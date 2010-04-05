@@ -1,3 +1,10 @@
+curl (7.20.0-3) unstable; urgency=low
+
+  * debian/control: Vcs* tags added.
+  * docs/libcurl/libcurl.m4: added the missing double quote (closes: #576518).
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Mon, 05 Apr 2010 18:56:40 +0530
+
 curl (7.20.0-2) unstable; urgency=low
 
   * New Maintainer (closes: #574137).

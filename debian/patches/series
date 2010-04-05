@@ -3,6 +3,7 @@ no_com_err
 runtests_gdb
 art_http_scripting
 versioned
+missing-double-quote
 
 # this must be the last
 curl_links_with_rt
