@@ -13,7 +13,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 1998 - 2009 Daniel Stenberg, <daniel@haxx.se>
+# Copyright (c) 1998 - 2010 Daniel Stenberg, <daniel@haxx.se>
 # This configure script may be copied, distributed and modified under the
 # terms of the curl license; see COPYING for more details
 ## -------------------- ##
@@ -1834,7 +1834,7 @@ Copyright (C) 2009 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 1998 - 2009 Daniel Stenberg, <daniel@haxx.se>
+Copyright (c) 1998 - 2010 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details
 _ACEOF
@@ -14001,7 +14001,76 @@ $as_echo "no" >&6; }
   fi
 
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if compiler is GNU C" >&5
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if compiler is clang" >&5
+$as_echo_n "checking if compiler is clang... " >&6; }
+
+      if test -z "$SED"; then
+    as_fn_error "SED not set. Cannot continue without SED being set." "$LINENO" 5
+  fi
+  if test -z "$GREP"; then
+    as_fn_error "GREP not set. Cannot continue without GREP being set." "$LINENO" 5
+  fi
+
+  tmp_exp=""
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __clang__
+CURL_DEF_TOKEN __clang__
+#endif
+
+
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+
+    tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
+      "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
+      "$SED" 's/.*CURL_DEF_TOKEN[ ]//' 2>/dev/null | \
+      "$SED" 's/["][ ]*["]//g' 2>/dev/null`
+    if test -z "$tmp_exp" || test "$tmp_exp" = "__clang__"; then
+      tmp_exp=""
+    fi
+
+fi
+rm -f conftest.err conftest.$ac_ext
+  if test -z "$tmp_exp"; then
+    curl_cv_have_def___clang__=no
+
+  else
+    curl_cv_have_def___clang__=yes
+    curl_cv_def___clang__=$tmp_exp
+
+  fi
+
+  if test "$curl_cv_have_def___clang__" = "yes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    compiler_id="CLANG"
+    clangver=`$CC -dumpversion`
+    clangvhi=`echo $clangver | cut -d . -f1`
+    clangvlo=`echo $clangver | cut -d . -f2`
+    compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
+    flags_dbg_all="-g -g0 -g1 -g2 -g3"
+    flags_dbg_all="$flags_dbg_all -ggdb"
+    flags_dbg_all="$flags_dbg_all -gstabs"
+    flags_dbg_all="$flags_dbg_all -gstabs+"
+    flags_dbg_all="$flags_dbg_all -gcoff"
+    flags_dbg_all="$flags_dbg_all -gxcoff"
+    flags_dbg_all="$flags_dbg_all -gdwarf-2"
+    flags_dbg_all="$flags_dbg_all -gvms"
+    flags_dbg_yes="-g"
+    flags_dbg_off="-g0"
+    flags_opt_all="-O -O0 -O1 -O2 -Os -O3 -O4"
+    flags_opt_yes="-Os"
+    flags_opt_off="-O0"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if compiler is GNU C" >&5
 $as_echo_n "checking if compiler is GNU C... " >&6; }
 
       if test -z "$SED"; then
@@ -14628,7 +14697,8 @@ squeeze() {
       #
   if test "$compiler_id" != "unknown"; then
     #
-    if test "$compiler_id" = "GNU_C"; then
+    if test "$compiler_id" = "GNU_C" ||
+      test "$compiler_id" = "CLANG"; then
 
     tmp_has_include="no"
   tmp_chg_FLAGS="$CFLAGS"
@@ -14669,6 +14739,11 @@ squeeze() {
     tmp_CFLAGS=""
     #
     case "$compiler_id" in
+        #
+      CLANG)
+        #
+                                tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
+        ;;
         #
       DEC_C)
         #
@@ -15322,6 +15397,33 @@ $as_echo "$as_me: WARNING: compiler options rejected: $tmp_options" >&2;}
     #
     case "$compiler_id" in
         #
+      CLANG)
+        #
+        if test "$want_warnings" = "yes"; then
+                              tmp_CFLAGS="$tmp_CFLAGS -pedantic"
+          tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
+          tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
+          tmp_CFLAGS="$tmp_CFLAGS -Wshadow"
+          tmp_CFLAGS="$tmp_CFLAGS -Winline -Wnested-externs"
+          tmp_CFLAGS="$tmp_CFLAGS -Wmissing-declarations"
+          tmp_CFLAGS="$tmp_CFLAGS -Wmissing-prototypes"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
+          tmp_CFLAGS="$tmp_CFLAGS -Wfloat-equal"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-multichar -Wsign-compare"
+          tmp_CFLAGS="$tmp_CFLAGS -Wundef"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-format-nonliteral"
+          tmp_CFLAGS="$tmp_CFLAGS -Wendif-labels -Wstrict-prototypes"
+          tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+          tmp_CFLAGS="$tmp_CFLAGS -Wcast-align"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-system-headers"
+          tmp_CFLAGS="$tmp_CFLAGS -Wshorten-64-to-32"
+          #
+                    if test "$compiler_num" -ge "101"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wunused"
+          fi
+        fi
+        ;;
+        #
       DEC_C)
         #
         if test "$want_warnings" = "yes"; then
@@ -15440,7 +15542,7 @@ $as_echo "$as_me: WARNING: compiler options rejected: $tmp_options" >&2;}
           fi
         fi
                 tmp_CFLAGS="$tmp_CFLAGS -fno-omit-frame-pointer"
-                tmp_CFLAGS="$tmp_CFLAGS -no-ansi-alias"
+                tmp_CFLAGS="$tmp_CFLAGS -fno-strict-aliasing"
                 tmp_CFLAGS="$tmp_CFLAGS -fp-model precise"
                 if test "$compiler_num" -ge "1000"; then
                     tmp_CFLAGS="$tmp_CFLAGS -vec-report0"
@@ -18844,15 +18946,12 @@ $as_echo "yes" >&6; }
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
-        GSSAPI_LIBS=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
-        GSSAPI_LIBS="-lgssapi"
      fi
   fi
 
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
-  LIBS="$LIBS $GSSAPI_LIBS"
 
   ac_fn_c_check_header_mongrel "$LINENO" "gss.h" "ac_cv_header_gss_h" "$ac_includes_default"
 if test "x$ac_cv_header_gss_h" = x""yes; then :
@@ -18963,15 +19062,22 @@ $as_echo "#define HAVE_GSSAPI 1" >>confdefs.h
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LIBS="$LIBS -lgss"
   elif test -z "$GSSAPI_LIB_DIR"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-                        gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-        LIBS="$LIBS $gss_libs"
-     elif test "$GSSAPI_ROOT" != "yes"; then
-        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-        LIBS="$LIBS -lgssapi"
-     else
-        LIBS="$LIBS -lgssapi"
-     fi
+     case $host in
+     *-*-darwin*)
+        LIBS="$LIBS -lgssapi_krb5 -lresolv"
+        ;;
+     *)
+        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+                                 gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+           LIBS="$LIBS $gss_libs"
+        elif test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+           LIBS="$LIBS -lgssapi"
+        else
+           LIBS="$LIBS -lgssapi"
+        fi
+        ;;
+     esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
      LIBS="$LIBS -lgssapi"
@@ -29219,8 +29325,8 @@ done
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*)
-            curl_disallow_poll="yes"
+    darwin*|interix*)
+                              curl_disallow_poll="yes"
       ;;
   esac
   #
@@ -33815,7 +33921,8 @@ $as_echo "no" >&6; }
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports it" >&5
 $as_echo_n "checking whether $CC supports it... " >&6; }
        if test "$GCC" = yes ; then
-         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ||
+                                 test "$compiler_id" = "CLANG"; then
            { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 

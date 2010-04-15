@@ -22,7 +22,6 @@
  * RFC2384 POP URL Scheme
  * RFC2595 Using TLS with IMAP, POP3 and ACAP
  *
- * $Id: pop3.c,v 1.5 2010-01-30 05:22:30 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -233,6 +232,7 @@ static void state(struct connectdata *conn,
     "USER",
     "PASS",
     "STARTTLS",
+    "LIST",
     "RETR",
     "QUIT",
     /* LAST */
@@ -383,7 +383,49 @@ static CURLcode pop3_state_retr_resp(struct connectdata *conn,
   return result;
 }
 
-/* start the DO phase */
+
+/* for the list response */
+static CURLcode pop3_state_list_resp(struct connectdata *conn,
+                                     int pop3code,
+                                     pop3state instate)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct FTP *pop3 = data->state.proto.pop3;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+  struct pingpong *pp = &pop3c->pp;
+
+  (void)instate; /* no use for this yet */
+
+  if('O' != pop3code) {
+    state(conn, POP3_STOP);
+    return CURLE_RECV_ERROR;
+  }
+
+  /* POP3 download */
+  result=Curl_setup_transfer(conn, FIRSTSOCKET, -1, FALSE,
+                             pop3->bytecountp,
+                             -1, NULL); /* no upload here */
+
+  if(pp->cache) {
+    /* cache holds the email ID listing */
+
+    /* we may get the EOB already here! */
+    result = Curl_pop3_write(conn, pp->cache, pp->cache_size);
+    if(result)
+      return result;
+
+    /* cache is drained */
+    free(pp->cache);
+    pp->cache = NULL;
+    pp->cache_size = 0;
+  }
+
+  state(conn, POP3_STOP);
+  return result;
+}
+
+/* start the DO phase for RETR */
 static CURLcode pop3_retr(struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
@@ -394,6 +436,20 @@ static CURLcode pop3_retr(struct connectdata *conn)
     return result;
 
   state(conn, POP3_RETR);
+  return result;
+}
+
+/* start the DO phase for LIST */
+static CURLcode pop3_list(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
+
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "LIST %s", pop3c->mailbox);
+  if(result)
+    return result;
+
+  state(conn, POP3_LIST);
   return result;
 }
 
@@ -450,6 +506,10 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
 
     case POP3_RETR:
       result = pop3_state_retr_resp(conn, pop3code, pop3c->state);
+      break;
+
+    case POP3_LIST:
+      result = pop3_state_list_resp(conn, pop3code, pop3c->state);
       break;
 
     case POP3_QUIT:
@@ -656,6 +716,7 @@ CURLcode pop3_perform(struct connectdata *conn,
 {
   /* this is POP3 and no proxy */
   CURLcode result=CURLE_OK;
+  struct pop3_conn *pop3c = &conn->proto.pop3c;
 
   DEBUGF(infof(conn->data, "DO phase starts\n"));
 
@@ -668,7 +729,13 @@ CURLcode pop3_perform(struct connectdata *conn,
   *dophase_done = FALSE; /* not done yet */
 
   /* start the first command in the DO phase */
-  result = pop3_retr(conn);
+  /* If mailbox is empty, then assume user wants listing for mail IDs,
+   * otherwise, attempt to retrieve the mail-id stored in mailbox
+   */
+  if (strlen(pop3c->mailbox))
+    result = pop3_retr(conn);
+  else
+    result = pop3_list(conn);
   if(result)
     return result;
 
@@ -785,9 +852,6 @@ static CURLcode pop3_parse_url_path(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   const char *path = data->state.path;
   int len;
-
-  if(!*path)
-    path = "INBOX";
 
   /* url decode the path and use this mailbox */
   pop3c->mailbox = curl_easy_unescape(data, path, 0, &len);
@@ -926,9 +990,9 @@ CURLcode Curl_pop3_write(struct connectdata *conn,
      0d 0a 2e 0d 0a. This marker can of course be spread out
      over up to 5 different data chunks. Deal with it! */
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  int checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
-  int checkleft = POP3_EOB_LEN-pop3c->eob;
-  int check = (checkmax >= checkleft?checkleft:checkmax);
+  size_t checkmax = (nread >= POP3_EOB_LEN?POP3_EOB_LEN:nread);
+  size_t checkleft = POP3_EOB_LEN-pop3c->eob;
+  size_t check = (checkmax >= checkleft?checkleft:checkmax);
 
   if(!memcmp(POP3_EOB, &str[nread - check], check)) {
     /* substring match */

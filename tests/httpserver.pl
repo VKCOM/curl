@@ -19,7 +19,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: httpserver.pl,v 1.29 2010-01-08 15:54:07 yangtse Exp $
 #***************************************************************************
 
 BEGIN {

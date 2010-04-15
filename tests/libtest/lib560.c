@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib560.c,v 1.4 2010-02-05 18:07:20 yangtse Exp $
  *
  */
 #include "test.h"
@@ -100,6 +99,7 @@ test_cleanup:
     curl_multi_cleanup(multi_handle);
 
   curl_easy_cleanup(http_handle);
+  curl_global_cleanup();
 
   return res;
 }

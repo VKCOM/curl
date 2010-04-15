@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: tftpd.c,v 1.64 2010-02-04 17:17:19 yangtse Exp $
  *
  * Trivial file transfer protocol server.
  *
@@ -709,15 +708,14 @@ int main(int argc, char **argv)
       arg++;
       if(argc>arg) {
         char *endptr;
-        long lnum = -1;
-        lnum = strtol(argv[arg], &endptr, 10);
+        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (lnum < 1025L) || (lnum > 65535L)) {
+           (ulnum < 1025UL) || (ulnum > 65535UL)) {
           fprintf(stderr, "tftpd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = (unsigned short)(lnum & 0xFFFFL);
+        port = curlx_ultous(ulnum);
         arg++;
       }
     }
@@ -1051,8 +1049,12 @@ static int validate_access(struct testcase *test,
       }
       else {
         size_t count;
-        test->buffer = (char *)spitout(stream, "reply", partbuf, &count);
+        error = getpart(&test->buffer, &count, "reply", partbuf, stream);
         fclose(stream);
+        if(error) {
+          logmsg("getpart() failed with error: %d", error);
+          return EACCESS;
+        }
         if(test->buffer) {
           test->rptr = test->buffer; /* set read pointer */
           test->bufsize = count;    /* set total count */

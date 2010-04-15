@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: http_chunks.c,v 1.49 2009-06-10 21:26:11 bagder Exp $
  ***************************************************************************/
 #include "setup.h"
 
@@ -306,14 +305,17 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       /* conn->trailer is assumed to be freed in url.c on a
          connection basis */
       if(conn->trlPos >= conn->trlMax) {
+        /* in this logic we always allocate one byte more than trlMax
+           contains, just because CHUNK_TRAILER_POSTCR will append two bytes
+           so we need to make sure we have room for an extra byte */
         char *ptr;
         if(conn->trlMax) {
           conn->trlMax *= 2;
-          ptr = realloc(conn->trailer,conn->trlMax);
+          ptr = realloc(conn->trailer, conn->trlMax + 1);
         }
         else {
           conn->trlMax=128;
-          ptr = malloc(conn->trlMax);
+          ptr = malloc(conn->trlMax + 1);
         }
         if(!ptr)
           return CHUNKE_OUT_OF_MEMORY;

@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: version.c,v 1.65 2010-01-23 13:53:33 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: imap.h,v 1.1 2009-12-12 21:54:02 bagder Exp $
  ***************************************************************************/
 
 #include "pingpong.h"

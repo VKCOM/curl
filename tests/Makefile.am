@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: Makefile.am,v 1.54 2010-02-01 12:05:08 yangtse Exp $
 ###########################################################################
 
 HTMLPAGES = testcurl.html runtests.html

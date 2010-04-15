@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: mprintf.c,v 1.82 2010-02-04 19:44:31 yangtse Exp $
  *
  * Purpose:
  *  A merge of Bjorn Reese's format() function and Daniel's dsprintf()
@@ -871,7 +870,7 @@ static int dprintf_formatf(
           len = strlen(str);
 
         if(prec != -1 && (size_t) prec < len)
-          len = prec;
+          len = (size_t)prec;
         width -= (long)len;
 
         if(p->flags & FLAGS_ALT)
@@ -911,7 +910,7 @@ static int dprintf_formatf(
           static const char strnil[] = "(nil)";
           const char *point;
 
-          width -= sizeof(strnil) - 1;
+          width -= (long)(sizeof(strnil) - 1);
           if(p->flags & FLAGS_LEFT)
             while(width-- > 0)
               OUTCHAR(' ');

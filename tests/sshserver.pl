@@ -19,7 +19,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: sshserver.pl,v 1.51 2010-01-15 18:55:01 yangtse Exp $
 #***************************************************************************
 
 # Starts sshd for use in the SCP, SFTP and SOCKS curl test harness tests.

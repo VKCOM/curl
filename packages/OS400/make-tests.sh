@@ -2,7 +2,6 @@
 #
 #       tests compilation script for the OS/400.
 #
-# $Id: make-tests.sh,v 1.2 2009-08-11 14:07:08 patrickm Exp $
 
 
 SCRIPTDIR=`dirname "${0}"`

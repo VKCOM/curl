@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: cookie.c,v 1.116 2010-01-28 15:34:18 yangtse Exp $
  ***************************************************************************/
 
 /***
@@ -784,7 +783,7 @@ static int cookie_sort(const void *p1, const void *p2)
   size_t l1 = c1->path?strlen(c1->path):0;
   size_t l2 = c2->path?strlen(c2->path):0;
 
-  return (int)(l2 - l1);
+  return (l2 > l1) ? 1 : (l2 < l1) ? -1 : 0 ;
 }
 
 /*****************************************************************************

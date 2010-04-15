@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: transfer.c,v 1.458 2010-02-04 19:44:31 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -981,9 +980,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   /* only use the proper socket if the *_HOLD bit is not set simultaneously as
      then we are in rate limiting state in that transfer direction */
 
-  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV) {
+  if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
     fd_read = conn->sockfd;
-  } else
+  else
     fd_read = CURL_SOCKET_BAD;
 
   if((k->keepon & KEEP_SENDBITS) == KEEP_SEND)
@@ -991,10 +990,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   else
     fd_write = CURL_SOCKET_BAD;
 
-   if(!select_res) { /* Call for select()/poll() only, if read/write/error
-                         status is not known. */
-       select_res = Curl_socket_ready(fd_read, fd_write, 0);
-   }
+  if(!select_res) /* Call for select()/poll() only, if read/write/error
+                     status is not known. */
+    select_res = Curl_socket_ready(fd_read, fd_write, 0);
 
   if(select_res == CURL_CSELECT_ERR) {
     failf(data, "select/poll returned error");
@@ -1062,21 +1060,22 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if(result)
     return result;
 
-  if(data->set.timeout &&
-     (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
-    if(k->size != -1) {
-      failf(data, "Operation timed out after %ld milliseconds with %"
-            FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-            data->set.timeout, k->bytecount, k->size);
-    } else {
-      failf(data, "Operation timed out after %ld milliseconds with %"
-            FORMAT_OFF_T " bytes received",
-            data->set.timeout, k->bytecount);
+  if(k->keepon) {
+    if(data->set.timeout &&
+       (Curl_tvdiff(k->now, k->start) >= data->set.timeout)) {
+      if(k->size != -1) {
+        failf(data, "Operation timed out after %ld milliseconds with %"
+              FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
+              Curl_tvdiff(k->now, k->start), k->bytecount, k->size);
+      } else {
+        failf(data, "Operation timed out after %ld milliseconds with %"
+              FORMAT_OFF_T " bytes received",
+              Curl_tvdiff(k->now, k->start), k->bytecount);
+      }
+      return CURLE_OPERATION_TIMEDOUT;
     }
-    return CURLE_OPERATION_TIMEDOUT;
   }
-
-  if(!k->keepon) {
+  else {
     /*
      * The transfer has been performed. Just make some general checks before
      * returning.
@@ -1176,6 +1175,60 @@ int Curl_single_getsock(const struct connectdata *conn,
   return bitmap;
 }
 
+/*
+ * Determine optimum sleep time based on configured rate, current rate,
+ * and packet size.
+ * Returns value in mili-seconds.
+ *
+ * The basic idea is to adjust the desired rate up/down in this method
+ * based on whether we are running too slow or too fast.  Then, calculate
+ * how many miliseconds to wait for the next packet to achieve this new
+ * rate.
+ */
+long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
+                             int pkt_size)
+{
+  curl_off_t min_sleep = 0;
+  curl_off_t rv = 0;
+
+  if (rate_bps == 0)
+    return 0;
+
+  /* If running faster than about .1% of the desired speed, slow
+   * us down a bit.  Use shift instead of division as the 0.1%
+   * cutoff is arbitrary anyway.
+   */
+  if (cur_rate_bps > (rate_bps + (rate_bps >> 10))) {
+    /* running too fast, decrease target rate by 1/64th of rate */
+    rate_bps -= rate_bps >> 6;
+    min_sleep = 1;
+  }
+  else if (cur_rate_bps < (rate_bps - (rate_bps >> 10))) {
+    /* running too slow, increase target rate by 1/64th of rate */
+    rate_bps += rate_bps >> 6;
+  }
+
+  /* Determine number of miliseconds to wait until we do
+   * the next packet at the adjusted rate.  We should wait
+   * longer when using larger packets, for instance.
+   */
+  rv = ((curl_off_t)((pkt_size * 8) * 1000) / rate_bps);
+
+  /* Catch rounding errors and always slow down at least 1ms if
+   * we are running too fast.
+   */
+  if (rv < min_sleep)
+    rv = min_sleep;
+
+  /* Bound value to fit in 'long' on 32-bit platform.  That's
+   * plenty long enough anyway!
+   */
+  if(rv > 0x7fffffff)
+    rv = 0x7fffffff;
+  
+  return (long)rv;
+}
+
 
 /*
  * Transfer()
@@ -1198,6 +1251,8 @@ Transfer(struct connectdata *conn)
   bool done=FALSE;
   bool first=TRUE;
   int timeout_ms;
+  int buffersize;
+  int totmp;
 
   if((conn->sockfd == CURL_SOCKET_BAD) &&
      (conn->writesockfd == CURL_SOCKET_BAD))
@@ -1212,6 +1267,7 @@ Transfer(struct connectdata *conn)
     curl_socket_t fd_read = conn->sockfd;
     curl_socket_t fd_write = conn->writesockfd;
     int keepon = k->keepon;
+    timeout_ms = 1000;
 
     if(conn->waitfor) {
       /* if waitfor is set, get the RECV and SEND bits from that but keep the
@@ -1229,6 +1285,16 @@ Transfer(struct connectdata *conn)
       k->keepon &= ~KEEP_SEND_HOLD;
     }
     else {
+      if (data->set.upload && data->set.max_send_speed &&
+          (data->progress.ulspeed > data->set.max_send_speed) ) {
+        /* calculate upload rate-limitation timeout. */
+        buffersize = (int)(data->set.buffer_size ?
+                           data->set.buffer_size : BUFSIZE);
+        totmp = (int)Curl_sleep_time(data->set.max_send_speed,
+                                     data->progress.ulspeed, buffersize);
+        if (totmp < timeout_ms)
+          timeout_ms = totmp;
+      }
       fd_write = CURL_SOCKET_BAD;
       if(keepon & KEEP_SEND)
         k->keepon |= KEEP_SEND_HOLD; /* hold it */
@@ -1240,6 +1306,16 @@ Transfer(struct connectdata *conn)
       k->keepon &= ~KEEP_RECV_HOLD;
     }
     else {
+      if ((!data->set.upload) && data->set.max_recv_speed &&
+          (data->progress.dlspeed > data->set.max_recv_speed)) {
+        /* Calculate download rate-limitation timeout. */
+        buffersize = (int)(data->set.buffer_size ?
+                           data->set.buffer_size : BUFSIZE);
+        totmp = (int)Curl_sleep_time(data->set.max_recv_speed,
+                                     data->progress.dlspeed, buffersize);
+        if (totmp < timeout_ms)
+          timeout_ms = totmp;
+      }
       fd_read = CURL_SOCKET_BAD;
       if(keepon & KEEP_RECV)
         k->keepon |= KEEP_RECV_HOLD; /* hold it */
@@ -1266,8 +1342,18 @@ Transfer(struct connectdata *conn)
       /* if this is the first lap and one of the file descriptors is fine
          to work with, skip the timeout */
       timeout_ms = 0;
-    else
-      timeout_ms = 1000;
+    else {
+      if(data->set.timeout) {
+        totmp = (int)(data->set.timeout - Curl_tvdiff(k->now, k->start));
+        if(totmp < 0)
+          return CURLE_OPERATION_TIMEDOUT;
+      }
+      else
+        totmp = 1000;
+
+      if (totmp < timeout_ms)
+        timeout_ms = totmp;
+    }
 
     switch (Curl_socket_ready(fd_read, fd_write, timeout_ms)) {
     case -1: /* select() error, stop reading */

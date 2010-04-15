@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: llist.c,v 1.24 2009-04-21 11:46:17 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

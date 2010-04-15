@@ -21,7 +21,6 @@
  * RFC3501 IMAPv4 protocol
  * RFC5092 IMAP URL Scheme
  *
- * $Id: imap.c,v 1.5 2010-01-25 23:41:02 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -244,7 +243,7 @@ static const char *getcmdid(struct connectdata *conn)
   struct imap_conn *imapc = &conn->proto.imapc;
 
   /* get the next id, but wrap at end of table */
-  imapc->cmdid = (imapc->cmdid+1)% (sizeof(ids)/sizeof(ids[0]));
+  imapc->cmdid = (int)((imapc->cmdid+1) % (sizeof(ids)/sizeof(ids[0])));
 
   return ids[imapc->cmdid];
 }
@@ -885,11 +884,12 @@ static CURLcode imap_disconnect(struct connectdata *conn)
 
   /* The IMAP session may or may not have been allocated/setup at this
      point! */
-  (void)imap_logout(conn); /* ignore errors on the LOGOUT */
+  if (imapc->pp.conn)
+    (void)imap_logout(conn); /* ignore errors on the LOGOUT */
 
   Curl_pp_disconnect(&imapc->pp);
 
-  free(imapc->mailbox);
+  Curl_safefree(imapc->mailbox);
 
   return CURLE_OK;
 }
@@ -914,6 +914,8 @@ static CURLcode imap_parse_url_path(struct connectdata *conn)
 
   /* url decode the path and use this mailbox */
   imapc->mailbox = curl_easy_unescape(data, path, 0, &len);
+  if(!imapc->mailbox)
+    return CURLE_OUT_OF_MEMORY;
 
   return CURLE_OK;
 }

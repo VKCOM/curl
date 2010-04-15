@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: writeenv.c,v 1.12 2010-01-18 20:22:04 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

@@ -1,6 +1,5 @@
 #!/bin/sh
 
-# $Id: initscript.sh,v 1.7 2009-02-16 15:33:17 patrickm Exp $
 
 case "${SCRIPTDIR}" in
 /*)     ;;

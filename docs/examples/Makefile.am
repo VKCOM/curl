@@ -1,5 +1,4 @@
 #
-# $Id: Makefile.am,v 1.53 2009-11-05 15:04:04 yangtse Exp $
 #
 
 AUTOMAKE_OPTIONS = foreign nostdinc

@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: serverhelp.pm,v 1.7 2010-02-01 12:05:08 yangtse Exp $
 #***************************************************************************
 
 package serverhelp;

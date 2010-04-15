@@ -18,7 +18,6 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
-.\" * $Id: curl.1,v 1.287 2010-02-02 12:27:12 kdudka Exp $
 .\" **************************************************************************
 .\"
 .TH curl 1 "28 November 2009" "Curl 7.20.0" "Curl Manual"
@@ -215,7 +214,7 @@ local directory hierarchy as needed. This option creates the dirs mentioned
 with the -o option, nothing else. If the -o file name uses no dir or if the
 dirs it mentions already exist, no dir will be created.
 
-To create remote directories when using FTP or SFTP, try 
+To create remote directories when using FTP or SFTP, try
 \fI--ftp-create-dirs\fP.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
@@ -1417,10 +1416,12 @@ The total amount of bytes of the downloaded headers.
 The total amount of bytes that were sent in the HTTP request.
 .TP
 .B speed_download
-The average download speed that curl measured for the complete download.
+The average download speed that curl measured for the complete download. Bytes
+per second.
 .TP
 .B speed_upload
-The average upload speed that curl measured for the complete upload.
+The average upload speed that curl measured for the complete upload. Bytes per
+second.
 .TP
 .B content_type
 The Content-Type of the requested document, if there was any.

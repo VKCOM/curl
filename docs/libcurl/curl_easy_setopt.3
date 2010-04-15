@@ -18,7 +18,6 @@
 .\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 .\" * KIND, either express or implied.
 .\" *
-.\" * $Id: curl_easy_setopt.3,v 1.275 2010-01-28 01:39:16 yangtse Exp $
 .\" **************************************************************************
 .\"
 .TH curl_easy_setopt 3 "1 Jan 2010" "libcurl 7.20.0" "libcurl Manual"
@@ -94,7 +93,7 @@ function gets called by libcurl as soon as there is data received that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
 of bytes actually taken care of. If that amount differs from the amount passed
-to your function, it'll signal an error to the library and it will abort the
+to your function, it'll signal an error to the library. This will abort the
 transfer and return \fICURLE_WRITE_ERROR\fP.
 
 From 7.18.0, the function can return CURL_WRITEFUNC_PAUSE which then will
@@ -272,9 +271,9 @@ using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP. Do not assume that the header line is zero
 terminated! The pointer named \fIstream\fP is the one you set with the
 \fICURLOPT_WRITEHEADER\fP option. The callback function must return the number
-of bytes actually taken care of, or return -1 to signal error to the library
-(it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
-code).
+of bytes actually taken care of. If that amount differs from the amount passed
+to your function, it'll signal an error to the library. This will abort the
+transfer and return \fICURL_WRITE_ERROR\fP.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
@@ -435,7 +434,7 @@ Therefore the (probably undefined) contents of the buffer is NOT copied
 by the library. You should keep the associated storage available until
 libcurl no longer needs it. Failing to do so will cause very odd behavior
 or even crashes. libcurl will need it until you call \fIcurl_easy_cleanup(3)\fP
-or you set the same option again to use a different pointer. 
+or you set the same option again to use a different pointer.
 
 Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
 debug/trace why errors happen.
@@ -1092,6 +1091,10 @@ SMTP mail request.  The linked list should be a fully valid list of \fBstruct
 curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
 create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire list.
 
+Each recipient in SMTP lingo is specified with angle brackets (<>), but should
+you not use an angle bracket as first letter libcurl will assume you provide a
+single email address only and enclose that with angle brackets for you.
+
 (Added in 7.20.0)
 .SH TFTP OPTIONS
 .IP CURLOPT_TFTP_BLKSIZE
@@ -1342,7 +1345,9 @@ terminate the RTSP session since it is valid to control an RTSP session over
 different connections.  (Added in 7.20.0)
 .IP CURL_RTSPREQ_GET_PARAMETER
 Retrieve a parameter from the server. By default, libcurl will automatically
-include an \fIAccept: text/parameters\fP header unless a custom one is set.
+include a \fIContent-Type: text/parameters\fP header on all non-empty requests
+unless a custom one is set. GET_PARAMETER acts just like an HTTP PUT or POST
+(see \fICURL_RTSPREQ_SET_PARAMETER\fP).
 Applications wishing to send a heartbeat message (e.g. in the presence of a
 server-specified timeout) should send use an empty GET_PARAMETER request.
 (Added in 7.20.0)

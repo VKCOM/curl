@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: parsedate.h,v 1.7 2009-09-03 08:30:28 bagder Exp $
  ***************************************************************************/
 
 extern const char * const Curl_wkday[7];

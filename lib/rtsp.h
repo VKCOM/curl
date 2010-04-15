@@ -21,7 +21,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: rtsp.h,v 1.3 2010-01-28 01:39:16 yangtse Exp $
  ***************************************************************************/
 #ifndef CURL_DISABLE_RTSP
 

@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: main.c,v 1.558 2010-02-03 10:57:42 yangtse Exp $
  ***************************************************************************/
 #include "setup.h"
 
@@ -168,6 +167,7 @@ static int vms_show = 0;
 
 static const char *msdosify(const char *);
 static char *rename_if_dos_device_name(char *);
+static char *sanitize_dos_name(char *);
 
 #ifndef S_ISCHR
 #  ifdef S_IFCHR
@@ -580,10 +580,7 @@ struct Configurable {
   /* for bandwidth limiting features: */
   curl_off_t sendpersecond; /* send to peer */
   curl_off_t recvpersecond; /* receive from peer */
-  struct timeval lastsendtime;
-  size_t lastsendsize;
-  struct timeval lastrecvtime;
-  size_t lastrecvsize;
+
   bool ftp_ssl;
   bool ftp_ssl_reqd;
   bool ftp_ssl_control;
@@ -652,7 +649,7 @@ static void warnf(struct Configurable *config, const char *fmt, ...)
              max text width then! */
           cut = WARN_TEXTWIDTH-1;
 
-        fwrite(ptr, cut + 1, 1, config->errors);
+        (void)fwrite(ptr, cut + 1, 1, config->errors);
         fputs("\n", config->errors);
         ptr += cut+1; /* skip the space too */
         len -= cut;
@@ -3651,15 +3648,22 @@ int my_trace(CURL *handle, curl_infotype type,
   struct tm *now;
   char timebuf[20];
   time_t secs;
+  static time_t epoch_offset;
+  static int    known_offset;
 
   (void)handle; /* prevent compiler warning */
 
-  tv = cutil_tvnow();
-  secs = tv.tv_sec;
-  now = localtime(&secs);  /* not multithread safe but we don't care */
-  if(config->tracetime)
+  if(config->tracetime) {
+    tv = cutil_tvnow();
+    if(!known_offset) {
+      epoch_offset = time(NULL) - tv.tv_sec;
+      known_offset = 1;
+    }
+    secs = epoch_offset + tv.tv_sec;
+    now = localtime(&secs);  /* not thread safe but we don't care */
     snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld ",
              now->tm_hour, now->tm_min, now->tm_sec, (long)tv.tv_usec);
+  }
   else
     timebuf[0]=0;
 
@@ -3704,14 +3708,14 @@ int my_trace(CURL *handle, curl_infotype type,
           if(!newl) {
             fprintf(output, "%s%s ", timebuf, s_infotype[type]);
           }
-          fwrite(data+st, i-st+1, 1, output);
+          (void)fwrite(data+st, i-st+1, 1, output);
           st = i+1;
           newl = FALSE;
         }
       }
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      fwrite(data+st, i-st+1, 1, output);
+      (void)fwrite(data+st, i-st+1, 1, output);
       newl = (bool)(size && (data[size-1] != '\n'));
       traced_data = FALSE;
       break;
@@ -3719,7 +3723,7 @@ int my_trace(CURL *handle, curl_infotype type,
     case CURLINFO_HEADER_IN:
       if(!newl)
         fprintf(output, "%s%s ", timebuf, s_infotype[type]);
-      fwrite(data, size, 1, output);
+      (void)fwrite(data, size, 1, output);
       newl = (bool)(size && (data[size-1] != '\n'));
       traced_data = FALSE;
       break;
@@ -3875,6 +3879,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->referer);
   if (config->hostpubmd5)
     free(config->hostpubmd5);
+  if(config->mail_from)
+    free(config->mail_from);
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   if(config->socks5_gssapi_service)
     free(config->socks5_gssapi_service);
@@ -4085,8 +4091,85 @@ static bool stdin_upload(const char *uploadfile)
                 curlx_strequal(uploadfile, "."));
 }
 
+/* Adds the file name to the URL if it doesn't already have one.
+ * url will be freed before return if the returned pointer is different
+ */
+static char *add_file_name_to_url(CURL *curl, char *url, const char *filename)
+{
+  /* If no file name part is given in the URL, we add this file name */
+  char *ptr=strstr(url, "://");
+  if(ptr)
+    ptr+=3;
+  else
+    ptr=url;
+  ptr = strrchr(ptr, '/');
+  if(!ptr || !strlen(++ptr)) {
+    /* The URL has no file name part, add the local file name. In order
+       to be able to do so, we have to create a new URL in another
+       buffer.*/
+
+    /* We only want the part of the local path that is on the right
+       side of the rightmost slash and backslash. */
+    const char *filep = strrchr(filename, '/');
+    char *file2 = strrchr(filep?filep:filename, '\\');
+    char *encfile;
+
+    if(file2)
+      filep = file2+1;
+    else if(filep)
+      filep++;
+    else
+      filep = filename;
+
+    /* URL encode the file name */
+    encfile = curl_easy_escape(curl, filep, 0 /* use strlen */);
+    if(encfile) {
+      char *urlbuffer = malloc(strlen(url) + strlen(encfile) + 3);
+      if(!urlbuffer) {
+        free(url);
+        return NULL;
+      }
+      if(ptr)
+        /* there is a trailing slash on the URL */
+        sprintf(urlbuffer, "%s%s", url, encfile);
+      else
+        /* there is no trailing slash on the URL */
+        sprintf(urlbuffer, "%s/%s", url, encfile);
+
+      curl_free(encfile);
+
+      free(url);
+      url = urlbuffer; /* use our new URL instead! */
+    }
+  }
+  return url;
+}
+
+/* Extracts the name portion of the URL.
+ * Returns a heap-allocated string, or NULL if no name part
+ */
+static char *get_url_file_name(const char *url)
+{
+  char *fn = NULL;
+
+  /* Find and get the remote file name */
+  const char * pc =strstr(url, "://");
+  if(pc)
+    pc+=3;
+  else
+    pc=url;
+  pc = strrchr(pc, '/');
+
+  if(pc) {
+    /* duplicate the string beyond the slash */
+    pc++;
+    fn = *pc ? strdup(pc): NULL;
+  }
+  return fn;
+}
+
 static char*
-parse_filename(char *ptr, int len)
+parse_filename(char *ptr, size_t len)
 {
   char* copy;
   char* p;
@@ -4099,7 +4182,7 @@ parse_filename(char *ptr, int len)
     return NULL;
   strncpy(copy, ptr, len);
   copy[len] = 0;
-  
+
   p = copy;
   if (*p == '\'' || *p == '"') {
     /* store the starting quote */
@@ -4261,8 +4344,6 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
   config->showerror=TRUE;
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
-  config->lastrecvtime = cutil_tvnow();
-  config->lastsendtime = cutil_tvnow();
   config->maxredirs = DEFAULT_MAXREDIRS;
 
   if(argc>1 &&
@@ -4535,19 +4616,8 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
 
           if(!outfile) {
-            /* Find and get the remote file name */
-            char * pc =strstr(url, "://");
-            if(pc)
-              pc+=3;
-            else
-              pc=url;
-            pc = strrchr(pc, '/');
-
-            if(pc) {
-              /* duplicate the string beyond the slash */
-              pc++;
-              outfile = *pc ? strdup(pc): NULL;
-            }
+            /* extract the file name from the URL */
+            outfile = get_url_file_name(url);
             if((!outfile || !*outfile) && !config->content_disposition) {
               helpf(config->errors, "Remote file name has no length!\n");
               res = CURLE_WRITE_ERROR;
@@ -4555,20 +4625,12 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
               break;
             }
 #if defined(MSDOS) || defined(WIN32)
-            {
-              /* For DOS and WIN32, we do some major replacing of
-                 bad characters in the file name before using it */
-              char file1[PATH_MAX];
-              if(strlen(outfile) >= PATH_MAX)
-                outfile[PATH_MAX-1]=0; /* cut it */
-              strcpy(file1, msdosify(outfile));
-              free(outfile);
-
-              outfile = strdup(rename_if_dos_device_name(file1));
-              if(!outfile) {
-                res = CURLE_OUT_OF_MEMORY;
-                break;
-              }
+            /* For DOS and WIN32, we do some major replacing of
+             bad characters in the file name before using it */
+            outfile = sanitize_dos_name(outfile);
+            if(!outfile) {
+              res = CURLE_OUT_OF_MEMORY;
+              break;
             }
 #endif /* MSDOS || WIN32 */
           }
@@ -4635,53 +4697,11 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
            */
           struct_stat fileinfo;
 
-          /* If no file name part is given in the URL, we add this file name */
-          char *ptr=strstr(url, "://");
-          if(ptr)
-            ptr+=3;
-          else
-            ptr=url;
-          ptr = strrchr(ptr, '/');
-          if(!ptr || !strlen(++ptr)) {
-            /* The URL has no file name part, add the local file name. In order
-               to be able to do so, we have to create a new URL in another
-               buffer.*/
-
-            /* We only want the part of the local path that is on the right
-               side of the rightmost slash and backslash. */
-            char *filep = strrchr(uploadfile, '/');
-            char *file2 = strrchr(filep?filep:uploadfile, '\\');
-
-            if(file2)
-              filep = file2+1;
-            else if(filep)
-              filep++;
-            else
-              filep = uploadfile;
-
-            /* URL encode the file name */
-            filep = curl_easy_escape(curl, filep, 0 /* use strlen */);
-
-            if(filep) {
-              char *urlbuffer = malloc(strlen(url) + strlen(filep) + 3);
-              if(!urlbuffer) {
-                helpf(config->errors, "out of memory\n");
-                free(url);
-                res = CURLE_OUT_OF_MEMORY;
-                break;
-              }
-              if(ptr)
-                /* there is a trailing slash on the URL */
-                sprintf(urlbuffer, "%s%s", url, filep);
-              else
-                /* there is no trailing slash on the URL */
-                sprintf(urlbuffer, "%s/%s", url, filep);
-
-              curl_free(filep);
-
-              free(url);
-              url = urlbuffer; /* use our new URL instead! */
-            }
+          url = add_file_name_to_url(curl, url, uploadfile);
+          if(!url) {
+            helpf(config->errors, "out of memory\n");
+            res = CURLE_OUT_OF_MEMORY;
+            break;
           }
           /* VMS Note:
            *
@@ -5157,7 +5177,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
 
         if(config->mail_rcpt)
-          my_setopt_str(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+          my_setopt(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         /* curl 7.20.x */
         if(config->ftp_pret)
@@ -5168,7 +5188,7 @@ operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
           my_setopt(curl, CURLOPT_HEADERDATA, &outs);
         }
-        
+
         retry_numretries = config->req_retry;
 
         retrystart = cutil_tvnow();
@@ -5778,7 +5798,7 @@ rename_if_dos_device_name (char *file_name)
 
   strncpy(fname, file_name, PATH_MAX-1);
   fname[PATH_MAX-1] = 0;
-  base = basename (fname);
+  base = basename(fname);
   if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
     size_t blen = strlen (base);
 
@@ -5793,5 +5813,18 @@ rename_if_dos_device_name (char *file_name)
     strcpy (file_name, fname);
   }
   return file_name;
+}
+
+/* Replace bad characters in the file name before using it.
+ * fn will always be freed before return
+ * The returned pointer must be freed by the caller if not NULL
+ */
+static char *sanitize_dos_name(char *fn)
+{
+  char tmpfn[PATH_MAX];
+  fn[PATH_MAX-1]=0; /* ensure fn is not too long by possibly truncating it */
+  strcpy(tmpfn, msdosify(fn));
+  free(fn);
+  return strdup(rename_if_dos_device_name(tmpfn));
 }
 #endif /* MSDOS || WIN32 */

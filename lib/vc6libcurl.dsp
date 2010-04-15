@@ -460,6 +460,10 @@ SOURCE=.\url.c
 
 SOURCE=.\version.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\warnless.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -755,6 +759,10 @@ SOURCE=.\urldata.h
 # Begin Source File
 
 SOURCE=.\url.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\warnless.h
 # End Source File
 # End Group
 

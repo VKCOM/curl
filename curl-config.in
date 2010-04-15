@@ -19,7 +19,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: curl-config.in,v 1.37 2009-11-14 19:23:26 claesjac Exp $
 ###########################################################################
 
 prefix=@prefix@

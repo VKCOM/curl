@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: content_encoding.c,v 1.36 2010-02-09 09:35:48 bagder Exp $
  ***************************************************************************/
 
 #include "setup.h"

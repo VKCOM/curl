@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+75. NTLM authentication involving unicode user name or password.
+  http://curl.haxx.se/mail/lib-2009-10/0024.html
+  http://curl.haxx.se/bug/view.cgi?id=2944325
+
 74. The HTTP spec allows headers to be merged and become comma-separated
   instead of being repeated several times. This also include Authenticate: and
   Proxy-Authenticate: headers and while this hardly every happens in real life
@@ -21,7 +25,7 @@ may have been fixed since this was written!
 
 70. Problem re-using easy handle after call to curl_multi_remove_handle
   http://curl.haxx.se/mail/lib-2009-07/0249.html
-    
+
 68. "More questions about ares behavior".
   http://curl.haxx.se/mail/lib-2009-08/0012.html
 
@@ -163,7 +167,7 @@ may have been fixed since this was written!
   to VMS file structures and the perceived file sizes stat() returns. A
   possible fix would involve sending a "STRU VMS" command.
   http://curl.haxx.se/bug/view.cgi?id=1156287
-  
+
 21. FTP ASCII transfers do not follow RFC959. They don't convert the data
    accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
    clearly describes how this should be done:

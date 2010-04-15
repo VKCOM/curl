@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: rtspd.c,v 1.3 2010-02-04 17:17:19 yangtse Exp $
  ***************************************************************************/
 
 /*
@@ -87,6 +86,11 @@ typedef enum {
   RPROT_RTSP = 1,
   RPROT_HTTP = 2
 } reqprot_t;
+
+#define SET_RTP_PKT_CHN(p,c)  ((p)[1] = (unsigned char)((c) & 0xFF))
+
+#define SET_RTP_PKT_LEN(p,l) (((p)[2] = (unsigned char)(((l) >> 8) & 0xFF)), \
+                              ((p)[3] = (unsigned char)((l) & 0xFF)))
 
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
@@ -188,7 +192,7 @@ static const char *doc404_HTTP = "HTTP/1.1 404 Not Found\r\n"
 
 /* send back this on RTSP 404 file not found */
 static const char *doc404_RTSP = "RTSP/1.0 404 Not Found\r\n"
-    "Server: " RTSPDVERSION "\r\n"
+    "Server: " RTSPDVERSION
     END_OF_HEADERS;
 
 /* Default size to send away fake RTP data */
@@ -418,9 +422,14 @@ static int ProcessRequest(struct httprequest *req)
         char *rtp_scratch = NULL;
 
         /* get the custom server control "commands" */
-        cmd = (char *)spitout(stream, "reply", "servercmd", &cmdsize);
-        ptr = cmd;
+        error = getpart(&cmd, &cmdsize, "reply", "servercmd", stream);
         fclose(stream);
+        if(error) {
+          logmsg("getpart() failed with error: %d", error);
+          req->open = FALSE; /* closes connection */
+          return 1; /* done */
+        }
+        ptr = cmd;
 
         if(cmdsize) {
           logmsg("Found a reply-servercmd section!");
@@ -465,11 +474,10 @@ static int ProcessRequest(struct httprequest *req)
                 rtp_scratch[0] = '$';
 
                 /* The channel follows and is one byte */
-                rtp_scratch[1] = (char)(rtp_channel & 0xFF);
+                SET_RTP_PKT_CHN(rtp_scratch ,rtp_channel);
 
                 /* Length follows and is a two byte short in network order */
-                *((unsigned short *)(&rtp_scratch[2])) =
-                  htons((unsigned short)rtp_size);
+                SET_RTP_PKT_LEN(rtp_scratch, rtp_size);
 
                 /* Fill it with junk data */
                 for(i = 0; i < rtp_size; i+= RTP_DATA_SIZE) {
@@ -501,6 +509,8 @@ static int ProcessRequest(struct httprequest *req)
           } while(ptr && *ptr);
           logmsg("Done parsing server commands");
         }
+        if(cmd)
+          free(cmd);
       }
     }
     else {
@@ -567,10 +577,23 @@ static int ProcessRequest(struct httprequest *req)
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
          have been received */
-      size_t cl = strtol(line+15, &line, 10);
-      req->cl = cl - req->skip;
+      char *endptr;
+      char *ptr = line + 15;
+      unsigned long clen = 0;
+      while(*ptr && ISSPACE(*ptr))
+        ptr++;
+      endptr = ptr;
+      SET_ERRNO(0);
+      clen = strtoul(ptr, &endptr, 10);
+      if((ptr == endptr) || !ISSPACE(*endptr) || (ERANGE == ERRNO)) {
+        /* this assumes that a zero Content-Length is valid */
+        logmsg("Found invalid Content-Length: (%s) in the request", ptr);
+        req->open = FALSE; /* closes connection */
+        return 1; /* done */
+      }
+      req->cl = clen - req->skip;
 
-      logmsg("Found Content-Length: %zu in the request", cl);
+      logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
         logmsg("... but will abort after %zu bytes", req->cl);
       break;
@@ -946,13 +969,20 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       return 0;
     }
     else {
-      buffer = spitout(stream, "reply", partbuf, &count);
-      ptr = (char *)buffer;
+      error = getpart(&ptr, &count, "reply", partbuf, stream);
       fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
+        return 0;
+      }
+      buffer = ptr;
     }
 
-    if(got_exit_signal)
+    if(got_exit_signal) {
+      if(ptr)
+        free(ptr);
       return -1;
+    }
 
     /* re-open the same file again */
     stream=fopen(filename, "rb");
@@ -961,17 +991,30 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       logmsg("fopen() failed with error: %d %s", error, strerror(error));
       logmsg("Error opening file: %s", filename);
       logmsg("Couldn't open test file");
+      if(ptr)
+        free(ptr);
       return 0;
     }
     else {
       /* get the custom server control "commands" */
-      cmd = (char *)spitout(stream, "reply", "postcmd", &cmdsize);
+      error = getpart(&cmd, &cmdsize, "reply", "postcmd", stream);
       fclose(stream);
+      if(error) {
+        logmsg("getpart() failed with error: %d", error);
+        if(ptr)
+          free(ptr);
+        return 0;
+      }
     }
   }
 
-  if(got_exit_signal)
+  if(got_exit_signal) {
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
+  }
 
   /* If the word 'swsclose' is present anywhere in the reply chunk, the
      connection will be closed after the data has been sent to the requesting
@@ -993,6 +1036,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("fopen() failed with error: %d %s", error, strerror(error));
     logmsg("Error opening file: %s", RESPONSE_DUMP);
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
   }
 
@@ -1041,7 +1088,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     req->rtp_buffersize = 0;
   }
 
-
   do {
     res = fclose(dump);
   } while(res && ((error = ERRNO) == EINTR));
@@ -1049,8 +1095,13 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     logmsg("Error closing file %s error: %d %s",
            RESPONSE_DUMP, error, strerror(error));
 
-  if(got_exit_signal)
+  if(got_exit_signal) {
+    if(ptr)
+      free(ptr);
+    if(cmd)
+      free(cmd);
     return -1;
+  }
 
   if(sendfailure) {
     logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) were sent",
@@ -1175,15 +1226,14 @@ int main(int argc, char *argv[])
       arg++;
       if(argc>arg) {
         char *endptr;
-        long lnum = -1;
-        lnum = strtol(argv[arg], &endptr, 10);
+        unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
-           (lnum < 1025L) || (lnum > 65535L)) {
+           (ulnum < 1025UL) || (ulnum > 65535UL)) {
           fprintf(stderr, "rtspd: invalid --port argument (%s)\n",
                   argv[arg]);
           return 0;
         }
-        port = (unsigned short)(lnum & 0xFFFFL);
+        port = curlx_ultous(ulnum);
         arg++;
       }
     }

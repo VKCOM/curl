@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: multi-debugcallback.c,v 1.5 2009-06-05 18:40:40 yangtse Exp $
  *
  * This is a very simple example using the multi interface and the debug
  * callback.

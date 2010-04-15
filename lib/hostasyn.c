@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hostasyn.c,v 1.26 2010-01-22 06:36:52 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

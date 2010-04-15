@@ -7,7 +7,6 @@
  *
  * An example of curl_easy_send() and curl_easy_recv() usage.
  *
- * $Id: sendrecv.c,v 1.3 2009-11-02 21:20:45 bagder Exp $
  */
 
 #include <stdio.h>

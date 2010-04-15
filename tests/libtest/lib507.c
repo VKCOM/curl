@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib507.c,v 1.18 2010-02-05 18:07:19 yangtse Exp $
  */
 
 #include "test.h"
@@ -64,7 +63,7 @@ int test(char *URL)
 
   do {
     ret = curl_multi_perform(multi, &still_running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;
@@ -88,7 +87,7 @@ int test(char *URL)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    if (tutil_tvdiff(tutil_tvnow(), ml_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), ml_start) >
         MAIN_LOOP_HANG_TIMEOUT) {
       ml_timedout = TRUE;
       break;
@@ -105,7 +104,7 @@ int test(char *URL)
         mp_start = tutil_tvnow();
         do {
           ret = curl_multi_perform(multi, &still_running);
-          if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
+          if (tutil_tvdiff(tutil_tvnow(), mp_start) >
               MULTI_PERFORM_HANG_TIMEOUT) {
             mp_timedout = TRUE;
             break;

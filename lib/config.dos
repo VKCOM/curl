@@ -1,7 +1,6 @@
 #ifndef HEADER_CONFIG_DOS_H
 #define HEADER_CONFIG_DOS_H
 
-/* $Id: config.dos,v 1.30 2009-10-21 18:01:11 yangtse Exp $ */
 
 /* ================================================================ */
 /*        lib/config.dos - Hand crafted config file for DOS         */
@@ -65,7 +64,9 @@
 #define NEED_MALLOC_H          1
 
 #define RETSIGTYPE             void
+#define SIZEOF_INT             4
 #define SIZEOF_LONG_DOUBLE     16
+#define SIZEOF_SHORT           2
 #define STDC_HEADERS           1
 #define TIME_WITH_SYS_TIME     1
 

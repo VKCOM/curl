@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: curl_threads.c,v 1.2 2010-01-29 17:47:54 yangtse Exp $
  ***************************************************************************/
 #include "setup.h"
 
@@ -45,7 +44,7 @@
 
 struct curl_actual_call {
   unsigned int (*func)(void *);
-  void *arg;  
+  void *arg;
 };
 
 static void *curl_thread_create_thunk(void *arg)

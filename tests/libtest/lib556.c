@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib556.c,v 1.8 2010-02-05 18:07:20 yangtse Exp $
  */
 
 #include "test.h"
@@ -46,7 +45,7 @@ int test(char *URL)
 
   if(!res) {
     /* we are connected, now get a HTTP document the raw way */
-    const char *request = 
+    const char *request =
 #ifdef CURL_DOES_CONVERSIONS
       /* ASCII representation with escape sequences for non-ASCII platforms */
       "\x47\x45\x54\x20\x2f\x35\x35\x36\x20\x48\x54\x54\x50\x2f\x31\x2e"

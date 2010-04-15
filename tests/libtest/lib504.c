@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib504.c,v 1.29 2010-02-05 18:07:19 yangtse Exp $
  */
 
 #include "test.h"
@@ -52,9 +51,10 @@ int test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* the point here being that there must not run anything on the given
+  /* The point here is that there must not be anything running on the given
      proxy port */
-  test_setopt(c, CURLOPT_PROXY, libtest_arg2);
+  if (libtest_arg2)
+    test_setopt(c, CURLOPT_PROXY, libtest_arg2);
   test_setopt(c, CURLOPT_URL, URL);
   test_setopt(c, CURLOPT_VERBOSE, 1L);
 

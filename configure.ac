@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: configure.ac,v 1.452 2010-02-04 14:40:11 yangtse Exp $
 #***************************************************************************
 dnl Process this file with autoconf to produce a configure script.
 
@@ -30,7 +29,7 @@ AC_INIT([curl], [-], [a suitable curl mailing list => http://curl.haxx.se/mail/]
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2009 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2010 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
@@ -1123,15 +1122,12 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
-        GSSAPI_LIBS=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
      elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
-        GSSAPI_LIBS="-lgssapi"
      fi
   fi
 
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
-  LIBS="$LIBS $GSSAPI_LIBS"
 
   AC_CHECK_HEADER(gss.h,
     [
@@ -1198,17 +1194,24 @@ if test x"$want_gss" = xyes; then
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     LIBS="$LIBS -lgss"
   elif test -z "$GSSAPI_LIB_DIR"; then
-     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
-        LIBS="$LIBS $gss_libs"
-     elif test "$GSSAPI_ROOT" != "yes"; then
-        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-        LIBS="$LIBS -lgssapi"
-     else
-        LIBS="$LIBS -lgssapi"
-     fi
+     case $host in
+     *-*-darwin*)
+        LIBS="$LIBS -lgssapi_krb5 -lresolv"
+        ;;
+     *)
+        if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+           dnl krb5-config doesn't have --libs-only-L or similar, put everything
+           dnl into LIBS
+           gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+           LIBS="$LIBS $gss_libs"
+        elif test "$GSSAPI_ROOT" != "yes"; then
+           LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+           LIBS="$LIBS -lgssapi"
+        else
+           LIBS="$LIBS -lgssapi"
+        fi
+        ;;
+     esac
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
      LIBS="$LIBS -lgssapi"
@@ -2376,7 +2379,10 @@ AC_HELP_STRING([--disable-hidden-symbols],[Leave all symbols with default visibi
   *)
        AC_MSG_CHECKING([whether $CC supports it])
        if test "$GCC" = yes ; then
-         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ||
+           dnl clang always supports -fvisibility= but it doesn't show up
+           dnl under --help.
+           test "$compiler_id" = "CLANG"; then
            AC_MSG_RESULT(yes)
            AC_DEFINE(CURL_HIDDEN_SYMBOLS, 1, [to enable hidden symbols])
            AC_DEFINE(CURL_EXTERN_SYMBOL, [__attribute__ ((visibility ("default")))], [to make a symbol visible])

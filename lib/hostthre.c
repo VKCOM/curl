@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hostthre.c,v 1.65 2010-02-02 16:23:42 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -136,7 +135,7 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 
   if(tsd->hostname)
     free(tsd->hostname);
-  
+
   if (tsd->res)
     Curl_freeaddrinfo(tsd->res);
 
@@ -147,8 +146,8 @@ void destroy_thread_sync_data(struct thread_sync_data * tsd)
 static
 int init_thread_sync_data(struct thread_sync_data * tsd,
                            const char * hostname,
-			   int port,
-			   const struct addrinfo *hints)
+                           int port,
+                           const struct addrinfo *hints)
 {
   memset(tsd, 0, sizeof(*tsd));
 
@@ -181,34 +180,12 @@ int init_thread_sync_data(struct thread_sync_data * tsd,
   return 0;
 }
 
-/*
- * gethostbyname_thread() resolves a name and then exits.
- */
-static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
-{
-  struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
-
-  tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
-
-  if (!tsd->res) {
-    tsd->sock_error = SOCKERRNO;
-    if (tsd->sock_error == 0)
-      tsd->sock_error = ENOMEM;
-  } 
-
-  Curl_mutex_acquire(tsd->mtx);
-  tsd->done = 1;
-  Curl_mutex_release(tsd->mtx);
-
-  return 0;
-}
-
 static int getaddrinfo_complete(struct connectdata *conn)
 {
   struct thread_sync_data *tsd = conn_thread_sync_data(conn);
   int rc;
 
-  rc = Curl_addrinfo_callback(conn, tsd->sock_error, tsd->res); 
+  rc = Curl_addrinfo_callback(conn, tsd->sock_error, tsd->res);
   /* The tsd->res structure has been copied to async.dns and perhaps the DNS cache.
      Set our copy to NULL so destroy_thread_sync_data doesn't free it.
    */
@@ -218,7 +195,7 @@ static int getaddrinfo_complete(struct connectdata *conn)
 }
 
 
-#if defined(HAVE_GETADDRINFO)
+#ifdef HAVE_GETADDRINFO
 
 /*
  * getaddrinfo_thread() resolves a name and then exits.
@@ -237,6 +214,30 @@ static unsigned int CURL_STDCALL getaddrinfo_thread (void *arg)
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
   if (rc != 0) {
+    tsd->sock_error = SOCKERRNO;
+    if (tsd->sock_error == 0)
+      tsd->sock_error = ENOMEM;
+  }
+
+  Curl_mutex_acquire(tsd->mtx);
+  tsd->done = 1;
+  Curl_mutex_release(tsd->mtx);
+
+  return 0;
+}
+
+#else /* HAVE_GETADDRINFO */
+
+/*
+ * gethostbyname_thread() resolves a name and then exits.
+ */
+static unsigned int CURL_STDCALL gethostbyname_thread (void *arg)
+{
+  struct thread_sync_data *tsd = (struct thread_sync_data *)arg;
+
+  tsd->res = Curl_ipv4_resolve_r(tsd->hostname, tsd->port);
+
+  if (!tsd->res) {
     tsd->sock_error = SOCKERRNO;
     if (tsd->sock_error == 0)
       tsd->sock_error = ENOMEM;
@@ -268,9 +269,9 @@ void Curl_destroy_thread_data (struct Curl_async *async)
 
     if (td->thread_hnd != curl_thread_t_null)
       Curl_thread_join(&td->thread_hnd);
- 
+
     destroy_thread_sync_data(&td->tsd);
-    
+
     free(async->os_specific);
   }
   async->hostname = NULL;
@@ -291,7 +292,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   int err = ENOMEM;
 
   conn->async.os_specific = (void*) td;
-  if(!td) 
+  if(!td)
     goto err_exit;
 
   conn->async.port = port;
@@ -301,7 +302,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->dummy_sock = CURL_SOCKET_BAD;
   td->thread_hnd = curl_thread_t_null;
 
-  if (!init_thread_sync_data(&td->tsd, hostname, port, hints)) 
+  if (!init_thread_sync_data(&td->tsd, hostname, port, hints))
     goto err_exit;
 
   Curl_safefree(conn->async.hostname);
@@ -364,11 +365,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   if (Curl_thread_join(&td->thread_hnd)) {
     rc = getaddrinfo_complete(conn);
   } else {
-    DEBUGASSERT(0);    
+    DEBUGASSERT(0);
   }
 
   conn->async.done = TRUE;
-    
+
   if(entry)
     *entry = conn->async.dns;
 
@@ -404,7 +405,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
   int done = 0;
- 
+
   *entry = NULL;
 
   if (!td) {
@@ -416,7 +417,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   done = td->tsd.done;
   Curl_mutex_release(td->tsd.mtx);
 
-  if (done) { 
+  if (done) {
     getaddrinfo_complete(conn);
     if (td->poll_interval != 0)
         Curl_expire(conn->data, 0);
@@ -474,7 +475,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
   return 0;
 }
 
-#if !defined(HAVE_GETADDRINFO)
+#ifndef HAVE_GETADDRINFO
 /*
  * Curl_getaddrinfo() - for platforms without getaddrinfo
  */
@@ -503,7 +504,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return Curl_ipv4_resolve_r(hostname, port);
 }
 
-#else /* HAVE_GETADDRINFO */
+#else /* !HAVE_GETADDRINFO */
 
 /*
  * Curl_getaddrinfo() - for getaddrinfo
@@ -522,7 +523,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* default to synchronous response */
 
-#if !defined(CURLRES_IPV4)
+#ifndef CURLRES_IPV4
   /*
    * Check if a limited name resolve has been requested.
    */
@@ -584,6 +585,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   return res;
 }
 
-#endif /* HAVE_GETADDRINFO */
+#endif /* !HAVE_GETADDRINFO */
 
 #endif /* CURLRES_THREADED */

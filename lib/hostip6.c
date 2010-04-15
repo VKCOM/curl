@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hostip6.c,v 1.53 2010-01-25 23:50:13 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

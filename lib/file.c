@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: file.c,v 1.122 2009-11-18 10:33:54 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

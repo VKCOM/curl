@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: http_digest.c,v 1.51 2009-05-22 17:26:49 danf Exp $
  ***************************************************************************/
 #include "setup.h"
 

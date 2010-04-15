@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: url.h,v 1.44 2009-05-08 10:59:40 bagder Exp $
  ***************************************************************************/
 
 #include <stdarg.h> /* to make sure we have ap_list */

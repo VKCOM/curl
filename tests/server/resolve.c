@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: resolve.c,v 1.14 2010-02-02 12:39:10 yangtse Exp $
  ***************************************************************************/
 
 /* Purpose
@@ -131,8 +130,8 @@ int main(int argc, char *argv[])
   else {
 #ifdef ENABLE_IPV6
     /* Check that the system has IPv6 enabled before checking the resolver */
-    int s = socket(PF_INET6, SOCK_DGRAM, 0);
-    if(s == -1)
+    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
+    if(s == CURL_SOCKET_BAD)
       /* an ipv6 address was requested and we can't get/use one */
       rc = -1;
     else {

@@ -1,5 +1,5 @@
-#ifndef __LIB_CURL_SETUP_H
-#define __LIB_CURL_SETUP_H
+#ifndef HEADER_CURL_LIB_SETUP_H
+#define HEADER_CURL_LIB_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: setup.h,v 1.178 2010-01-26 08:43:21 yangtse Exp $
  ***************************************************************************/
 
 /*
@@ -549,4 +548,4 @@ int netware_init(void);
 #include "setup_once.h"
 #endif
 
-#endif /* __LIB_CURL_SETUP_H */
+#endif /* HEADER_CURL_LIB_SETUP_H */

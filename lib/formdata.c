@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: formdata.c,v 1.124 2010-01-22 23:21:39 bagder Exp $
  ***************************************************************************/
 
 /*

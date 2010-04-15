@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: os400sys.c,v 1.8 2009-05-18 10:46:17 patrickm Exp $
  *
  ***************************************************************************/
 
