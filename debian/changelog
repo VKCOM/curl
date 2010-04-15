@@ -1,3 +1,15 @@
+curl (7.20.1-1) unstable; urgency=low
+
+  * New upstream release.
+  * debian/patches/missing-double-quote: No longer needed as it has
+    been fixed by the upstream.
+  * debian/patches/no_com_err: Reworked the patches for the new
+    release.
+  * lib/http.c: chunked-encoding with Content-Length header problem
+    has been fixed in the upstream. (closes: #572276)
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Thu, 15 Apr 2010 18:52:44 +0530
+
 curl (7.20.0-3) unstable; urgency=low
 
   * debian/control: Vcs* tags added.
