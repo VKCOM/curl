@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: Makefile.am,v 1.156 2010-02-09 09:35:07 bagder Exp $
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
@@ -27,7 +26,7 @@ VCPROJ = libcurl.vcproj
 
 DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.hostip README.multi_socket README.httpauth README.pipelining    \
- README.curl_off_t README.cmake README.pingpong
+ README.curl_off_t README.pingpong
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
 
@@ -95,7 +94,7 @@ endif
 #
 # Here's the simplified rule guide on how to change -version-info:
 # (current version is C:R:A)
-# 
+#
 # 1. if there are only source changes, use C:R+1:A
 # 2. if interfaces were added use C+1:0:A+1
 # 3. if interfaces were removed, then use C+1:0:0

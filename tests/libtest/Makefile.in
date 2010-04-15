@@ -57,7 +57,8 @@ noinst_PROGRAMS = lib500$(EXEEXT) lib501$(EXEEXT) lib502$(EXEEXT) \
 	lib558$(EXEEXT) lib559$(EXEEXT) lib560$(EXEEXT) \
 	lib562$(EXEEXT) lib564$(EXEEXT) lib565$(EXEEXT) \
 	lib566$(EXEEXT) lib567$(EXEEXT) lib568$(EXEEXT) \
-	lib569$(EXEEXT) lib570$(EXEEXT) lib571$(EXEEXT)
+	lib569$(EXEEXT) lib570$(EXEEXT) lib571$(EXEEXT) \
+	lib572$(EXEEXT)
 subdir = tests/libtest
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -339,6 +340,10 @@ am_lib571_OBJECTS = lib571.$(OBJEXT) $(am__objects_1)
 lib571_OBJECTS = $(am_lib571_OBJECTS)
 lib571_LDADD = $(LDADD)
 lib571_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib572_OBJECTS = lib572.$(OBJEXT) $(am__objects_1)
+lib572_OBJECTS = $(am_lib572_OBJECTS)
+lib572_LDADD = $(LDADD)
+lib572_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -369,7 +374,8 @@ SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib558_SOURCES) $(lib559_SOURCES) $(lib560_SOURCES) \
 	$(lib562_SOURCES) $(lib564_SOURCES) $(lib565_SOURCES) \
 	$(lib566_SOURCES) $(lib567_SOURCES) $(lib568_SOURCES) \
-	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES)
+	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES) \
+	$(lib572_SOURCES)
 DIST_SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib503_SOURCES) $(lib504_SOURCES) $(lib505_SOURCES) \
 	$(lib506_SOURCES) $(lib507_SOURCES) $(lib508_SOURCES) \
@@ -389,7 +395,8 @@ DIST_SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib558_SOURCES) $(lib559_SOURCES) $(lib560_SOURCES) \
 	$(lib562_SOURCES) $(lib564_SOURCES) $(lib565_SOURCES) \
 	$(lib566_SOURCES) $(lib567_SOURCES) $(lib568_SOURCES) \
-	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES)
+	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES) \
+	$(lib572_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -573,7 +580,7 @@ target_alias = @target_alias@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -586,14 +593,13 @@ target_alias = @target_alias@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: Makefile.am,v 1.85 2009-11-05 15:04:04 yangtse Exp $
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 @USE_EMBEDDED_ARES_FALSE@INCLUDES = -I$(top_builddir)/include/curl \
 @USE_EMBEDDED_ARES_FALSE@           -I$(top_builddir)/include      \
 @USE_EMBEDDED_ARES_FALSE@           -I$(top_srcdir)/include        \
 @USE_EMBEDDED_ARES_FALSE@           -I$(top_builddir)/lib          \
-@USE_EMBEDDED_ARES_FALSE@           -I$(top_srcdir)/lib 
+@USE_EMBEDDED_ARES_FALSE@           -I$(top_srcdir)/lib
 
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
@@ -699,6 +705,7 @@ lib568_SOURCES = lib568.c $(SUPPORTFILES)
 lib569_SOURCES = lib569.c $(SUPPORTFILES)
 lib570_SOURCES = lib570.c $(SUPPORTFILES)
 lib571_SOURCES = lib571.c $(SUPPORTFILES)
+lib572_SOURCES = lib572.c $(SUPPORTFILES)
 all: all-am
 
 .SUFFIXES:
@@ -919,6 +926,9 @@ lib570$(EXEEXT): $(lib570_OBJECTS) $(lib570_DEPENDENCIES)
 lib571$(EXEEXT): $(lib571_OBJECTS) $(lib571_DEPENDENCIES) 
 	@rm -f lib571$(EXEEXT)
 	$(LINK) $(lib571_LDFLAGS) $(lib571_OBJECTS) $(lib571_LDADD) $(LIBS)
+lib572$(EXEEXT): $(lib572_OBJECTS) $(lib572_DEPENDENCIES) 
+	@rm -f lib572$(EXEEXT)
+	$(LINK) $(lib572_LDFLAGS) $(lib572_OBJECTS) $(lib572_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1002,6 +1012,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib569.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib570.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib571.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib572.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testutil.Po@am__quote@
 
 .c.o:

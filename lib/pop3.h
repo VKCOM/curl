@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: pop3.h,v 1.1 2009-12-12 21:54:02 bagder Exp $
  ***************************************************************************/
 
 /****************************************************************************
@@ -33,6 +32,7 @@ typedef enum {
   POP3_USER,
   POP3_PASS,
   POP3_STARTTLS,
+  POP3_LIST,
   POP3_RETR,
   POP3_QUIT,
   POP3_LAST  /* never used */
@@ -43,8 +43,8 @@ typedef enum {
 struct pop3_conn {
   struct pingpong pp;
   char *mailbox;     /* what to RETR */
-  int eob;        /* number of bytes of the EOB (End Of Body) that has been
-                     received thus far */
+  size_t eob;        /* number of bytes of the EOB (End Of Body) that has been
+                        received thus far */
   pop3state state; /* always use pop3.c:state() to change state! */
 };
 

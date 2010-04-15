@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: sshhelp.pm,v 1.6 2010-01-21 14:26:32 yangtse Exp $
 #***************************************************************************
 
 package sshhelp;

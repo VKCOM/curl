@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: urlglob.c,v 1.55 2009-11-18 10:33:55 yangtse Exp $
  ***************************************************************************/
 
 /* client-local setup.h */

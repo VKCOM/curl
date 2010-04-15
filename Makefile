@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: Makefile.dist,v 1.50 2009-11-23 16:48:32 yangtse Exp $
 ###########################################################################
 
 VC=vc6

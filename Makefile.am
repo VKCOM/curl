@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: Makefile.am,v 1.80 2009-11-04 12:34:48 bagder Exp $
 ###########################################################################
 
 AUTOMAKE_OPTIONS = foreign

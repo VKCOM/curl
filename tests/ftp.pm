@@ -18,7 +18,6 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: ftp.pm,v 1.25 2010-01-20 20:39:56 yangtse Exp $
 ###########################################################################
 
 use strict;

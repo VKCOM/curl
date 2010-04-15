@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hostip.c,v 1.225 2010-01-23 13:53:33 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -543,7 +542,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #ifdef USE_ALARM_TIMEOUT
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
-  bool keep_copysig=FALSE;        /* did copy it? */
+  volatile bool keep_copysig = FALSE; /* wether old sigact has been saved */
   struct sigaction sigact;
 #else
 #ifdef HAVE_SIGNAL
@@ -551,7 +550,7 @@ int Curl_resolv_timeout(struct connectdata *conn,
 #endif /* HAVE_SIGNAL */
 #endif /* HAVE_SIGACTION */
   volatile long timeout;
-  unsigned int prev_alarm=0;
+  volatile unsigned int prev_alarm = 0;
   struct SessionHandle *data = conn->data;
 #endif /* USE_ALARM_TIMEOUT */
   int rc;
@@ -565,46 +564,52 @@ int Curl_resolv_timeout(struct connectdata *conn,
   else
     timeout = timeoutms;
 
-  if(timeout && timeout < 1000)
+  if(!timeout)
+    /* USE_ALARM_TIMEOUT defined, but no timeout actually requested */
+    return Curl_resolv(conn, hostname, port, entry);
+
+  if(timeout < 1000)
     /* The alarm() function only provides integer second resolution, so if
        we want to wait less than one second we must bail out already now. */
     return CURLRESOLV_TIMEDOUT;
 
-  if (timeout > 0) {
-    /* This allows us to time-out from the name resolver, as the timeout
-       will generate a signal and we will siglongjmp() from that here.
-       This technique has problems (see alarmfunc). */
-      if(sigsetjmp(curl_jmpenv, 1)) {
-        /* this is coming from a siglongjmp() after an alarm signal */
-        failf(data, "name lookup timed out");
-        return CURLRESOLV_ERROR;
-      }
-
-    /*************************************************************
-     * Set signal handler to catch SIGALRM
-     * Store the old value to be able to set it back later!
-     *************************************************************/
+  /*************************************************************
+   * Set signal handler to catch SIGALRM
+   * Store the old value to be able to set it back later!
+   *************************************************************/
 #ifdef HAVE_SIGACTION
-    sigaction(SIGALRM, NULL, &sigact);
-    keep_sigact = sigact;
-    keep_copysig = TRUE; /* yes, we have a copy */
-    sigact.sa_handler = alarmfunc;
+  sigaction(SIGALRM, NULL, &sigact);
+  keep_sigact = sigact;
+  keep_copysig = TRUE; /* yes, we have a copy */
+  sigact.sa_handler = alarmfunc;
 #ifdef SA_RESTART
-    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-    sigact.sa_flags &= ~SA_RESTART;
+  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+  sigact.sa_flags &= ~SA_RESTART;
 #endif
-    /* now set the new struct */
-    sigaction(SIGALRM, &sigact, NULL);
+  /* now set the new struct */
+  sigaction(SIGALRM, &sigact, NULL);
 #else /* HAVE_SIGACTION */
-    /* no sigaction(), revert to the much lamer signal() */
+  /* no sigaction(), revert to the much lamer signal() */
 #ifdef HAVE_SIGNAL
-    keep_sigact = signal(SIGALRM, alarmfunc);
+  keep_sigact = signal(SIGALRM, alarmfunc);
 #endif
 #endif /* HAVE_SIGACTION */
 
-    /* alarm() makes a signal get sent when the timeout fires off, and that
-       will abort system calls */
-    prev_alarm = alarm((unsigned int) (timeout/1000L));
+  /* alarm() makes a signal get sent when the timeout fires off, and that
+     will abort system calls */
+  prev_alarm = alarm((unsigned int) (timeout/1000L));
+
+  /* This allows us to time-out from the name resolver, as the timeout
+     will generate a signal and we will siglongjmp() from that here.
+     This technique has problems (see alarmfunc).
+     This should be the last thing we do before calling Curl_resolv(),
+     as otherwise we'd have to worry about variables that get modified
+     before we invoke Curl_resolv() (and thus use "volatile"). */
+  if(sigsetjmp(curl_jmpenv, 1)) {
+    /* this is coming from a siglongjmp() after an alarm signal */
+    failf(data, "name lookup timed out");
+    rc = CURLRESOLV_ERROR;
+    goto clean_up;
   }
 
 #else
@@ -622,45 +627,46 @@ int Curl_resolv_timeout(struct connectdata *conn,
   rc = Curl_resolv(conn, hostname, port, entry);
 
 #ifdef USE_ALARM_TIMEOUT
-  if (timeout > 0) {
+clean_up:
+
+  if(!prev_alarm)
+    /* deactivate a possibly active alarm before uninstalling the handler */
+    alarm(0);
 
 #ifdef HAVE_SIGACTION
-    if(keep_copysig) {
-      /* we got a struct as it looked before, now put that one back nice
-         and clean */
-      sigaction(SIGALRM, &keep_sigact, NULL); /* put it back */
-    }
+  if(keep_copysig) {
+    /* we got a struct as it looked before, now put that one back nice
+       and clean */
+    sigaction(SIGALRM, &keep_sigact, NULL); /* put it back */
+  }
 #else
 #ifdef HAVE_SIGNAL
-    /* restore the previous SIGALRM handler */
-    signal(SIGALRM, keep_sigact);
+  /* restore the previous SIGALRM handler */
+  signal(SIGALRM, keep_sigact);
 #endif
 #endif /* HAVE_SIGACTION */
 
-    /* switch back the alarm() to either zero or to what it was before minus
-       the time we spent until now! */
-    if(prev_alarm) {
-      /* there was an alarm() set before us, now put it back */
-      unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
+  /* switch back the alarm() to either zero or to what it was before minus
+     the time we spent until now! */
+  if(prev_alarm) {
+    /* there was an alarm() set before us, now put it back */
+    unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
 
-      /* the alarm period is counted in even number of seconds */
-      unsigned long alarm_set = prev_alarm - elapsed_ms/1000;
+    /* the alarm period is counted in even number of seconds */
+    unsigned long alarm_set = prev_alarm - elapsed_ms/1000;
 
-      if(!alarm_set ||
-         ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
-        /* if the alarm time-left reached zero or turned "negative" (counted
-           with unsigned values), we should fire off a SIGALRM here, but we
-           won't, and zero would be to switch it off so we never set it to
-           less than 1! */
-        alarm(1);
-        rc = CURLRESOLV_TIMEDOUT;
-        failf(data, "Previous alarm fired off!");
-      }
-      else
-        alarm((unsigned int)alarm_set);
+    if(!alarm_set ||
+       ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
+      /* if the alarm time-left reached zero or turned "negative" (counted
+         with unsigned values), we should fire off a SIGALRM here, but we
+         won't, and zero would be to switch it off so we never set it to
+         less than 1! */
+      alarm(1);
+      rc = CURLRESOLV_TIMEDOUT;
+      failf(data, "Previous alarm fired off!");
     }
     else
-      alarm(0); /* just shut it off */
+      alarm((unsigned int)alarm_set);
   }
 #endif /* USE_ALARM_TIMEOUT */
 

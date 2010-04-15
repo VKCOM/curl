@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: util.c,v 1.31 2010-02-02 12:39:10 yangtse Exp $
  ***************************************************************************/
 
 #define CURL_NO_OLDIES
@@ -72,6 +71,8 @@ void logmsg(const char *msg, ...)
   time_t sec;
   struct tm *now;
   char timebuf[20];
+  static time_t epoch_offset;
+  static int    known_offset;
 
   if (!serverlogfile) {
     fprintf(stderr, "Error: serverlogfile not set\n");
@@ -79,8 +80,12 @@ void logmsg(const char *msg, ...)
   }
 
   tv = curlx_tvnow();
-  sec = tv.tv_sec;
-  now = localtime(&sec); /* not multithread safe but we don't care */
+  if(!known_offset) {
+    epoch_offset = time(NULL) - tv.tv_sec;
+    known_offset = 1;
+  }
+  sec = epoch_offset + tv.tv_sec;
+  now = localtime(&sec); /* not thread safe but we don't care */
 
   snprintf(timebuf, sizeof(timebuf), "%02d:%02d:%02d.%06ld",
     (int)now->tm_hour, (int)now->tm_min, (int)now->tm_sec, (long)tv.tv_usec);

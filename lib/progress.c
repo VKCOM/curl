@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: progress.c,v 1.95 2009-11-05 15:00:28 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"

@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: ftp.c,v 1.546 2010-02-05 09:32:11 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -91,6 +90,7 @@
 #include "url.h"
 #include "rawstr.h"
 #include "speedcheck.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -759,9 +759,9 @@ static CURLcode ftp_state_use_port(struct connectdata *conn,
     /* parse the port */
     if( ip_end != NULL ) {
       if((port_start = strchr(ip_end, ':')) != NULL) {
-        port_min = (unsigned short)strtol(port_start+1, NULL, 10);
+        port_min = curlx_ultous(strtoul(port_start+1, NULL, 10));
         if((port_sep = strchr(port_start, '-')) != NULL) {
-          port_max = (unsigned short)strtol(port_sep + 1, NULL, 10);
+          port_max = curlx_ultous(strtoul(port_sep + 1, NULL, 10));
         }
         else
           port_max = port_min;
@@ -1424,6 +1424,12 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
     break;
   }
 
+  /*
+   * This state uses:
+   * 'count1' to iterate over the commands to send
+   * 'count2' to store wether to allow commands to fail
+   */
+
   if(init)
     ftpc->count1 = 0;
   else
@@ -1438,7 +1444,15 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       i++;
     }
     if(item) {
-      PPSENDF(&ftpc->pp, "%s", item->data);
+      char *cmd = item->data;
+      if(cmd[0] == '*') {
+        cmd++;
+        ftpc->count2 = 1; /* the sent command is allowed to fail */
+      }
+      else
+        ftpc->count2 = 0; /* failure means cancel operation */
+
+      PPSENDF(&ftpc->pp, "%s", cmd);
       state(conn, instate);
       quote = TRUE;
     }
@@ -2658,7 +2672,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     case FTP_POSTQUOTE:
     case FTP_RETR_PREQUOTE:
     case FTP_STOR_PREQUOTE:
-      if(ftpcode >= 400) {
+      if((ftpcode >= 400) && !ftpc->count2) {
+        /* failure reponse code, and not allowed to fail */
         failf(conn->data, "QUOT command failed with %03d", ftpcode);
         return CURLE_QUOTE_ERROR;
       }
@@ -2811,14 +2826,12 @@ static CURLcode ftp_easy_statemach(struct connectdata *conn)
 #if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
     defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
   /* workaround icc 9.1 optimizer issue */
-# define vqualifier volatile
-#else
-# define vqualifier
+#pragma optimize("", off)
 #endif
 
 static CURLcode ftp_init(struct connectdata *conn)
 {
-  struct FTP *vqualifier ftp;
+  struct FTP *ftp;
 
   if(NULL == conn->data->state.proto.ftp) {
     conn->data->state.proto.ftp = malloc(sizeof(struct FTP));
@@ -2846,6 +2859,12 @@ static CURLcode ftp_init(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+#if defined(__INTEL_COMPILER) && (__INTEL_COMPILER == 910) && \
+    defined(__OPTIMIZE__) && defined(__unix__) && defined(__i386__)
+  /* workaround icc 9.1 optimizer issue */
+#pragma optimize("", on)
+#endif
 
 /*
  * ftp_connect() should do everything that is to be considered a part of
@@ -3070,6 +3089,7 @@ static CURLcode ftp_done(struct connectdata *conn, CURLcode status,
     long old_time = pp->response_time;
 
     pp->response_time = 60*1000; /* give it only a minute for now */
+    pp->response = Curl_tvnow(); /* timeout relative now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 

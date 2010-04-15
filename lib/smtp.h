@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2009 - 2010, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: smtp.h,v 1.4 2009-12-30 22:50:42 bagder Exp $
  ***************************************************************************/
 
 #include "pingpong.h"
@@ -33,10 +32,12 @@ typedef enum {
   SMTP_SERVERGREET, /* waiting for the initial greeting immediately after
                        a connect */
   SMTP_EHLO,
+  SMTP_HELO,
   SMTP_STARTTLS,
   SMTP_MAIL, /* MAIL FROM */
   SMTP_RCPT, /* RCPT TO */
   SMTP_DATA,
+  SMTP_POSTDATA,
   SMTP_QUIT,
   SMTP_LAST  /* never used */
 } smtpstate;
@@ -46,9 +47,10 @@ typedef enum {
 struct smtp_conn {
   struct pingpong pp;
   char *domain;    /* what to send in the EHLO */
-  int eob;         /* number of bytes of the EOB (End Of Body) that has been
-                      received thus far */
+  size_t eob;         /* number of bytes of the EOB (End Of Body) that has been
+                         received thus far */
   smtpstate state; /* always use smtp.c:state() to change state! */
+  struct curl_slist *rcpt;
 };
 
 extern const struct Curl_handler Curl_handler_smtp;
@@ -62,6 +64,6 @@ extern const struct Curl_handler Curl_handler_smtps;
 #define SMTP_EOB_REPL "\x0d\x0a\x2e\x2e"
 #define SMTP_EOB_REPL_LEN 4
 
-CURLcode Curl_smtp_escape_eob(struct connectdata *conn, int nread);
+CURLcode Curl_smtp_escape_eob(struct connectdata *conn, ssize_t nread);
 
 #endif /* __SMTP_H */

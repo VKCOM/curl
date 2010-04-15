@@ -491,13 +491,13 @@ p.roffit {
 <p class="level1">If cookies are enabled and cached, then a user could craft a URL which performs some malicious action to a site whose authentication is already stored in a cookie. e.g. <a href="http://mail.example.com/delete-stuff.cgi">http://mail.example.com/delete-stuff.cgi</a>?delete=all Apps can mitigate against this by disabling cookies or clearing them between requests. 
 <p class="level1">
 <p class="level0"><a name="Dangerous"></a><span class="nroffip">Dangerous URLs</span> 
-<p class="level1">SCP URLs can contain raw commands within the scp: URL, which is a side effect of how the SCP protocol is designed. e.g.  scp://user:pass@host/a;date &gt;/tmp/test; Apps must not allow unsanitized SCP: URLs to be passed in for downloads. 
+<p class="level1">SCP URLs can contain raw commands within the scp: URL, which is a side effect of how the SCP protocol is designed. e.g. scp://user:pass@host/a;date &gt;/tmp/test; Apps must not allow unsanitized SCP: URLs to be passed in for downloads. 
 <p class="level1">
 <p class="level0"><a name="Denial"></a><span class="nroffip">Denial of Service</span> 
 <p class="level1">A malicious server could cause libcurl to effectively hang by sending a trickle of data through, or even no data at all but just keeping the TCP connection open.  This could result in a denial-of-service attack. The CURLOPT_TIMEOUT and/or CURLOPT_LOW_SPEED_LIMIT options can be used to mitigate against this. 
 <p class="level1">A malicious server could cause libcurl to effectively hang by starting to send data, then severing the connection without cleanly closing the TCP connection.  The app could install a CURLOPT_SOCKOPTFUNCTION callback function and set the TCP SO_KEEPALIVE option to mitigate against this. Setting one of the timeout options would also work against this attack. 
 <p class="level1">A malicious server could cause libcurl to download an infinite amount of data, potentially causing all of memory or disk to be filled. Setting the CURLOPT_MAXFILESIZE_LARGE option is not sufficient to guard against this. Instead, the app should monitor the amount of data received within the write or progress callback and abort once the limit is reached. 
-<p class="level1">A malicious HTTP server could cause an infinite redirection loop, causing a  denial-of-service. This can be mitigated by using the CURLOPT_MAXREDIRS option. 
+<p class="level1">A malicious HTTP server could cause an infinite redirection loop, causing a denial-of-service. This can be mitigated by using the CURLOPT_MAXREDIRS option. 
 <p class="level1">
 <p class="level0"><a name="Arbitrary"></a><span class="nroffip">Arbitrary Headers</span> 
 <p class="level1">User-supplied data must be sanitized when used in options like CURLOPT_USERAGENT, CURLOPT_HTTPHEADER, CURLOPT_POSTFIELDS and others that are used to generate structured data. Characters like embedded carriage returns or ampersands could allow the user to create additional headers or fields that could cause malicious transactions. 

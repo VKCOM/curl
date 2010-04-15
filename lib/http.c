@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: http.c,v 1.437 2010-02-04 19:44:31 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -3063,6 +3062,8 @@ checkprotoprefix(struct SessionHandle *data, struct connectdata *conn,
 #ifndef CURL_DISABLE_RTSP
   if(conn->protocol & PROT_RTSP)
     return checkrtspprefix(data, s);
+#else
+  (void)conn;
 #endif /* CURL_DISABLE_RTSP */
 
   return checkhttpprefix(data, s);
@@ -3336,8 +3337,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
              using chunked Transfer-Encoding.
           */
           if(k->chunk)
-            k->size=-1;
-
+            k->maxdownload = k->size = -1;
         }
         if(-1 != k->size) {
           /* We do this operation even if no_body is true, since this

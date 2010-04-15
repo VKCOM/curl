@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: connect.c,v 1.229 2010-02-04 19:44:31 yangtse Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -574,6 +573,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     int error;
     if(verifyconnect(sockfd, &error)) {
       /* we are connected, awesome! */
+      conn->bits.tcpconnect = TRUE;
       *connected = TRUE;
       return CURLE_OK;
     }

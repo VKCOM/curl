@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: urldata.h,v 1.432 2010-01-22 20:27:48 yangtse Exp $
  ***************************************************************************/
 
 /* This file is for lib internal stuff */
@@ -684,7 +683,7 @@ struct connectdata {
 #define PROT_SSL     (1<<25) /* protocol requires SSL */
 
 /* these ones need action before socket close */
-#define PROT_CLOSEACTION (PROT_FTP | PROT_TFTP | PROT_IMAP | PROT_POP3)
+#define PROT_CLOSEACTION (PROT_FTP | PROT_IMAP | PROT_POP3)
 #define PROT_DUALCHANNEL PROT_FTP /* these protocols use two connections */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the

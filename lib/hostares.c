@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hostares.c,v 1.57 2010-01-26 22:59:43 bagder Exp $
  ***************************************************************************/
 
 #include "setup.h"
@@ -105,7 +104,7 @@ int Curl_resolv_getsock(struct connectdata *conn,
   struct timeval timebuf;
   struct timeval *timeout;
   int max = ares_getsock(conn->data->state.areschannel,
-                         (int *)socks, numsocks);
+                         (ares_socket_t *)socks, numsocks);
 
 
   maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
@@ -134,7 +133,7 @@ static int waitperform(struct connectdata *conn, int timeout_ms)
   struct SessionHandle *data = conn->data;
   int nfds;
   int bitmask;
-  int socks[ARES_GETSOCK_MAXNUM];
+  ares_socket_t socks[ARES_GETSOCK_MAXNUM];
   struct pollfd pfd[ARES_GETSOCK_MAXNUM];
   int i;
   int num = 0;

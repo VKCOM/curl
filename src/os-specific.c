@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: os-specific.c,v 1.3 2009-12-31 13:35:24 yangtse Exp $
  ***************************************************************************/
 #include "setup.h"
 

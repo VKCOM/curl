@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: ftp.h,v 1.30 2010-01-25 23:41:02 yangtse Exp $
  ***************************************************************************/
 
 #include "pingpong.h"

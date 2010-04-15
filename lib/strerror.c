@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: strerror.c,v 1.59 2010-01-21 13:58:31 bagder Exp $
  ***************************************************************************/
 
 #include "setup.h"

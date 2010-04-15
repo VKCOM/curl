@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: multi-app.c,v 1.10 2010-01-21 09:53:30 bagder Exp $
  *
  * This is an example application source code using the multi interface.
  */

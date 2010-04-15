@@ -18,11 +18,10 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# $Id: curl-confopts.m4,v 1.10 2010-01-27 06:59:02 yangtse Exp $
 #***************************************************************************
 
 # File version for 'aclocal' use. Keep it a single number.
-# serial 9
+# serial 11
 
 
 dnl CURL_CHECK_OPTION_ARES

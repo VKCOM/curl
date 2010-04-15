@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib502.c,v 1.9 2010-02-05 18:07:19 yangtse Exp $
  */
 
 #include "test.h"
@@ -63,7 +62,7 @@ int test(char *URL)
 
   while (running) {
     res = (int)curl_multi_perform(m, &running);
-    if (tutil_tvdiff(tutil_tvnow(), mp_start) > 
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
         MULTI_PERFORM_HANG_TIMEOUT) {
       mp_timedout = TRUE;
       break;

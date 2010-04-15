@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: hash.c,v 1.42 2009-11-11 09:31:37 bagder Exp $
  ***************************************************************************/
 
 #include "setup.h"

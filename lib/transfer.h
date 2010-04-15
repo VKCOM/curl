@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: transfer.h,v 1.34 2009-08-21 12:01:36 bagder Exp $
  ***************************************************************************/
 CURLcode Curl_perform(struct SessionHandle *data);
 CURLcode Curl_pretransfer(struct SessionHandle *data);
@@ -61,4 +60,8 @@ Curl_setup_transfer (struct connectdata *data,
                                            -1 disables */
                curl_off_t *writecountp /* return number of bytes written */
 );
+
+long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
+                     int pkt_size);
+
 #endif

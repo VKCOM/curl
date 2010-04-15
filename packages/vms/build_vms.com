@@ -1,5 +1,4 @@
-$! $Id: build_vms.com,v 1.11 2009-12-31 13:35:24 yangtse Exp $
-$! BUILD_VMS.COM 
+$! BUILD_VMS.COM
 $!
 $! I've taken the original build_vms.com, supplied by Nico Baggus, if
 $! memory serves me correctly, and made some modifications.
@@ -45,11 +44,11 @@ $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and
 $!                   src directories as curl_config.h.
-$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to 
-$!                   this build directory.  They will be copied to the src 
-$!                   directory before build.  The .msg file will be compiled 
-$!                   to get the .obj for messages, but the .h and .sdl files 
-$!                   are not automatically created since they partly rely on 
+$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to
+$!                   this build directory.  They will be copied to the src
+$!                   directory before build.  The .msg file will be compiled
+$!                   to get the .obj for messages, but the .h and .sdl files
+$!                   are not automatically created since they partly rely on
 $!                   the freeware SDL tool.
 $!  8-FEB-2005, MSK, merged the two config-vms.h* files into one that uses
 $!                   USE_SSLEAY to define if the target has SSL support built
@@ -95,7 +94,7 @@ $ orig_def = f$environment( "DEFAULT")
 $ on error then goto Common_Exit
 $ on control_y then goto Common_Exit
 $!
-$ ctrl_y  = 1556 
+$ ctrl_y  = 1556
 $ proc = f$environment( "PROCEDURE")
 $ proc_dev_dir = -
    f$parse( proc, , , "DEVICE")+ f$parse( proc, , , "DIRECTORY")
@@ -137,6 +136,7 @@ $! Interpret command-line options.
 $!
 $ hpssl = 0
 $ ldap = 0
+$ list = 0
 $ nohpssl = 0
 $ nossl = 0
 $ openssl = 0
@@ -150,6 +150,7 @@ $    CURL_CCDEFS = f$edit( CURL_CCDEFS, "TRIM")
 $    cc_defs = cc_defs+ ", "+ CURL_CCDEFS
 $ endif
 $ link_qual = ""
+$ msg_qual = "/object = ''objdir'"
 $ ssl_opt = ""
 $!
 $ arg = 1
@@ -187,7 +188,7 @@ $    endif
 $!
 $    if (arg_val .eqs. "64")
 $    then
-$       cc_qual1 = cc_qual1 + " /POINTER = 64"
+$       cc_qual1 = cc_qual1+ " /POINTER = 64"
 $       goto arg_loop_end
 $    endif
 $!
@@ -201,15 +202,14 @@ $    endif
 $!
 $    if (arg_val .eqs. "DEBUG")
 $    then
-$       cc_qual1 = cc_qual1 + -
-         " /debug /nooptimize"
-$       link_qual = link_qual+ " /debug /map = ''lisdir'"
+$       cc_qual1 = cc_qual1+ " /debug /nooptimize"
+$       link_qual = link_qual+ " /debug"
 $       goto arg_loop_end
 $    endif
 $!
 $    if (arg_val .eqs. "IEEE")
 $    then
-$       cc_qual1 = cc_qual1 + " /FLOAT = IEEE_FLOAT"
+$       cc_qual1 = cc_qual1+ " /FLOAT = IEEE_FLOAT"
 $       goto arg_loop_end
 $    endif
 $!
@@ -232,7 +232,10 @@ $    endif
 $!
 $    if (f$extract( 0, 4, arg_val) .eqs. "LIST")
 $    then
-$       cc_qual1 = cc_qual1 + " /list = ''lisdir' /show = (all, nomessages)"
+$       list = 1
+$       cc_qual1 = cc_qual1+ " /list = ''lisdir' /show = (all, nomessages)"
+$       link_qual = link_qual+ " /map = ''lisdir'"
+$       msg_qual = msg_qual+ " /list = ''lisdir'"
 $       goto arg_loop_end
 $    endif
 $!
@@ -262,6 +265,16 @@ $ arg = arg+ 1
 $ goto arg_loop
 $arg_loop_out:
 $!
+$! CC /LIST, LINK /MAP, and MESSAGE /LIST are defaults in batch mode,
+$! so be explicit when they're not desired.
+$!
+$ if (list .eq. 0)
+$ then
+$    cc_qual1 = cc_qual1+ " /nolist"
+$    link_qual = link_qual+ " /nomap"
+$    msg_qual = msg_qual+ " /nolist"
+$ endif
+$!
 $! Create product directory, if needed.
 $!
 $ if (f$search( proc_dev_dir+ arch_name+ ".DIR;1") .eqs. "")
@@ -281,7 +294,7 @@ $       then
 $!         Use HP SSL.
 $          hpssl = 1
 $          ssl_opt = ", ''proc_dev_dir'hpssl_"+ -
-            f$getsyi("ARCH_NAME") + ".opt /options"
+            f$getsyi("ARCH_NAME")+ ".opt /options"
 $       else
 $!         Use OpenSSL.  Assume object libraries, unless shared images
 $!         are found (and not prohibited).
@@ -296,7 +309,7 @@ $             then
 $!               OpenSSL shared images with "SSL_xxx.EXE names.
 $                openssl = 2
 $                ssl_opt = ", ''proc_dev_dir'openssl_ssl_"+ -
-                  f$getsyi("ARCH_NAME") + ".opt /options"
+                  f$getsyi("ARCH_NAME")+ ".opt /options"
 $             else
 $                if ((f$search( "ssllib:libcrypto.exe") .nes. "") .and. -
                   (f$search( "ssllib:libssl.exe") .nes. ""))
@@ -304,7 +317,7 @@ $                then
 $!                  OpenSSL shared images with "xxx.EXE names.
 $                   openssl = 3
 $                   ssl_opt = ", ''proc_dev_dir'openssl_"+ -
-                     f$getsyi("ARCH_NAME") + ".opt /options"
+                     f$getsyi("ARCH_NAME")+ ".opt /options"
 $                endif
 $             endif
 $          endif
@@ -330,8 +343,6 @@ $ 'vo_c' "CC opts:", -
   " ''cc_defs'", -
   " ''cc_qual1'", -
   " ''cc_qual2'"
-$!
-$ msg_qual = "/object = ''objdir'"
 $!
 $! Inform the victim of our plans.
 $!
@@ -455,8 +466,8 @@ $ link 'link_qual' /executable = 'exedir'CURL.EXE -
 $!
 $ goto Common_Exit
 $!
-$! Subroutine to build everything with a filetype passed in via P2 in 
-$! the directory passed in via P1 and put it in the object library named 
+$! Subroutine to build everything with a filetype passed in via P2 in
+$! the directory passed in via P1 and put it in the object library named
 $! via P3.  Exclude items in P4.
 $!
 $build:   subroutine
@@ -521,7 +532,7 @@ $    set default 'build_def'
 $    exit 'sts'
 $ endsubroutine   ! Build
 $!
-$! Based on the file TYPE, do the right compile command.  
+$! Based on the file TYPE, do the right compile command.
 $! Only C and MSG supported.
 $!
 $compile:   subroutine

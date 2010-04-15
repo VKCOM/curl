@@ -21,7 +21,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: http.h,v 1.43 2010-01-21 13:58:30 bagder Exp $
  ***************************************************************************/
 #ifndef CURL_DISABLE_HTTP
 

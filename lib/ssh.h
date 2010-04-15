@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: ssh.h,v 1.20 2009-12-12 22:17:51 bagder Exp $
  ***************************************************************************/
 
 #include "setup.h"

@@ -5,7 +5,6 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * $Id: lib552.c,v 1.9 2010-02-05 18:07:20 yangtse Exp $
  *
  * argv1 = URL
  * argv2 = proxy with embedded user+password

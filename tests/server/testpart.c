@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: testpart.c,v 1.3 2010-02-02 12:39:10 yangtse Exp $
  ***************************************************************************/
 
 #define CURL_NO_OLDIES
@@ -35,15 +34,20 @@
 
 int main(int argc, char **argv)
 {
+  int rc;
+  char  *part;
+  size_t partlen, i;
+
   if(argc< 3) {
     printf("./testpart main sub\n");
   }
   else {
-    size_t size;
-    unsigned int i;
-    const char *buffer = spitout(stdin, argv[1], argv[2], &size);
-    for(i=0; i< size; i++)
-      printf("%c", buffer[i]);
+    rc = getpart(&part, &partlen, argv[1], argv[2], stdin);
+    if(rc)
+      return(rc);
+    for(i = 0; i < partlen; i++)
+      printf("%c", part[i]);
+    free(part);
   }
   return 0;
 }

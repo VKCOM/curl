@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: connect.h,v 1.28 2009-07-09 21:47:24 bagder Exp $
  ***************************************************************************/
 
 #include "nonblock.h" /* for curlx_nonblock(), formerly Curl_nonblock() */

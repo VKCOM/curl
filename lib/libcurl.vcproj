@@ -181,6 +181,7 @@
 <File RelativePath="transfer.c"></File>
 <File RelativePath="url.c"></File>
 <File RelativePath="version.c"></File>
+<File RelativePath="warnless.c"></File>
 </Filter><Filter	Name="Header Files">
 <File RelativePath="arpa_telnet.h"></File>
 <File RelativePath="config-win32.h"></File>
@@ -255,6 +256,7 @@
 <File RelativePath="transfer.h"></File>
 <File RelativePath="urldata.h"></File>
 <File RelativePath="url.h"></File>
+<File RelativePath="warnless.h"></File>
 
 		</Filter>
 		<Filter

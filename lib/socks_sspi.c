@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id: socks_sspi.c,v 1.8 2010-01-23 17:31:54 yangtse Exp $
  ***************************************************************************/
 
 

@@ -1,7 +1,6 @@
 #ifndef HEADER_CONFIG_VMS_H
 #define HEADER_CONFIG_VMS_H
 
-/* $Id: config-vms.h,v 1.29 2010-01-28 10:56:43 yangtse Exp $ */
 /*                                                                         */
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
@@ -30,11 +29,17 @@
 /* Define if you can safely include both <sys/time.h> and <time.h>.  */
 #define TIME_WITH_SYS_TIME 1
 
-/* The number of bytes in a long double.  */
+/* The size of `int', as computed by sizeof. */
+#define SIZEOF_INT 4
+
+/* The size of `long double', as computed by sizeof. */
 #define SIZEOF_LONG_DOUBLE 8
 
-/* The number of bytes in a long long.  */
+/* The size of `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
+
+/* The size of `short', as computed by sizeof. */
+#define SIZEOF_SHORT 2
 
 /* Define if you have the alarm function.  */
 #define HAVE_ALARM 1
@@ -205,7 +210,7 @@
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <termios.h> header file.  */
-#undef HAVE_TERMIOS_H 
+#undef HAVE_TERMIOS_H
 
 /* Define if you have the <time.h> header file.  */
 #define HAVE_TIME_H 1
