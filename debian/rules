@@ -73,7 +73,7 @@ configure-stamp:
 	tar -cf - --exclude=debian --exclude=.pc . | tar -xf - -C debian/build-gnutls
 
 	for flavour in build build-gnutls; do \
-		(cd debian/$$flavour && libtoolize --automake --copy --force && aclocal-1.9 -I m4 && automake-1.9 && autoconf) \
+		(cd debian/$$flavour && ./buildconf) \
 	done
 
 	cd debian/build && ./configure ${CONFIGURE_ARGS} --with-ca-path=/etc/ssl/certs

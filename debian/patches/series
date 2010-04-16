@@ -1,4 +1,4 @@
-libtool
+#libtool
 no_com_err
 runtests_gdb
 art_http_scripting
