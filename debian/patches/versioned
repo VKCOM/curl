@@ -95,6 +95,6 @@ Index: curl/lib/libcurl.vers.in
 +
 +CURL_@VERSIONED_FLAVOUR@3
 +{
-+	global: curl_*;
++	global: curl_*; Curl_*;
 +	local: *;
 +};
