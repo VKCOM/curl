@@ -1,3 +1,11 @@
+curl (7.20.1-2) unstable; urgency=low
+
+  * debian/rules: Removed the custom LDFLAGS variable. This is not
+    required as we are no longer using the libtool patch.
+    (closes: #578774)
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Wed, 28 Apr 2010 18:40:27 +0530
+
 curl (7.20.1-1) unstable; urgency=low
 
   * New upstream release.
