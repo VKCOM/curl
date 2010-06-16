@@ -46,19 +46,20 @@ noinst_PROGRAMS = lib500$(EXEEXT) lib501$(EXEEXT) lib502$(EXEEXT) \
 	lib516$(EXEEXT) lib517$(EXEEXT) lib518$(EXEEXT) \
 	lib519$(EXEEXT) lib520$(EXEEXT) lib521$(EXEEXT) \
 	lib523$(EXEEXT) lib524$(EXEEXT) lib525$(EXEEXT) \
-	lib526$(EXEEXT) lib527$(EXEEXT) lib529$(EXEEXT) \
-	lib530$(EXEEXT) lib532$(EXEEXT) lib533$(EXEEXT) \
-	lib536$(EXEEXT) lib537$(EXEEXT) lib540$(EXEEXT) \
-	lib541$(EXEEXT) lib542$(EXEEXT) lib543$(EXEEXT) \
-	lib544$(EXEEXT) lib545$(EXEEXT) lib547$(EXEEXT) \
-	lib548$(EXEEXT) lib549$(EXEEXT) lib552$(EXEEXT) \
-	lib553$(EXEEXT) lib554$(EXEEXT) lib555$(EXEEXT) \
-	lib556$(EXEEXT) lib539$(EXEEXT) lib557$(EXEEXT) \
-	lib558$(EXEEXT) lib559$(EXEEXT) lib560$(EXEEXT) \
-	lib562$(EXEEXT) lib564$(EXEEXT) lib565$(EXEEXT) \
-	lib566$(EXEEXT) lib567$(EXEEXT) lib568$(EXEEXT) \
-	lib569$(EXEEXT) lib570$(EXEEXT) lib571$(EXEEXT) \
-	lib572$(EXEEXT)
+	lib526$(EXEEXT) lib527$(EXEEXT) lib574$(EXEEXT) \
+	lib575$(EXEEXT) lib576$(EXEEXT) lib577$(EXEEXT) \
+	lib529$(EXEEXT) lib530$(EXEEXT) lib532$(EXEEXT) \
+	lib533$(EXEEXT) lib536$(EXEEXT) lib537$(EXEEXT) \
+	lib540$(EXEEXT) lib541$(EXEEXT) lib542$(EXEEXT) \
+	lib543$(EXEEXT) lib544$(EXEEXT) lib545$(EXEEXT) \
+	lib547$(EXEEXT) lib548$(EXEEXT) lib549$(EXEEXT) \
+	lib552$(EXEEXT) lib553$(EXEEXT) lib554$(EXEEXT) \
+	lib555$(EXEEXT) lib556$(EXEEXT) lib539$(EXEEXT) \
+	lib557$(EXEEXT) lib558$(EXEEXT) lib559$(EXEEXT) \
+	lib560$(EXEEXT) lib562$(EXEEXT) lib564$(EXEEXT) \
+	lib565$(EXEEXT) lib566$(EXEEXT) lib567$(EXEEXT) \
+	lib568$(EXEEXT) lib569$(EXEEXT) lib570$(EXEEXT) \
+	lib571$(EXEEXT) lib572$(EXEEXT) lib573$(EXEEXT)
 subdir = tests/libtest
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -344,6 +345,26 @@ am_lib572_OBJECTS = lib572.$(OBJEXT) $(am__objects_1)
 lib572_OBJECTS = $(am_lib572_OBJECTS)
 lib572_LDADD = $(LDADD)
 lib572_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib573_OBJECTS = lib573.$(OBJEXT) $(am__objects_1) $(am__objects_2)
+lib573_OBJECTS = $(am_lib573_OBJECTS)
+lib573_LDADD = $(LDADD)
+lib573_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib574_OBJECTS = lib574.$(OBJEXT) $(am__objects_1)
+lib574_OBJECTS = $(am_lib574_OBJECTS)
+lib574_LDADD = $(LDADD)
+lib574_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib575_OBJECTS = lib575.$(OBJEXT) $(am__objects_1)
+lib575_OBJECTS = $(am_lib575_OBJECTS)
+lib575_LDADD = $(LDADD)
+lib575_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib576_OBJECTS = lib576.$(OBJEXT) $(am__objects_1)
+lib576_OBJECTS = $(am_lib576_OBJECTS)
+lib576_LDADD = $(LDADD)
+lib576_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib577_OBJECTS = lib577.$(OBJEXT) $(am__objects_1)
+lib577_OBJECTS = $(am_lib577_OBJECTS)
+lib577_LDADD = $(LDADD)
+lib577_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -375,7 +396,8 @@ SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib562_SOURCES) $(lib564_SOURCES) $(lib565_SOURCES) \
 	$(lib566_SOURCES) $(lib567_SOURCES) $(lib568_SOURCES) \
 	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES) \
-	$(lib572_SOURCES)
+	$(lib572_SOURCES) $(lib573_SOURCES) $(lib574_SOURCES) \
+	$(lib575_SOURCES) $(lib576_SOURCES) $(lib577_SOURCES)
 DIST_SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib503_SOURCES) $(lib504_SOURCES) $(lib505_SOURCES) \
 	$(lib506_SOURCES) $(lib507_SOURCES) $(lib508_SOURCES) \
@@ -396,7 +418,8 @@ DIST_SOURCES = $(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib562_SOURCES) $(lib564_SOURCES) $(lib565_SOURCES) \
 	$(lib566_SOURCES) $(lib567_SOURCES) $(lib568_SOURCES) \
 	$(lib569_SOURCES) $(lib570_SOURCES) $(lib571_SOURCES) \
-	$(lib572_SOURCES)
+	$(lib572_SOURCES) $(lib573_SOURCES) $(lib574_SOURCES) \
+	$(lib575_SOURCES) $(lib576_SOURCES) $(lib577_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -448,6 +471,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
+HAVE_LDAP_SSL = @HAVE_LDAP_SSL@
 HAVE_LIBZ = @HAVE_LIBZ@
 HAVE_LIBZ_FALSE = @HAVE_LIBZ_FALSE@
 HAVE_LIBZ_TRUE = @HAVE_LIBZ_TRUE@
@@ -517,10 +541,13 @@ USE_ARES = @USE_ARES@
 USE_EMBEDDED_ARES_FALSE = @USE_EMBEDDED_ARES_FALSE@
 USE_EMBEDDED_ARES_TRUE = @USE_EMBEDDED_ARES_TRUE@
 USE_GNUTLS = @USE_GNUTLS@
+USE_LIBRTMP = @USE_LIBRTMP@
 USE_LIBSSH2 = @USE_LIBSSH2@
 USE_MANUAL_FALSE = @USE_MANUAL_FALSE@
 USE_MANUAL_TRUE = @USE_MANUAL_TRUE@
 USE_NSS = @USE_NSS@
+USE_OPENLDAP = @USE_OPENLDAP@
+USE_POLARSSL = @USE_POLARSSL@
 USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
@@ -695,6 +722,10 @@ lib558_CFLAGS = -DLIB558
 lib559_SOURCES = lib558.c $(SUPPORTFILES)
 lib559_CFLAGS = -DLIB559
 lib560_SOURCES = lib560.c $(SUPPORTFILES)
+lib574_SOURCES = lib574.c $(SUPPORTFILES)
+lib575_SOURCES = lib575.c $(SUPPORTFILES)
+lib576_SOURCES = lib576.c $(SUPPORTFILES)
+lib577_SOURCES = lib577.c $(SUPPORTFILES)
 lib562_SOURCES = lib562.c $(SUPPORTFILES)
 lib564_SOURCES = lib564.c $(SUPPORTFILES) $(TESTUTIL)
 lib565_SOURCES = lib510.c $(SUPPORTFILES)
@@ -706,6 +737,7 @@ lib569_SOURCES = lib569.c $(SUPPORTFILES)
 lib570_SOURCES = lib570.c $(SUPPORTFILES)
 lib571_SOURCES = lib571.c $(SUPPORTFILES)
 lib572_SOURCES = lib572.c $(SUPPORTFILES)
+lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL)
 all: all-am
 
 .SUFFIXES:
@@ -929,6 +961,21 @@ lib571$(EXEEXT): $(lib571_OBJECTS) $(lib571_DEPENDENCIES)
 lib572$(EXEEXT): $(lib572_OBJECTS) $(lib572_DEPENDENCIES) 
 	@rm -f lib572$(EXEEXT)
 	$(LINK) $(lib572_LDFLAGS) $(lib572_OBJECTS) $(lib572_LDADD) $(LIBS)
+lib573$(EXEEXT): $(lib573_OBJECTS) $(lib573_DEPENDENCIES) 
+	@rm -f lib573$(EXEEXT)
+	$(LINK) $(lib573_LDFLAGS) $(lib573_OBJECTS) $(lib573_LDADD) $(LIBS)
+lib574$(EXEEXT): $(lib574_OBJECTS) $(lib574_DEPENDENCIES) 
+	@rm -f lib574$(EXEEXT)
+	$(LINK) $(lib574_LDFLAGS) $(lib574_OBJECTS) $(lib574_LDADD) $(LIBS)
+lib575$(EXEEXT): $(lib575_OBJECTS) $(lib575_DEPENDENCIES) 
+	@rm -f lib575$(EXEEXT)
+	$(LINK) $(lib575_LDFLAGS) $(lib575_OBJECTS) $(lib575_LDADD) $(LIBS)
+lib576$(EXEEXT): $(lib576_OBJECTS) $(lib576_DEPENDENCIES) 
+	@rm -f lib576$(EXEEXT)
+	$(LINK) $(lib576_LDFLAGS) $(lib576_OBJECTS) $(lib576_LDADD) $(LIBS)
+lib577$(EXEEXT): $(lib577_OBJECTS) $(lib577_DEPENDENCIES) 
+	@rm -f lib577$(EXEEXT)
+	$(LINK) $(lib577_LDFLAGS) $(lib577_OBJECTS) $(lib577_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1013,6 +1060,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib570.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib571.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib572.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib573.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib574.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib575.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib576.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib577.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testutil.Po@am__quote@
 
 .c.o:

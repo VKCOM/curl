@@ -121,13 +121,13 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-ssl / --with-gnutls / --with-nss)"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
-   curl_ares_msg="no      (--enable-ares)"
+    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
@@ -136,6 +136,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
+   curl_rtmp_msg="no      (--with-librtmp)"
 
 dnl
 dnl Save anything in $LIBS for later
@@ -370,28 +371,10 @@ AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
        AC_SUBST(CURL_DISABLE_LDAP, [1])
        ;;
   *)
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-           AC_SUBST(CURL_DISABLE_LDAP, [1])
-           AC_MSG_RESULT(no)
-           ;;
-         *)
-           AC_MSG_RESULT(yes)
-       esac
+       AC_MSG_RESULT(yes)
        ;;
   esac ],[
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-           AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-           AC_SUBST(CURL_DISABLE_LDAP, [1])
-           AC_MSG_RESULT(no)
-           ;;
-         *)
-           AC_MSG_RESULT(yes)
-       esac ]
+       AC_MSG_RESULT(yes) ]
 )
 AC_MSG_CHECKING([whether to support ldaps])
 AC_ARG_ENABLE(ldaps,
@@ -403,20 +386,28 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
        AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
        AC_SUBST(CURL_DISABLE_LDAPS, [1])
        ;;
-  *)   if test x$CURL_DISABLE_LDAP = x1 ; then
-               AC_MSG_RESULT(LDAP support needs to be enabled in order to enable LDAPS support!)
-               AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-               AC_SUBST(CURL_DISABLE_LDAPS, [1])
+  *)   if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         AC_MSG_RESULT(LDAP needs to be enabled to support LDAPS)
+         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+         AC_SUBST(CURL_DISABLE_LDAPS, [1])
        else
-               AC_MSG_RESULT(yes)
-               AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
-               curl_ldaps_msg="enabled"
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+         AC_SUBST(HAVE_LDAP_SSL, [1])
+         curl_ldaps_msg="enabled"
        fi
        ;;
-  esac ],
-       AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-       AC_SUBST(CURL_DISABLE_LDAPS, [1])
+  esac ],[
+       if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         AC_MSG_RESULT(no)
+         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
+         AC_SUBST(CURL_DISABLE_LDAPS, [1])
+       else
+         AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
+         AC_SUBST(HAVE_LDAP_SSL, [1])
+         curl_ldaps_msg="enabled"
+       fi ]
 )
 
 AC_MSG_CHECKING([whether to support rtsp])
@@ -801,13 +792,11 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   CURL_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME" ; then
-    case $host in
-      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
-        dnl Windows uses a single and unique OpenLDAP DLL name
-        LDAPLIBNAME="wldap32"
-        LBERLIBNAME="no"
-        ;;
-    esac
+    if test "$ac_cv_native_windows" = "yes"; then
+      dnl Windows uses a single and unique LDAP library name
+      LDAPLIBNAME="wldap32"
+      LBERLIBNAME="no"
+    fi
   fi
 
   if test "$LDAPLIBNAME" ; then
@@ -849,18 +838,17 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
-  AC_CHECK_FUNCS([ldap_url_parse])
+  AC_CHECK_FUNCS([ldap_url_parse ldap_init_fd])
 
   if test "$LDAPLIBNAME" = "wldap32"; then
     curl_ldap_msg="enabled (winldap)"
-    AC_DEFINE(CURL_LDAP_WIN, 1, [Use W$ LDAP implementation])
-    case $host in
-      *-*-cygwin* | *-*-pw32*)
-        AC_DEFINE(CURL_LDAP_HYBRID, 1, [W$ LDAP with non-W$ compiler])
-        ;;
-    esac
+    AC_DEFINE(CURL_LDAP_WIN, 1, [Use Windows LDAP implementation])
   else
     curl_ldap_msg="enabled (OpenLDAP)"
+    if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
+      AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
+      AC_SUBST(USE_OPENLDAP, [1])
+    fi
   fi
 fi
 
@@ -1137,10 +1125,17 @@ if test x"$want_gss" = xyes; then
     ],
     [
       dnl not found, check Heimdal or MIT
+      AC_CHECK_HEADERS([gssapi/gssapi.h], [], [not_mit=1])
       AC_CHECK_HEADERS(
-        [gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
+        [gssapi/gssapi_generic.h gssapi/gssapi_krb5.h],
         [],
-        [not_mit=1])
+        [not_mit=1],
+        [
+AC_INCLUDES_DEFAULT
+#ifdef HAVE_GSSAPI_GSSAPI_H
+#include <gssapi/gssapi.h>
+#endif
+        ])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found, check for Heimdal
         AC_CHECK_HEADER(gssapi.h,
@@ -1700,6 +1695,90 @@ if test "$OPENSSL_ENABLED" != "1"; then
 fi dnl OPENSSL != 1
 
 dnl ----------------------------------------------------
+dnl check for PolarSSL
+dnl ----------------------------------------------------
+
+dnl Default to compiler & linker defaults for PolarSSL files & libraries.
+OPT_POLARSSL=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+AC_ARG_WITH(polarssl,dnl
+AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
+  OPT_POLARSSL=$withval)
+
+if test "$OPENSSL_ENABLED" != "1"; then
+
+  if test X"$OPT_POLARSSL" != Xno; then
+
+    if test "$OPT_POLARSSL" = "yes"; then
+      OPT_POLARSSL=""
+    fi
+
+    if test -z "$OPT_POLARSSL" ; then
+      dnl check for lib first without setting any new path
+
+      AC_CHECK_LIB(polarssl, havege_init,
+      dnl libpolarssl found, set the variable
+       [
+         AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
+         AC_SUBST(USE_POLARSSL, [1])
+         POLARSSL_ENABLED=1
+         USE_POLARSSL="yes"
+         curl_ssl_msg="enabled (PolarSSL)"
+        ])
+    fi
+
+    if test "x$USE_POLARSSL" != "xyes"; then
+      dnl add the path and test again
+      addld=-L$OPT_POLARSSL/lib$libsuff
+      addcflags=-I$OPT_POLARSSL/include
+      polarssllib=$OPT_POLARSSL/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      AC_CHECK_LIB(polarssl, ssl_init,
+       [
+       AC_DEFINE(USE_POLARSSL, 1, [if PolarSSL is enabled])
+       AC_SUBST(USE_POLARSSL, [1])
+       POLARSSL_ENABLED=1
+       USE_POLARSSL="yes"
+       curl_ssl_msg="enabled (PolarSSL)"
+       ],
+       [
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+       ])
+    fi
+
+    if test "x$USE_POLARSSL" = "xyes"; then
+      AC_MSG_NOTICE([detected PolarSSL])
+
+      CURL_LIBS="$CURL_LIBS -lpolarssl"
+      LIBS="$LIBS -lpolarssl"
+
+      if test -n "$polarssllib"; then
+        dnl when shared libs were found in a path that the run-time
+        dnl linker doesn't search through, we need to add it to
+        dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+        dnl due to this
+
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
+        export LD_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $polarssllib to LD_LIBRARY_PATH])
+      fi
+
+    fi
+
+  fi dnl PolarSSL not disabled
+
+fi dnl OPENSSL != 1
+
+dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
 dnl ----------------------------------------------------
 
@@ -1795,9 +1874,9 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls or --with-nss to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
@@ -1882,7 +1961,8 @@ if test X"$OPT_LIBSSH2" != Xno; then
        dnl to prevent further configure tests to fail due to this
 
        dnl libssh2_version is a post 1.0 addition
-       AC_CHECK_FUNCS( libssh2_version )
+       dnl libssh2_init and libssh2_exit were added in 1.2.5
+       AC_CHECK_FUNCS( libssh2_version libssh2_init libssh2_exit)
 
        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
        export LD_LIBRARY_PATH
@@ -1890,6 +1970,79 @@ if test X"$OPT_LIBSSH2" != Xno; then
     fi
   else
     dnl no libssh2, revert back to clean variables
+    LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
+
+dnl **********************************************************************
+dnl Check for the presence of LIBRTMP libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for LIBRTMP files & libraries.
+OPT_LIBRTMP=off
+AC_ARG_WITH(librtmp,dnl
+AC_HELP_STRING([--with-librtmp=PATH],[Where to look for librtmp, PATH points to the LIBRTMP installation (default: /usr/local/lib); when possible, set the PKG_CONFIG_PATH environment variable instead of using this option])
+AC_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
+  OPT_LIBRTMP=$withval)
+
+if test X"$OPT_LIBRTMP" != Xno; then
+  dnl backup the pre-librtmp variables
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBRTMP" in
+  yes)
+    dnl --with-librtmp (without path) used
+    CURL_CHECK_PKGCONFIG(librtmp)
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
+      LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
+      CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
+      version=`$PKGCONFIG --modversion librtmp`
+      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+    dnl no --with-librtmp option given, just check default places
+    ;;
+  *)
+    dnl use the given --with-librtmp spot
+    PREFIX_RTMP=$OPT_LIBRTMP
+    ;;
+  esac
+
+  dnl if given with a prefix, we set -L and -I based on that
+  if test -n "$PREFIX_RTMP"; then
+    LD_RTMP=-L${PREFIX_RTMP}/lib$libsuff
+    CPP_RTMP=-I${PREFIX_RTMP}/include
+    DIR_RTMP=${PREFIX_RTMP}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_RTMP"
+  CPPFLAGS="$CPPFLAGS $CPP_RTMP"
+  LIBS="$LIBS $LIB_RTMP"
+
+  AC_CHECK_LIB(rtmp, RTMP_Init)
+
+  AC_CHECK_HEADERS(librtmp/rtmp.h,
+    curl_rtmp_msg="enabled (librtmp)"
+    LIBRTMP_ENABLED=1
+    AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
+    AC_SUBST(USE_LIBRTMP, [1])
+  )
+
+  if test X"$OPT_LIBRTMP" != Xoff &&
+     test "$LIBRTMP_ENABLED" != "1"; then
+    AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
+  fi
+
+  if test "$LIBRTMP_ENABLED" != "1"; then
+    dnl no librtmp, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
@@ -2282,6 +2435,28 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 CURL_CHECK_LIB_ARES
 AM_CONDITIONAL(USE_EMBEDDED_ARES, test x$embedded_ares = xyes)
 
+CURL_CHECK_OPTION_THREADED_RESOLVER
+
+if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
+  AC_MSG_ERROR(
+[Options --enable-threaded-resolver and --enable-ares are mutually exclusive])
+fi
+
+if test "$want_thres" = "yes"; then
+  AC_CHECK_HEADER(pthread.h,
+    [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
+      save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS -pthread"
+      AC_CHECK_LIB(pthread, pthread_create,
+        [ AC_MSG_NOTICE([using POSIX threaded DNS lookup])
+          AC_DEFINE(USE_THREADS_POSIX, 1, [if you want POSIX threaded DNS lookup])
+          USE_THREADS_POSIX=1
+          curl_res_msg="threaded"
+        ],
+        [ CFLAGS="$save_CFLAGS"])
+  ])
+fi
+
 dnl ************************************************************
 dnl disable verbose text strings
 dnl
@@ -2475,7 +2650,7 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
-if test "x$USE_ARES" = "x1"; then
+if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
@@ -2511,9 +2686,12 @@ if test "x$CURL_DISABLE_TELNET" != "x1"; then
 fi
 if test "x$CURL_DISABLE_LDAP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
-fi
-if test "x$CURL_DISABLE_LDAPS" != "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+  if test "x$CURL_DISABLE_LDAPS" != "x1"; then
+    if (test "x$USE_OPENLDAP" = "x1" && test "x$SSL_ENABLED" = "x1") ||
+      (test "x$USE_OPENLDAP" != "x1"  && test "x$HAVE_LDAP_SSL" = "x1"); then
+      SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+    fi
+  fi
 fi
 if test "x$CURL_DISABLE_DICT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS DICT"
@@ -2545,6 +2723,9 @@ if test "x$USE_LIBSSH2" = "x1"; then
 fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
+fi
+if test "x$USE_LIBRTMP" = "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP"
 fi
 
 dnl replace spaces with newlines
@@ -2617,7 +2798,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
   SPNEGO support:  ${curl_spnego_msg}
-  c-ares support:  ${curl_ares_msg}
+  resolver:        ${curl_res_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
@@ -2629,6 +2810,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
   RTSP support:    ${curl_rtsp_msg}
+  RTMP support:    ${curl_rtmp_msg}
   Protocols:       ${SUPPORT_PROTOCOLS}
 ])
 

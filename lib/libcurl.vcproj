@@ -108,20 +108,25 @@
 <File RelativePath="content_encoding.c"></File>
 <File RelativePath="cookie.c"></File>
 <File RelativePath="curl_addrinfo.c"></File>
+<File RelativePath="curl_fnmatch.c"></File>
 <File RelativePath="curl_memrchr.c"></File>
 <File RelativePath="curl_rand.c"></File>
+<File RelativePath="curl_rtmp.c"></File>
 <File RelativePath="curl_sspi.c"></File>
 <File RelativePath="curl_threads.c"></File>
 <File RelativePath="dict.c"></File>
 <File RelativePath="easy.c"></File>
 <File RelativePath="escape.c"></File>
 <File RelativePath="file.c"></File>
+<File RelativePath="fileinfo.c"></File>
 <File RelativePath="formdata.c"></File>
 <File RelativePath="ftp.c"></File>
+<File RelativePath="ftplistparser.c"></File>
 <File RelativePath="getenv.c"></File>
 <File RelativePath="getinfo.c"></File>
 <File RelativePath="gtls.c"></File>
 <File RelativePath="hash.c"></File>
+<File RelativePath="hmac.c"></File>
 <File RelativePath="hostares.c"></File>
 <File RelativePath="hostasyn.c"></File>
 <File RelativePath="hostip4.c"></File>
@@ -149,8 +154,10 @@
 <File RelativePath="netrc.c"></File>
 <File RelativePath="nonblock.c"></File>
 <File RelativePath="nss.c"></File>
+<File RelativePath="openldap.c"></File>
 <File RelativePath="parsedate.c"></File>
 <File RelativePath="pingpong.c"></File>
+<File RelativePath="polarssl.c"></File>
 <File RelativePath="pop3.c"></File>
 <File RelativePath="progress.c"></File>
 <File RelativePath="qssl.c"></File>
@@ -182,6 +189,7 @@
 <File RelativePath="url.c"></File>
 <File RelativePath="version.c"></File>
 <File RelativePath="warnless.c"></File>
+<File RelativePath="wildcard.c"></File>
 </Filter><Filter	Name="Header Files">
 <File RelativePath="arpa_telnet.h"></File>
 <File RelativePath="config-win32.h"></File>
@@ -190,11 +198,14 @@
 <File RelativePath="cookie.h"></File>
 <File RelativePath="curl_addrinfo.h"></File>
 <File RelativePath="curl_base64.h"></File>
+<File RelativePath="curl_fnmatch.h"></File>
+<File RelativePath="curl_hmac.h"></File>
 <File RelativePath="curl_ldap.h"></File>
 <File RelativePath="curl_md5.h"></File>
 <File RelativePath="curl_memory.h"></File>
 <File RelativePath="curl_memrchr.h"></File>
 <File RelativePath="curl_rand.h"></File>
+<File RelativePath="curl_rtmp.h"></File>
 <File RelativePath="curl_sspi.h"></File>
 <File RelativePath="curl_threads.h"></File>
 <File RelativePath="curlx.h"></File>
@@ -202,8 +213,10 @@
 <File RelativePath="easyif.h"></File>
 <File RelativePath="escape.h"></File>
 <File RelativePath="file.h"></File>
+<File RelativePath="fileinfo.h"></File>
 <File RelativePath="formdata.h"></File>
 <File RelativePath="ftp.h"></File>
+<File RelativePath="ftplistparser.h"></File>
 <File RelativePath="getinfo.h"></File>
 <File RelativePath="gtls.h"></File>
 <File RelativePath="hash.h"></File>
@@ -226,6 +239,7 @@
 <File RelativePath="nssg.h"></File>
 <File RelativePath="parsedate.h"></File>
 <File RelativePath="pingpong.h"></File>
+<File RelativePath="polarssl.h"></File>
 <File RelativePath="pop3.h"></File>
 <File RelativePath="progress.h"></File>
 <File RelativePath="qssl.h"></File>
@@ -257,6 +271,7 @@
 <File RelativePath="urldata.h"></File>
 <File RelativePath="url.h"></File>
 <File RelativePath="warnless.h"></File>
+<File RelativePath="wildcard.h"></File>
 
 		</Filter>
 		<Filter

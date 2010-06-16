@@ -64,7 +64,33 @@ p.roffit {
 <p class="level0"><a name="CURLOPTNOSIGNAL"></a><span class="nroffip">CURLOPT_NOSIGNAL</span> 
 <p class="level1">Pass a long. If it is 1, libcurl will not use any functions that install signal handlers or any functions that cause signals to be sent to the process. This option is mainly here to allow multi-threaded unix applications to still set/use all timeout options etc, without risking getting signals. (Added in 7.10) 
 <p class="level1">If this option is set and libcurl has been built with the standard name resolver, timeouts will not occur while the name resolve takes place. Consider building libcurl with c-ares support to enable asynchronous DNS lookups, which enables nice timeouts for name resolves without signals. 
-<p class="level1"><a name="CALLBACK"></a><h2 class="nroffsh">CALLBACK OPTIONS</h2>
+<p class="level0"><a name="CURLOPTWILDCARDMATCH"></a><span class="nroffip">CURLOPT_WILDCARDMATCH</span> 
+<p class="level1">Set this option to 1 if you want to transfer multiple files according to a file name pattern. The pattern can be specified as part of the <a class="emphasis" href="#CURLOPTURL">CURLOPT_URL</a> option, using an fnmatch-like pattern (Shell Pattern Matching) in the last part of URL (file name). 
+<p class="level1">By default, libcurl uses its internal wildcard matching implementation. You can provide your own matching function by the <a class="emphasis" href="#CURLOPTFNMATCHFUNCTION">CURLOPT_FNMATCH_FUNCTION</a> option. 
+<p class="level1">This feature is only supported by the FTP download for now. 
+<p class="level1">A brief introduction of its syntax follows: 
+<p class="level2">
+<p class="level1"><a name="fBfP"></a><span class="nroffip">\fB*\fP - ASTERISK</span> 
+<p class="level2"><a href="ftp://example.com/some/path/">ftp://example.com/some/path/</a><span Class="bold">*.txt</span> (for all txt's from the root directory) 
+<p class="level1">
+<p class="level2">
+<p class="level1"><a name="fBfP"></a><span class="nroffip">\fB?\fP - QUESTION MARK</span> 
+<p class="level2">Question mark matches any (exactly one) character. 
+<p class="level2"><a href="ftp://example.com/some/path/">ftp://example.com/some/path/</a><span Class="bold">photo?.jpeg</span> 
+<p class="level1">
+<p class="level2">
+<p class="level1"><a name="fBfP"></a><span class="nroffip">\fB[\fP - BRACKET EXPRESSION</span> 
+<p class="level2">The left bracket opens a bracket expression. The question mark and asterisk have no special meaning in a bracket expression. Each bracket expression ends by the right bracket and matches exactly one character. Some examples follow: 
+<p class="level2"><span Class="bold">[a-zA-Z0-9]</span> or <span Class="bold">[f-gF-G]</span> - character interval 
+<p class="level2"><span Class="bold">[abc]</span> - character enumeration 
+<p class="level2"><span Class="bold">[^abc]</span> or <span Class="bold">[!abc]</span> - negation 
+<p class="level2"><span Class="bold">[[:</span><span Class="emphasis">name</span><span Class="bold">:]]</span> class expression. Supported classes are <span Class="bold">alnum</span>,<span Class="bold">lower</span>, <span Class="bold">space</span>, <span Class="bold">alpha</span>, <span Class="bold">digit</span>, <span Class="bold">print</span>, <span Class="bold">upper</span>, <span Class="bold">blank</span>, <span Class="bold">graph</span>, <span Class="bold">xdigit</span>. 
+<p class="level2"><span Class="bold">[][-!^]</span> - special case - matches only '-', ']', '[', '!' or '^'. These characters have no special purpose. 
+<p class="level2"><span Class="bold">[\[\]\\]</span> - escape syntax. Matches '[', ']' or '&acute;. 
+<p class="level2">Using the rules above, a file name pattern can be constructed: 
+<p class="level2"><a href="ftp://example.com/some/path/">ftp://example.com/some/path/</a><span Class="bold">[a-z[:upper:]\\].jpeg</span> 
+<p class="level1">
+<p class="level1">(This was added in 7.21.0) <a name="CALLBACK"></a><h2 class="nroffsh">CALLBACK OPTIONS</h2>
 <p class="level0">
 <p class="level0"><a name="CURLOPTWRITEFUNCTION"></a><span class="nroffip">CURLOPT_WRITEFUNCTION</span> 
 <p class="level1">Function pointer that should match the following prototype: <span class="bold">size_t function( void *ptr, size_t size, size_t nmemb, void *stream);</span> This function gets called by libcurl as soon as there is data received that needs to be saved. The size of the data pointed to by <span Class="emphasis">ptr</span> is <span Class="emphasis">size</span> multiplied with <span Class="emphasis">nmemb</span>, it will not be zero terminated. Return the number of bytes actually taken care of. If that amount differs from the amount passed to your function, it'll signal an error to the library. This will abort the transfer and return <span Class="emphasis">CURLE_WRITE_ERROR</span>. 
@@ -111,7 +137,7 @@ p.roffit {
 <p class="level0"><a name="CURLOPTOPENSOCKETDATA"></a><span class="nroffip">CURLOPT_OPENSOCKETDATA</span> 
 <p class="level1">Pass a pointer that will be untouched by libcurl and passed as the first argument in the opensocket callback set with <a class="emphasis" href="#CURLOPTOPENSOCKETFUNCTION">CURLOPT_OPENSOCKETFUNCTION</a>. (Option added in 7.17.1.) 
 <p class="level0"><a name="CURLOPTPROGRESSFUNCTION"></a><span class="nroffip">CURLOPT_PROGRESSFUNCTION</span> 
-<p class="level1">Function pointer that should match the <span Class="emphasis">curl_progress_callback</span> prototype found in <span Class="emphasis">&lt;curl/curl.h&gt;</span>. This function gets called by libcurl instead of its internal equivalent with a frequent interval during operation (roughly once per second) no matter if data is being transfered or not.  Unknown/unused argument values passed to the callback will be set to zero (like if you only download data, the upload size will remain 0). Returning a non-zero value from this callback will cause libcurl to abort the transfer and return <span Class="emphasis">CURLE_ABORTED_BY_CALLBACK</span>. 
+<p class="level1">Function pointer that should match the <span Class="emphasis">curl_progress_callback</span> prototype found in <span Class="emphasis">&lt;curl/curl.h&gt;</span>. This function gets called by libcurl instead of its internal equivalent with a frequent interval during operation (roughly once per second or sooner) no matter if data is being transfered or not. Unknown/unused argument values passed to the callback will be set to zero (like if you only download data, the upload size will remain 0). Returning a non-zero value from this callback will cause libcurl to abort the transfer and return <span Class="emphasis">CURLE_ABORTED_BY_CALLBACK</span>. 
 <p class="level1">If you transfer data with the multi interface, this function will not be called during periods of idleness unless you call the appropriate libcurl function that performs transfers. 
 <p class="level1"><a class="emphasis" href="#CURLOPTNOPROGRESS">CURLOPT_NOPROGRESS</a> must be set to 0 to make this function actually get called. 
 <p class="level0"><a name="CURLOPTPROGRESSDATA"></a><span class="nroffip">CURLOPT_PROGRESSDATA</span> 
@@ -168,7 +194,22 @@ p.roffit {
 <p class="level1">Function pointer that should match the following prototype: <span class="emphasis">size_t function( void *ptr, size_t size, size_t nmemb, void *stream)</span>. This function gets called by libcurl as soon as it has received interleaved RTP data. This function gets called for each $ block and therefore contains exactly one upper-layer protocol unit (e.g.  one RTP packet). Curl writes the interleaved header as well as the included data for each call. The first byte is always an ASCII dollar sign. The dollar sign is followed by a one byte channel identifier and then a 2 byte integer length in network byte order. See <span Class="emphasis">RFC 2326 Section 10.12</span> for more information on how RTP interleaving behaves. If unset or set to NULL, curl will use the default write function. 
 <p class="level1">Interleaved RTP poses some challeneges for the client application. Since the stream data is sharing the RTSP control connection, it is critical to service the RTP in a timely fashion. If the RTP data is not handled quickly, subsequent response processing may become unreasonably delayed and the connection may close. The application may use <a class="emphasis" href="#CURLRTSPREQRECEIVE">CURL_RTSPREQ_RECEIVE</a> to service RTP data when no requests are desired. If the application makes a request, (e.g.  <a class="emphasis" href="#CURLRTSPREQPAUSE">CURL_RTSPREQ_PAUSE</a>) then the response handler will process any pending RTP data before marking the request as finished.  (Added in 7.20.0) 
 <p class="level0"><a name="CURLOPTINTERLEAVEDATA"></a><span class="nroffip">CURLOPT_INTERLEAVEDATA</span> 
-<p class="level1">This is the stream that will be passed to <a class="emphasis" href="#CURLOPTINTERLEAVEFUNCTION">CURLOPT_INTERLEAVEFUNCTION</a> when interleaved RTP data is received. (Added in 7.20.0) <a name="ERROR"></a><h2 class="nroffsh">ERROR OPTIONS</h2>
+<p class="level1">This is the stream that will be passed to <a class="emphasis" href="#CURLOPTINTERLEAVEFUNCTION">CURLOPT_INTERLEAVEFUNCTION</a> when interleaved RTP data is received. (Added in 7.20.0) 
+<p class="level0"><a name="CURLOPTCHUNKBGNFUNCTION"></a><span class="nroffip">CURLOPT_CHUNK_BGN_FUNCTION</span> 
+<p class="level1">Function pointer that should match the following prototype: <span class="bold">long function (const void *transfer_info, void *ptr, int remains)</span>. This function gets called by libcurl before a part of the stream is going to be transferred (if the transfer supports chunks). 
+<p class="level1">This callback makes sense only when using the <a class="emphasis" href="#CURLOPTWILDCARDMATCH">CURLOPT_WILDCARDMATCH</a> option for now. 
+<p class="level1">The target of transfer_info parameter is a "feature depended" structure. For the FTP wildcard download, the target is curl_fileinfo structure (see <span Class="emphasis">curl/curl.h</span>).  The parameter ptr is a pointer given by <a class="emphasis" href="#CURLOPTCHUNKDATA">CURLOPT_CHUNK_DATA</a>. The parameter remains contains number of chunks remaining per the transfer. If the feature is not available, the parameter has zero value. 
+<p class="level1">Return <span Class="emphasis">CURL_CHUNK_BGN_FUNC_OK</span> if everything is fine, <span Class="emphasis">CURL_CHUNK_BGN_FUNC_SKIP</span> if you want to skip the concrete chunk or <span Class="emphasis">CURL_CHUNK_BGN_FUNC_FAIL</span> to tell libcurl to stop if some error occurred. (This was added in 7.21.0) 
+<p class="level0"><a name="CURLOPTCHUNKENDFUNCTION"></a><span class="nroffip">CURLOPT_CHUNK_END_FUNCTION</span> 
+<p class="level1">Function pointer that should match the following prototype: <span class="bold">long function(void *ptr)</span>. This function gets called by libcurl as soon as a part of the stream has been transferred (or skipped). 
+<p class="level1">Return <span Class="emphasis">CURL_CHUNK_END_FUNC_OK</span> if everything is fine or <span Class="bold">CURL_CHUNK_END_FUNC_FAIL</span> to tell the lib to stop if some error occurred. (This was added in 7.21.0) 
+<p class="level0"><a name="CURLOPTCHUNKDATA"></a><span class="nroffip">CURLOPT_CHUNK_DATA</span> 
+<p class="level1">Pass a pointer that will be untouched by libcurl and passed as the ptr argument to the <span Class="emphasis">CURL_CHUNK_BGN_FUNTION</span> and <span Class="emphasis">CURL_CHUNK_END_FUNTION</span>. (This was added in 7.21.0) 
+<p class="level0"><a name="CURLOPTFNMATCHFUNCTION"></a><span class="nroffip">CURLOPT_FNMATCH_FUNCTION</span> 
+<p class="level1">Function pointer that should match <span class="bold">int function(void *ptr, const char *pattern, const char *string)</span> prototype (see <span Class="emphasis">curl/curl.h</span>). It is used internally for the wildcard matching feature. 
+<p class="level1">Return <span Class="emphasis">CURL_FNMATCHFUNC_MATCH</span> if pattern matches the string, <span Class="emphasis">CURL_FNMATCHFUNC_NOMATCH</span> if not or <span Class="emphasis">CURL_FNMATCHFUNC_FAIL</span> if an error occurred.  (This was added in 7.21.0) 
+<p class="level0"><a name="CURLOPTFNMATCHDATA"></a><span class="nroffip">CURLOPT_FNMATCH_DATA</span> 
+<p class="level1">Pass a pointer that will be untouched by libcurl and passed as the ptr argument to the <span Class="emphasis">CURL_FNMATCH_FUNCTION</span>. (This was added in 7.21.0) <a name="ERROR"></a><h2 class="nroffsh">ERROR OPTIONS</h2>
 <p class="level0">
 <p class="level0"><a name="CURLOPTERRORBUFFER"></a><span class="nroffip">CURLOPT_ERRORBUFFER</span> 
 <p class="level1">Pass a char * to a buffer that the libcurl may store human readable error messages in. This may be more helpful than just the return code from <span Class="emphasis">curl_easy_perform</span>. The buffer must be at least CURL_ERROR_SIZE big. Although this argument is a 'char *', it does not describe an input string. Therefore the (probably undefined) contents of the buffer is NOT copied by the library. You should keep the associated storage available until libcurl no longer needs it. Failing to do so will cause very odd behavior or even crashes. libcurl will need it until you call <a class="emphasis" href="./curl_easy_cleanup.html">curl_easy_cleanup(3)</a> or you set the same option again to use a different pointer. 
