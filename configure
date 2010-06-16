@@ -801,11 +801,13 @@ NROFF
 PERL
 IPV6_ENABLED
 IDN_ENABLED
+USE_LIBRTMP
 USE_LIBSSH2
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_NSS
 HAVE_PK11_CREATEGENERICOBJECT
+USE_POLARSSL
 USE_GNUTLS
 RANDOM_FILE
 HAVE_LIBZ_FALSE
@@ -814,6 +816,7 @@ HAVE_LIBZ
 USE_SSLEAY
 PKGCONFIG
 KRB4_ENABLED
+USE_OPENLDAP
 CURL_DISABLE_SMTP
 CURL_DISABLE_IMAP
 CURL_DISABLE_POP3
@@ -821,6 +824,7 @@ CURL_DISABLE_TFTP
 CURL_DISABLE_TELNET
 CURL_DISABLE_DICT
 CURL_DISABLE_PROXY
+HAVE_LDAP_SSL
 CURL_DISABLE_LDAPS
 CURL_DISABLE_LDAP
 CURL_DISABLE_FILE
@@ -998,12 +1002,15 @@ with_zlib
 with_egd_socket
 with_random
 with_gnutls
+with_polarssl
 with_nss
 with_ca_bundle
 with_ca_path
 with_libssh2
+with_librtmp
 with_libidn
 enable_nonblocking
+enable_threaded_resolver
 enable_verbose
 enable_sspi
 enable_crypto_auth
@@ -1692,6 +1699,10 @@ Optional Features:
   --disable-ipv6          Disable ipv6 support
   --enable-nonblocking    Enable non-blocking communications
   --disable-nonblocking   Disable non-blocking communications
+  --enable-threaded-resolver
+                          Enable threaded resolver
+  --disable-threaded-resover
+                          Disable threaded resolver
   --enable-verbose        Enable verbose strings
   --disable-verbose       Disable verbose strings
   --enable-sspi           Enable SSPI
@@ -1735,6 +1746,9 @@ Optional Packages:
   --with-gnutls=PATH      where to look for GnuTLS, PATH points to the
                           installation root (default: /usr/local/)
   --without-gnutls        disable GnuTLS detection
+  --with-polarssl=PATH    where to look for PolarSSL, PATH points to the
+                          installation root (default: /usr/local/)
+  --without-polarssl      disable PolarSSL detection
   --with-nss=PATH         where to look for NSS, PATH points to the
                           installation root (default: /usr/local/)
   --without-nss           disable NSS detection
@@ -1748,6 +1762,11 @@ Optional Packages:
                           possible, set the PKG_CONFIG_PATH environment
                           variable instead of using this option
   --without-libssh2       disable LIBSSH2
+  --with-librtmp=PATH     Where to look for librtmp, PATH points to the
+                          LIBRTMP installation (default: /usr/local/lib); when
+                          possible, set the PKG_CONFIG_PATH environment
+                          variable instead of using this option
+  --without-librtmp       disable LIBRTMP
   --with-libidn=PATH      Enable libidn usage
   --without-libidn        Disable libidn usage
 
@@ -3671,13 +3690,13 @@ PKGADD_VENDOR="curl.haxx.se"
 
 
 
-    curl_ssl_msg="no      (--with-ssl / --with-gnutls / --with-nss)"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
  curl_spnego_msg="no      (--with-spnego)"
-   curl_ares_msg="no      (--enable-ares)"
+    curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
@@ -3686,6 +3705,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
+   curl_rtmp_msg="no      (--with-librtmp)"
 
 ALL_LIBS=$LIBS
 
@@ -7836,13 +7856,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7839: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7859: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7842: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7862: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7845: output\"" >&5)
+  (eval echo "\"\$as_me:7865: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -9044,7 +9064,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 9047 "configure"' > conftest.$ac_ext
+  echo '#line 9067 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10302,11 +10322,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10305: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10325: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10309: \$? = $ac_status" >&5
+   echo "$as_me:10329: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10641,11 +10661,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10644: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10664: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10648: \$? = $ac_status" >&5
+   echo "$as_me:10668: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10746,11 +10766,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10749: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10769: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10753: \$? = $ac_status" >&5
+   echo "$as_me:10773: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10801,11 +10821,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10804: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10824: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10808: \$? = $ac_status" >&5
+   echo "$as_me:10828: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13167,7 +13187,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13170 "configure"
+#line 13190 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13263,7 +13283,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13266 "configure"
+#line 13286 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16507,40 +16527,14 @@ $as_echo "#define CURL_DISABLE_LDAP 1" >>confdefs.h
 
        ;;
   *)
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-
-$as_echo "#define CURL_DISABLE_LDAP 1" >>confdefs.h
-
-           CURL_DISABLE_LDAP=1
-
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-           ;;
-         *)
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-       esac
        ;;
   esac
 else
 
-       case $host in
-         *-*-cygwin*)
-           # Force no ldap. config/build process is broken for cygwin
-
-$as_echo "#define CURL_DISABLE_LDAP 1" >>confdefs.h
-
-           CURL_DISABLE_LDAP=1
-
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-           ;;
-         *)
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-       esac
 
 fi
 
@@ -16558,32 +16552,46 @@ $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
        CURL_DISABLE_LDAPS=1
 
        ;;
-  *)   if test x$CURL_DISABLE_LDAP = x1 ; then
-               { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDAP support needs to be enabled in order to enable LDAPS support!" >&5
-$as_echo "LDAP support needs to be enabled in order to enable LDAPS support!" >&6; }
+  *)   if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: LDAP needs to be enabled to support LDAPS" >&5
+$as_echo "LDAP needs to be enabled to support LDAPS" >&6; }
 
 $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
 
-               CURL_DISABLE_LDAPS=1
+         CURL_DISABLE_LDAPS=1
 
        else
-               { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_LDAP_SSL 1" >>confdefs.h
 
-               curl_ldaps_msg="enabled"
+         HAVE_LDAP_SSL=1
+
+         curl_ldaps_msg="enabled"
        fi
        ;;
   esac
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+
+       if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 
 $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
 
-       CURL_DISABLE_LDAPS=1
+         CURL_DISABLE_LDAPS=1
 
+       else
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define HAVE_LDAP_SSL 1" >>confdefs.h
+
+         HAVE_LDAP_SSL=1
+
+         curl_ldaps_msg="enabled"
+       fi
 
 fi
 
@@ -18178,12 +18186,10 @@ _ACEOF
 
 
   if test -z "$LDAPLIBNAME" ; then
-    case $host in
-      *-*-cygwin* | *-*-mingw* | *-*-pw32*)
-                LDAPLIBNAME="wldap32"
-        LBERLIBNAME="no"
-        ;;
-    esac
+    if test "$ac_cv_native_windows" = "yes"; then
+            LDAPLIBNAME="wldap32"
+      LBERLIBNAME="no"
+    fi
   fi
 
   if test "$LDAPLIBNAME" ; then
@@ -18433,12 +18439,14 @@ $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
 fi
 
 if test x$CURL_DISABLE_LDAP != x1 ; then
-  for ac_func in ldap_url_parse
+  for ac_func in ldap_url_parse ldap_init_fd
 do :
-  ac_fn_c_check_func "$LINENO" "ldap_url_parse" "ac_cv_func_ldap_url_parse"
-if test "x$ac_cv_func_ldap_url_parse" = x""yes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+eval as_val=\$$as_ac_var
+   if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_LDAP_URL_PARSE 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi
@@ -18450,15 +18458,15 @@ done
 
 $as_echo "#define CURL_LDAP_WIN 1" >>confdefs.h
 
-    case $host in
-      *-*-cygwin* | *-*-pw32*)
-
-$as_echo "#define CURL_LDAP_HYBRID 1" >>confdefs.h
-
-        ;;
-    esac
   else
     curl_ldap_msg="enabled (OpenLDAP)"
+    if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
+
+$as_echo "#define USE_OPENLDAP 1" >>confdefs.h
+
+      USE_OPENLDAP=1
+
+    fi
   fi
 fi
 
@@ -18963,10 +18971,30 @@ $as_echo "#define HAVE_GSSGNU 1" >>confdefs.h
 
 else
 
-            for ac_header in gssapi/gssapi.h gssapi/gssapi_generic.h gssapi/gssapi_krb5.h
+            for ac_header in gssapi/gssapi.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "gssapi/gssapi.h" "ac_cv_header_gssapi_gssapi_h" "$ac_includes_default"
+if test "x$ac_cv_header_gssapi_gssapi_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_GSSAPI_GSSAPI_H 1
+_ACEOF
+
+else
+  not_mit=1
+fi
+
+done
+
+      for ac_header in gssapi/gssapi_generic.h gssapi/gssapi_krb5.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "
+$ac_includes_default
+#ifdef HAVE_GSSAPI_GSSAPI_H
+#include <gssapi/gssapi.h>
+#endif
+
+"
 eval as_val=\$$as_ac_Header
    if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
@@ -20169,6 +20197,158 @@ $as_echo "$as_me: Added $gtlslib to LD_LIBRARY_PATH" >&6;}
   fi
 fi
 
+OPT_POLARSSL=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+
+# Check whether --with-polarssl was given.
+if test "${with_polarssl+set}" = set; then :
+  withval=$with_polarssl; OPT_POLARSSL=$withval
+fi
+
+
+if test "$OPENSSL_ENABLED" != "1"; then
+
+  if test X"$OPT_POLARSSL" != Xno; then
+
+    if test "$OPT_POLARSSL" = "yes"; then
+      OPT_POLARSSL=""
+    fi
+
+    if test -z "$OPT_POLARSSL" ; then
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for havege_init in -lpolarssl" >&5
+$as_echo_n "checking for havege_init in -lpolarssl... " >&6; }
+if test "${ac_cv_lib_polarssl_havege_init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpolarssl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char havege_init ();
+int main (void)
+{
+return havege_init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_polarssl_havege_init=yes
+else
+  ac_cv_lib_polarssl_havege_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_polarssl_havege_init" >&5
+$as_echo "$ac_cv_lib_polarssl_havege_init" >&6; }
+if test "x$ac_cv_lib_polarssl_havege_init" = x""yes; then :
+
+
+$as_echo "#define USE_POLARSSL 1" >>confdefs.h
+
+         USE_POLARSSL=1
+
+         POLARSSL_ENABLED=1
+         USE_POLARSSL="yes"
+         curl_ssl_msg="enabled (PolarSSL)"
+
+fi
+
+    fi
+
+    if test "x$USE_POLARSSL" != "xyes"; then
+            addld=-L$OPT_POLARSSL/lib$libsuff
+      addcflags=-I$OPT_POLARSSL/include
+      polarssllib=$OPT_POLARSSL/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ssl_init in -lpolarssl" >&5
+$as_echo_n "checking for ssl_init in -lpolarssl... " >&6; }
+if test "${ac_cv_lib_polarssl_ssl_init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpolarssl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char ssl_init ();
+int main (void)
+{
+return ssl_init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_polarssl_ssl_init=yes
+else
+  ac_cv_lib_polarssl_ssl_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_polarssl_ssl_init" >&5
+$as_echo "$ac_cv_lib_polarssl_ssl_init" >&6; }
+if test "x$ac_cv_lib_polarssl_ssl_init" = x""yes; then :
+
+
+$as_echo "#define USE_POLARSSL 1" >>confdefs.h
+
+       USE_POLARSSL=1
+
+       POLARSSL_ENABLED=1
+       USE_POLARSSL="yes"
+       curl_ssl_msg="enabled (PolarSSL)"
+
+else
+
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+
+fi
+
+    fi
+
+    if test "x$USE_POLARSSL" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: detected PolarSSL" >&5
+$as_echo "$as_me: detected PolarSSL" >&6;}
+
+      CURL_LIBS="$CURL_LIBS -lpolarssl"
+      LIBS="$LIBS -lpolarssl"
+
+      if test -n "$polarssllib"; then
+
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
+        export LD_LIBRARY_PATH
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $polarssllib to LD_LIBRARY_PATH" >&5
+$as_echo "$as_me: Added $polarssllib to LD_LIBRARY_PATH" >&6;}
+      fi
+
+    fi
+
+  fi
+fi
+
 OPT_NSS=no
 
 
@@ -20445,11 +20625,11 @@ $as_echo "$as_me: Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH" >&6;}
 
   fi
 fi
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED" = "x"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&5
 $as_echo "$as_me: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&2;}
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --with-ssl, --with-gnutls or --with-nss to address this." >&5
-$as_echo "$as_me: WARNING: Use --with-ssl, --with-gnutls or --with-nss to address this." >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this." >&5
+$as_echo "$as_me: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl or --with-nss to address this." >&2;}
 else
   # SSL is enabled, genericly
 
@@ -20789,7 +20969,7 @@ done
   if test "$LIBSSH2_ENABLED" = "1"; then
     if test -n "$DIR_SSH2"; then
 
-              for ac_func in libssh2_version
+                     for ac_func in libssh2_version libssh2_init libssh2_exit
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -20809,6 +20989,238 @@ done
 $as_echo "$as_me: Added $DIR_SSH2 to LD_LIBRARY_PATH" >&6;}
     fi
   else
+        LDFLAGS=$CLEANLDFLAGS
+    CPPFLAGS=$CLEANCPPFLAGS
+    LIBS=$CLEANLIBS
+  fi
+fi
+
+
+OPT_LIBRTMP=off
+
+# Check whether --with-librtmp was given.
+if test "${with_librtmp+set}" = set; then :
+  withval=$with_librtmp; OPT_LIBRTMP=$withval
+fi
+
+
+if test X"$OPT_LIBRTMP" != Xno; then
+    CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
+  CLEANLIBS="$LIBS"
+
+  case "$OPT_LIBRTMP" in
+  yes)
+
+
+    PKGCONFIG="no"
+
+    if test x$cross_compiling = xyes; then
+            # Extract the first word of "${host}-pkg-config", so it can be a program name with args.
+set dummy ${host}-pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG = xno; then
+      # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for librtmp options with pkg-config" >&5
+$as_echo_n "checking for librtmp options with pkg-config... " >&6; }
+            itexists=`
+    if test -n ""; then
+      PKG_CONFIG_LIBDIR=""
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists librtmp >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+
+    if test "$PKGCONFIG" != "no" ; then
+      LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
+      LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
+      CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
+      version=`$PKGCONFIG --modversion librtmp`
+      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/-L//'`
+    fi
+
+    ;;
+  off)
+        ;;
+  *)
+        PREFIX_RTMP=$OPT_LIBRTMP
+    ;;
+  esac
+
+    if test -n "$PREFIX_RTMP"; then
+    LD_RTMP=-L${PREFIX_RTMP}/lib$libsuff
+    CPP_RTMP=-I${PREFIX_RTMP}/include
+    DIR_RTMP=${PREFIX_RTMP}/lib$libsuff
+  fi
+
+  LDFLAGS="$LDFLAGS $LD_RTMP"
+  CPPFLAGS="$CPPFLAGS $CPP_RTMP"
+  LIBS="$LIBS $LIB_RTMP"
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for RTMP_Init in -lrtmp" >&5
+$as_echo_n "checking for RTMP_Init in -lrtmp... " >&6; }
+if test "${ac_cv_lib_rtmp_RTMP_Init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lrtmp  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char RTMP_Init ();
+int main (void)
+{
+return RTMP_Init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_rtmp_RTMP_Init=yes
+else
+  ac_cv_lib_rtmp_RTMP_Init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_rtmp_RTMP_Init" >&5
+$as_echo "$ac_cv_lib_rtmp_RTMP_Init" >&6; }
+if test "x$ac_cv_lib_rtmp_RTMP_Init" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBRTMP 1
+_ACEOF
+
+  LIBS="-lrtmp $LIBS"
+
+fi
+
+
+  for ac_header in librtmp/rtmp.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "librtmp/rtmp.h" "ac_cv_header_librtmp_rtmp_h" "$ac_includes_default"
+if test "x$ac_cv_header_librtmp_rtmp_h" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBRTMP_RTMP_H 1
+_ACEOF
+ curl_rtmp_msg="enabled (librtmp)"
+    LIBRTMP_ENABLED=1
+
+$as_echo "#define USE_LIBRTMP 1" >>confdefs.h
+
+    USE_LIBRTMP=1
+
+
+fi
+
+done
+
+
+  if test X"$OPT_LIBRTMP" != Xoff &&
+     test "$LIBRTMP_ENABLED" != "1"; then
+    as_fn_error "librtmp libs and/or directories were not found where specified!" "$LINENO" 5
+  fi
+
+  if test "$LIBRTMP_ENABLED" != "1"; then
         LDFLAGS=$CLEANLDFLAGS
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
@@ -33789,7 +34201,7 @@ $as_echo "#define USE_ARES 1" >>confdefs.h
 
       USE_ARES=1
 
-      curl_ares_msg="enabled"
+      curl_res_msg="c-ares"
     fi
   fi
 
@@ -33803,6 +34215,91 @@ else
   USE_EMBEDDED_ARES_FALSE=
 fi
 
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the threaded resolver" >&5
+$as_echo_n "checking whether to enable the threaded resolver... " >&6; }
+  OPT_THRES="default"
+  # Check whether --enable-threaded_resolver was given.
+if test "${enable_threaded_resolver+set}" = set; then :
+  enableval=$enable_threaded_resolver; OPT_THRES=$enableval
+fi
+
+  case "$OPT_THRES" in
+    yes)
+            want_thres="yes"
+      ;;
+    *)
+            want_thres="no"
+      ;;
+  esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $want_thres" >&5
+$as_echo "$want_thres" >&6; }
+
+
+if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
+  as_fn_error "Options --enable-threaded-resolver and --enable-ares are mutually exclusive" "$LINENO" 5
+fi
+
+if test "$want_thres" = "yes"; then
+  ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
+if test "x$ac_cv_header_pthread_h" = x""yes; then :
+
+$as_echo "#define HAVE_PTHREAD_H 1" >>confdefs.h
+
+      save_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS -pthread"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread_create in -lpthread" >&5
+$as_echo_n "checking for pthread_create in -lpthread... " >&6; }
+if test "${ac_cv_lib_pthread_pthread_create+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lpthread  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char pthread_create ();
+int main (void)
+{
+return pthread_create ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_pthread_pthread_create=yes
+else
+  ac_cv_lib_pthread_pthread_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_pthread_pthread_create" >&5
+$as_echo "$ac_cv_lib_pthread_pthread_create" >&6; }
+if test "x$ac_cv_lib_pthread_pthread_create" = x""yes; then :
+   { $as_echo "$as_me:${as_lineno-$LINENO}: using POSIX threaded DNS lookup" >&5
+$as_echo "$as_me: using POSIX threaded DNS lookup" >&6;}
+
+$as_echo "#define USE_THREADS_POSIX 1" >>confdefs.h
+
+          USE_THREADS_POSIX=1
+          curl_res_msg="threaded"
+
+else
+   CFLAGS="$save_CFLAGS"
+fi
+
+
+fi
+
+
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable verbose strings" >&5
 $as_echo_n "checking whether to enable verbose strings... " >&6; }
@@ -34035,7 +34532,7 @@ fi
 if test "x$HAVE_LIBZ" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES libz"
 fi
-if test "x$USE_ARES" = "x1"; then
+if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
 if test "x$IDN_ENABLED" = "x1"; then
@@ -34070,9 +34567,12 @@ if test "x$CURL_DISABLE_TELNET" != "x1"; then
 fi
 if test "x$CURL_DISABLE_LDAP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAP"
-fi
-if test "x$CURL_DISABLE_LDAPS" != "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+  if test "x$CURL_DISABLE_LDAPS" != "x1"; then
+    if (test "x$USE_OPENLDAP" = "x1" && test "x$SSL_ENABLED" = "x1") ||
+      (test "x$USE_OPENLDAP" != "x1"  && test "x$HAVE_LDAP_SSL" = "x1"); then
+      SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS LDAPS"
+    fi
+  fi
 fi
 if test "x$CURL_DISABLE_DICT" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS DICT"
@@ -34104,6 +34604,9 @@ if test "x$USE_LIBSSH2" = "x1"; then
 fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
+fi
+if test "x$USE_LIBRTMP" = "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP"
 fi
 
 SUPPORT_PROTOCOLS=`echo $SUPPORT_PROTOCOLS | tr ' ' '\012' | sort | tr '\012' ' '`
@@ -36654,7 +37157,7 @@ fi
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
   SPNEGO support:  ${curl_spnego_msg}
-  c-ares support:  ${curl_ares_msg}
+  resolver:        ${curl_res_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
@@ -36666,6 +37169,7 @@ fi
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
   RTSP support:    ${curl_rtsp_msg}
+  RTMP support:    ${curl_rtmp_msg}
   Protocols:       ${SUPPORT_PROTOCOLS}
 " >&5
 $as_echo "$as_me: Configured to build curl/libcurl:
@@ -36680,7 +37184,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
   SPNEGO support:  ${curl_spnego_msg}
-  c-ares support:  ${curl_ares_msg}
+  resolver:        ${curl_res_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
@@ -36692,6 +37196,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   LDAP support:    ${curl_ldap_msg}
   LDAPS support:   ${curl_ldaps_msg}
   RTSP support:    ${curl_rtsp_msg}
+  RTMP support:    ${curl_rtmp_msg}
   Protocols:       ${SUPPORT_PROTOCOLS}
 " >&6;}
 

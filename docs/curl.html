@@ -384,6 +384,27 @@ p.roffit {
 <p class="level1">Tells curl to respect RFC 2616/10.3.2 and not convert POST requests into GET requests when following a 301 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L--location">-L/--location</a> (Added in 7.17.1) 
 <p class="level0"><a name="--post302"></a><span class="nroffip">--post302</span> 
 <p class="level1">Tells curl to respect RFC 2616/10.3.2 and not convert POST requests into GET requests when following a 302 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L--location">-L/--location</a> (Added in 7.19.1) 
+<p class="level0"><a name="--proto"></a><span class="nroffip">--proto &lt;protocols&gt;</span> 
+<p class="level1">Tells curl to use the listed protocols for its initial retrieval. Protocols are evaluated left to right, are comma separated, and are each a protocol name or 'all', optionally prefixed by zero or more modifiers. Available modifiers are: 
+<p class="level2">
+<p class="level2"><a class="bold" href="#">+</a> Permit this protocol in addition to protocols already permitted (this is the default if no modifier is used). 
+<p class="level2"><a class="bold" href="#-">-</a> Deny this protocol, removing it from the list of protocols already permitted. 
+<p class="level2"><a class="bold" href="#">=</a> Permit only this protocol (ignoring the list already permitted), though subject to later modification by subsequent entries in the comma separated list. 
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">For example: 
+<p class="level2">
+<p class="level2"><a class="bold" href="#--proto">--proto -ftps</a> uses the default protocols, but disables ftps 
+<p class="level2"><a class="bold" href="#--proto">--proto -all,https,+http</a> only enables http and https 
+<p class="level2"><a class="bold" href="#--proto">--proto =http,https</a> also only enables http and https 
+<p class="level1">
+<p class="level0"><a name=""></a><span class="nroffip"></span> 
+<p class="level1">Unknown protocols produce a warning. This allows scripts to safely rely on being able to disable potentially dangerous protocols, without relying upon support for that protocol being built into curl to avoid an error. 
+<p class="level1">This option can be used multiple times, in which case the effect is the same as concatenating the protocols into one instance of the option. 
+<p class="level1">(Added in 7.20.2) 
+<p class="level0"><a name="--proto-redir"></a><span class="nroffip">--proto-redir &lt;protocols&gt;</span> 
+<p class="level1">Tells curl to use the listed protocols after a redirect. See --proto for how protocols are represented. 
+<p class="level1">(Added in 7.20.2) 
 <p class="level0"><a name="--proxy-anyauth"></a><span class="nroffip">--proxy-anyauth</span> 
 <p class="level1">Tells curl to pick a suitable authentication method when communicating with the given proxy. This might cause an extra request/response round-trip. (Added in 7.13.2) 
 <p class="level0"><a name="--proxy-basic"></a><span class="nroffip">--proxy-basic</span> 
