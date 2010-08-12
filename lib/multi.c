@@ -61,7 +61,6 @@
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
-  struct Curl_message *next;
 };
 
 /* NOTE: if you add a state here, add the name to the statename[] array as
@@ -110,12 +109,8 @@ struct Curl_one_easy {
   CURLMstate state;  /* the handle's state */
   CURLcode result;   /* previous result */
 
-  struct Curl_message *msg; /* A pointer to one single posted message.
-                               Cleanup should be done on this pointer NOT on
-                               the linked list in Curl_multi.  This message
-                               will be deleted when this handle is removed
-                               from the multi-handle */
-  int msg_num; /* number of messages left in 'msg' to return */
+  struct Curl_message msg; /* A single posted message. */
+  int msg_stored; /* a message is stored in 'msg' to return */
 
   /* Array with the plain socket numbers this handle takes care of, in no
      particular order. Note that all sockets are added to the sockhash, where
@@ -656,6 +651,10 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
          to that since we're not part of that handle anymore */
       easy->easy_handle->state.connc = NULL;
 
+      /* Since we return the connection back to the communal connection pool
+         we mark the last connection as inaccessible */
+      easy->easy_handle->state.lastconnect = -1;
+
       /* Modify the connectindex since this handle can't point to the
          connection cache anymore.
 
@@ -693,8 +692,6 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
-    if(easy->msg)
-      free(easy->msg);
     free(easy);
 
     multi->num_easy--; /* one less to care about now */
@@ -1307,7 +1304,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       /* if both rates are within spec, resume transfer */
-      Curl_pgrsUpdate(easy->easy_conn);
       if( ( ( easy->easy_handle->set.max_send_speed == 0 ) ||
             ( easy->easy_handle->progress.ulspeed <
               easy->easy_handle->set.max_send_speed ) )  &&
@@ -1528,28 +1524,26 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
         multistate(easy, CURLM_STATE_COMPLETED);
       }
+      /* if there's still a connection to use, call the progress function */
+      else if(easy->easy_conn && Curl_pgrsUpdate(easy->easy_conn))
+        easy->result = CURLE_ABORTED_BY_CALLBACK;
     }
   } while(0);
-  if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
+  if((CURLM_STATE_COMPLETED == easy->state) && !easy->msg_stored) {
     if(easy->easy_handle->dns.hostcachetype == HCACHE_MULTI) {
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->dns.hostcache = NULL;
       easy->easy_handle->dns.hostcachetype = HCACHE_NONE;
     }
 
-    /* now add a node to the Curl_message linked list with this info */
-    msg = malloc(sizeof(struct Curl_message));
-
-    if(!msg)
-      return CURLM_OUT_OF_MEMORY;
+    /* now fill in the Curl_message with this info */
+    msg = &easy->msg;
 
     msg->extmsg.msg = CURLMSG_DONE;
     msg->extmsg.easy_handle = easy->easy_handle;
     msg->extmsg.data.result = easy->result;
-    msg->next = NULL;
 
-    easy->msg = msg;
-    easy->msg_num = 1; /* there is one unread message here */
+    easy->msg_stored = 1; /* there is an unread message here */
 
     multi->num_msgs++; /* increase message counter */
   }
@@ -1564,6 +1558,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_one_easy *easy;
   CURLMcode returncode=CURLM_OK;
   struct Curl_tree *t;
+  struct timeval now = Curl_tvnow();
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -1601,10 +1596,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
    * Simply remove all expired timers from the splay since handles are dealt
    * with unconditionally by this function and curl_multi_timeout() requires
    * that already passed/handled expire times are removed from the splay.
+   *
+   * It is important that the 'now' value is set at the entry of this function
+   * and not for the current time as it may have ticked a little while since
+   * then and then we risk this loop to remove timers that actually have not
+   * been handled!
    */
   do {
-    struct timeval now = Curl_tvnow();
-
     multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
     if(t) {
       struct SessionHandle *d = t->payload;
@@ -1689,8 +1687,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
       Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association */
 
-      if(easy->msg)
-        free(easy->msg);
       free(easy);
       easy = nexteasy;
     }
@@ -1717,8 +1713,8 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 
     easy=multi->easy.next;
     while(easy != &multi->easy) {
-      if(easy->msg_num) {
-        easy->msg_num--;
+      if(easy->msg_stored) {
+        easy->msg_stored = 0;
         break;
       }
       easy = easy->next;
@@ -1729,7 +1725,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     multi->num_msgs--;
     *msgs_in_queue = multi->num_msgs;
 
-    return &easy->msg->extmsg;
+    return &easy->msg.extmsg;
   }
   else
     return NULL;
@@ -2168,7 +2164,9 @@ static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
                                               struct connectdata *conn)
 {
   size_t pipeLen = conn->send_pipe->size + conn->recv_pipe->size;
+  struct curl_llist_element *sendhead = conn->send_pipe->head;
   struct curl_llist *pipeline;
+  CURLcode rc;
 
   if(!Curl_isPipeliningEnabled(handle) ||
      pipeLen == 0)
@@ -2181,7 +2179,17 @@ static CURLcode addHandleToSendOrPendPipeline(struct SessionHandle *handle,
       pipeline = conn->pend_pipe;
   }
 
-  return Curl_addHandleToPipeline(handle, pipeline);
+  rc = Curl_addHandleToPipeline(handle, pipeline);
+
+  if (pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
+      /* this is a new one as head, expire it */
+      conn->writechannel_inuse = FALSE; /* not in use yet */
+      infof(conn->data, "%p is at send pipe head!\n",
+            conn->send_pipe->head->ptr);
+      Curl_expire(conn->send_pipe->head->ptr, 1);
+  }
+
+  return rc;
 }
 
 static int checkPendPipeline(struct connectdata *conn)

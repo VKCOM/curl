@@ -391,6 +391,9 @@
 /* Define to 1 if you have the `libssh2_init' function. */
 #undef HAVE_LIBSSH2_INIT
 
+/* Define to 1 if you have the `libssh2_scp_send64' function. */
+#undef HAVE_LIBSSH2_SCP_SEND64
+
 /* Define to 1 if you have the `libssh2_version' function. */
 #undef HAVE_LIBSSH2_VERSION
 

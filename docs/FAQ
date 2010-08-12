@@ -1,4 +1,4 @@
-Updated: Nov 7, 2009 (http://curl.haxx.se/docs/faq.html)
+Updated: June 30, 2010 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -74,6 +74,7 @@ FAQ
   4.16 My HTTP POST or PUT requests are slow!
   4.17 Non-functional connect timeouts on Windows
   4.18 file:// URLs containing drive letters (Windows, NetWare)
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -83,7 +84,7 @@ FAQ
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
   5.9 How does libcurl resolve host names?
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
@@ -399,10 +400,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS, yassl or NSS, although there
-  should not be many problems using a different library. If anyone does "port"
-  curl to use a different SSL library, we are of course very interested in
-  getting the patch!
+  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS or PolarSSL,
+  although there should not be many problems using a different library. If
+  anyone does "port" curl to use a different SSL library, we are of course
+  very interested in getting the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -944,6 +945,31 @@ FAQ
 
   In either case, cURL should now be looking for the correct file.
 
+  4.19 Why doesn't cURL return an error when the network cable is unplugged?
+
+  Unplugging the cable is not an error situation. The TCP/IP protocol stack
+  was designed to be fault tolerant, so even though there may be a physical
+  break somewhere the connection shouldn't be affected, just possibly
+  delayed.  Eventually, the physical break will be fixed or the data will be
+  re-routed around the physical problem.
+
+  In such cases, the TCP/IP stack is responsible for detecting when the
+  network connection is irrevocably lost. Since with some protocols it is
+  perfectly legal for the client wait indefinitely for data, the stack may
+  never report a problem, and even when it does, it can take up to 20 minutes
+  for it to detect an issue.  The curl option --keepalive-time enables
+  keep-alive support in the TCP/IP stack which makes it periodically probe the
+  connection to make sure it is still available to send data. That should
+  reliably detect any TCP/IP network failure.
+
+  But even that won't detect the network going down before the TCP/IP
+  connection is established (e.g. during a DNS lookup) or using protocols that
+  don't use TCP.  To handle those situations, curl offers a number of timeouts
+  on its own. --speed-limit/--speed-time will abort if the data transfer rate
+  falls too low, and --connect-timeout and --max-time can be used to put an
+  overall timeout on the connection phase or the entire transfer.
+
+
 5. libcurl Issues
 
   5.1 Is libcurl thread-safe?
@@ -1058,13 +1084,14 @@ FAQ
   Borland:         libcurl.lib   libcurl_imp.lib
 
 
-  5.8 libcurl.so.3: open failed: No such file or directory
+  5.8 libcurl.so.X: open failed: No such file or directory
 
   This is an error message you might get when you try to run a program linked
   with a shared version of libcurl and your run-time linker (ld.so) couldn't
-  find the shared library named libcurl.so.3.
+  find the shared library named libcurl.so.X. (Where X is the number of the
+  current libcurl ABI, typically 3 or 4).
 
-  You need to make sure that ld.so finds libcurl.so.3. You can do that
+  You need to make sure that ld.so finds libcurl.so.X. You can do that
   multiple ways, and it differs somewhat between different operating systems,
   but they are usually:
 
@@ -1100,10 +1127,10 @@ FAQ
     Using this offers asynchronous name resolves but it currently has no IPv6
     support.
 
-  - The Windows threaded resolver. It use:
+  - The threaded resolver (default option on Windows). It uses:
 
-    A - gethostbyname() on plain ipv4 windows hosts
-    B - getaddrinfo() on ipv6-enabled windows hosts
+    A - gethostbyname() on plain ipv4 hosts
+    B - getaddrinfo() on ipv6-enabled hosts
 
   Also note that libcurl never resolves or reverse-lookups addresses given as
   pure numbers, such as 127.0.0.1 or ::1.
@@ -1182,7 +1209,9 @@ FAQ
   to do "LIST -a" or similar to see them.
 
   The application thus needs to parse the LIST output. One such existing
-  list parser is available at http://cr.yp.to/ftpparse.html
+  list parser is available at http://cr.yp.to/ftpparse.html  Versions of
+  libcurl since 7.21.0 also provide the ability to specify a wildcard to
+  download multiple files from one FTP directory.
 
 
 6. License Issues
