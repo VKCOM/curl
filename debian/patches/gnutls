@@ -1,8 +1,37 @@
-Index: curl/lib/Makefile.am
-===================================================================
---- curl.orig/lib/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-+++ curl/lib/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-@@ -42,7 +42,7 @@
+diff --git a/configure.ac b/configure.ac
+index 9cf63fa..3159617 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1677,9 +1677,9 @@ if test "$OPENSSL_ENABLED" != "1"; then
+ 
+       CLEANLIBS="$LIBS"
+       CLEANCPPFLAGS="$CPPFLAGS"
+-      CLEADLDFLAGS="$LDFLAGS"
++      CLEANLDFLAGS="$LDFLAGS"
+ 
+-      LIBS="$LIBS $addlib"
++      LIBS="$LIBS $addlib -lgcrypt"
+       LDFLAGS="$LDFLAGS $addld"
+       if test "$addcflags" != "-I/usr/include"; then
+          CPPFLAGS="$CPPFLAGS $addcflags"
+diff --git a/docs/examples/Makefile.am b/docs/examples/Makefile.am
+index 8d92f73..cd67b02 100644
+--- a/docs/examples/Makefile.am
++++ b/docs/examples/Makefile.am
+@@ -29,7 +29,7 @@ endif
+ CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
+ 
+ # Dependencies
+-LDADD = $(LIBDIR)/libcurl.la
++LDADD = $(LIBDIR)/libcurl-gnutls.la
+ 
+ # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
+ include Makefile.inc
+diff --git a/lib/Makefile.am b/lib/Makefile.am
+index 8c37934..4fdecb8 100644
+--- a/lib/Makefile.am
++++ b/lib/Makefile.am
+@@ -41,7 +41,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
  
  CLEANFILES = $(DSP) $(VCPROJ)
  
@@ -10,8 +39,8 @@ Index: curl/lib/Makefile.am
 +lib_LTLIBRARIES = libcurl-gnutls.la
  LIBCURL_LIBS = @LIBCURL_LIBS@
  
- # Specify our include paths here, and do it relative to $(top_srcdir) and
-@@ -117,12 +117,12 @@
+ # This might hold -Werror
+@@ -119,12 +119,12 @@ if VERSIONED_SYMBOLS
  VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
  endif
  
@@ -26,13 +55,13 @@ Index: curl/lib/Makefile.am
  
  WIN32SOURCES = $(CSOURCES)
  WIN32HEADERS = $(HHEADERS) config-win32.h
-Index: curl/src/Makefile.am
-===================================================================
---- curl.orig/src/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-+++ curl/src/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-@@ -47,8 +47,8 @@
- 
- include Makefile.inc
+diff --git a/src/Makefile.am b/src/Makefile.am
+index 27e2066..0eed24c 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -49,8 +49,8 @@ include Makefile.inc
+ # This might hold -Werror
+ CFLAGS += @CURL_CFLAG_EXTRAS@
  
 -curl_LDADD = $(top_builddir)/lib/libcurl.la -lrt @CURL_LIBS@
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
@@ -41,11 +70,11 @@ Index: curl/src/Makefile.am
  BUILT_SOURCES = hugehelp.c
  CLEANFILES = hugehelp.c
  # Use the C locale to ensure that only ASCII characters appear in the
-Index: curl/tests/libtest/Makefile.am
-===================================================================
---- curl.orig/tests/libtest/Makefile.am	2010-02-09 13:05:59.000000000 +0100
-+++ curl/tests/libtest/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-@@ -55,8 +55,8 @@
+diff --git a/tests/libtest/Makefile.am b/tests/libtest/Makefile.am
+index 2ba7b0a..8749a2c 100644
+--- a/tests/libtest/Makefile.am
++++ b/tests/libtest/Makefile.am
+@@ -54,8 +54,8 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
  test1022.pl Makefile.inc
  
  # Dependencies (may need to be overriden)
@@ -54,31 +83,5 @@ Index: curl/tests/libtest/Makefile.am
 +LDADD = $(top_builddir)/lib/libcurl-gnutls.la
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  
- # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES, noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
- include Makefile.inc
-Index: curl/docs/examples/Makefile.am
-===================================================================
---- curl.orig/docs/examples/Makefile.am	2010-02-09 13:05:41.000000000 +0100
-+++ curl/docs/examples/Makefile.am	2010-02-09 13:49:49.000000000 +0100
-@@ -30,7 +30,7 @@
- CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
- 
- # Dependencies
--LDADD = $(LIBDIR)/libcurl.la
-+LDADD = $(LIBDIR)/libcurl-gnutls.la
- 
- # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
- include Makefile.inc
-Index: curl/configure.ac
-===================================================================
---- curl.orig/configure.ac	2010-02-09 13:49:49.000000000 +0100
-+++ curl/configure.ac	2010-02-09 13:49:49.000000000 +0100
-@@ -1658,7 +1658,7 @@
-       CLEANCPPFLAGS="$CPPFLAGS"
-       CLEADLDFLAGS="$LDFLAGS"
- 
--      LIBS="$LIBS $addlib"
-+      LIBS="$LIBS $addlib -lgcrypt"
-       LDFLAGS="$LDFLAGS $addld"
-       if test "$addcflags" != "-I/usr/include"; then
-          CPPFLAGS="$CPPFLAGS $addcflags"
+ # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
+ # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
