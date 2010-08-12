@@ -451,6 +451,9 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
     td->interval_end = elapsed + td->poll_interval;
 
+    /* Reset old timer so we can set a new one further in the future */
+    Curl_expire(conn->data, 0);
+
     Curl_expire(conn->data, td->poll_interval);
   }
 
@@ -484,8 +487,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
-  struct hostent *h = NULL;
-  struct SessionHandle *data = conn->data;
   struct in_addr in;
 
   *waitp = 0; /* default to synchronous response */
