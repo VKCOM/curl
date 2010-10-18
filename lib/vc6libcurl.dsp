@@ -238,6 +238,10 @@ SOURCE=.\getinfo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\gopher.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\gtls.c
 # End Source File
 # Begin Source File
@@ -623,6 +627,10 @@ SOURCE=.\ftplistparser.h
 # Begin Source File
 
 SOURCE=.\getinfo.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\gopher.h
 # End Source File
 # Begin Source File
 

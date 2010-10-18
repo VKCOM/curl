@@ -118,7 +118,7 @@ int main(int argc, char **argv)
   http_handle = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.haxx.se/");
+  curl_easy_setopt(http_handle, CURLOPT_URL, "http://www.example.com/");
 
   curl_easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, my_trace);
   curl_easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
@@ -130,8 +130,7 @@ int main(int argc, char **argv)
   curl_multi_add_handle(multi_handle, http_handle);
 
   /* we start some action by calling perform right away */
-  while(CURLM_CALL_MULTI_PERFORM ==
-        curl_multi_perform(multi_handle, &still_running));
+  curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -181,8 +180,7 @@ int main(int argc, char **argv)
     case 0:
     default:
       /* timeout or readable/writable sockets */
-      while(CURLM_CALL_MULTI_PERFORM ==
-            curl_multi_perform(multi_handle, &still_running));
+      curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }

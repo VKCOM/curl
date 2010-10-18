@@ -464,6 +464,8 @@ p.roffit {
 <p class="level0"><a name="CURLOPTDIRLISTONLY"></a><span class="nroffip">CURLOPT_DIRLISTONLY</span> 
 <p class="level1">A parameter set to 1 tells the library to just list the names of files in a directory, instead of doing a full directory listing that would include file sizes, dates etc. This works for FTP and SFTP URLs. 
 <p class="level1">This causes an FTP NLST command to be sent on an FTP server.  Beware that some FTP servers list only files in their response to NLST; they might not include subdirectories and symbolic links. 
+<p class="level1">Setting this option to 1 also implies a directory listing even if the URL doesn't end with a slash, which otherwise is necessary. 
+<p class="level1">Do NOT use this option if you also use <a class="emphasis" href="#CURLOPTWILDCARDMATCH">CURLOPT_WILDCARDMATCH</a> as it will effectively break that feature then. 
 <p class="level1">(This option was known as CURLOPT_FTPLISTONLY up to 7.16.4) 
 <p class="level0"><a name="CURLOPTAPPEND"></a><span class="nroffip">CURLOPT_APPEND</span> 
 <p class="level1">A parameter set to 1 tells the library to append to the remote file instead of overwrite it. This is only useful when uploading to an FTP site. 
@@ -586,6 +588,7 @@ p.roffit {
 <p class="level1">Ranges work on HTTP, FTP, FILE (since 7.18.0), and RTSP (since 7.20.0) transfers only. 
 <p class="level0"><a name="CURLOPTRESUMEFROM"></a><span class="nroffip">CURLOPT_RESUME_FROM</span> 
 <p class="level1">Pass a long as parameter. It contains the offset in number of bytes that you want the transfer to start from. Set this option to 0 to make the transfer start from the beginning (effectively disabling resume). For FTP, set this option to -1 to make the transfer start from the end of the target file (useful to continue an interrupted upload). 
+<p class="level1">When doing uploads with FTP, the resume position is where in the local/source file libcurl should try to resume the upload from and it will then append the source file to the remote target file. 
 <p class="level0"><a name="CURLOPTRESUMEFROMLARGE"></a><span class="nroffip">CURLOPT_RESUME_FROM_LARGE</span> 
 <p class="level1">Pass a curl_off_t as parameter. It contains the offset in number of bytes that you want the transfer to start from. (Added in 7.11.0) 
 <p class="level0"><a name="CURLOPTCUSTOMREQUEST"></a><span class="nroffip">CURLOPT_CUSTOMREQUEST</span> 

@@ -125,6 +125,7 @@
 <File RelativePath="ftplistparser.c"></File>
 <File RelativePath="getenv.c"></File>
 <File RelativePath="getinfo.c"></File>
+<File RelativePath="gopher.c"></File>
 <File RelativePath="gtls.c"></File>
 <File RelativePath="hash.c"></File>
 <File RelativePath="hmac.c"></File>
@@ -222,6 +223,7 @@
 <File RelativePath="ftp.h"></File>
 <File RelativePath="ftplistparser.h"></File>
 <File RelativePath="getinfo.h"></File>
+<File RelativePath="gopher.h"></File>
 <File RelativePath="gtls.h"></File>
 <File RelativePath="hash.h"></File>
 <File RelativePath="hostip.h"></File>
