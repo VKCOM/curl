@@ -43,9 +43,9 @@ int main(int argc, char **argv)
       handles[i] = curl_easy_init();
 
   /* set the options (I left out a few, you'll get the point anyway) */
-  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "http://website.com");
+  curl_easy_setopt(handles[HTTP_HANDLE], CURLOPT_URL, "http://example.com");
 
-  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://ftpsite.com");
+  curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_URL, "ftp://example.com");
   curl_easy_setopt(handles[FTP_HANDLE], CURLOPT_UPLOAD, 1L);
 
   /* init a multi stack */
@@ -56,8 +56,7 @@ int main(int argc, char **argv)
       curl_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
-  while(CURLM_CALL_MULTI_PERFORM ==
-        curl_multi_perform(multi_handle, &still_running));
+  curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -108,8 +107,7 @@ int main(int argc, char **argv)
     default:
       /* one or more of curl's file descriptors say there's data to read
          or write */
-      while(CURLM_CALL_MULTI_PERFORM ==
-            curl_multi_perform(multi_handle, &still_running));
+      curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }

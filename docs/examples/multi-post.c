@@ -58,8 +58,7 @@ int main(int argc, char *argv[])
   if(curl && multi_handle) {
 
     /* what URL that receives this POST */
-    curl_easy_setopt(curl, CURLOPT_URL,
-                     "http://www.fillinyoururl.com/upload.cgi");
+    curl_easy_setopt(curl, CURLOPT_URL, "http://www.example.com/upload.cgi");
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
@@ -67,8 +66,7 @@ int main(int argc, char *argv[])
 
     curl_multi_add_handle(multi_handle, curl);
 
-    while(CURLM_CALL_MULTI_PERFORM ==
-          curl_multi_perform(multi_handle, &still_running));
+    curl_multi_perform(multi_handle, &still_running);
 
     while(still_running) {
       struct timeval timeout;
@@ -118,8 +116,7 @@ int main(int argc, char *argv[])
       default:
         /* timeout or readable/writable sockets */
         printf("perform!\n");
-        while(CURLM_CALL_MULTI_PERFORM ==
-              curl_multi_perform(multi_handle, &still_running));
+        curl_multi_perform(multi_handle, &still_running);
         printf("running: %d!\n", still_running);
         break;
       }

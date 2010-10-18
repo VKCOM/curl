@@ -24,7 +24,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.57)
 
 dnl We don't know the version number "statically" so we use a dash here
-AC_INIT([curl], [-], [a suitable curl mailing list => http://curl.haxx.se/mail/])
+AC_INIT([curl], [-], [a suitable curl mailing list: http://curl.haxx.se/mail/])
 
 CURL_OVERRIDE_AUTOCONF
 
@@ -53,7 +53,7 @@ CONFIGURE_OPTIONS="\"$ac_configure_args\""
 AC_SUBST(CONFIGURE_OPTIONS)
 
 CURL_CFLAG_EXTRAS=""
-if test X"$want_werror" == Xyes; then
+if test X"$want_werror" = Xyes; then
   CURL_CFLAG_EXTRAS="-Werror"
 fi
 AC_SUBST(CURL_CFLAG_EXTRAS)
@@ -416,7 +416,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi
        ;;
   esac ],[
@@ -428,7 +427,6 @@ AC_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
          AC_MSG_RESULT(yes)
          AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
          AC_SUBST(HAVE_LDAP_SSL, [1])
-         curl_ldaps_msg="enabled"
        fi ]
 )
 
@@ -563,6 +561,22 @@ AC_HELP_STRING([--disable-smtp],[Disable SMTP support]),
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_SMTP, 1, [to disable SMTP])
        AC_SUBST(CURL_DISABLE_SMTP, [1])
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+AC_MSG_CHECKING([whether to support gopher])
+AC_ARG_ENABLE(gopher,
+AC_HELP_STRING([--enable-gopher],[Enable Gopher support])
+AC_HELP_STRING([--disable-gopher],[Disable Gopher support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable Gopher])
+       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -874,6 +888,10 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
       AC_SUBST(USE_OPENLDAP, [1])
     fi
   fi
+fi
+
+if test x$CURL_DISABLE_LDAPS != x1 ; then
+    curl_ldaps_msg="enabled"
 fi
 
 dnl **********************************************************************
@@ -1718,6 +1736,20 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
 fi dnl OPENSSL != 1
 
+dnl ---
+dnl If GnuTLS is enabled, we MUST verify that it uses libgcrypt since
+dnl curl code relies on that but recent GnuTLS versions can in fact build
+dnl with different crypto libraries which curl right now cannot handle
+dnl ---
+
+if test "$GNUTLS_ENABLED" = "1"; then
+  AC_CHECK_LIB(gcrypt,
+               gcry_control, ,
+    [
+      AC_MSG_ERROR([need GnuTLS built with gcrypt to function with GnuTLS])
+    ])
+fi
+
 dnl ----------------------------------------------------
 dnl check for PolarSSL
 dnl ----------------------------------------------------
@@ -2035,6 +2067,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
     ;;
   off)
     dnl no --with-librtmp option given, just check default places
+    LIB_RTMP="-lrtmp"
     ;;
   *)
     dnl use the given --with-librtmp spot
@@ -2053,13 +2086,19 @@ if test X"$OPT_LIBRTMP" != Xno; then
   CPPFLAGS="$CPPFLAGS $CPP_RTMP"
   LIBS="$LIBS $LIB_RTMP"
 
-  AC_CHECK_LIB(rtmp, RTMP_Init)
-
-  AC_CHECK_HEADERS(librtmp/rtmp.h,
-    curl_rtmp_msg="enabled (librtmp)"
-    LIBRTMP_ENABLED=1
-    AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-    AC_SUBST(USE_LIBRTMP, [1])
+  AC_CHECK_LIB(rtmp, RTMP_Init,
+    [
+     AC_CHECK_HEADERS(librtmp/rtmp.h,
+        curl_rtmp_msg="enabled (librtmp)"
+        LIBRTMP_ENABLED=1
+        AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
+        AC_SUBST(USE_LIBRTMP, [1])
+     )
+    ],
+      dnl not found, revert back to clean variables
+      LDFLAGS=$CLEANLDFLAGS
+      CPPFLAGS=$CLEANCPPFLAGS
+      LIBS=$CLEANLIBS
   )
 
   if test X"$OPT_LIBRTMP" != Xoff &&
@@ -2067,12 +2106,6 @@ if test X"$OPT_LIBRTMP" != Xno; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi
 
-  if test "$LIBRTMP_ENABLED" != "1"; then
-    dnl no librtmp, revert back to clean variables
-    LDFLAGS=$CLEANLDFLAGS
-    CPPFLAGS=$CLEANCPPFLAGS
-    LIBS=$CLEANLIBS
-  fi
 fi
 
 dnl **********************************************************************
@@ -2737,6 +2770,9 @@ if test "x$CURL_DISABLE_DICT" != "x1"; then
 fi
 if test "x$CURL_DISABLE_TFTP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS TFTP"
+fi
+if test "x$CURL_DISABLE_GOPHER" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS GOPHER"
 fi
 if test "x$CURL_DISABLE_POP3" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS POP3"
