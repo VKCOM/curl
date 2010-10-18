@@ -74,13 +74,13 @@ diff --git a/tests/libtest/Makefile.am b/tests/libtest/Makefile.am
 index 2ba7b0a..8749a2c 100644
 --- a/tests/libtest/Makefile.am
 +++ b/tests/libtest/Makefile.am
-@@ -54,8 +54,8 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
+@@ -53,8 +53,8 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
  test1022.pl Makefile.inc
  
  # Dependencies (may need to be overriden)
--LDADD = $(top_builddir)/lib/libcurl.la
+-LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 -DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-+LDADD = $(top_builddir)/lib/libcurl-gnutls.la
++LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  
  # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
