@@ -3,7 +3,7 @@ curl (7.21.2-2) unstable; urgency=low
   * debian/control: add libc-ares-dev as build dependency.
   * debian/rules: invoke configure with --enable-ares.
     (closes: #570436)
-  * debian/copyright: add copyright notice of lib/security
+  * debian/copyright: add copyright notice of `lib/security.c'
     to the copyright file. (closes: #603712)
 
  -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Tue, 30 Nov 2010 17:35:29 +0530
