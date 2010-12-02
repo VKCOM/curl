@@ -1,3 +1,11 @@
+curl (7.21.2-3) unstable; urgency=low
+
+  * debian/rules: reverting changes related to c-ares inclusion.
+  * debian/control: removing libc-ares-dev for now.
+    (closes: #605558)
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Thu, 02 Dec 2010 10:56:36 +0530
+
 curl (7.21.2-2) unstable; urgency=low
 
   * debian/control: add libc-ares-dev as build dependency.
