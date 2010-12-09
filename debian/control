@@ -2,7 +2,7 @@ Source: curl
 Section: web
 Priority: optional
 Maintainer: Ramakrishnan Muthukrishnan <rkrishnan@debian.org>
-Build-Depends: debhelper (>> 5), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, zlib1g-dev, stunnel, libkrb5-dev [!hurd-i386], libidn11-dev, groff-base, libdb-dev (>= 4.7), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev
+Build-Depends: debhelper (>> 5), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, libnss3-dev, zlib1g-dev, stunnel, libkrb5-dev [!hurd-i386], libidn11-dev, groff-base, libdb-dev (>= 4.7), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev
 Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.1
 Vcs-Browser: http://git.debian.org/?p=collab-maint/curl.git
@@ -51,6 +51,20 @@ Description: Multi-protocol file transfer library (GnuTLS)
  .
  This is the shared version of libcurl.
 
+Package: libcurl3-nss
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
+Replaces: libcurl4-nss
+Conflicts: libcurl4-nss
+Description: Multi-protocol file transfer library (NSS)
+ libcurl is designed to be a solid, usable, reliable and portable
+ multi-protocol file transfer library.
+ .
+ SSL support is provided by NSS.
+ .
+ This is the shared version of libcurl.
+
 Package: libcurl4-openssl-dev
 Architecture: any
 Section: libdevel
@@ -83,6 +97,22 @@ Description: Development files and documentation for libcurl (GnuTLS)
  .
  HTML and PDF versions of all the manual pages are also provided.
 
+Package: libcurl4-nss-dev
+Architecture: any
+Section: libdevel
+Suggests: libcurl3-dbg
+Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
+Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
+Conflicts: libcurl-dev
+Depends: libcurl3-nss (= ${binary:Version}), libc6-dev | libc-dev, libnss3-dev, zlib1g-dev, libidn11-dev, libkrb5-dev | hurd, libldap2-dev, ${misc:Depends}
+Description: Development files and documentation for libcurl (NSS)
+ These files (ie. includes, static library, manual pages) allow to
+ build software which uses libcurl.
+ .
+ SSL support is provided by NSS.
+ .
+ HTML and PDF versions of all the manual pages are also provided.
+
 Package: libcurl3-dbg
 Architecture: any
 Section: debug
@@ -91,7 +121,8 @@ Suggests: libc-dbg
 Provides: libcurl4-dbg
 Replaces: libcurl4-dbg
 Conflicts: libcurl4-dbg
-Depends: libcurl3 (= ${binary:Version}) | libcurl3-gnutls (= ${binary:Version}), ${misc:Depends}
+Depends: libcurl3 (= ${binary:Version}) | libcurl3-gnutls (= ${binary:Version}) | libcurl3-nss (= ${binary:Version}), ${misc:Depends}
 Description: libcurl compiled with debug symbols
- This contains the debug symbols of both the OpenSSL and GnuTLS versions of
- libcurl3. It might be useful in debug sessions of software which uses libcurl.
+ This contains the debug symbols of both the OpenSSL, GnuTLS and NSS versions
+ of libcurl3. It might be useful in debug sessions of software which uses
+ libcurl.
