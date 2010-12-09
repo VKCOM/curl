@@ -2,6 +2,8 @@ curl (7.21.2-4) unstable; urgency=low
 
   * support for curl library built against nss.
     (closes: #606244)
+  * honour DEB_BUILD_OPTIONS=nocheck option.
+    (closes: #606059)
 
  -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Thu, 09 Dec 2010 20:11:37 +0530
 

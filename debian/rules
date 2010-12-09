@@ -27,17 +27,21 @@ else
 CROSS= --build $(DEB_BUILD_GNU_TYPE)
 endif
 
-DO_TEST=no
-ifeq (${DEB_BUILD_GNU_TYPE},${DEB_HOST_GNU_TYPE})
-ifneq (${DEB_BUILD_ARCH},m68k)
-ifneq (${DEB_BUILD_ARCH_OS},kfreebsd)
-ifneq (${DEB_BUILD_ARCH_OS},knetbsd)
-ifneq (${DEB_BUILD_ARCH_OS},hurd)
-DO_TEST=yes
-endif
-endif
-endif
-endif
+ifneq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+    DO_TEST=no
+else
+    DO_TEST=no
+    ifeq (${DEB_BUILD_GNU_TYPE},${DEB_HOST_GNU_TYPE})
+    ifneq (${DEB_BUILD_ARCH},m68k)
+    ifneq (${DEB_BUILD_ARCH_OS},kfreebsd)
+    ifneq (${DEB_BUILD_ARCH_OS},knetbsd)
+    ifneq (${DEB_BUILD_ARCH_OS},hurd)
+        DO_TEST=yes
+    endif
+    endif
+    endif
+    endif
+    endif
 endif
 
 SHLIBS_VERSION=7.16.2-1
