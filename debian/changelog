@@ -1,3 +1,9 @@
+curl (7.21.3-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Wed, 15 Dec 2010 23:39:26 +0530
+
 curl (7.21.2-4) unstable; urgency=low
 
   * support for curl library built against nss.
