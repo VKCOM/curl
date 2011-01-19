@@ -1,6 +1,9 @@
 curl (7.21.3-1) unstable; urgency=low
 
   * New upstream release.
+  * debian/*.manpages: adding all manpages for the curl library.
+    (closes: #605651)
+  * gnutls->handshake: improved timeout handling. See #594150 for details.
 
  -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Wed, 15 Dec 2010 23:39:26 +0530
 
