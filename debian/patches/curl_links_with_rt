@@ -1,5 +1,5 @@
 diff --git a/src/Makefile.am b/src/Makefile.am
-index f2b4c8c..27e2066 100644
+index 8b3c0b6..9188e82 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -49,7 +49,7 @@ include Makefile.inc
