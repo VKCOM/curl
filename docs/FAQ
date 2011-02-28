@@ -1,4 +1,4 @@
-Updated: October 6, 2010 (http://curl.haxx.se/docs/faq.html)
+Updated: January 29, 2011 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -446,10 +446,10 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS or PolarSSL,
-  although there should not be many problems using a different library. If
-  anyone does "port" curl to use a different SSL library, we are of course
-  very interested in getting the patch!
+  Curl has been written to use OpenSSL, GnuTLS, yassl, NSS, PolarSSL, axTLS or
+  qssl, although there should not be many problems using a different
+  library. If anyone does "port" curl to use a different SSL library, we are
+  of course very interested in getting the patch!
 
   2.3 Where can I find a copy of LIBEAY32.DLL?
 
@@ -1224,16 +1224,18 @@ FAQ
 
   5.13 How do I stop an ongoing transfer?
 
-  There are several ways, but none of them are instant. There is no function
-  you can call from another thread or similar that will stop it immediately.
+  With the easy interface you make sure to return the correct error code from
+  one of the callbacks, but none of them are instant. There is no function you
+  can call from another thread or similar that will stop it immediately.
   Instead you need to make sure that one of the callbacks you use return an
   appropriate value that will stop the transfer.
 
   Suitable callbacks that you can do this with include the progress callback,
   the read callback and the write callback.
 
-  If you're using the multi interface, you also stop a transfer by removing
-  the particular easy handle from the multi stack.
+  If you're using the multi interface, you can also stop a transfer by
+  removing the particular easy handle from the multi stack. At any moment you
+  think the transfer is done.
 
   5.14 Using C++ non-static functions for callbacks?
 
@@ -1345,12 +1347,16 @@ FAQ
   You do not have to reveal or make public any changes to the libcurl source
   code.
 
-  You do not have to reveal or make public that you are using libcurl within
+  You do not have to broadcast to the world that you are using libcurl within
   your app.
 
-  As can be seen here: http://curl.haxx.se/docs/companies.html and
-  elsewhere, more and more companies are discovering the power
-  of libcurl and take advantage of it even in commercial environments.
+  All we ask is that you disclose "the copyright notice and this permission
+  notice" somewhere. Most probably like in the documentation or in the section
+  where other third party dependencies already are mentioned and acknowledged.
+
+  As can be seen here: http://curl.haxx.se/docs/companies.html and elsewhere,
+  more and more companies are discovering the power of libcurl and take
+  advantage of it even in commercial environments.
 
 
 7. PHP/CURL Issues

@@ -336,6 +336,17 @@ p.roffit {
 <p class="level1"><a name="CURLAUTHONLY"></a><span class="nroffip">CURLAUTH_ONLY</span> 
 <p class="level2">This is a meta symbol. Or this value together with a single specific auth value to force libcurl to probe for un-restricted auth and if not, only that single auth algorithm is acceptable. (Added in 7.21.3) 
 <p class="level1">
+<p class="level0"><a name="CURLOPTTLSAUTHTYPE"></a><span class="nroffip">CURLOPT_TLSAUTH_TYPE</span> 
+<p class="level1">Pass a long as parameter, which is set to a bitmask, to tell libcurl which authentication method(s) you want it to use for TLS authentication. 
+<p class="level2">
+<p class="level1"><a name="CURLOPTTLSAUTHSRP"></a><span class="nroffip">CURLOPT_TLSAUTH_SRP</span> 
+<p class="level2">TLS-SRP authentication. Secure Remote Password authentication for TLS is defined in RFC 5054 and provides mutual authentication if both sides have a shared secret. To use TLS-SRP, you must also set the <a class="emphasis" href="#CURLOPTTLSAUTHUSERNAME">CURLOPT_TLSAUTH_USERNAME</a> and <a class="emphasis" href="#CURLOPTTLSAUTHPASSWORD">CURLOPT_TLSAUTH_PASSWORD</a> options. 
+<p class="level2">You need to build libcurl with GnuTLS and with TLS-SRP support for this to work. (Added in 7.21.4) 
+<p class="level1">
+<p class="level0"><a name="CURLOPTTLSAUTHUSERNAME"></a><span class="nroffip">CURLOPT_TLSAUTH_USERNAME</span> 
+<p class="level1">Pass a char * as parameter, which should point to the zero-terminated username to use for the TLS authentication method specified with the <a class="emphasis" href="#CURLOPTTLSAUTHTYPE">CURLOPT_TLSAUTH_TYPE</a> option. Requires that the <span Class="emphasis">CURLOPT_TLS_PASSWORD</span> option also be set. (Added in 7.21.4) 
+<p class="level0"><a name="CURLOPTTLSAUTHPASSWORD"></a><span class="nroffip">CURLOPT_TLSAUTH_PASSWORD</span> 
+<p class="level1">Pass a char * as parameter, which should point to the zero-terminated password to use for the TLS authentication method specified with the <a class="emphasis" href="#CURLOPTTLSAUTHTYPE">CURLOPT_TLSAUTH_TYPE</a> option. Requires that the <span Class="emphasis">CURLOPT_TLS_USERNAME</span> option also be set. (Added in 7.21.4) 
 <p class="level0"><a name="CURLOPTPROXYAUTH"></a><span class="nroffip">CURLOPT_PROXYAUTH</span> 
 <p class="level1">Pass a long as parameter, which is set to a bitmask, to tell libcurl which authentication method(s) you want it to use for your proxy authentication.  If more than one bit is set, libcurl will first query the site to see what authentication methods it supports and then pick the best one you allow it to use. For some methods, this will induce an extra network round-trip. Set the actual name and password with the <a class="emphasis" href="#CURLOPTPROXYUSERPWD">CURLOPT_PROXYUSERPWD</a> option. The bitmask can be constructed by or'ing together the bits listed above for the <a class="emphasis" href="#CURLOPTHTTPAUTH">CURLOPT_HTTPAUTH</a> option. As of this writing, only Basic, Digest and NTLM work. (Added in 7.10.7) <a name="HTTP"></a><h2 class="nroffsh">HTTP OPTIONS</h2>
 <p class="level0">
@@ -436,6 +447,7 @@ p.roffit {
 <p class="level0">
 <p class="level0"><a name="CURLOPTMAILFROM"></a><span class="nroffip">CURLOPT_MAIL_FROM</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. It will be used to specify the sender address in a mail when sending an SMTP mail with libcurl. 
+<p class="level1">An originator email address in SMTP lingo is specified within angle brackets (&lt;&gt;) which libcurl will not add for you before version 7.21.4. Failing to provide such brackets may cause the server to reject your mail. 
 <p class="level1">(Added in 7.20.0) 
 <p class="level0"><a name="CURLOPTMAILRCPT"></a><span class="nroffip">CURLOPT_MAIL_RCPT</span> 
 <p class="level1">Pass a pointer to a linked list of recipients to pass to the server in your SMTP mail request.  The linked list should be a fully valid list of <span class="bold">struct curl_slist</span> structs properly filled in. Use <a class="emphasis" href="./curl_slist_append.html">curl_slist_append(3)</a> to create the list and <a class="emphasis" href="./curl_slist_free_all.html">curl_slist_free_all(3)</a> to clean up an entire list. 
@@ -612,7 +624,7 @@ p.roffit {
 <p class="level1">Pass a curl_off_t as parameter. This allows you to specify the maximum size (in bytes) of a file to download. If the file requested is larger than this value, the transfer will not start and <span Class="emphasis">CURLE_FILESIZE_EXCEEDED</span> will be returned. (Added in 7.11.0) 
 <p class="level1">The file size is not always known prior to download, and for such files this option has no effect even if the file transfer ends up being larger than this given limit. This concerns both FTP and HTTP transfers. 
 <p class="level0"><a name="CURLOPTTIMECONDITION"></a><span class="nroffip">CURLOPT_TIMECONDITION</span> 
-<p class="level1">Pass a long as parameter. This defines how the <a class="emphasis" href="#CURLOPTTIMEVALUE">CURLOPT_TIMEVALUE</a> time value is treated. You can set this parameter to <span Class="emphasis">CURL_TIMECOND_IFMODSINCE</span> or <span Class="emphasis">CURL_TIMECOND_IFUNMODSINCE</span>. This feature applies to HTTP, FTP, and RTSP. 
+<p class="level1">Pass a long as parameter. This defines how the <a class="emphasis" href="#CURLOPTTIMEVALUE">CURLOPT_TIMEVALUE</a> time value is treated. You can set this parameter to <span Class="emphasis">CURL_TIMECOND_IFMODSINCE</span> or <span Class="emphasis">CURL_TIMECOND_IFUNMODSINCE</span>. This feature applies to HTTP, FTP, RTSP, and FILE. 
 <p class="level1">The last modification time of a file is not always known and in such instances this feature will have no effect even if the given time condition would not have been met. <a class="emphasis" href="./curl_easy_getinfo.html">curl_easy_getinfo(3)</a> with the <span Class="emphasis">CURLINFO_CONDITION_UNMET</span> option can be used after a transfer to learn if a zero-byte successful "transfer" was due to this condition not matching. 
 <p class="level0"><a name="CURLOPTTIMEVALUE"></a><span class="nroffip">CURLOPT_TIMEVALUE</span> 
 <p class="level1">Pass a long as parameter. This should be the time in seconds since 1 Jan 1970, and the time will be used in a condition as specified with <a class="emphasis" href="#CURLOPTTIMECONDITION">CURLOPT_TIMECONDITION</a>. <a name="CONNECTION"></a><h2 class="nroffsh">CONNECTION OPTIONS</h2>
@@ -682,7 +694,7 @@ p.roffit {
 <p class="level0">
 <p class="level0"><a name="CURLOPTSSLCERT"></a><span class="nroffip">CURLOPT_SSLCERT</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the file name of your certificate. The default format is "PEM" and can be changed with <a class="emphasis" href="#CURLOPTSSLCERTTYPE">CURLOPT_SSLCERTTYPE</a>. 
-<p class="level1">With NSS this is the nickname of the certificate you wish to authenticate with. 
+<p class="level1">With NSS this can also be the nickname of the certificate you wish to authenticate with. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname. 
 <p class="level0"><a name="CURLOPTSSLCERTTYPE"></a><span class="nroffip">CURLOPT_SSLCERTTYPE</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the format of your certificate. Supported formats are "PEM" and "DER".  (Added in 7.9.3) 
 <p class="level0"><a name="CURLOPTSSLKEY"></a><span class="nroffip">CURLOPT_SSLKEY</span> 
@@ -713,11 +725,11 @@ p.roffit {
 <p class="level2">Force SSLv3 
 <p class="level1">
 <p class="level0"><a name="CURLOPTSSLVERIFYPEER"></a><span class="nroffip">CURLOPT_SSL_VERIFYPEER</span> 
-<p class="level1">Pass a long as parameter. 
-<p class="level1">This option determines whether curl verifies the authenticity of the peer's certificate. A value of 1 means curl verifies; zero means it doesn't.  The default is nonzero, but before 7.10, it was zero. 
-<p class="level1">When negotiating an SSL connection, the server sends a certificate indicating its identity.  Curl verifies whether the certificate is authentic, i.e. that you can trust that the server is who the certificate says it is.  This trust is based on a chain of digital signatures, rooted in certification authority (CA) certificates you supply.  As of 7.10, curl installs a default bundle of CA certificates and you can specify alternate certificates with the <a class="emphasis" href="#CURLOPTCAINFO">CURLOPT_CAINFO</a> option or the <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> option. 
-<p class="level1">When <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is nonzero, and the verification fails to prove that the certificate is authentic, the connection fails.  When the option is zero, the connection succeeds regardless. 
-<p class="level1">Authenticating the certificate is not by itself very useful.  You typically want to ensure that the server, as authentically identified by its certificate, is the server you mean to be talking to.  Use <a class="emphasis" href="#CURLOPTSSLVERIFYHOST">CURLOPT_SSL_VERIFYHOST</a> to control that. 
+<p class="level1">Pass a long as parameter. By default, curl assumes a value of 1. 
+<p class="level1">This option determines whether curl verifies the authenticity of the peer's certificate. A value of 1 means curl verifies; 0 (zero) means it doesn't. 
+<p class="level1">When negotiating an SSL connection, the server sends a certificate indicating its identity.  Curl verifies whether the certificate is authentic, i.e. that you can trust that the server is who the certificate says it is.  This trust is based on a chain of digital signatures, rooted in certification authority (CA) certificates you supply.  curl uses a default bundle of CA certificates (the path for that is determined at build time) and you can specify alternate certificates with the <a class="emphasis" href="#CURLOPTCAINFO">CURLOPT_CAINFO</a> option or the <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> option. 
+<p class="level1">When <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is nonzero, and the verification fails to prove that the certificate is authentic, the connection fails.  When the option is zero, the peer certificate verification succeeds regardless. 
+<p class="level1">Authenticating the certificate is not by itself very useful.  You typically want to ensure that the server, as authentically identified by its certificate, is the server you mean to be talking to.  Use <a class="emphasis" href="#CURLOPTSSLVERIFYHOST">CURLOPT_SSL_VERIFYHOST</a> to control that. The check that the host name in the certificate is valid for the host name you're connecting to is done independently of the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option. 
 <p class="level0"><a name="CURLOPTCAINFO"></a><span class="nroffip">CURLOPT_CAINFO</span> 
 <p class="level1">Pass a char * to a zero terminated string naming a file holding one or more certificates to verify the peer with.  This makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option.  If <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is zero, <a class="emphasis" href="#CURLOPTCAINFO">CURLOPT_CAINFO</a> need not even indicate an accessible file. 
 <p class="level1">This option is by default set to the system path where libcurl's cacert bundle is assumed to be stored, as established at build time. 
@@ -727,18 +739,12 @@ p.roffit {
 <p class="level1">This option makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option. Otherwise, the result of the check is not considered as failure. 
 <p class="level1">A specific error code (CURLE_SSL_ISSUER_ERROR) is defined with the option, which is returned if the setup of the SSL/TLS session has failed due to a mismatch with the issuer of peer certificate (<a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> has to be set too for the check to fail). (Added in 7.19.0) 
 <p class="level0"><a name="CURLOPTCAPATH"></a><span class="nroffip">CURLOPT_CAPATH</span> 
-<p class="level1">Pass a char * to a zero terminated string naming a directory holding multiple CA certificates to verify the peer with. The certificate directory must be prepared using the openssl c_rehash utility. This makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option.  If <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is zero, <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> need not even indicate an accessible path.  The <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> function apparently does not work in Windows due to some limitation in openssl. This option is OpenSSL-specific and does nothing if libcurl is built to use GnuTLS. 
+<p class="level1">Pass a char * to a zero terminated string naming a directory holding multiple CA certificates to verify the peer with. If libcurl is built against OpenSSL, the certificate directory must be prepared using the openssl c_rehash utility. This makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option.  If <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is zero, <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> need not even indicate an accessible path.  The <a class="emphasis" href="#CURLOPTCAPATH">CURLOPT_CAPATH</a> function apparently does not work in Windows due to some limitation in openssl. This option is OpenSSL-specific and does nothing if libcurl is built to use GnuTLS. NSS-powered libcurl provides the option only for backward compatibility. 
 <p class="level0"><a name="CURLOPTCRLFILE"></a><span class="nroffip">CURLOPT_CRLFILE</span> 
 <p class="level1">Pass a char * to a zero terminated string naming a file with the concatenation of CRL (in PEM format) to use in the certificate validation that occurs during the SSL exchange. 
 <p class="level1">When curl is built to use NSS or GnuTLS, there is no way to influence the use of CRL passed to help in the verification process. When libcurl is built with OpenSSL support, X509_V_FLAG_CRL_CHECK and X509_V_FLAG_CRL_CHECK_ALL are both set, requiring CRL check against all the elements of the certificate chain if a CRL file is passed. 
 <p class="level1">This option makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option. 
 <p class="level1">A specific error code (CURLE_SSL_CRL_BADFILE) is defined with the option. It is returned when the SSL exchange fails because the CRL file cannot be loaded. A failure in certificate verification due to a revocation information found in the CRL does not trigger this specific error. (Added in 7.19.0) 
-<p class="level0"><a name="CURLOPTCERTINFO"></a><span class="nroffip">CURLOPT_CERTINFO</span> 
-<p class="level1">Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With this enabled, libcurl (if built with OpenSSL) will extract lots of information and data about the certificates in the certificate chain used in the SSL connection. This data is then possible to extract after a transfer using <a class="emphasis" href="./curl_easy_getinfo.html">curl_easy_getinfo(3)</a> and its option <span Class="emphasis">CURLINFO_CERTINFO</span>. (Added in 7.19.1) 
-<p class="level0"><a name="CURLOPTRANDOMFILE"></a><span class="nroffip">CURLOPT_RANDOM_FILE</span> 
-<p class="level1">Pass a char * to a zero terminated file name. The file will be used to read from to seed the random engine for SSL. The more random the specified file is, the more secure the SSL connection will become. 
-<p class="level0"><a name="CURLOPTEGDSOCKET"></a><span class="nroffip">CURLOPT_EGDSOCKET</span> 
-<p class="level1">Pass a char * to the zero terminated path name to the Entropy Gathering Daemon socket. It will be used to seed the random engine for SSL. 
 <p class="level0"><a name="CURLOPTSSLVERIFYHOST"></a><span class="nroffip">CURLOPT_SSL_VERIFYHOST</span> 
 <p class="level1">Pass a long as parameter. 
 <p class="level1">This option determines whether libcurl verifies that the server cert is for the server it is known as. 
@@ -747,8 +753,14 @@ p.roffit {
 <p class="level1">Curl considers the server the intended one when the Common Name field or a Subject Alternate Name field in the certificate matches the host name in the URL to which you told Curl to connect. 
 <p class="level1">When the value is 1, the certificate must contain a Common Name field, but it doesn't matter what name it says.  (This is not ordinarily a useful setting). 
 <p class="level1">When the value is 0, the connection succeeds regardless of the names in the certificate. 
-<p class="level1">The default, since 7.10, is 2. 
-<p class="level1">This option controls checking the server's claimed identity.  The server could be lying.  To control lying, see <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a>. 
+<p class="level1">The default value for this option is 2. 
+<p class="level1">This option controls checking the server's certificate's claimed identity. The server could be lying.  To control lying, see <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a>. 
+<p class="level0"><a name="CURLOPTCERTINFO"></a><span class="nroffip">CURLOPT_CERTINFO</span> 
+<p class="level1">Pass a long set to 1 to enable libcurl's certificate chain info gatherer. With this enabled, libcurl (if built with OpenSSL) will extract lots of information and data about the certificates in the certificate chain used in the SSL connection. This data is then possible to extract after a transfer using <a class="emphasis" href="./curl_easy_getinfo.html">curl_easy_getinfo(3)</a> and its option <span Class="emphasis">CURLINFO_CERTINFO</span>. (Added in 7.19.1) 
+<p class="level0"><a name="CURLOPTRANDOMFILE"></a><span class="nroffip">CURLOPT_RANDOM_FILE</span> 
+<p class="level1">Pass a char * to a zero terminated file name. The file will be used to read from to seed the random engine for SSL. The more random the specified file is, the more secure the SSL connection will become. 
+<p class="level0"><a name="CURLOPTEGDSOCKET"></a><span class="nroffip">CURLOPT_EGDSOCKET</span> 
+<p class="level1">Pass a char * to the zero terminated path name to the Entropy Gathering Daemon socket. It will be used to seed the random engine for SSL. 
 <p class="level0"><a name="CURLOPTSSLCIPHERLIST"></a><span class="nroffip">CURLOPT_SSL_CIPHER_LIST</span> 
 <p class="level1">Pass a char *, pointing to a zero terminated string holding the list of ciphers to use for the SSL connection. The list must be syntactically correct, it consists of one or more cipher strings separated by colons. Commas or spaces are also acceptable separators but colons are normally used, !, - and + can be used as operators. 
 <p class="level1">For OpenSSL and GnuTLS valid examples of cipher lists include 'RC4-SHA', &acute;SHA1+DES&acute;, 'TLSv1' and 'DEFAULT'. The default list is normally set when you compile OpenSSL. 

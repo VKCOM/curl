@@ -103,6 +103,7 @@
 			Name="Source Files"
 			>
 
+<File RelativePath="axtls.c"></File>
 <File RelativePath="base64.c"></File>
 <File RelativePath="connect.c"></File>
 <File RelativePath="content_encoding.c"></File>
@@ -140,7 +141,9 @@
 <File RelativePath="http_chunks.c"></File>
 <File RelativePath="http_digest.c"></File>
 <File RelativePath="http_negotiate.c"></File>
+<File RelativePath="http_negotiate_sspi.c"></File>
 <File RelativePath="http_ntlm.c"></File>
+<File RelativePath="idn_win32.c"></File>
 <File RelativePath="if2ip.c"></File>
 <File RelativePath="imap.c"></File>
 <File RelativePath="inet_ntop.c"></File>
@@ -195,6 +198,7 @@
 <File RelativePath="wildcard.c"></File>
 </Filter><Filter	Name="Header Files">
 <File RelativePath="arpa_telnet.h"></File>
+<File RelativePath="axtls.h"></File>
 <File RelativePath="config-win32.h"></File>
 <File RelativePath="connect.h"></File>
 <File RelativePath="content_encoding.h"></File>
