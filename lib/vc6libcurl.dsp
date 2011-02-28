@@ -150,6 +150,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\axtls.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\base64.c
 # End Source File
 # Begin Source File
@@ -298,7 +302,15 @@ SOURCE=.\http_negotiate.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\http_negotiate_sspi.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\http_ntlm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\idn_win32.c
 # End Source File
 # Begin Source File
 
@@ -515,6 +527,10 @@ SOURCE=.\wildcard.c
 # Begin Source File
 
 SOURCE=.\arpa_telnet.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\axtls.h
 # End Source File
 # Begin Source File
 
