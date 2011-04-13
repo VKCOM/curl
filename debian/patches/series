@@ -1,5 +1,6 @@
 #libtool
 sslv2_disable
+error_code
 no_com_err
 runtests_gdb
 art_http_scripting
