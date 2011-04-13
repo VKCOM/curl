@@ -1,3 +1,12 @@
+curl (7.21.4-2) unstable; urgency=low
+
+  * debian/patches/{sslv2-disable, series}: Apply the
+    upstream commit c66b0b32fba175d5f096c944d8ec8f9f06299f4a.
+    (closes: #622016)
+  * debian/{rules, control}: enable rtmp. (closes: #622328)    
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Wed, 13 Apr 2011 16:15:27 -0700
+
 curl (7.21.4-1) unstable; urgency=low
 
   * New upstream release.
