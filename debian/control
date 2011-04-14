@@ -2,7 +2,7 @@ Source: curl
 Section: web
 Priority: optional
 Maintainer: Ramakrishnan Muthukrishnan <rkrishnan@debian.org>
-Build-Depends: debhelper (>> 5), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, libnss3-dev, zlib1g-dev, stunnel, libkrb5-dev [!hurd-i386], libidn11-dev, groff-base, libdb-dev (>= 4.6), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev, librtmp-dev
+Build-Depends: debhelper (>> 5), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, libnss3-dev, zlib1g-dev, stunnel, libkrb5-dev, libidn11-dev, groff-base, libdb-dev (>= 4.6), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev, librtmp-dev
 Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.1
 Vcs-Browser: http://git.debian.org/?p=collab-maint/curl.git
@@ -72,7 +72,7 @@ Suggests: libcurl3-dbg
 Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-openssl-dev, libcurl3-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-openssl-dev, libcurl3-dev (<< 7.14.1-1)
 Conflicts: libcurl-dev
-Depends: libcurl3 (= ${binary:Version}), libc6-dev | libc-dev, libssl-dev, zlib1g-dev, libidn11-dev, libkrb5-dev | hurd, libssh2-1-dev, libldap2-dev, ${misc:Depends}
+Depends: libcurl3 (= ${binary:Version}), libc6-dev | libc-dev, libssl-dev, zlib1g-dev, libidn11-dev, libkrb5-dev, libssh2-1-dev, libldap2-dev, ${misc:Depends}
 Description: Development files and documentation for libcurl (OpenSSL)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
@@ -88,7 +88,7 @@ Suggests: libcurl3-dbg
 Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-gnutls-dev, libcurl4-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-gnutls-dev, libcurl4-dev
 Conflicts: libcurl-dev
-Depends: libcurl3-gnutls (= ${binary:Version}), libc6-dev | libc-dev, libgnutls-dev, zlib1g-dev, libidn11-dev, libkrb5-dev | hurd, libldap2-dev, ${misc:Depends}
+Depends: libcurl3-gnutls (= ${binary:Version}), libc6-dev | libc-dev, libgnutls-dev, zlib1g-dev, libidn11-dev, libkrb5-dev, libldap2-dev, ${misc:Depends}
 Description: Development files and documentation for libcurl (GnuTLS)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
@@ -104,7 +104,7 @@ Suggests: libcurl3-dbg
 Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
 Conflicts: libcurl-dev
-Depends: libcurl3-nss (= ${binary:Version}), libc6-dev | libc-dev, libnss3-dev, zlib1g-dev, libidn11-dev, libkrb5-dev | hurd, libldap2-dev, ${misc:Depends}
+Depends: libcurl3-nss (= ${binary:Version}), libc6-dev | libc-dev, libnss3-dev, zlib1g-dev, libidn11-dev, libkrb5-dev, libldap2-dev, ${misc:Depends}
 Description: Development files and documentation for libcurl (NSS)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
