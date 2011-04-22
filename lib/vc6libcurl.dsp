@@ -202,6 +202,10 @@ SOURCE=.\curl_threads.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\cyassl.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dict.c
 # End Source File
 # Begin Source File
@@ -307,6 +311,10 @@ SOURCE=.\http_negotiate_sspi.c
 # Begin Source File
 
 SOURCE=.\http_ntlm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\http_proxy.c
 # End Source File
 # Begin Source File
 
@@ -610,6 +618,10 @@ SOURCE=.\curlx.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\cyassl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\dict.h
 # End Source File
 # Begin Source File
@@ -679,6 +691,10 @@ SOURCE=.\http_negotiate.h
 # Begin Source File
 
 SOURCE=.\http_ntlm.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\http_proxy.h
 # End Source File
 # Begin Source File
 
