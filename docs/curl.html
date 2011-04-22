@@ -161,7 +161,7 @@ p.roffit {
 <p class="level0"><a name="--egd-file"></a><span class="nroffip">--egd-file &lt;file&gt;</span> 
 <p class="level1">(SSL) Specify the path name to the Entropy Gathering Daemon socket. The socket is used to seed the random engine for SSL connections. See also the <a class="emphasis" href="#--random-file">--random-file</a> option. 
 <p class="level0"><a name="-E--cert"></a><span class="nroffip">-E/--cert &lt;certificate[:password]&gt;</span> 
-<p class="level1">(SSL) Tells curl to use the specified certificate file when getting a file with HTTPS or FTPS. The certificate must be in PEM format.  If the optional password isn't specified, it will be queried for on the terminal. Note that this option assumes a "certificate" file that is the private key and the private certificate concatenated! See <span Class="emphasis">--cert</span> and <a class="emphasis" href="#--key">--key</a> to specify them independently. 
+<p class="level1">(SSL) Tells curl to use the specified client certificate file when getting a file with HTTPS, FTPS or another SSL-based protocol. The certificate must be in PEM format.  If the optional password isn't specified, it will be queried for on the terminal. Note that this option assumes a "certificate" file that is the private key and the private certificate concatenated! See <span Class="emphasis">--cert</span> and <a class="emphasis" href="#--key">--key</a> to specify them independently. 
 <p class="level1">If curl is built against the NSS SSL library then this option can tell curl the nickname of the certificate to use within the NSS database defined by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be loaded. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--cert-type"></a><span class="nroffip">--cert-type &lt;type&gt;</span> 
@@ -342,6 +342,11 @@ p.roffit {
 <p class="level1"><span Class="bold">machine host.domain.com login myself password secret</span> 
 <p class="level0"><a name="--netrc-optional"></a><span class="nroffip">--netrc-optional</span> 
 <p class="level1">Very similar to <span Class="emphasis">--netrc</span>, but this option makes the .netrc usage <span Class="bold">optional</span> and not mandatory as the <span Class="emphasis">--netrc</span> option does. 
+<p class="level1">
+<p class="level0"><a name="--netrc-file"></a><span class="nroffip">--netrc-file</span> 
+<p class="level1">This option is similar to <span Class="emphasis">--netrc</span>, except that you provide the path (absolute or relative) to the netrc file that Curl should use. You can only specify one netrc file per invocation. If several <a class="emphasis" href="#--netrc-file">--netrc-file</a> options are provided, only the <span Class="bold">last one</span> will be used. (Added in 7.21.5) 
+<p class="level1">This option overrides any use of <span Class="emphasis">--netrc</span> as they are mutually exclusive. It will also abide by --netrc-optional if specified. 
+<p class="level1">
 <p class="level0"><a name="--negotiate"></a><span class="nroffip">--negotiate</span> 
 <p class="level1">(HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was designed by Microsoft and is used in their web applications. It is primarily meant as a support for Kerberos5 authentication but may be also used along with another authentication method. For more information see IETF draft draft-brezak-spnego-http-04.txt. 
 <p class="level1">If you want to enable Negotiate for your proxy authentication, then use <a class="emphasis" href="#--proxy-negotiate">--proxy-negotiate</a>. 
@@ -374,6 +379,7 @@ p.roffit {
 <p class="level0"><a name="-O--remote-name"></a><span class="nroffip">-O/--remote-name</span> 
 <p class="level1">Write output to a local file named like the remote file we get. (Only the file part of the remote file is used, the path is cut off.) 
 <p class="level1">The remote file name to use for saving is extracted from the given URL, nothing else. 
+<p class="level1">Consequentially, the file will be saved in the current working directory. If you want the file saved in a different directory, make sure you change current working directory before you invoke curl with the <a class="bold" href="#-O--remote-name">-O/--remote-name</a> flag! 
 <p class="level1">You may use this option as many times as the number of URLs you have. 
 <p class="level0"><a name="--remote-name-all"></a><span class="nroffip">--remote-name-all</span> 
 <p class="level1">This option changes the default action for all given URLs to be dealt with as if <a class="emphasis" href="#-O--remote-name">-O/--remote-name</a> were used for each one. So if you want to disable that for a specific URL after <a class="emphasis" href="#--remote-name-all">--remote-name-all</a> has been used, you must use "-o -" or <span Class="emphasis">--no-remote-name</span>. (Added in 7.19.0) 
@@ -703,6 +709,8 @@ p.roffit {
 <p class="level1">Failed to initialize. 
 <p class="level0"><a name="3"></a><span class="nroffip">3</span> 
 <p class="level1">URL malformed. The syntax was not correct. 
+<p class="level0"><a name="4"></a><span class="nroffip">4</span> 
+<p class="level1">A feature or option that was needed to perform the desired request was not enabled or was explicitly disabled at build-time. To make curl able to do this, you probably need another build of libcurl! 
 <p class="level0"><a name="5"></a><span class="nroffip">5</span> 
 <p class="level1">Couldn't resolve proxy. The given proxy host could not be resolved. 
 <p class="level0"><a name="6"></a><span class="nroffip">6</span> 
@@ -770,7 +778,7 @@ p.roffit {
 <p class="level0"><a name="47"></a><span class="nroffip">47</span> 
 <p class="level1">Too many redirects. When following redirects, curl hit the maximum amount. 
 <p class="level0"><a name="48"></a><span class="nroffip">48</span> 
-<p class="level1">Unknown TELNET option specified. 
+<p class="level1">Unknown option specified to libcurl. This indicates that you passed a weird option to curl that was passed on to libcurl and rejected. Read up in the manual! 
 <p class="level0"><a name="49"></a><span class="nroffip">49</span> 
 <p class="level1">Malformed telnet option. 
 <p class="level0"><a name="51"></a><span class="nroffip">51</span> 
