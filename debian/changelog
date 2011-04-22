@@ -1,3 +1,12 @@
+curl (7.21.5-1) unstable; urgency=low
+
+  * New Upstream version. (closes: #623459)
+  * debian/patches/{sslv2_disable, error_code}: removed as these
+    patches were backported earlier from new upstream and this
+    release incorporates them.
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Fri, 22 Apr 2011 13:14:41 +0530
+
 curl (7.21.4-2) unstable; urgency=low
 
   * debian/patches/{sslv2-disable, series}: Apply the
