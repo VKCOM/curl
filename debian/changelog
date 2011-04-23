@@ -1,3 +1,9 @@
+curl (7.21.6-1) unstable; urgency=low
+
+  * New upstream release to fix a HTTPS over a HTTP proxy bug on 7.21.5.
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Sat, 23 Apr 2011 07:12:57 +0530
+
 curl (7.21.5-1) unstable; urgency=low
 
   * New Upstream version. (closes: #623459)
