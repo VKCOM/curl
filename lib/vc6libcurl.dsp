@@ -378,6 +378,10 @@ SOURCE=.\netrc.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\non-ascii.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\nonblock.c
 # End Source File
 # Begin Source File
@@ -731,6 +735,10 @@ SOURCE=.\multiif.h
 # Begin Source File
 
 SOURCE=.\netrc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\non-ascii.h
 # End Source File
 # Begin Source File
 
