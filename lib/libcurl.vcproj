@@ -160,6 +160,7 @@
 <File RelativePath="mprintf.c"></File>
 <File RelativePath="multi.c"></File>
 <File RelativePath="netrc.c"></File>
+<File RelativePath="non-ascii.c"></File>
 <File RelativePath="nonblock.c"></File>
 <File RelativePath="nss.c"></File>
 <File RelativePath="openldap.c"></File>
@@ -249,6 +250,7 @@
 <File RelativePath="memdebug.h"></File>
 <File RelativePath="multiif.h"></File>
 <File RelativePath="netrc.h"></File>
+<File RelativePath="non-ascii.h"></File>
 <File RelativePath="nonblock.h"></File>
 <File RelativePath="nssg.h"></File>
 <File RelativePath="parsedate.h"></File>

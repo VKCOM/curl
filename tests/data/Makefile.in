@@ -139,6 +139,7 @@ MAINT = @MAINT@
 MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
+MANIFEST_TOOL = @MANIFEST_TOOL@
 MANOPT = @MANOPT@
 MIMPURE_FALSE = @MIMPURE_FALSE@
 MIMPURE_TRUE = @MIMPURE_TRUE@
@@ -197,6 +198,7 @@ USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
 VERSIONNUM = @VERSIONNUM@
+ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
@@ -231,7 +233,6 @@ libexecdir = @libexecdir@
 libext = @libext@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_ECHO = @lt_ECHO@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -313,7 +314,7 @@ EXTRA_DIST = test1 test108 test117 test127 test20 test27 test34 test46	   \
  test1203 test1117 test1118 test1119 test1120 test1300 test1301 test1302 \
  test1303 test320 test321 test322 test323 test324 test1121 test581 test580 \
  test1304 test1305 test1306 test1307 test582 test583 test808 test809       \
- test810 test811 test812 test813 test584
+ test810 test811 test812 test813 test584 test1122 test1123 test1124 test1125
 
 all: all-am
 

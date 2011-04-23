@@ -90,7 +90,7 @@ p.roffit {
 <p class="level1">NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS ciphers is in the NSSCipherSuite entry at this URL: <span Class="emphasis"><a href="http://directory.fedora.redhat.com/docs/mod_nss.html">http://directory.fedora.redhat.com/docs/mod_nss.html</a>#Directives</span> 
 <p class="level1">If this option is used several times, the last one will override the others. 
 <p class="level0"><a name="--compressed"></a><span class="nroffip">--compressed</span> 
-<p class="level1">(HTTP) Request a compressed response using one of the algorithms libcurl supports, and return the uncompressed document.  If this option is used and the server sends an unsupported encoding, curl will report an error. 
+<p class="level1">(HTTP) Request a compressed response using one of the algorithms libcurl supports, and save the uncompressed document.  If this option is used and the server sends an unsupported encoding, curl will report an error. 
 <p class="level0"><a name="--connect-timeout"></a><span class="nroffip">--connect-timeout &lt;seconds&gt;</span> 
 <p class="level1">Maximum time in seconds that you allow the connection to the server to take. This only limits the connection phase, once curl has connected this option is of no more use. See also the <a class="emphasis" href="#-m--max-time">-m/--max-time</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
@@ -570,6 +570,9 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--trace-time"></a><span class="nroffip">--trace-time</span> 
 <p class="level1">Prepends a time stamp to each trace or verbose line that curl displays. (Added in 7.14.0) 
+<p class="level0"><a name="--tr-encoding"></a><span class="nroffip">--tr-encoding</span> 
+<p class="level1">(HTTP) Request a compressed Transfer-Encoding response using one of the algorithms libcurl supports, and uncompress the data while receiving it. 
+<p class="level1">(Added in 7.21.6) 
 <p class="level0"><a name="-u--user"></a><span class="nroffip">-u/--user &lt;user:password&gt;</span> 
 <p class="level1">Specify the user name and password to use for server authentication. Overrides <a class="emphasis" href="#-n--netrc">-n/--netrc</a> and <a class="emphasis" href="#--netrc-optional">--netrc-optional</a>. 
 <p class="level1">If you just give the user name (without entering a colon) curl will prompt for a password. 
