@@ -2,7 +2,7 @@ Source: curl
 Section: web
 Priority: optional
 Maintainer: Ramakrishnan Muthukrishnan <rkrishnan@debian.org>
-Build-Depends: debhelper (>> 5), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, libnss3-dev, zlib1g-dev, stunnel, libkrb5-dev, libidn11-dev, groff-base, libdb-dev (>= 4.6), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev, librtmp-dev
+Build-Depends: debhelper (>> 8.1.3), autoconf, libtool, automake1.9, binutils (>= 2.14.90.0.7), libssl-dev, libgnutls-dev, libnss3-dev, zlib1g-dev, stunnel, libkrb5-dev, libidn11-dev, groff-base, libdb-dev (>= 4.6), libldap2-dev, quilt, libssh2-1-dev (>= 1.2), libgcrypt11-dev, librtmp-dev
 Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.2.0
 Vcs-Browser: http://git.debian.org/?p=collab-maint/curl.git
@@ -29,6 +29,8 @@ Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
 Replaces: libcurl2 (<< 1:7.11.2-2), libcurl4
 Conflicts: libcurl4
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
 Description: Multi-protocol file transfer library (OpenSSL)
  libcurl is designed to be a solid, usable, reliable and portable
  multi-protocol file transfer library.
@@ -43,6 +45,8 @@ Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
 Replaces: libcurl4-gnutls
 Conflicts: libcurl4-gnutls
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
 Description: Multi-protocol file transfer library (GnuTLS)
  libcurl is designed to be a solid, usable, reliable and portable
  multi-protocol file transfer library.
@@ -57,6 +61,8 @@ Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}, ca-certificates
 Replaces: libcurl4-nss
 Conflicts: libcurl4-nss
+Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
 Description: Multi-protocol file transfer library (NSS)
  libcurl is designed to be a solid, usable, reliable and portable
  multi-protocol file transfer library.
@@ -122,6 +128,7 @@ Provides: libcurl4-dbg
 Replaces: libcurl4-dbg
 Conflicts: libcurl4-dbg
 Depends: libcurl3 (= ${binary:Version}) | libcurl3-gnutls (= ${binary:Version}) | libcurl3-nss (= ${binary:Version}), ${misc:Depends}
+Multi-Arch: same
 Description: libcurl compiled with debug symbols
  This contains the debug symbols of both the OpenSSL, GnuTLS and NSS versions
  of libcurl3. It might be useful in debug sessions of software which uses

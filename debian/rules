@@ -15,6 +15,7 @@ DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
 DEB_BUILD_ARCH_OS ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH_OS)
 DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 # set the number of build jobs
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
@@ -49,7 +50,7 @@ SHLIBS_VERSION=7.16.2-1
 # this will catch miss-linking. (e.g. undefined symbols)
 # LDFLAGS = -Wl,-z,defs
 
-CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking --enable-ipv6 --with-lber-lib=lber --enable-manual --enable-versioned-symbols --with-librtmp
+CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking --enable-ipv6 --with-lber-lib=lber --enable-manual --enable-versioned-symbols --with-librtmp --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 # this is still not ready
 # --enable-ares
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
@@ -115,13 +116,21 @@ clean:
 	dh_testroot
 	-quilt pop -a
 	rm -rf build-stamp configure-stamp debian/build debian/build-gnutls debian/build-nss debian/tmp-gnutls debian/tmp-nss
-	dh_clean debian/shlibs.local
+	dh_clean debian/shlibs.local debian/libcurl3.links \
+		debian/libcurl3-gnutls.links debian/libcurl3-nss.links \
+		debian/libcurl4-gnutls-dev.links debian/libcurl4-nss-dev.links
 
 #install: DH_OPTIONS=
 install: build-stamp
 	dh_testdir
 	dh_testroot
 	dh_clean -k
+	for file in libcurl3.links libcurl3-gnutls.links libcurl3-nss.links \
+	            libcurl4-gnutls-dev.links libcurl4-nss-dev.links; \
+	do \
+		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
+			debian/$${file}.in > debian/$$file; \
+	done
 	dh_installdirs
 	${MAKE} -C debian/build DESTDIR=$(shell pwd)/debian/tmp install
 	${MAKE} -C debian/build-gnutls DESTDIR=$(shell pwd)/debian/tmp-gnutls install
