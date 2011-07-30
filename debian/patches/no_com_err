@@ -1,8 +1,14 @@
+commit 0354fc658df0f600850b8d3c9852cce7c1c68222
+Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
+Date:   Sat Jul 30 17:28:32 2011 +0530
+
+    no_com_err
+
 diff --git a/configure.ac b/configure.ac
-index 55f4ea7..4f5a86b 100644
+index e9b49c7..ff29e0e 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1245,7 +1245,8 @@ if test x"$want_gss" = xyes; then
+@@ -1266,7 +1266,8 @@ if test x"$want_gss" = xyes; then
             dnl krb5-config doesn't have --libs-only-L or similar, put everything
             dnl into LIBS
             gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`

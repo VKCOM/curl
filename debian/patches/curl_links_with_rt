@@ -1,5 +1,11 @@
+commit cab38832f0cc8d72d6ea66a77e6a5e90705fd0df
+Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
+Date:   Sat Jul 30 17:37:22 2011 +0530
+
+    curl_links_with_rt
+
 diff --git a/src/Makefile.am b/src/Makefile.am
-index 8b3c0b6..9188e82 100644
+index d697e78..78c8430 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -49,7 +49,7 @@ include Makefile.inc

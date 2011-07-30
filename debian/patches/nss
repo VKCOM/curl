@@ -1,8 +1,14 @@
+commit 4fd261ebc3240ca54c4b4603a7a6a8d43789ec0b
+Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
+Date:   Sat Jul 30 17:45:06 2011 +0530
+
+    nss
+
 diff --git a/configure.ac b/configure.ac
-index edba59d..8528b7d 100644
+index 5bbcf9e..35a4b5b 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1702,7 +1702,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
+@@ -1739,7 +1739,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
        CLEANCPPFLAGS="$CPPFLAGS"
        CLEANLDFLAGS="$LDFLAGS"
  
@@ -12,10 +18,10 @@ index edba59d..8528b7d 100644
        if test "$addcflags" != "-I/usr/include"; then
           CPPFLAGS="$CPPFLAGS $addcflags"
 diff --git a/docs/examples/Makefile.am b/docs/examples/Makefile.am
-index 22612bc..1a32d64 100644
+index ee6e47c..90eb37e 100644
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
-@@ -29,7 +29,7 @@ endif
+@@ -48,7 +48,7 @@ endif
  CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
  
  # Dependencies
@@ -25,7 +31,7 @@ index 22612bc..1a32d64 100644
  # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
  include Makefile.inc
 diff --git a/lib/Makefile.am b/lib/Makefile.am
-index 0b1b829..eb8ac99 100644
+index 1dc1b6d..e333aec 100644
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
 @@ -42,7 +42,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
@@ -37,16 +43,16 @@ index 0b1b829..eb8ac99 100644
  LIBCURL_LIBS = @LIBCURL_LIBS@
  
  # This might hold -Werror
-@@ -122,7 +122,7 @@ if VERSIONED_SYMBOLS
+@@ -120,7 +120,7 @@ if VERSIONED_SYMBOLS
  VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
  endif
  
--libcurl_gnutls_la_LDFLAGS = $(LINKFLAGS) $(VERSIONINFO) $(VERSIONED_SYMBOLS)
-+libcurl_nss_la_LDFLAGS = $(LINKFLAGS) $(VERSIONINFO) $(VERSIONED_SYMBOLS)
+-libcurl_gnutls_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
++libcurl_nss_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
  
- # as unit testing will compile and link everything an extra time, we only
- # do it if debug is enabled
-@@ -135,7 +135,7 @@ endif
+ # unit testing static library built only along with unit tests
+ if BUILD_UNITTESTS
+@@ -135,7 +135,7 @@ libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
@@ -56,7 +62,7 @@ index 0b1b829..eb8ac99 100644
  
  WIN32SOURCES = $(CSOURCES)
 diff --git a/src/Makefile.am b/src/Makefile.am
-index b8c0a9a..7090605 100644
+index bf82791..1b5e11d 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -49,8 +49,8 @@ include Makefile.inc
