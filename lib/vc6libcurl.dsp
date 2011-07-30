@@ -150,6 +150,14 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\asyn-ares.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\asyn-thread.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\axtls.c
 # End Source File
 # Begin Source File
@@ -262,10 +270,6 @@ SOURCE=.\hmac.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\hostares.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\hostasyn.c
 # End Source File
 # Begin Source File
@@ -283,10 +287,6 @@ SOURCE=.\hostip.c
 # Begin Source File
 
 SOURCE=.\hostsyn.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\hostthre.c
 # End Source File
 # Begin Source File
 
@@ -539,6 +539,10 @@ SOURCE=.\wildcard.c
 # Begin Source File
 
 SOURCE=.\arpa_telnet.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\asyn.h
 # End Source File
 # Begin Source File
 

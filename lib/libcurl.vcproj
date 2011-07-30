@@ -103,6 +103,8 @@
 			Name="Source Files"
 			>
 
+<File RelativePath="asyn-ares.c"></File>
+<File RelativePath="asyn-thread.c"></File>
 <File RelativePath="axtls.c"></File>
 <File RelativePath="base64.c"></File>
 <File RelativePath="connect.c"></File>
@@ -131,13 +133,11 @@
 <File RelativePath="gtls.c"></File>
 <File RelativePath="hash.c"></File>
 <File RelativePath="hmac.c"></File>
-<File RelativePath="hostares.c"></File>
 <File RelativePath="hostasyn.c"></File>
 <File RelativePath="hostip4.c"></File>
 <File RelativePath="hostip6.c"></File>
 <File RelativePath="hostip.c"></File>
 <File RelativePath="hostsyn.c"></File>
-<File RelativePath="hostthre.c"></File>
 <File RelativePath="http.c"></File>
 <File RelativePath="http_chunks.c"></File>
 <File RelativePath="http_digest.c"></File>
@@ -201,6 +201,7 @@
 <File RelativePath="wildcard.c"></File>
 </Filter><Filter	Name="Header Files">
 <File RelativePath="arpa_telnet.h"></File>
+<File RelativePath="asyn.h"></File>
 <File RelativePath="axtls.h"></File>
 <File RelativePath="config-win32.h"></File>
 <File RelativePath="connect.h"></File>

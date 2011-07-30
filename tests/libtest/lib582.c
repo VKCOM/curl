@@ -26,6 +26,7 @@
 #include <fcntl.h>
 
 #include "testutil.h"
+#include "warnless.h"
 #include "memdebug.h"
 
 #define MAIN_LOOP_HANG_TIMEOUT     4 * 1000
@@ -129,7 +130,7 @@ static int checkForCompletion(CURLM* curl, int* success)
   CURLMsg* message;
   int result = 0;
   *success = 0;
-  while ((message = curl_multi_info_read(curl, &numMessages)) != 0) {
+  while ((message = curl_multi_info_read(curl, &numMessages)) != NULL) {
     if (message->msg == CURLMSG_DONE) {
       result = 1;
       if (message->data.result == CURLE_OK)
@@ -139,7 +140,7 @@ static int checkForCompletion(CURLM* curl, int* success)
     }
     else {
       fprintf(stderr, "Got an unexpected message from curl: %i\n",
-              message->msg);
+              (int)message->msg);
       result = 1;
       *success = 0;
     }
