@@ -1,5 +1,4 @@
 #libtool
-curl-gssapi-delegation
 no_com_err
 runtests_gdb
 art_http_scripting
