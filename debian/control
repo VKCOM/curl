@@ -21,7 +21,7 @@ Description: Get a file from an HTTP, HTTPS or FTP server
  or any kind of interactivity.
  .
  curl offers a busload of useful tricks like proxy support, user
- authentication, ftp upload, HTTP post, file transfer resume and more.
+ authentication, FTP upload, HTTP post, file transfer resume and more.
 
 Package: libcurl3
 Architecture: any

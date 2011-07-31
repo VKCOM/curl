@@ -1,6 +1,12 @@
 curl (7.21.7-1) unstable; urgency=low
 
-  * New Upstream
+  * New Upstream release which fixes the following bugs.
+    - libcurl3-gnutls: HTTPS over HTTP still broken in
+      Git (closes: #627335)
+    - git-core: gnutls_handshake() fail when using
+      https:// over a proxy (closes: #559371)
+  * debian/control: capitalize 'ftp'. (closes: #587338)
+  * debian/rules: add build-arch and build-indep targets.
 
  -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Sat, 30 Jul 2011 17:57:08 +0530
 

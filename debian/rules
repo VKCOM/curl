@@ -60,7 +60,9 @@ ifneq (${DEB_BUILD_ARCH_OS},hurd)
 CONFIGURE_ARGS += --with-gssapi=/usr
 endif
 
-build: build-stamp
+build: build-arch build-indep
+build-arch: build-stamp
+build-indep: build-stamp
 
 #configure-stamp: DH_OPTIONS=
 configure-stamp:
