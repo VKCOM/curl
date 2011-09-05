@@ -1,3 +1,11 @@
+curl (7.21.7-2) unstable; urgency=low
+
+  * debian/control: libcurl*-dev packages should depend on librtmp-dev.
+    (closes: #640260)
+  * debian/rules: add build-arch and build-indep targets.
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Mon, 05 Sep 2011 16:12:42 +0200
+
 curl (7.21.7-1) unstable; urgency=low
 
   * New Upstream release which fixes the following bugs.
