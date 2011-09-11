@@ -1,3 +1,10 @@
+curl (7.21.7-3) unstable; urgency=low
+
+  * debian/rules: Build only curl and libcurl3 with rtmp support. Rest of the
+    packages do not need to be built with rtmp support. (closes: #641173)
+
+ -- Ramakrishnan Muthukrishnan <rkrishnan@debian.org>  Sun, 11 Sep 2011 22:08:08 +0200
+
 curl (7.21.7-2) unstable; urgency=low
 
   * debian/control: libcurl*-dev packages should depend on librtmp-dev.

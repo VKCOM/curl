@@ -50,7 +50,7 @@ SHLIBS_VERSION=7.16.2-1
 # this will catch miss-linking. (e.g. undefined symbols)
 # LDFLAGS = -Wl,-z,defs
 
-CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking --enable-ipv6 --with-lber-lib=lber --enable-manual --enable-versioned-symbols --with-librtmp --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
+CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man --disable-dependency-tracking --enable-ipv6 --with-lber-lib=lber --enable-manual --enable-versioned-symbols --libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)
 # this is still not ready
 # --enable-ares
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
@@ -93,7 +93,7 @@ configure-stamp:
 		(cd debian/$$flavour && ./buildconf) \
 	done
 
-	cd debian/build && ./configure ${CONFIGURE_ARGS} --with-ca-path=/etc/ssl/certs
+	cd debian/build && ./configure ${CONFIGURE_ARGS} --with-librtmp --with-ca-path=/etc/ssl/certs
 	cd debian/build-gnutls && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-gnutls --without-libssh2
 	cd debian/build-nss && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-nss --without-libssh2
 	touch configure-stamp
