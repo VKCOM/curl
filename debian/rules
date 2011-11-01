@@ -117,7 +117,7 @@ clean:
 install: build-stamp
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	for file in libcurl3.links libcurl3-gnutls.links libcurl3-nss.links \
 	            libcurl4-gnutls-dev.links libcurl4-nss-dev.links; \
 	do \
