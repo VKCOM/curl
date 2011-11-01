@@ -68,31 +68,24 @@ build: build-arch build-indep
 configure-stamp:
 	dh_testdir
 	mkdir -p debian/build debian/build-gnutls debian/build-nss
-
 	-quilt push -a
-
 	# pop the last patch (nss)
 	quilt pop
-
 	# pop the second last patch (gnutls)
 	quilt pop
 	# get the source without nss and gnutls patches
 	tar -cf - --exclude=debian --exclude=.pc . | tar -xf - -C debian/build
-
 	# push the second last patch which must be gnutls
 	quilt push
 	# get the source with gnutls patch applied
 	tar -cf - --exclude=debian --exclude=.pc . | tar -xf - -C debian/build-gnutls
-
 	# push the last patch which must be nss
 	quilt push
 	# get the source with nss patch applied
 	tar -cf - --exclude=debian --exclude=.pc . | tar -xf - -C debian/build-nss
-
 	for flavour in build build-gnutls build-nss; do \
 		(cd debian/$$flavour && ./buildconf) \
 	done
-
 	cd debian/build && ./configure ${CONFIGURE_ARGS} --with-librtmp --with-ca-path=/etc/ssl/certs
 	cd debian/build-gnutls && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-gnutls --without-libssh2
 	cd debian/build-nss && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-nss --without-libssh2
@@ -104,13 +97,11 @@ build-stamp: configure-stamp
 	${MAKE} $(JOBS) -C debian/build
 	${MAKE} $(JOBS) -C debian/build-gnutls
 	${MAKE} $(JOBS) -C debian/build-nss
-
 ifeq (${DO_TEST},yes)
 	-${MAKE} -C debian/build test
 	-${MAKE} -C debian/build-gnutls test
 	-${MAKE} -C debian/build-nss test
 endif
-
 	touch build-stamp
 
 clean:
@@ -133,16 +124,13 @@ install: build-stamp
 		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
 			debian/$${file}.in > debian/$$file; \
 	done
-	dh_installdirs
 	${MAKE} -C debian/build DESTDIR=$(shell pwd)/debian/tmp install
 	${MAKE} -C debian/build-gnutls DESTDIR=$(shell pwd)/debian/tmp-gnutls install
 	${MAKE} -C debian/build-nss DESTDIR=$(shell pwd)/debian/tmp-nss install
 	dh_install -plibcurl3-gnutls -plibcurl4-gnutls-dev --sourcedir=debian/tmp-gnutls
 	dh_install -plibcurl3-nss -plibcurl4-nss-dev --sourcedir=debian/tmp-nss
 	dh_install -Nlibcurl3-gnutls -Nlibcurl4-gnutls-dev -Nlibcurl3-nss -Nlibcurl4-nss-dev --sourcedir=debian/tmp
-	install -m 644 debian/libcurl3-gnutls.lintian-overrides debian/libcurl3-gnutls/usr/share/lintian/overrides/libcurl3-gnutls
-	install -m 644 debian/libcurl3-nss.lintian-overrides debian/libcurl3-nss/usr/share/lintian/overrides/libcurl3-nss
-	install -m 644 debian/libcurl3.lintian-overrides debian/libcurl3/usr/share/lintian/overrides/libcurl3
+	dh_lintian
 	for i in `find debian/lib* -name "lib*.la"`; do echo "removing dependency_libs from $$i"; sed -i -e "/dependency_libs/ s/'.*'/''/" $$i; done
 
 # Build architecture-independent files here.
@@ -156,13 +144,6 @@ binary-arch: build-stamp install
 	dh_testdir
 	dh_testroot
 	dh_installdocs
-	for package in libcurl4-openssl-dev libcurl4-gnutls-dev libcurl4-nss-dev; do \
-		install -m 644 docs/libcurl/libcurl.m4 debian/$${package}/usr/share/aclocal; \
-		for doc_ext in html pdf; do \
-			install -m 644 docs/*.$${doc_ext} debian/$${package}/usr/share/doc/$${package}/$${doc_ext}; \
-			install -m 644 docs/libcurl/*.$${doc_ext} debian/$${package}/usr/share/doc/$${package}/$${doc_ext}/libcurl; \
-		done; \
-	done
 	dh_installman
 	dh_installexamples
 	dh_installchangelogs CHANGES

@@ -4,3 +4,6 @@ usr/lib/*/libcurl.la
 usr/lib/*/libcurl.so
 usr/lib/*/pkgconfig/libcurl.pc
 usr/include
+../../docs/libcurl/libcurl.m4 usr/share/aclocal
+../../docs/*.{html,pdf} usr/share/doc/libcurl4-openssl-dev
+../../docs/libcurl/*.{html,pdf} usr/share/doc/libcurl4-openssl-dev/libcurl
