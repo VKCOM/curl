@@ -91,7 +91,9 @@ SIGPIPE signals, which otherwise are sent by the system when trying to send
 data to a socket which is closed in the other end. libcurl makes an effort to
 never cause such SIGPIPEs to trigger, but some operating systems have no way
 to avoid them and even on those that have there are some corner cases when
-they may still happen, contrary to our desire.
+they may still happen, contrary to our desire. In addition, using
+\fICURLAUTH_NTLM_WB\fP authentication could cause a SIGCHLD signal to be
+raised.
 .IP CURLOPT_WILDCARDMATCH
 Set this option to 1 if you want to transfer multiple files according to a
 file name pattern. The pattern can be specified as part of the
@@ -890,6 +892,20 @@ prevent the password from being eavesdropped.
 
 You need to build libcurl with OpenSSL support for this option to work, or
 build libcurl on Windows.
+.IP CURLAUTH_NTLM_WB
+NTLM delegating to winbind helper. Authentication is performed by a separate
+binary application that is executed when needed. The name of the application
+is specified at compile time but is typically /usr/bin/ntlm_auth
+(Added in 7.22.0)
+
+Note that libcurl will fork when necessary to run the winbind application and
+kill it when complete, calling waitpid() to await its exit when done. On POSIX
+operating systems, killing the process will cause a SIGCHLD signal to be
+raised (regardless of whether \fICURLOPT_NOSIGNAL\fP is set), which must be
+handled intelligently by the application. In particular, the application must
+not unconditionally call wait() in its SIGCHLD signal handler to avoid being
+subject to a race condition.  This behavior is subject to change in future
+versions of libcurl.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
 it finds suitable. libcurl will automatically select the one it finds most
@@ -1313,18 +1329,22 @@ Examples with specified ports:
 You disable PORT again and go back to using the passive version by setting
 this option to NULL.
 .IP CURLOPT_QUOTE
-Pass a pointer to a linked list of FTP or SFTP commands to pass to
-the server prior to your FTP request. This will be done before any
-other commands are issued (even before the CWD command for FTP). The
-linked list should be a fully valid list of 'struct curl_slist' structs
-properly filled in with text strings. Use \fIcurl_slist_append(3)\fP
-to append strings (commands) to the list, and clear the entire list
-afterwards with \fIcurl_slist_free_all(3)\fP. Disable this operation
-again by setting a NULL to this option.
-The set of valid FTP commands depends on the server (see RFC959 for a
-list of mandatory commands).
-The valid SFTP commands are: chgrp, chmod, chown, ln, mkdir, pwd,
-rename, rm, rmdir, symlink (see
+Pass a pointer to a linked list of FTP or SFTP commands to pass to the server
+prior to your FTP request. This will be done before any other commands are
+issued (even before the CWD command for FTP). The linked list should be a
+fully valid list of 'struct curl_slist' structs properly filled in with text
+strings. Use \fIcurl_slist_append(3)\fP to append strings (commands) to the
+list, and clear the entire list afterwards with
+\fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a NULL
+to this option. When speaking to a FTP server, prefix the command with an
+asterisk (*) to make libcurl continue even if the command fails as by default
+libcurl will stop at first failure.
+
+The set of valid FTP commands depends on the server (see RFC959 for a list of
+mandatory commands).
+
+The valid SFTP commands are: chgrp, chmod, chown, ln, mkdir, pwd, rename, rm,
+rmdir, symlink (see
 .BR curl (1))
 (SFTP support added in 7.16.3)
 .IP CURLOPT_POSTQUOTE
@@ -2105,6 +2125,14 @@ of these, 'private' will be used. Set the string to NULL to disable kerberos
 support for FTP.
 
 (This option was known as CURLOPT_KRB4LEVEL up to 7.16.3)
+.IP CURLOPT_GSSAPI_DELEGATION
+Set the parameter to CURLGSSAPI_DELEGATION_FLAG to allow unconditional GSSAPI
+credential delegation.  The delegation is disabled by default since 7.21.7.
+Set the parameter to CURLGSSAPI_DELEGATION_POLICY_FLAG to delegate only if
+the OK-AS-DELEGATE flag is set in the service ticket in case this feature is
+supported by the GSSAPI implementation and the definition of
+GSS_C_DELEG_POLICY_FLAG was available at compile-time.
+(Added in 7.22.0)
 .SH SSH OPTIONS
 .IP CURLOPT_SSH_AUTH_TYPES
 Pass a long set to a bitmask consisting of one or more of

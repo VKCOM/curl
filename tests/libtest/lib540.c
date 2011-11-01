@@ -76,7 +76,6 @@ static int loop(CURLM *cm, const char* url, const char* userpwd,
                 struct curl_slist *headers)
 {
   CURLMsg *msg;
-  CURLMcode code;
   long L;
   int M, Q, U = -1;
   fd_set R, W, E;
@@ -87,9 +86,7 @@ static int loop(CURLM *cm, const char* url, const char* userpwd,
 
   while (U) {
 
-    do {
-      code = curl_multi_perform(cm, &U);
-    } while (code == CURLM_CALL_MULTI_PERFORM);
+    (void) curl_multi_perform(cm, &U);
 
     if (U) {
       FD_ZERO(&R);

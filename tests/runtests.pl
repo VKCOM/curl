@@ -203,6 +203,7 @@ my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
+my $has_ntlm_wb; # set if libcurl is built with NTLM delegation to winbind
 my $has_charconv;# set if libcurl is built with CharConv support
 my $has_tls_srp; # set if libcurl is built with TLS-SRP support
 
@@ -226,6 +227,7 @@ my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
 my %enabled_keywords;   # key words of tests to run
+my %disabled;           # disabled test cases 
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -257,6 +259,7 @@ my $verbose;
 my $debugprotocol;
 my $anyway;
 my $gdbthis;      # run test case with gdb debugger
+my $gdbxwin;      # use windowed gdb when using gdb
 my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
 my $postmortem;   # display detailed info about failed tests
@@ -307,7 +310,7 @@ $SIG{TERM} = \&catch_zap;
 # to prevent them to interfere with our testing!
 
 my $protocol;
-foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no')) {
+foreach $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
     my $proxy = "${protocol}_proxy";
     # clear lowercase version
     delete $ENV{$proxy} if($ENV{$proxy});
@@ -2115,10 +2118,10 @@ sub checksystem {
                $has_openssl=1;
                $ssllib="polarssl";
            } 
-	   elsif ($libcurl =~ /axtls/i) {
-	       $has_axtls=1;
-	       $ssllib="axTLS";
-	   }
+           elsif ($libcurl =~ /axtls/i) {
+               $has_axtls=1;
+               $ssllib="axTLS";
+           }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             # these are the protocols compiled in to this libcurl
@@ -2170,6 +2173,10 @@ sub checksystem {
             if($feat =~ /NTLM/i) {
                 # NTLM enabled
                 $has_ntlm=1;
+            }
+            if($feat =~ /NTLM_WB/i) {
+                # NTLM delegation to winbind daemon ntlm_auth helper enabled
+                $has_ntlm_wb=1;
             }
             if($feat =~ /CharConv/i) {
                 # CharConv enabled
@@ -2437,6 +2444,9 @@ sub singletest {
     if($disttests !~ /test$testnum\W/ ) {
         logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
     }
+    if($disabled{$testnum}) {
+        logmsg "Warning: test$testnum is explicitly disabled\n";
+    }
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -2486,6 +2496,11 @@ sub singletest {
                 next;
             }
         }
+        elsif($f eq "debug") {
+            if($debug_build) {
+                next;
+            }
+        }
         elsif($f eq "large_file") {
             if($large_file) {
                 next;
@@ -2508,6 +2523,11 @@ sub singletest {
         }
         elsif($f eq "NTLM") {
             if($has_ntlm) {
+                next;
+            }
+        }
+        elsif($f eq "NTLM_WB") {
+            if($has_ntlm_wb) {
                 next;
             }
         }
@@ -2805,8 +2825,14 @@ sub singletest {
     }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
-	$cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
-        $cmdargs ="$out --include --verbose --trace-time $cmd";
+        $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
+
+        my $inc="";
+        if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
+            $inc = "--include ";
+        }
+
+        $cmdargs ="$out $inc--verbose --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
@@ -2900,7 +2926,8 @@ sub singletest {
                        "$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis) {
-        runclient("$gdb --directory libtest $DBGCURL -x $LOGDIR/gdbcmd");
+        my $GDBW = ($gdbxwin) ? "-w" : "";
+        runclient("$gdb --directory libtest $DBGCURL $GDBW -x $LOGDIR/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
@@ -3861,7 +3888,6 @@ sub runtimestats {
 my $number=0;
 my $fromnum=-1;
 my @testthis;
-my %disabled;
 while(@ARGV) {
     if ($ARGV[0] eq "-v") {
         # verbose output
@@ -3891,6 +3917,11 @@ while(@ARGV) {
     elsif ($ARGV[0] eq "-g") {
         # run this test with gdb
         $gdbthis=1;
+    }
+    elsif ($ARGV[0] eq "-gw") {
+        # run this test with windowed gdb
+        $gdbthis=1;
+        $gdbxwin=1;
     }
     elsif($ARGV[0] eq "-s") {
         # short output
@@ -3963,6 +3994,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -c path  use this curl executable
   -d       display server debug info
   -g       run the test case with gdb
+  -gw      run the test case with gdb as a windowed application
   -h       this help text
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
@@ -4116,6 +4148,22 @@ if(!$listonly) {
 }
 
 #######################################################################
+# Fetch all disabled tests
+#
+
+open(D, "<$TESTDIR/DISABLED");
+while(<D>) {
+    if(/^ *\#/) {
+        # allow comments
+        next;
+    }
+    if($_ =~ /(\d+)/) {
+        $disabled{$1}=$1; # disable this test number
+    }
+}
+close(D);
+
+#######################################################################
 # If 'all' tests are requested, find out all test numbers
 #
 
@@ -4124,18 +4172,6 @@ if ( $TESTCASES eq "all") {
     opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
     my @cmds = grep { /^test([0-9]+)$/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir(DIR);
-
-    open(D, "<$TESTDIR/DISABLED");
-    while(<D>) {
-        if(/^ *\#/) {
-            # allow comments
-            next;
-        }
-        if($_ =~ /(\d+)/) {
-            $disabled{$1}=$1; # disable this test number
-        }
-    }
-    close(D);
 
     $TESTCASES=""; # start with no test cases
 
@@ -4243,6 +4279,9 @@ sub displaylogs {
         }
         if(($log =~ /^file\d+\.txt/) && ($log !~ /^file$testnum\.txt/)) {
             next; # skip fileNnn.txt of other tests
+        }
+        if(($log =~ /^netrc\d+/) && ($log !~ /^netrc$testnum/)) {
+            next; # skip netrcNnn of other tests
         }
         if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests

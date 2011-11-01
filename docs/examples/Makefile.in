@@ -71,7 +71,8 @@ check_PROGRAMS = 10-at-a-time$(EXEEXT) anyauthput$(EXEEXT) \
 	simple$(EXEEXT) simplepost$(EXEEXT) simplessl$(EXEEXT) \
 	sendrecv$(EXEEXT) httpcustomheader$(EXEEXT) certinfo$(EXEEXT) \
 	chkspeed$(EXEEXT) ftpgetinfo$(EXEEXT) ftp-wildcard$(EXEEXT) \
-	smtp-multi$(EXEEXT) simplesmtp$(EXEEXT) smtp-tls$(EXEEXT)
+	smtp-multi$(EXEEXT) simplesmtp$(EXEEXT) smtp-tls$(EXEEXT) \
+	rtsp$(EXEEXT) externalsocket$(EXEEXT) resolve$(EXEEXT)
 subdir = docs/examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -116,6 +117,10 @@ debug_SOURCES = debug.c
 debug_OBJECTS = debug.$(OBJEXT)
 debug_LDADD = $(LDADD)
 debug_DEPENDENCIES = $(LIBDIR)/libcurl.la
+externalsocket_SOURCES = externalsocket.c
+externalsocket_OBJECTS = externalsocket.$(OBJEXT)
+externalsocket_LDADD = $(LDADD)
+externalsocket_DEPENDENCIES = $(LIBDIR)/libcurl.la
 fileupload_SOURCES = fileupload.c
 fileupload_OBJECTS = fileupload.$(OBJEXT)
 fileupload_LDADD = $(LDADD)
@@ -200,6 +205,14 @@ postit2_SOURCES = postit2.c
 postit2_OBJECTS = postit2.$(OBJEXT)
 postit2_LDADD = $(LDADD)
 postit2_DEPENDENCIES = $(LIBDIR)/libcurl.la
+resolve_SOURCES = resolve.c
+resolve_OBJECTS = resolve.$(OBJEXT)
+resolve_LDADD = $(LDADD)
+resolve_DEPENDENCIES = $(LIBDIR)/libcurl.la
+rtsp_SOURCES = rtsp.c
+rtsp_OBJECTS = rtsp.$(OBJEXT)
+rtsp_LDADD = $(LDADD)
+rtsp_DEPENDENCIES = $(LIBDIR)/libcurl.la
 sendrecv_SOURCES = sendrecv.c
 sendrecv_OBJECTS = sendrecv.$(OBJEXT)
 sendrecv_LDADD = $(LDADD)
@@ -244,21 +257,23 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
-	cookie_interface.c debug.c fileupload.c fopen.c ftp-wildcard.c \
-	ftpget.c ftpgetinfo.c ftpgetresp.c ftpupload.c getinfo.c \
-	getinmemory.c http-post.c httpcustomheader.c httpput.c https.c \
-	multi-app.c multi-debugcallback.c multi-double.c multi-post.c \
+	cookie_interface.c debug.c externalsocket.c fileupload.c \
+	fopen.c ftp-wildcard.c ftpget.c ftpgetinfo.c ftpgetresp.c \
+	ftpupload.c getinfo.c getinmemory.c http-post.c \
+	httpcustomheader.c httpput.c https.c multi-app.c \
+	multi-debugcallback.c multi-double.c multi-post.c \
 	multi-single.c persistant.c post-callback.c postit2.c \
-	sendrecv.c sepheaders.c simple.c simplepost.c simplesmtp.c \
-	simplessl.c smtp-multi.c smtp-tls.c
+	resolve.c rtsp.c sendrecv.c sepheaders.c simple.c simplepost.c \
+	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c
 DIST_SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
-	cookie_interface.c debug.c fileupload.c fopen.c ftp-wildcard.c \
-	ftpget.c ftpgetinfo.c ftpgetresp.c ftpupload.c getinfo.c \
-	getinmemory.c http-post.c httpcustomheader.c httpput.c https.c \
-	multi-app.c multi-debugcallback.c multi-double.c multi-post.c \
+	cookie_interface.c debug.c externalsocket.c fileupload.c \
+	fopen.c ftp-wildcard.c ftpget.c ftpgetinfo.c ftpgetresp.c \
+	ftpupload.c getinfo.c getinmemory.c http-post.c \
+	httpcustomheader.c httpput.c https.c multi-app.c \
+	multi-debugcallback.c multi-double.c multi-post.c \
 	multi-single.c persistant.c post-callback.c postit2.c \
-	sendrecv.c sepheaders.c simple.c simplepost.c simplesmtp.c \
-	simplessl.c smtp-multi.c smtp-tls.c
+	resolve.c rtsp.c sendrecv.c sepheaders.c simple.c simplepost.c \
+	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -542,6 +557,9 @@ cookie_interface$(EXEEXT): $(cookie_interface_OBJECTS) $(cookie_interface_DEPEND
 debug$(EXEEXT): $(debug_OBJECTS) $(debug_DEPENDENCIES) 
 	@rm -f debug$(EXEEXT)
 	$(LINK) $(debug_LDFLAGS) $(debug_OBJECTS) $(debug_LDADD) $(LIBS)
+externalsocket$(EXEEXT): $(externalsocket_OBJECTS) $(externalsocket_DEPENDENCIES) 
+	@rm -f externalsocket$(EXEEXT)
+	$(LINK) $(externalsocket_LDFLAGS) $(externalsocket_OBJECTS) $(externalsocket_LDADD) $(LIBS)
 fileupload$(EXEEXT): $(fileupload_OBJECTS) $(fileupload_DEPENDENCIES) 
 	@rm -f fileupload$(EXEEXT)
 	$(LINK) $(fileupload_LDFLAGS) $(fileupload_OBJECTS) $(fileupload_LDADD) $(LIBS)
@@ -605,6 +623,12 @@ post-callback$(EXEEXT): $(post_callback_OBJECTS) $(post_callback_DEPENDENCIES)
 postit2$(EXEEXT): $(postit2_OBJECTS) $(postit2_DEPENDENCIES) 
 	@rm -f postit2$(EXEEXT)
 	$(LINK) $(postit2_LDFLAGS) $(postit2_OBJECTS) $(postit2_LDADD) $(LIBS)
+resolve$(EXEEXT): $(resolve_OBJECTS) $(resolve_DEPENDENCIES) 
+	@rm -f resolve$(EXEEXT)
+	$(LINK) $(resolve_LDFLAGS) $(resolve_OBJECTS) $(resolve_LDADD) $(LIBS)
+rtsp$(EXEEXT): $(rtsp_OBJECTS) $(rtsp_DEPENDENCIES) 
+	@rm -f rtsp$(EXEEXT)
+	$(LINK) $(rtsp_LDFLAGS) $(rtsp_OBJECTS) $(rtsp_LDADD) $(LIBS)
 sendrecv$(EXEEXT): $(sendrecv_OBJECTS) $(sendrecv_DEPENDENCIES) 
 	@rm -f sendrecv$(EXEEXT)
 	$(LINK) $(sendrecv_LDFLAGS) $(sendrecv_OBJECTS) $(sendrecv_LDADD) $(LIBS)
@@ -642,6 +666,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chkspeed.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cookie_interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/externalsocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileupload.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fopen.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ftp-wildcard.Po@am__quote@
@@ -663,6 +688,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/persistant.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/post-callback.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/postit2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rtsp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sendrecv.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sepheaders.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/simple.Po@am__quote@

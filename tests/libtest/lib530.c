@@ -21,16 +21,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
@@ -161,20 +151,16 @@ int test(char *URL)
     mp_timedout = FALSE;
     mp_start = tutil_tvnow();
 
-    while (res == CURLM_CALL_MULTI_PERFORM) {
-      res = (int)curl_multi_perform(m, &running);
-      if (tutil_tvdiff(tutil_tvnow(), mp_start) >
-          MULTI_PERFORM_HANG_TIMEOUT) {
-        mp_timedout = TRUE;
-        break;
-      }
-      if (running <= 0) {
-        done = TRUE; /* bail out */
-        break;
-      }
-    }
-    if (mp_timedout || done)
+    res = (int)curl_multi_perform(m, &running);
+    if (tutil_tvdiff(tutil_tvnow(), mp_start) >
+        MULTI_PERFORM_HANG_TIMEOUT) {
+      mp_timedout = TRUE;
       break;
+    }
+    if (running <= 0) {
+      done = TRUE; /* bail out */
+      break;
+    }
 
     if (res != CURLM_OK) {
       fprintf(stderr, "not okay???\n");

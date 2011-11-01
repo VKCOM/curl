@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #include "testutil.h"
@@ -59,8 +57,6 @@ static CURLMcode perform(CURLM * multi)
     switch (code) {
       case CURLM_OK:
         break;
-      case CURLM_CALL_MULTI_PERFORM:
-        continue;
       default:
         return code;
     }
