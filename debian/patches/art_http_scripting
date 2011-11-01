@@ -4,8 +4,6 @@ Date:   Sat Jul 30 17:29:38 2011 +0530
 
     art_http_scripting
 
-diff --git a/docs/index.html b/docs/index.html
-index 4390378..f53411b 100644
 --- a/docs/index.html
 +++ b/docs/index.html
 @@ -12,7 +12,7 @@

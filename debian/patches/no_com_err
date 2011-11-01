@@ -4,11 +4,9 @@ Date:   Sat Jul 30 17:28:32 2011 +0530
 
     no_com_err
 
-diff --git a/configure.ac b/configure.ac
-index e9b49c7..ff29e0e 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1266,7 +1266,8 @@ if test x"$want_gss" = xyes; then
+@@ -1286,7 +1286,8 @@
             dnl krb5-config doesn't have --libs-only-L or similar, put everything
             dnl into LIBS
             gss_libs=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
