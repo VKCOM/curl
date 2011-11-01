@@ -1,14 +1,15 @@
-commit fb6b538b745c1695b574ec95e7aac35f07b0fdd8
+Description: versioned.
+Origin: vendor
+Forwarded: no
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
-Date:   Sat Jul 30 17:34:16 2011 +0530
-
-    versioned
+Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Last-Update: 2011-11-01
 
 --- a/configure.ac
 +++ b/configure.ac
 @@ -2333,6 +2333,52 @@
  fi
- 
+
  dnl **********************************************************************
 +dnl Check for linker switch for versioned symbols
 +dnl **********************************************************************
@@ -58,7 +59,7 @@ Date:   Sat Jul 30 17:34:16 2011 +0530
 +dnl **********************************************************************
  dnl Check for the presence of IDN libraries and headers
  dnl **********************************************************************
- 
+
 @@ -3109,6 +3155,7 @@
             include/curl/Makefile \
             src/Makefile \
@@ -72,14 +73,14 @@ Date:   Sat Jul 30 17:34:16 2011 +0530
 @@ -116,7 +116,11 @@
  MIMPURE = -mimpure-text
  endif
- 
+
 -libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(LIBCURL_LIBS)
 +if VERSIONED_SYMBOLS
 +VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
 +endif
 +
 +libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
- 
+
  # unit testing static library built only along with unit tests
  if BUILD_UNITTESTS
 --- /dev/null

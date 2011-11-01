@@ -1,17 +1,18 @@
-commit 69bf8bdbfc67912c4a4838322cb92a8b05ff2ec2
+Description: Fix path to "TheArtOfHttpScripting" in docs.
+Origin: vendor
+Forwarded: no
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
-Date:   Sat Jul 30 17:29:38 2011 +0530
-
-    art_http_scripting
+Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Last-Update: 2011-11-01
 
 --- a/docs/index.html
 +++ b/docs/index.html
 @@ -12,7 +12,7 @@
  <br><a href="curl.html">curl</A>
- 
+
  <h2>Tutorial</h2>
 -<a href="TheArtOfHttpScripting">The Art Of Scripting HTTP Requests Using Curl</a> (plain text)
 +<a href="../TheArtOfHttpScripting.gz">The Art Of Scripting HTTP Requests Using Curl</a> (plain text)
- 
+
  <h2>libcurl</h2>
  See the <a href="libcurl/index.html">libcurl section</a>

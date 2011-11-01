@@ -1,8 +1,9 @@
-commit 0354fc658df0f600850b8d3c9852cce7c1c68222
+Description: no_com_err.
+Origin: vendor
+Forwarded: no
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
-Date:   Sat Jul 30 17:28:32 2011 +0530
-
-    no_com_err
+Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Last-Update: 2011-11-01
 
 --- a/configure.ac
 +++ b/configure.ac
