@@ -1,93 +1,84 @@
-commit 4fd261ebc3240ca54c4b4603a7a6a8d43789ec0b
+Description: Build with NSS
+Origin: vendor
+Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
-Date:   Sat Jul 30 17:45:06 2011 +0530
+Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Last-Update: 2011-11-01
 
-    nss
-
-diff --git a/configure.ac b/configure.ac
-index 5bbcf9e..35a4b5b 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1739,7 +1739,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
+@@ -1759,7 +1759,7 @@
        CLEANCPPFLAGS="$CPPFLAGS"
        CLEANLDFLAGS="$LDFLAGS"
- 
+
 -      LIBS="$LIBS $addlib -lgcrypt"
 +      LIBS="$LIBS $addlib"
        LDFLAGS="$LDFLAGS $addld"
        if test "$addcflags" != "-I/usr/include"; then
           CPPFLAGS="$CPPFLAGS $addcflags"
-diff --git a/docs/examples/Makefile.am b/docs/examples/Makefile.am
-index ee6e47c..90eb37e 100644
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
-@@ -48,7 +48,7 @@ endif
+@@ -48,7 +48,7 @@
  CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
- 
+
  # Dependencies
 -LDADD = $(LIBDIR)/libcurl-gnutls.la
 +LDADD = $(LIBDIR)/libcurl-nss.la
- 
+
  # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
  include Makefile.inc
-diff --git a/lib/Makefile.am b/lib/Makefile.am
-index 1dc1b6d..e333aec 100644
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
-@@ -42,7 +42,7 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
- 
+@@ -42,7 +42,7 @@
+
  CLEANFILES = $(DSP) $(VCPROJ)
- 
+
 -lib_LTLIBRARIES = libcurl-gnutls.la
 +lib_LTLIBRARIES = libcurl-nss.la
  LIBCURL_LIBS = @LIBCURL_LIBS@
- 
+
  # This might hold -Werror
-@@ -120,7 +120,7 @@ if VERSIONED_SYMBOLS
+@@ -120,7 +120,7 @@
  VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
  endif
- 
+
 -libcurl_gnutls_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 +libcurl_nss_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
- 
+
  # unit testing static library built only along with unit tests
  if BUILD_UNITTESTS
-@@ -135,7 +135,7 @@ libcurlu_la_LDFLAGS = -static $(LIBCURL_LIBS)
+@@ -135,7 +135,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
- 
+
 -libcurl_gnutls_la_SOURCES = $(CSOURCES) $(HHEADERS)
 +libcurl_nss_la_SOURCES = $(CSOURCES) $(HHEADERS)
  libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
- 
+
  WIN32SOURCES = $(CSOURCES)
-diff --git a/src/Makefile.am b/src/Makefile.am
-index bf82791..1b5e11d 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -49,8 +49,8 @@ include Makefile.inc
+@@ -49,8 +49,8 @@
  # This might hold -Werror
  CFLAGS += @CURL_CFLAG_EXTRAS@
- 
+
 -curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la -lrt @CURL_LIBS@
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
 +curl_LDADD = $(top_builddir)/lib/libcurl-nss.la -lrt @CURL_LIBS@
 +curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-nss.la
- BUILT_SOURCES = hugehelp.c
- CLEANFILES = hugehelp.c
+ BUILT_SOURCES = hugehelp.c config-win32.h
+ CLEANFILES = hugehelp.c config-win32.h
  # Use the C locale to ensure that only ASCII characters appear in the
-diff --git a/tests/libtest/Makefile.am b/tests/libtest/Makefile.am
-index c4338e4..edf26f8 100644
 --- a/tests/libtest/Makefile.am
 +++ b/tests/libtest/Makefile.am
-@@ -54,8 +54,8 @@ EXTRA_DIST = test75.pl test307.pl test610.pl test613.pl test1013.pl	\
+@@ -54,8 +54,8 @@
  test1022.pl Makefile.inc
- 
+
  # Dependencies (may need to be overriden)
 -LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 -DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
 +LDADD = $(top_builddir)/lib/libcurl-nss.la @CURL_LIBS@
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-nss.la
- 
+
  # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
  # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
