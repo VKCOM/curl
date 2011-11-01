@@ -22,6 +22,7 @@
 #include "test.h"
 
 #include "warnless.h"
+#include "memdebug.h"
 
 /*
  * Simply download a HTTPS file!
@@ -37,7 +38,6 @@ int test(char *URL)
 {
   CURL *http_handle;
   CURLM *multi_handle = NULL;
-  CURLMcode code;
   int res;
 
   int still_running; /* keep number of running handles */
@@ -63,9 +63,7 @@ int test(char *URL)
   curl_multi_add_handle(multi_handle, http_handle);
 
   /* we start some action by calling perform right away */
-  do {
-    code = curl_multi_perform(multi_handle, &still_running);
-  } while(code == CURLM_CALL_MULTI_PERFORM);
+  (void) curl_multi_perform(multi_handle, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -100,9 +98,7 @@ int test(char *URL)
     case 0:
     default:
       /* timeout or readable/writable sockets */
-      do {
-        code = curl_multi_perform(multi_handle, &still_running);
-      } while(code == CURLM_CALL_MULTI_PERFORM);
+      (void) curl_multi_perform(multi_handle, &still_running);
       break;
     }
   }

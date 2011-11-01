@@ -53,7 +53,8 @@ test605 test606 test607 test608 test609 test610 test611 test612 test613	\
 test614 test615 test616 test617 test618 test619 test620 test621 test622	\
 test623 test624 test625 test626 test627 test628 test629 test630 test631	\
 test632 test633 test634 test635 test636 test637 test700 test701 test702	\
-test703 test704 test705 test706 test707 test708 test800 test801 test802	\
+test703 test704 test705 test706 test707 test708 test709 test710 \
+test800 test801 test802	\
 test803 test804 test805 test806 test807 test808 test809 test810 test811	\
 test812 test813 test1000 test1001 test1002 test1003 test1004 test1005	\
 test1006 test1007 test1008 test1009 test1010 test1011 test1012 test1013	\
@@ -71,9 +72,10 @@ test1094 test1095 test1096 test1097 test1098 test1099 test1100 test1101	\
 test1102 test1103 test1104 test1105 test1106 test1107 test1108 test1109	\
 test1110 test1111 test1112 test1113 test1114 test1115 test1116 test1117	\
 test1118 test1119 test1120 test1121 test1122 test1123 test1124 test1125	\
-test1126 test1127 test1128 test1200 test1201 test1202 test1203 test1300	\
-test1301 test1302 test1303 test1304 test1305 test1306 test1307 test1308	\
-test1309 test2000 test2001 test2002 test2003 test2004
+test1126 test1127 test1128 test1129 test1130 test1131 test1200 test1201	\
+test1202 test1203 test1300 test1301 test1302 test1303 test1304 test1305	\
+test1306 test1307 test1308 test1309 test1310 test1311 test1312 test1313 \
+test2000 test2001 test2002 test2003 test2004
 
 EXTRA_DIST = $(TESTCASES) DISABLED
 

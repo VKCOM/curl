@@ -21,8 +21,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
 
 #include "testutil.h"
@@ -33,8 +31,9 @@
 
 struct Sockets
 {
-  curl_socket_t* sockets;
-  int count;
+  curl_socket_t *sockets;
+  int count;      /* number of sockets actually stored in array */
+  int max_count;  /* max number of sockets that fit in allocated array */
 };
 
 struct ReadWriteSockets
@@ -54,8 +53,9 @@ static void removeFd(struct Sockets* sockets, curl_socket_t fd, int mention)
 
   for (i = 0; i < sockets->count; ++i) {
     if (sockets->sockets[i] == fd) {
-      memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(curl_socket_t) * (sockets->count - i - 1));
+      if (i < sockets->count - 1)
+        memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
+              sizeof(curl_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
     }
   }
@@ -72,8 +72,29 @@ static void addFd(struct Sockets* sockets, curl_socket_t fd, const char *what)
    */
   fprintf(stderr, "Add socket fd %d for %s\n", (int) fd, what);
   removeFd(sockets, fd, 0);
-  sockets->sockets = realloc(sockets->sockets,
-        sizeof(curl_socket_t) * (sockets->count + 1));
+  /*
+   * Allocate array storage when required.
+   */
+  if(!sockets->sockets) {
+    sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
+    if(!sockets->sockets)
+      return;
+    sockets->max_count = 20;
+  }
+  else if(sockets->count + 1 > sockets->max_count) {
+    curl_socket_t *oldptr = sockets->sockets;
+    sockets->sockets = realloc(oldptr, sizeof(curl_socket_t) *
+                               (sockets->max_count + 20));
+    if(!sockets->sockets) {
+      /* cleanup in test_cleanup */
+      sockets->sockets = oldptr;
+      return;
+    }
+    sockets->max_count += 20;
+  }
+  /*
+   * Add file descriptor to array.
+   */
   sockets->sockets[sockets->count] = fd;
   ++sockets->count;
 }
@@ -177,13 +198,12 @@ static void updateFdSet(struct Sockets* sockets, fd_set* fdset,
   }
 }
 
-static void notifyCurl(CURL* curl, curl_socket_t s, int evBitmask,
-                       const char* info)
+static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
+                       const char *info)
 {
   int numhandles = 0;
   CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
-  if (result != CURLM_OK && result != CURLM_CALL_MULTI_PERFORM)
-  {
+  if (result != CURLM_OK) {
     fprintf(stderr, "Curl error on %s: %i (%s)\n",
             info, result, curl_multi_strerror(result));
   }
@@ -192,14 +212,12 @@ static void notifyCurl(CURL* curl, curl_socket_t s, int evBitmask,
 /**
  * Invoke curl when a file descriptor is set.
  */
-static void checkFdSet(CURL* curl, struct Sockets* sockets, fd_set* fdset,
-                       int evBitmask, const char* name)
+static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
+                       int evBitmask, const char *name)
 {
   int i;
-  for (i = 0; i < sockets->count; ++i)
-  {
-    if (FD_ISSET(sockets->sockets[i], fdset))
-    {
+  for (i = 0; i < sockets->count; ++i) {
+    if (FD_ISSET(sockets->sockets[i], fdset)) {
       notifyCurl(curl, sockets->sockets[i], evBitmask, name);
     }
   }
@@ -216,7 +234,7 @@ int test(char *URL)
   CURLM *m = NULL;
   struct timeval ml_start;
   char ml_timedout = FALSE;
-  struct ReadWriteSockets sockets = {{0, 0}, {0, 0}};
+  struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   struct timeval timeout = {-1, 0};
   int success = 0;
 
@@ -369,9 +387,9 @@ test_cleanup:
   }
 
   fclose(hd_src); /* close the local file */
-  if (sockets.read.sockets != 0)
+  if (sockets.read.sockets)
     free(sockets.read.sockets);
-  if (sockets.write.sockets != 0)
+  if (sockets.write.sockets)
     free(sockets.write.sockets);
 
   curl_global_cleanup();
