@@ -5,5 +5,5 @@ usr/lib/*/libcurl-gnutls.so
 usr/lib/*/pkgconfig/libcurl.pc
 usr/include
 ../../docs/libcurl/libcurl.m4 usr/share/aclocal
-../../docs/*.{html,pdf} usr/share/doc/libcurl4-gnutls-dev
-../../docs/libcurl/*.{html,pdf} usr/share/doc/libcurl4-gnutls-dev/libcurl
+../../docs/*.html ../../docs/*.pdf} usr/share/doc/libcurl4-gnutls-dev
+../../docs/libcurl/*.html ../../docs/libcurl/*.pdf usr/share/doc/libcurl4-gnutls-dev/libcurl
