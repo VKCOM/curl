@@ -29,7 +29,6 @@ Homepage: http://curl.haxx.se
 
 Package: curl
 Architecture: any
-Section: web
 Replaces: curl-ssl
 Provides: curl-ssl
 Depends: ${shlibs:Depends}, ${misc:Depends}
