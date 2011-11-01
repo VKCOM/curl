@@ -9,8 +9,25 @@ curl (7.22.0-1) UNRELEASED; urgency=low
 
   [ Alessandro Ghedini ]
   * New upstream release.
+  * Bump debhelper compat level to 8.
+  * debian/control:
+    - One (Build-)Depends per line.
+    - Sort (Build-)Depends.
+    - Remove Build-Depends on binutils
+      (v2.18 is already in oldstable and it is Build-Essential: yes).
+    - Build depends on stunnel4 instead of stunnel 
+      (stunnel is just a dummy package).
+    - Remove duplicate Section field in package curl.
+    - Add Luk to Uploaders too, sort names.
+  * debian/patches:
+    - Update runtests_gdb patch, add DEP3 headers.
+    - Update gnutls and nss patches, add DEP3 headers.
+    - Refresh other patches.
+    - Add DEP3 headers to all the patches.
+  * Replace dh_clean -k call with dh_prep
+    (dh_clean -k is deprecated since debhelper 7).
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Tue, 01 Nov 2011 20:53:15 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Tue, 01 Nov 2011 22:04:32 +0100
 
 curl (7.21.7-3) unstable; urgency=low
 
