@@ -1,9 +1,16 @@
-curl (7.21.7-4) unstable; urgency=low
+curl (7.22.0-1) UNRELEASED; urgency=low
 
+  [ Ramakrishnan Muthukrishnan ]
+  * Add new Uploaders, Ian and Alessandro. (bug #647255)
+
+  [ Luk Claes ]
   * Install lintian overrides with dh_lintian.
   * Install all files with dh_install and get rid of dh_installdirs.
 
- -- Luk Claes <luk@debian.org>  Tue, 01 Nov 2011 19:55:34 +0100
+  [ Alessandro Ghedini ]
+  * New upstream release.
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Tue, 01 Nov 2011 20:53:15 +0100
 
 curl (7.21.7-3) unstable; urgency=low
 
