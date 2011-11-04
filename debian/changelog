@@ -26,8 +26,12 @@ curl (7.22.0-1) UNRELEASED; urgency=low
     - Add DEP3 headers to all the patches.
   * Replace dh_clean -k call with dh_prep
     (dh_clean -k is deprecated since debhelper 7).
+  * Add fix_manpage_spelling patch
+  * debian/copyright:
+    - Switch to DEP5 format
+    - Update copyright information
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Tue, 01 Nov 2011 22:04:32 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 04 Nov 2011 21:19:57 +0100
 
 curl (7.21.7-3) unstable; urgency=low
 
