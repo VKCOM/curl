@@ -1,6 +1,6 @@
 Description: runtests_gdb.
 Origin: vendor
-Forwarded: not-needed
+Forwarded: no
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
 Last-Update: 2011-11-01
