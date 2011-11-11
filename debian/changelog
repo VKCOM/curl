@@ -24,6 +24,8 @@ curl (7.22.0-1) UNRELEASED; urgency=low
     - Update gnutls and nss patches, add DEP3 headers.
     - Refresh other patches.
     - Add DEP3 headers to all the patches.
+    - Remove libtool patch (not applied anyway)
+    - Set Forwarded: not-needed for Debian specific patches
   * Replace dh_clean -k call with dh_prep
     (dh_clean -k is deprecated since debhelper 7).
   * Add fix_manpage_spelling patch
@@ -31,7 +33,7 @@ curl (7.22.0-1) UNRELEASED; urgency=low
     - Switch to DEP5 format
     - Update copyright information
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 04 Nov 2011 21:19:57 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 11 Nov 2011 20:48:37 +0100
 
 curl (7.21.7-3) unstable; urgency=low
 
