@@ -98,14 +98,14 @@ Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-openssl-dev, libcurl3-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-openssl-dev, libcurl3-dev (<< 7.14.1-1)
 Conflicts: libcurl-dev
 Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}),
- lib1g-dev,
  libc6-dev | libc-dev,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
  libssh2-1-dev,
- libssl-dev
+ libssl-dev,
+ zlib1g-dev
 Description: Development files and documentation for libcurl (OpenSSL)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
@@ -122,14 +122,13 @@ Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-gnutls-dev, libcurl4-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-gnutls-dev, libcurl4-dev
 Conflicts: libcurl-dev
 Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version}),
- lib1g-dev,
  libc6-dev | libc-dev,
+ libgnutls-dev,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
- libssh2-1-dev,
- libssl-dev
+ zlib1g-dev
 Description: Development files and documentation for libcurl (GnuTLS)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
@@ -146,14 +145,13 @@ Provides: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
 Replaces: libcurl-dev, libcurl-ssl-dev, libcurl3-nss-dev, libcurl4-dev
 Conflicts: libcurl-dev
 Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
- lib1g-dev,
  libc6-dev | libc-dev,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
+ libnss3-dev,
  librtmp-dev,
- libssh2-1-dev,
- libssl-dev
+ zlib1g-dev
 Description: Development files and documentation for libcurl (NSS)
  These files (ie. includes, static library, manual pages) allow to
  build software which uses libcurl.
