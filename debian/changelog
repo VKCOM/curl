@@ -1,4 +1,4 @@
-curl (7.22.0-1) unstable; urgency=low
+curl (7.22.0-3) unstable; urgency=low
 
   [ Ramakrishnan Muthukrishnan ]
   * Add new Uploaders, Ian and Alessandro. (Closes: #647255)
@@ -32,6 +32,7 @@ curl (7.22.0-1) unstable; urgency=low
   * debian/copyright:
     - Switch to DEP5 format
     - Update copyright information
+  * Add librtmp-dev to libcurl4-nss-dev too
 
  -- Alessandro Ghedini <al3xbio@gmail.com>  Sun, 13 Nov 2011 21:07:32 +0100
 
