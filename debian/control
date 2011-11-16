@@ -97,6 +97,7 @@ Suggests: libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-openssl-dev,
+ libcurl4-dev,
  libcurl3-dev
 Replaces: libcurl-dev,
  libcurl-ssl-dev,
