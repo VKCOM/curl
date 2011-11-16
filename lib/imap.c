@@ -119,6 +119,7 @@ const struct Curl_handler Curl_handler_imap = {
   imap_doing,                       /* doing */
   imap_getsock,                     /* proto_getsock */
   imap_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -144,6 +145,7 @@ const struct Curl_handler Curl_handler_imaps = {
   imap_doing,                       /* doing */
   imap_getsock,                     /* proto_getsock */
   imap_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -169,6 +171,7 @@ static const struct Curl_handler Curl_handler_imap_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -194,6 +197,7 @@ static const struct Curl_handler Curl_handler_imaps_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -576,7 +580,7 @@ static CURLcode imap_statemach_act(struct connectdata *conn)
       return CURLE_FTP_WEIRD_SERVER_REPLY;
     }
 
-    if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
       /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
          to TLS connection now */
       const char *str;

@@ -836,7 +836,7 @@ singleipconnect(struct connectdata *conn,
 {
   struct Curl_sockaddr_ex addr;
   int rc;
-  int error;
+  int error = 0;
   bool isconnected = FALSE;
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd;
@@ -907,11 +907,6 @@ singleipconnect(struct connectdata *conn,
 
   Curl_persistconninfo(conn);
 
-#ifdef ENABLE_IPV6
-  if(addr.family == AF_INET6)
-    conn->bits.ipv6 = TRUE;
-#endif
-
   if(data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
 
@@ -946,6 +941,8 @@ singleipconnect(struct connectdata *conn,
   /* Connect TCP sockets, bind UDP */
   if(!isconnected && (conn->socktype == SOCK_STREAM)) {
     rc = connect(sockfd, &addr.sa_addr, addr.addrlen);
+    if(-1 == rc)
+      error = SOCKERRNO;
     conn->connecttime = Curl_tvnow();
     if(conn->num_addr > 1)
       Curl_expire(data, conn->timeoutms_per_addr);
@@ -954,8 +951,6 @@ singleipconnect(struct connectdata *conn,
     rc = 0;
 
   if(-1 == rc) {
-    error = SOCKERRNO;
-
     switch (error) {
     case EINPROGRESS:
     case EWOULDBLOCK:
@@ -999,6 +994,10 @@ singleipconnect(struct connectdata *conn,
     /* we are connected, awesome! */
     *connected = TRUE; /* this is a true connect */
     infof(data, "connected\n");
+#ifdef ENABLE_IPV6
+    conn->bits.ipv6 = (addr.family == AF_INET6)?TRUE:FALSE;
+#endif
+
     Curl_updateconninfo(conn, sockfd);
     *sockp = sockfd;
     return CURLE_OK;

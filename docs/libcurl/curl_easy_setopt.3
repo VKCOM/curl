@@ -171,8 +171,12 @@ Set the \fIuserdata\fP argument with the \fICURLOPT_WRITEDATA\fP option.
 
 The callback function will be passed as much data as possible in all invokes,
 but you cannot possibly make any assumptions. It may be one byte, it may be
-thousands. The maximum amount of data that can be passed to the write callback
-is defined in the curl.h header file: CURL_MAX_WRITE_SIZE.
+thousands. The maximum amount of body data that can be passed to the write
+callback is defined in the curl.h header file: CURL_MAX_WRITE_SIZE (the usual
+default is 16K). If you however have \fICURLOPT_HEADER\fP set, which sends
+header data to the write callback, you can get up to
+\fICURL_MAX_HTTP_HEADER\fP bytes of header data passed into it. This usually
+means 100K.
 .IP CURLOPT_WRITEDATA
 Data pointer to pass to the file write function. If you use the
 \fICURLOPT_WRITEFUNCTION\fP option, this is the pointer you'll get as
@@ -353,6 +357,9 @@ pointer named \fIuserdata\fP is the one you set with the
 of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library. This will abort the
 transfer and return \fICURL_WRITE_ERROR\fP.
+
+A complete header that is passed to this function can be up to
+\fICURL_MAX_HTTP_HEADER\fP (100K) bytes.
 
 If this option is not set, or if it is set to NULL, but
 \fICURLOPT_HEADERDATA\fP (\fICURLOPT_WRITEHEADER\fP) is set to anything but
@@ -584,20 +591,162 @@ POST/PUT and a 401 or 407 is received immediately afterwards.
 .SH NETWORK OPTIONS
 .IP CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero
-terminated string.
+terminated string which must be URL-encoded in the following format:
 
-If the given URL lacks the protocol part ("http://" or "ftp://" etc), it will
-attempt to guess which protocol to use based on the given host name. If the
-given protocol of the set URL is not supported, libcurl will return on error
-(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP or
-\fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed info
-on which protocols are supported.
+scheme://host:port/path
 
-The string given to CURLOPT_URL must be url-encoded and follow RFC 2396
+For a greater explanation of the format please see RFC 2396
 (http://curl.haxx.se/rfc/rfc2396.txt).
 
-Starting with version 7.20.0, the fragment part of the URI will not be send as
-part of the path, which was the case previously.
+If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
+etc), libcurl will attempt to resolve which protocol to use based on the
+given host mame. If the protocol is not supported, libcurl will return
+(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP
+or \fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed
+information on which protocols are supported.
+
+The host part of the URL contains the address of the server that you want to
+connect to. This can be the fully qualified domain name of the server, the
+local network name of the machine on your network or the IP address of the
+server or machine represented by either an IPv4 or IPv6 address. For example:
+
+http://www.example.com/
+
+http://hostname/
+
+http://192.168.0.1/
+
+http://[2001:1890:1112:1::20]/
+
+It is also possible to specify the user name and password as part of the
+host, for some protocols, when connecting to servers that require
+authentication.
+
+For example the following types of authentication support this:
+
+http://user:password@www.domain.com
+ftp://user:password@ftp.domain.com
+pop3://user:password@mail.domain.com
+
+The port is optional and when not specified libcurl will use the default port
+based on the determined or specified protocol: 80 for http, 21 for ftp and 25
+for smtp, etc. The following examples show how to specify the port:
+
+http://www.weirdserver.com:8080/ - This will connect to a web server using
+port 8080.
+
+smtp://mail.domain.com:587/ - This will connect to a smtp server on the
+alternative mail port.
+
+The path part of the URL is protocol specific and whilst some examples are
+given below this list is not conclusive:
+
+.B HTTP
+
+The path part of a HTTP request specifies the file to retrieve and from what
+directory. If the directory is not specified then the web server's root
+directory is used. If the file is omitted then the default document will be
+retrieved for either the directory specified or the root directory. The
+exact resource returned for each URL is entirely dependent on the server's
+configuration.
+
+http://www.netscape.com - This gets the main page (index.html in this
+example) from Netscape's web server.
+
+http://www.netscape.com/index.html - This returns the main page from Netscape
+by specifying the page to get.
+
+http://www.netscape.com/contactus/ - This returns the default document from
+the contactus directory.
+
+.B FTP
+
+The path part of an FTP request specifies the file to retrieve and from what
+directory. If the file part is omitted then libcurl downloads the directory
+listing for the directory specified. If the directory is omitted then
+the directory listing for the root / home directory will be returned.
+
+ftp://cool.haxx.se - This retrieves the directory listing for our FTP server.
+
+ftp://cool.haxx.se/readme.txt - This downloads the file readme.txt from the
+root directory.
+
+ftp://cool.haxx.se/libcurl/readme.txt - This downloads readme.txt from the
+libcurl directory.
+
+ftp://user:password@my.example.com/readme.txt - This retrieves the readme.txt
+file from the user's home directory. When a username and password is
+specified, everything that is specified in the path part is relative to the
+user's home directory. To retrieve files from the root directory or a
+directory underneath the root directory then the absolute path must be
+specified by prepending an additional forward slash to the beginning of the
+path.
+
+ftp://user:password@my.example.com//readme.txt - This retrieves the readme.txt
+from the root directory when logging in as a specified user.
+
+.B SMTP
+
+The path part of a SMTP request specifies the host name to present during
+communication with the mail server. If the path is omitted then libcurl will
+attempt to resolve the local computer's host name. However, this may not
+return the fully qualified domain name that is required by some mail servers
+and specifying this path allows you to set an alternative name, such as
+your machine's fully qualified domain name, which you might have obtained
+from an external function such as gethostname or getaddrinfo.
+
+smtp://mail.domain.com - This connects to the mail server at domain.com and
+sends your local computer's host name in the HELO / EHLO command.
+
+smtp://mail.domain.com/client.domain.com - This will send client.domain.com in
+the HELO / EHLO command to the mail server at domain.com.
+
+.B POP3
+
+The path part of a POP3 request specifies the mailbox (message) to retrieve.
+If the mailbox is not specified then a list of waiting messages is returned
+instead.
+
+pop3://user:password@mail.domain.com - This lists the available messages
+pop3://user:password@mail.domain.com/1 - This retrieves the first message
+
+.B SCP
+
+The path part of an SCP request specifies the file to retrieve and from what
+directory. The file part may not be omitted. The file is taken as an absolute
+path from the root directory on the server. To specify a path relative to
+the user's home directory on the server, prepend ~/ to the path portion.
+If the user name is not embedded in the URL, it can be set with the
+\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
+
+scp://user@example.com/etc/issue - This specifies the file /etc/issue
+
+scp://example.com/~/my-file - This specifies the file my-file in the
+user's home directory on the server
+
+.B SFTP
+
+The path part of an SFTP request specifies the file to retrieve and from what
+directory. If the file part is omitted then libcurl downloads the directory
+listing for the directory specified.  If the path ends in a / then a directory
+listing is returned instead of a file.  If the path is omitted entirely then
+the directory listing for the root / home directory will be returned.
+If the user name is not embedded in the URL, it can be set with the
+\fICURLOPT_USERPWD\fP or \fBCURLOPT_USERNAME\fP option.
+
+sftp://user:password@example.com/etc/issue - This specifies the file
+/etc/issue
+
+sftp://user@example.com/~/my-file - This specifies the file my-file in the
+user's home directory
+
+sftp://ssh.example.com/~/Documents/ - This requests a directory listing
+of the Documents directory under the user's home directory
+
+.B NOTES
+
+Starting with version 7.20.0, the fragment part of the URI will not be sent as
+part of the path, which was previously the case.
 
 \fICURLOPT_URL\fP is the only option that \fBmust\fP be set before
 \fIcurl_easy_perform(3)\fP is called.
@@ -666,10 +815,10 @@ this are \fICURLPROXY_HTTP\fP, \fICURLPROXY_HTTP_1_0\fP (added in 7.19.4),
 
 If you set \fBCURLOPT_PROXYTYPE\fP to \fICURLPROXY_HTTP_1_0\fP, it will only
 affect how libcurl speaks to a proxy when CONNECT is used. The HTTP version
-used for "regular" HTTP requests is instead controled with
+used for "regular" HTTP requests is instead controlled with
 \fICURLOPT_HTTP_VERSION\fP.
 .IP CURLOPT_NOPROXY
-Pass a pointer to a zero terminated string. The should be a comma- separated
+Pass a pointer to a zero terminated string. The should be a comma separated
 list of hosts which do not use a proxy, if one is specified.  The only
 wildcard is a single * character, which matches all hosts, and effectively
 disables the proxy. Each name in this list is matched as either a domain which
@@ -933,12 +1082,12 @@ You need to build libcurl with GnuTLS or OpenSSL with TLS-SRP support for this
 to work. (Added in 7.21.4)
 .RE
 .IP CURLOPT_TLSAUTH_USERNAME
-Pass a char * as parameter, which should point to the zero-terminated username
+Pass a char * as parameter, which should point to the zero terminated username
 to use for the TLS authentication method specified with the
 \fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
 \fICURLOPT_TLS_PASSWORD\fP option also be set. (Added in 7.21.4)
 .IP CURLOPT_TLSAUTH_PASSWORD
-Pass a char * as parameter, which should point to the zero-terminated password
+Pass a char * as parameter, which should point to the zero terminated password
 to use for the TLS authentication method specified with the
 \fICURLOPT_TLSAUTH_TYPE\fP option. Requires that the
 \fICURLOPT_TLS_USERNAME\fP option also be set. (Added in 7.21.4)
@@ -1471,7 +1620,7 @@ a reply.
 Initiate the shutdown and wait for a reply.
 .RE
 .IP CURLOPT_FTP_ACCOUNT
-Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
+Pass a pointer to a zero terminated string (or NULL to disable). When an FTP
 server asks for "account data" after user name and password has been provided,
 this data is sent off using the ACCT command. (Added in 7.13.0)
 .IP CURLOPT_FTP_FILEMETHOD

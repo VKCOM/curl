@@ -71,7 +71,7 @@ p.roffit {
 <p class="level0">If you prefer a progress "bar" instead of the regular meter, <a class="emphasis" href="#-">-#</a> is your friend. <a name="OPTIONS"></a><h2 class="nroffsh">OPTIONS</h2>
 <p class="level0">In general, all boolean options are enabled with --option and yet again disabled with --<span Class="bold">no-</span>option. That is, you use the exact same option name but prefix it with "no-". However, in this list we mostly only list and show the --option version of them. (This concept with --no options was added in 7.19.0. Previously most options were toggled on/off on repeated use of the same command line option.) 
 <p class="level0"><a name="-"></a><span class="nroffip">-#, --progress-bar</span> 
-<p class="level1">Make curl display progress information as a progress bar instead of the 
+<p class="level1">Make curl display progress as a simple progress bar instead of the standard, more informational, meter. 
 <p class="level0"><a name="-0"></a><span class="nroffip">-0, --http1.0</span> 
 <p class="level1">(HTTP) Forces curl to issue its requests using HTTP 1.0 instead of using its internally preferred: HTTP 1.1. 
 <p class="level0"><a name="-1"></a><span class="nroffip">-1, --tlsv1</span> 
@@ -176,7 +176,7 @@ p.roffit {
 <p class="level1">Disabling EPRT only changes the active behavior. If you want to switch to passive mode you need to not use <a class="emphasis" href="#-P">-P, --ftp-port</a> or force it with <a class="emphasis" href="#--ftp-pasv">--ftp-pasv</a>. 
 <p class="level0"><a name="--disable-epsv"></a><span class="nroffip">--disable-epsv</span> 
 <p class="level1">(FTP) Tell curl to disable the use of the EPSV command when doing passive FTP transfers. Curl will normally always first attempt to use EPSV before PASV, but with this option, it will not try using EPSV. 
-<p class="level1"><span Class="bold">--epsv</span> can be used to explicitly enable EPRT again and <span Class="bold">--no-epsv</span> is an alias for <a class="bold" href="#--disable-epsv">--disable-epsv</a>. 
+<p class="level1"><span Class="bold">--epsv</span> can be used to explicitly enable EPSV again and <span Class="bold">--no-epsv</span> is an alias for <a class="bold" href="#--disable-epsv">--disable-epsv</a>. 
 <p class="level1">Disabling EPSV only changes the passive behavior. If you want to switch to active mode you need to use <a class="emphasis" href="#-P">-P, --ftp-port</a>. 
 <p class="level0"><a name="-e"></a><span class="nroffip">-e, --referer &lt;URL&gt;</span> 
 <p class="level1">(HTTP) Sends the "Referer Page" information to the HTTP server. This can also be set with the <a class="emphasis" href="#-H">-H, --header</a> flag of course.  When used with <a class="emphasis" href="#-L">-L, --location</a> you can append ";auto" to the --referer URL to make curl automatically set the previous URL when it follows a Location: header. The ";auto" string can be used alone, even if you don't set an initial --referer. 
@@ -260,7 +260,7 @@ p.roffit {
 <p class="level1">If used in combination with -I, the POST data will instead be appended to the URL with a HEAD request. 
 <p class="level1">If this option is used several times, the following occurrences make no difference. This is because undoing a GET doesn't make sense, but you should then instead enforce the alternative method you prefer. 
 <p class="level0"><a name="-H"></a><span class="nroffip">-H, --header &lt;header&gt;</span> 
-<p class="level1">(HTTP) Extra header to use when getting a web page. You may specify any number of extra headers. Note that if you should add a custom header that has the same name as one of the internal ones curl would use, your externally set header will be used instead of the internal one. This allows you to make even trickier stuff than curl would normally do. You should not replace internally set headers without knowing perfectly well what you're doing. Remove an internal header by giving a replacement without content on the right side of the colon, as in: -H "Host:". 
+<p class="level1">(HTTP) Extra header to use when getting a web page. You may specify any number of extra headers. Note that if you should add a custom header that has the same name as one of the internal ones curl would use, your externally set header will be used instead of the internal one. This allows you to make even trickier stuff than curl would normally do. You should not replace internally set headers without knowing perfectly well what you're doing. Remove an internal header by giving a replacement without content on the right side of the colon, as in: -H "Host:". If you send the custom header with no-value then its header must be terminated with a semicolon, such as -H "X-Custom-Header;" to send "X-Custom-Header:". 
 <p class="level1">curl will make sure that each header you add/replace is sent with the proper end-of-line marker, you should thus <span Class="bold">not</span> add that as a part of the header content: do not add newlines or carriage returns, they will only mess things up for you. 
 <p class="level1">See also the <a class="emphasis" href="#-A">-A, --user-agent</a> and <a class="emphasis" href="#-e">-e, --referer</a> options. 
 <p class="level1">This option can be used multiple times to add/replace/remove multiple headers. 
@@ -652,6 +652,10 @@ p.roffit {
 <p class="level1">(HTTP) Specifies a custom request method to use when communicating with the HTTP server.  The specified request will be used instead of the method otherwise used (which defaults to GET). Read the HTTP 1.1 specification for details and explanations. Common additional HTTP requests include PUT and DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and more. 
 <p class="level1">(FTP) Specifies a custom FTP command to use instead of LIST when doing file lists with FTP. 
 <p class="level1">If this option is used several times, the last one will be used. 
+<p class="level1">
+<p class="level0"><a name="--xattr"></a><span class="nroffip">--xattr</span> 
+<p class="level1">When saving output to a file, this option tells curl to store certain file metadata in extened file attributes. Currently, the URL is stored in the xdg.origin.url attribute and, for HTTP, the content type is stored in the mime_type attribute. If the file system does not support extended attributes, a warning is issued. 
+<p class="level1">
 <p class="level0"><a name="-y"></a><span class="nroffip">-y, --speed-time &lt;time&gt;</span> 
 <p class="level1">If a download is slower than speed-limit bytes per second during a speed-time period, the download gets aborted. If speed-time is used, the default speed-limit will be 1 unless set with -Y. 
 <p class="level1">This option controls transfers and thus will not affect slow connects etc. If this is a concern for you, try the <a class="emphasis" href="#--connect-timeout">--connect-timeout</a> option. 
