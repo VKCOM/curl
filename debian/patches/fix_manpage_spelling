@@ -4,9 +4,9 @@ Origin: vendor
 Forwarded: no
 Last-Update: 2011-11-02
 
---- curl-7.22.0.orig/docs/libcurl/curl_easy_setopt.3
-+++ curl-7.22.0/docs/libcurl/curl_easy_setopt.3
-@@ -1188,7 +1188,7 @@ option and thus you need to concatenate
+--- a/docs/libcurl/curl_easy_setopt.3
++++ b/docs/libcurl/curl_easy_setopt.3
+@@ -1337,7 +1337,7 @@
  multiple cookies in one string like this: "name1=content1; name2=content2;"
  etc.
  
