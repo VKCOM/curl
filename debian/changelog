@@ -1,8 +1,14 @@
 curl (7.23.0-1) UNRELEASED; urgency=low
 
   * New upstream release
+    - Do not use gnutls_priority_set_direct and
+      gnutls_certificate_type_set_priority anymore (Closes: #624024)
+  * Refresh patches
+  * Add --enable-debug flag to configure (Closes: #648902)
+  * One Provides/Replaces per line
+  * libcurl4-openssl-dev Provides libcurl4-dev too (Closes: #644126)
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Wed, 16 Nov 2011 12:19:53 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Wed, 16 Nov 2011 23:03:06 +0100
 
 curl (7.22.0-3) unstable; urgency=low
 
