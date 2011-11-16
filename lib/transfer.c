@@ -1699,26 +1699,37 @@ static char *concat_url(const char *base, const char *relurl)
     }
   }
   else {
-    /* We got a new absolute path for this server, cut off from the
-       first slash */
-    pathsep = strchr(protsep, '/');
-    if(pathsep) {
-      /* When people use badly formatted URLs, such as
-         "http://www.url.com?dir=/home/daniel" we must not use the first
-         slash, if there's a ?-letter before it! */
-      char *sep = strchr(protsep, '?');
-      if(sep && (sep < pathsep))
-        pathsep = sep;
-      *pathsep=0;
+    /* We got a new absolute path for this server */
+
+    if((relurl[0] == '/') && (relurl[1] == '/')) {
+      /* the new URL starts with //, just keep the protocol part from the
+         original one */
+      *protsep=0;
+      useurl = &relurl[2]; /* we keep the slashes from the original, so we
+                              skip the new ones */
     }
     else {
-      /* There was no slash. Now, since we might be operating on a badly
-         formatted URL, such as "http://www.url.com?id=2380" which doesn't
-         use a slash separator as it is supposed to, we need to check for a
-         ?-letter as well! */
-      pathsep = strchr(protsep, '?');
-      if(pathsep)
+      /* cut off the original URL from the first slash, or deal with URLs
+         without slash */
+      pathsep = strchr(protsep, '/');
+      if(pathsep) {
+        /* When people use badly formatted URLs, such as
+           "http://www.url.com?dir=/home/daniel" we must not use the first
+           slash, if there's a ?-letter before it! */
+        char *sep = strchr(protsep, '?');
+        if(sep && (sep < pathsep))
+          pathsep = sep;
         *pathsep=0;
+      }
+      else {
+        /* There was no slash. Now, since we might be operating on a badly
+           formatted URL, such as "http://www.url.com?id=2380" which doesn't
+           use a slash separator as it is supposed to, we need to check for a
+           ?-letter as well! */
+        pathsep = strchr(protsep, '?');
+        if(pathsep)
+          *pathsep=0;
+      }
     }
   }
 
@@ -1731,8 +1742,8 @@ static char *concat_url(const char *base, const char *relurl)
 
   urllen = strlen(url_clone);
 
-  newest = malloc( urllen + 1 + /* possible slash */
-                         newlen + 1 /* zero byte */);
+  newest = malloc(urllen + 1 + /* possible slash */
+                  newlen + 1 /* zero byte */);
 
   if(!newest) {
     free(url_clone); /* don't leak this */
@@ -1795,15 +1806,14 @@ CURLcode Curl_follow(struct SessionHandle *data,
          when we get the next URL. We pick the ->url field, which may or may
          not be 100% correct */
 
-      if(data->change.referer_alloc)
-        /* If we already have an allocated referer, free this first */
-        free(data->change.referer);
+      if(data->change.referer_alloc) {
+        Curl_safefree(data->change.referer);
+        data->change.referer_alloc = FALSE;
+      }
 
       data->change.referer = strdup(data->change.url);
-      if(!data->change.referer) {
-        data->change.referer_alloc = FALSE;
+      if(!data->change.referer)
         return CURLE_OUT_OF_MEMORY;
-      }
       data->change.referer_alloc = TRUE; /* yes, free this later */
     }
   }
@@ -1850,12 +1860,13 @@ CURLcode Curl_follow(struct SessionHandle *data,
   if(disallowport)
     data->state.allow_port = FALSE;
 
-  if(data->change.url_alloc)
-    free(data->change.url);
-  else
-    data->change.url_alloc = TRUE; /* the URL is allocated */
+  if(data->change.url_alloc) {
+    Curl_safefree(data->change.url);
+    data->change.url_alloc = FALSE;
+  }
 
   data->change.url = newurl;
+  data->change.url_alloc = TRUE;
   newurl = NULL; /* don't free! */
 
   infof(data, "Issue another request to this URL: '%s'\n", data->change.url);
@@ -1980,12 +1991,17 @@ connect_host(struct SessionHandle *data,
     /* Now, if async is TRUE here, we need to wait for the name
        to resolve */
     res = Curl_resolver_wait_resolv(*conn, NULL);
-    if(CURLE_OK == res)
+    if(CURLE_OK == res) {
       /* Resolved, continue with the connection */
       res = Curl_async_resolved(*conn, &protocol_done);
-    else
+      if(res)
+        *conn = NULL;
+    }
+    else {
       /* if we can't resolve, we kill this "connection" now */
       (void)Curl_disconnect(*conn, /* dead_connection */ FALSE);
+      *conn = NULL;
+    }
   }
 
   return res;

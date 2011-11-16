@@ -273,6 +273,7 @@ struct ssl_connect_data {
   struct SessionHandle *data;
 #ifdef HAVE_PK11_CREATEGENERICOBJECT
   struct curl_llist *obj_list;
+  PK11GenericObject *obj_clicert;
 #endif
 #endif /* USE_NSS */
 #ifdef USE_QSOSSL
@@ -670,6 +671,12 @@ struct Curl_handler {
                        curl_socket_t *socks,
                        int numsocks);
 
+  /* Called from the multi interface during the DO_MORE phase, and it should
+     then return a proper fd set */
+  int (*domore_getsock)(struct connectdata *conn,
+                        curl_socket_t *socks,
+                        int numsocks);
+
   /* Called from the multi interface during the DO_DONE, PERFORM and
      WAITPERFORM phases, and it should then return a proper fd set. Not setting
      this will make libcurl use the generic default one. */
@@ -905,7 +912,7 @@ struct connectdata {
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
-#ifdef NTLM_WB_ENABLED
+#if defined(USE_NTLM) && defined(NTLM_WB_ENABLED)
   /* used for communication with Samba's winbind daemon helper ntlm_auth */
   curl_socket_t ntlm_auth_hlpr_socket;
   pid_t ntlm_auth_hlpr_pid;
@@ -1486,7 +1493,7 @@ struct UserDefined {
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
   bool ftp_use_pret;     /* if PRET is to be used before PASV or not */
 
-  curl_usessl ftp_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+  curl_usessl use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
                             IMAP or POP3 or others! */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   curl_ftpccc ftp_ccc;   /* FTP CCC options */

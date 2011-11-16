@@ -123,6 +123,10 @@
 #define X509_STORE_set_flags(x,y) Curl_nop_stmt
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x10000000L
+#define HAVE_ERR_REMOVE_THREAD_STATE 1
+#endif
+
 /*
  * Number of bytes to read from the random number seed file. This must be
  * a finite value (because some entropy "files" like /dev/urandom have
@@ -697,20 +701,27 @@ int Curl_ossl_init(void)
 /* Global cleanup */
 void Curl_ossl_cleanup(void)
 {
-  /* Free the SSL error strings */
-  ERR_free_strings();
-
-  /* EVP_cleanup() removes all ciphers and digests from the table. */
+  /* Free ciphers and digests lists */
   EVP_cleanup();
 
 #ifdef HAVE_ENGINE_CLEANUP
+  /* Free engine list */
   ENGINE_cleanup();
 #endif
 
 #ifdef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA
-  /* this function was not present in 0.9.6b, but was added sometimes
-     later */
+  /* Free OpenSSL ex_data table */
   CRYPTO_cleanup_all_ex_data();
+#endif
+
+  /* Free OpenSSL error strings */
+  ERR_free_strings();
+
+  /* Free thread local error state, destroying hash upon zero refcount */
+#ifdef HAVE_ERR_REMOVE_THREAD_STATE
+  ERR_remove_thread_state(NULL);
+#else
+  ERR_remove_state(0);
 #endif
 }
 
@@ -810,18 +821,16 @@ struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
 {
   struct curl_slist *list = NULL;
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-  struct curl_slist *beg = NULL;
+  struct curl_slist *beg;
   ENGINE *e;
 
   for(e = ENGINE_get_first(); e; e = ENGINE_get_next(e)) {
-    list = curl_slist_append(list, ENGINE_get_id(e));
-    if(list == NULL) {
-      curl_slist_free_all(beg);
+    beg = curl_slist_append(list, ENGINE_get_id(e));
+    if(!beg) {
+      curl_slist_free_all(list);
       return NULL;
     }
-    else if(beg == NULL) {
-      beg = list;
-    }
+    list = beg;
   }
 #endif
   (void) data;
@@ -962,17 +971,6 @@ void Curl_ossl_session_free(void *ptr)
  */
 int Curl_ossl_close_all(struct SessionHandle *data)
 {
-  /*
-    ERR_remove_state() frees the error queue associated with
-    thread pid.  If pid == 0, the current thread will have its
-    error queue removed.
-
-    Since error queue data structures are allocated
-    automatically for new threads, they must be freed when
-    threads are terminated in oder to avoid memory leaks.
-  */
-  ERR_remove_state(0);
-
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
     ENGINE_finish(data->state.engine);
@@ -1857,14 +1855,14 @@ static CURLcode push_certinfo_len(struct SessionHandle *data,
      equivalent of curl_slist_append but doesn't strdup() the given data as
      like in this place the extra malloc/free is totally pointless */
   nl = curl_slist_append(ci->certinfo[certnum], output);
+  free(output);
   if(!nl) {
     curl_slist_free_all(ci->certinfo[certnum]);
+    ci->certinfo[certnum] = NULL;
     res = CURLE_OUT_OF_MEMORY;
   }
   else
     ci->certinfo[certnum] = nl;
-
-  free(output);
 
   return res;
 }

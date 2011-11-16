@@ -119,6 +119,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   pop3_doing,                       /* doing */
   pop3_getsock,                     /* proto_getsock */
   pop3_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -144,6 +145,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   pop3_doing,                       /* doing */
   pop3_getsock,                     /* proto_getsock */
   pop3_getsock,                     /* doing_getsock */
+  ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* readwrite */
@@ -169,6 +171,7 @@ static const struct Curl_handler Curl_handler_pop3_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -194,6 +197,7 @@ static const struct Curl_handler Curl_handler_pop3s_proxy = {
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
   ZERO_NULL,                            /* doing_getsock */
+  ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* readwrite */
@@ -517,7 +521,7 @@ static CURLcode pop3_statemach_act(struct connectdata *conn)
         return CURLE_FTP_WEIRD_SERVER_REPLY;
       }
 
-      if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+      if(data->set.use_ssl && !conn->ssl[FIRSTSOCKET].use) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested. Switch
            to TLS connection now */
         result = Curl_pp_sendf(&pop3c->pp, "STLS");
