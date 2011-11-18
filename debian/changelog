@@ -1,4 +1,4 @@
-curl (7.23.0-1) UNRELEASED; urgency=low
+curl (7.23.1-1) UNRELEASED; urgency=low
 
   * New upstream release
     - Do not use gnutls_priority_set_direct and
