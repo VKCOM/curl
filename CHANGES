@@ -6,6 +6,28 @@
 
                                   Changelog
 
+Version 7.23.1 (17 Nov 2011)
+
+Daniel Stenberg (17 Nov 2011)
+- FindWin32CACert: return OK even if CA cert isn't found
+
+Version 7.23.1 (17 Nov 2011)
+  
+
+Version 7.23.1 (17 Nov 2011)
+  Bug: http://curl.haxx.se/mail/lib-2011-11/0180.html
+
+Version 7.23.1 (17 Nov 2011)
+  Reported by: Mark Brand
+
+Dan Fandrich (16 Nov 2011)
+- curl has been built on many Android versions
+
+Daniel Stenberg (15 Nov 2011)
+- 7.24.0: start the work
+
+- THANKS: added 18 new contributors from 7.23.0
+
 Version 7.23.0 (14 Nov 2011)
 
 Dan Fandrich (14 Nov 2011)
@@ -5063,27 +5085,3 @@ Daniel Stenberg (15 Dec 2010)
   Removed trailing whitespace
   Removed several compiler warnings
   Removed odd backslashes at some line endings
-
-- urldate: undef hideous memory defines
-  
-  The public axTLS header (at least as of 1.2.7) redefines the memory
-  functions. We #undef those again immediately after the public header to
-  limit the damage. This should be fixed in axTLS.
-
-- configure: make --with-axtls set prefix
-  
-  In tradition with other options, have this point to the directory prefix
-  and not the lib directory. Otherwise we can't set the include path
-  reliably.
-
-- [Eric Hu brought this change]
-
-  Minor fixes to pass tests 301 and 306 with a patched axTLS.
-
-- [Eric Hu brought this change]
-
-  Initial axTLS integration. Connections can be made and some tests pass.
-  
-  Failed HTTPS tests: 301, 306, 311, 312, 313, 560
-  311, 312 need more detailed error reporting from axTLS.
-  313 relates to CRL, which hasn't been implemented yet.
