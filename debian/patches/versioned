@@ -35,10 +35,10 @@ Last-Update: 2011-11-01
 +  yes) AC_MSG_RESULT(yes)
 +	   if test "$OPENSSL_ENABLED" = "1"; then
 +		   versioned_symbols_flavour="OPENSSL_"
-+	   else
-+		   if test "$OPT_GNUTLS" != "no"; then
++	   elif test "$OPT_GNUTLS" != "no"; then
 +			   versioned_symbols_flavour="GNUTLS_"
-+		   fi
++	   elif test "$OPT_NSS" != "no"; then
++			   versioned_symbols_flavour="NSS_"
 +	   fi
 +	   versioned_symbols="yes"
 +	   ;;
