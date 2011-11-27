@@ -1,4 +1,4 @@
-curl (7.23.1-1) UNRELEASED; urgency=low
+curl (7.23.1-1) unstable; urgency=low
 
   * New upstream release
     - Do not use gnutls_priority_set_direct and
@@ -7,8 +7,12 @@ curl (7.23.1-1) UNRELEASED; urgency=low
   * Add --enable-debug flag to configure (Closes: #648902)
   * One Provides/Replaces per line
   * libcurl4-openssl-dev Provides libcurl4-dev too (Closes: #644126)
+  * Specify only 3 components for Standards-Version 
+    (the fourth is not really needed)
+  * Move ca-certificates to Recommends in lib* packages (Closes: #546607)
+  * Add NSS flavour to versioned symbols
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Wed, 16 Nov 2011 23:03:06 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Sun, 27 Nov 2011 18:45:01 +0100
 
 curl (7.22.0-3) unstable; urgency=low
 
