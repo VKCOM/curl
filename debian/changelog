@@ -1,3 +1,9 @@
+curl (7.23.1-2) unstable; urgency=low
+
+  * Bump shlibs version for libcurl3-nss (Closes: #650498)
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 01 Dec 2011 22:32:19 +0100
+
 curl (7.23.1-1) unstable; urgency=low
 
   * New upstream release
