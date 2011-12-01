@@ -45,7 +45,9 @@ else
     endif
 endif
 
-SHLIBS_VERSION=7.16.2-1
+SHLIBS_VERSION_SSL=7.16.2-1
+SHLIBS_VERSION_GNUTLS=7.16.2-1
+SHLIBS_VERSION_NSS=7.23.1-2
 
 # this will catch miss-linking. (e.g. undefined symbols)
 # LDFLAGS = -Wl,-z,defs
@@ -58,7 +60,7 @@ CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 # this is still not ready
 # --enable-ares
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
-# --with-ldap-lib=/usr/lib/libldap_r.so 
+# --with-ldap-lib=/usr/lib/libldap_r.so
 
 ifneq (${DEB_BUILD_ARCH_OS},hurd)
 CONFIGURE_ARGS += --with-gssapi=/usr
@@ -156,10 +158,9 @@ binary-arch: build-stamp install
 	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss --dbg-package=libcurl3-dbg
 	dh_compress
 	dh_fixperms
-	echo "libcurl 4 libcurl3 (>= $(SHLIBS_VERSION))" > debian/shlibs.local
-	dh_makeshlibs -plibcurl3 -V "libcurl3 (>= $(SHLIBS_VERSION))"
-	dh_makeshlibs -plibcurl3-gnutls -V "libcurl3-gnutls (>= $(SHLIBS_VERSION))"
-	dh_makeshlibs -plibcurl3-nss -V "libcurl3-nss (>= $(SHLIBS_VERSION))"
+	dh_makeshlibs -plibcurl3 -V "libcurl3 (>= $(SHLIBS_VERSION_SSL))"
+	dh_makeshlibs -plibcurl3-gnutls -V "libcurl3-gnutls (>= $(SHLIBS_VERSION_GNUTLS))"
+	dh_makeshlibs -plibcurl3-nss -V "libcurl3-nss (>= $(SHLIBS_VERSION_NSS))"
 	dh_installdeb
 	dh_shlibdeps
 	dh_md5sums
