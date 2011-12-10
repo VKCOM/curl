@@ -45,9 +45,9 @@ else
     endif
 endif
 
-SHLIBS_VERSION_SSL=7.16.2-1
-SHLIBS_VERSION_GNUTLS=7.16.2-1
-SHLIBS_VERSION_NSS=7.23.1-2
+SHLIBS_VERSION_SSL=7.23.1
+SHLIBS_VERSION_GNUTLS=7.23.1
+SHLIBS_VERSION_NSS=7.23.1
 
 # this will catch miss-linking. (e.g. undefined symbols)
 # LDFLAGS = -Wl,-z,defs
