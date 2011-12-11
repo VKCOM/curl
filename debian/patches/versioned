@@ -96,6 +96,6 @@ Last-Update: 2011-11-01
 +
 +CURL_@VERSIONED_FLAVOUR@3
 +{
-+	global: curl_*; Curl_*;
++	global: curl_*;
 +	local: *;
 +};
