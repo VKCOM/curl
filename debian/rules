@@ -45,10 +45,6 @@ else
     endif
 endif
 
-SHLIBS_VERSION_SSL=7.23.1
-SHLIBS_VERSION_GNUTLS=7.23.1
-SHLIBS_VERSION_NSS=7.23.1
-
 # this will catch miss-linking. (e.g. undefined symbols)
 # LDFLAGS = -Wl,-z,defs
 
@@ -159,9 +155,7 @@ binary-arch: build-stamp install
 	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss --dbg-package=libcurl3-dbg
 	dh_compress
 	dh_fixperms
-	dh_makeshlibs -plibcurl3 -V "libcurl3 (>= $(SHLIBS_VERSION_SSL))"
-	dh_makeshlibs -plibcurl3-gnutls -V "libcurl3-gnutls (>= $(SHLIBS_VERSION_GNUTLS))"
-	dh_makeshlibs -plibcurl3-nss -V "libcurl3-nss (>= $(SHLIBS_VERSION_NSS))"
+	dh_makeshlibs
 	dh_installdeb
 	dh_shlibdeps
 	dh_md5sums
