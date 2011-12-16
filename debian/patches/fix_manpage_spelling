@@ -1,8 +1,9 @@
 Description: Fix a typo in a manpage.
 Author: Alessandro Ghedini <al3xbio@gmail.com>
 Origin: vendor
-Forwarded: no
-Last-Update: 2011-11-02
+Forwarded: http://curl.haxx.se/mail/lib-2011-12/0132.html
+Applied-Upstream: https://github.com/bagder/curl/commit/cd4cd668396d
+Last-Update: 2011-12-16
 
 --- a/docs/libcurl/curl_easy_setopt.3
 +++ b/docs/libcurl/curl_easy_setopt.3
