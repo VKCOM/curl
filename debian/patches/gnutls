@@ -65,9 +65,9 @@ Last-Update: 2011-11-01
  # This might hold -Werror
  CFLAGS += @CURL_CFLAG_EXTRAS@
  
--curl_LDADD = $(top_builddir)/lib/libcurl.la -lrt @CURL_LIBS@
+-curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-+curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la -lrt @CURL_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 +curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  BUILT_SOURCES = hugehelp.c config-win32.h
  CLEANFILES = hugehelp.c config-win32.h

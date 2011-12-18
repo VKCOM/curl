@@ -4,7 +4,6 @@ art_http_scripting
 versioned
 fix_manpage_spelling
 
-curl_links_with_rt
 gnutls
 # this must be the last
 nss
