@@ -1,6 +1,6 @@
-Description: no_com_err.
+Description: libcurl doesn't need to link to libkrb5.
 Origin: vendor
-Forwarded: no
+Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
 Last-Update: 2011-11-01

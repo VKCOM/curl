@@ -1,4 +1,4 @@
-no_com_err
+dont_link_to_krb5
 runtests_gdb
 art_http_scripting
 versioned
