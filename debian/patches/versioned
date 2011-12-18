@@ -1,6 +1,6 @@
 Description: versioned.
 Origin: vendor
-Forwarded: not-needed
+Forwarded: http://curl.haxx.se/mail/lib-2011-12/0174.html
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
 Last-Update: 2011-11-01
