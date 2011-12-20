@@ -3,6 +3,7 @@ Origin: vendor
 Forwarded: http://curl.haxx.se/mail/lib-2011-12/0174.html
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Applied-Upstream: https://github.com/bagder/curl/commit/7cc2e8b349d
 Last-Update: 2011-11-01
 
 --- a/configure.ac
