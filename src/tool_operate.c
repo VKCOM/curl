@@ -576,41 +576,40 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           if((urlnode->flags & GETOUT_USEREMOTE)
              && config->content_disposition) {
-            /* Our header callback sets the filename */
+            /* Our header callback MIGHT set the filename */
             DEBUGASSERT(!outs.filename);
           }
-          else {
-            if(config->resume_from_current) {
-              /* We're told to continue from where we are now. Get the size
-                 of the file as it is now and open it for append instead */
-              struct_stat fileinfo;
-              /* VMS -- Danger, the filesize is only valid for stream files */
-              if(0 == stat(outfile, &fileinfo))
-                /* set offset to current file size: */
-                config->resume_from = fileinfo.st_size;
-              else
-                /* let offset be 0 */
-                config->resume_from = 0;
-            }
 
-            if(config->resume_from) {
-              /* open file for output: */
-              FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
-              if(!file) {
-                helpf(config->errors, "Can't open '%s'!\n", outfile);
-                res = CURLE_WRITE_ERROR;
-                goto quit_urls;
-              }
-              outs.fopened = TRUE;
-              outs.stream = file;
-              outs.init = config->resume_from;
-            }
-            else {
-              outs.stream = NULL; /* open when needed */
-            }
-            outs.filename = outfile;
-            outs.s_isreg = TRUE;
+          if(config->resume_from_current) {
+            /* We're told to continue from where we are now. Get the size
+               of the file as it is now and open it for append instead */
+            struct_stat fileinfo;
+            /* VMS -- Danger, the filesize is only valid for stream files */
+            if(0 == stat(outfile, &fileinfo))
+              /* set offset to current file size: */
+              config->resume_from = fileinfo.st_size;
+            else
+              /* let offset be 0 */
+              config->resume_from = 0;
           }
+
+          if(config->resume_from) {
+            /* open file for output: */
+            FILE *file = fopen(outfile, config->resume_from?"ab":"wb");
+            if(!file) {
+              helpf(config->errors, "Can't open '%s'!\n", outfile);
+              res = CURLE_WRITE_ERROR;
+              goto quit_urls;
+            }
+            outs.fopened = TRUE;
+            outs.stream = file;
+            outs.init = config->resume_from;
+          }
+          else {
+            outs.stream = NULL; /* open when needed */
+          }
+          outs.filename = outfile;
+          outs.s_isreg = TRUE;
         }
 
         if(uploadfile && !stdin_upload(uploadfile)) {
@@ -768,11 +767,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         /* for uploads */
         input.fd = infd;
         input.config = config;
+        /* Note that if CURLOPT_READFUNCTION is fread (the default), then
+         * lib/telnet.c will Curl_poll() on the input file descriptor
+         * rather then calling the READFUNCTION at regular intervals.
+         * The circumstances in which it is preferable to enable this
+         * behaviour, by omitting to set the READFUNCTION & READDATA options,
+         * have not been determined.
+         */
         my_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
-        if((outfile && !curlx_strequal("-", outfile)) ||
-           !checkprefix("telnet:", this_url))
-          my_setopt(curl, CURLOPT_READFUNCTION, tool_read_cb);
+        my_setopt(curl, CURLOPT_READFUNCTION, tool_read_cb);
 
         /* in 7.18.0, the CURLOPT_SEEKFUNCTION/DATA pair is taking over what
            CURLOPT_IOCTLFUNCTION/DATA pair previously provided for seeking */
@@ -1234,7 +1238,10 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
               RETRY_LAST /* not used */
             } retry = RETRY_NO;
             long response;
-            if(CURLE_OPERATION_TIMEDOUT == res)
+            if((CURLE_OPERATION_TIMEDOUT == res) ||
+               (CURLE_COULDNT_RESOLVE_HOST == res) ||
+               (CURLE_COULDNT_RESOLVE_PROXY == res) ||
+               (CURLE_FTP_ACCEPT_TIMEOUT == res))
               /* retry timeout always */
               retry = RETRY_TIMEOUT;
             else if((CURLE_OK == res) ||

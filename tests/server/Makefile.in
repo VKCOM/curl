@@ -52,7 +52,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
 	$(top_srcdir)/m4/curl-system.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/m4/xc-translit.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/m4/xc-translit.m4 \
+	$(top_srcdir)/m4/zz50-xc-ovr.m4 $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -123,7 +124,7 @@ am__objects_17 = sws-getpart.$(OBJEXT) sws-base64.$(OBJEXT) \
 	sws-memdebug.$(OBJEXT)
 am__objects_18 = sws-util.$(OBJEXT)
 am_sws_OBJECTS = $(am__objects_16) $(am__objects_2) $(am__objects_17) \
-	$(am__objects_18) sws-sws.$(OBJEXT)
+	$(am__objects_18) sws-sws.$(OBJEXT) sws-inet_pton.$(OBJEXT)
 sws_OBJECTS = $(am_sws_OBJECTS)
 sws_DEPENDENCIES =
 am__objects_19 = tftpd-mprintf.$(OBJEXT) tftpd-nonblock.$(OBJEXT) \
@@ -288,6 +289,7 @@ USE_CYASSL = @USE_CYASSL@
 USE_EMBEDDED_ARES_FALSE = @USE_EMBEDDED_ARES_FALSE@
 USE_EMBEDDED_ARES_TRUE = @USE_EMBEDDED_ARES_TRUE@
 USE_GNUTLS = @USE_GNUTLS@
+USE_GNUTLS_NETTLE = @USE_GNUTLS_NETTLE@
 USE_LIBRTMP = @USE_LIBRTMP@
 USE_LIBSSH2 = @USE_LIBSSH2@
 USE_MANUAL_FALSE = @USE_MANUAL_FALSE@
@@ -298,6 +300,9 @@ USE_POLARSSL = @USE_POLARSSL@
 USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
+VERSIONED_FLAVOUR = @VERSIONED_FLAVOUR@
+VERSIONED_SYMBOLS_FALSE = @VERSIONED_SYMBOLS_FALSE@
+VERSIONED_SYMBOLS_TRUE = @VERSIONED_SYMBOLS_TRUE@
 VERSIONNUM = @VERSIONNUM@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
@@ -449,7 +454,8 @@ sockfilt_LDADD = @TEST_SERVER_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 sws_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  server_sockaddr.h \
- sws.c
+ sws.c \
+ $(top_srcdir)/lib/inet_pton.c
 
 sws_LDADD = @TEST_SERVER_LIBS@
 sws_CFLAGS = $(AM_CFLAGS)
@@ -593,6 +599,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sockfilt-warnless.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-base64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-getpart.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-inet_pton.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-memdebug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-mprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sws-nonblock.Po@am__quote@
@@ -1558,6 +1565,20 @@ sws-sws.obj: sws.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='sws.c' object='sws-sws.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sws_CFLAGS) $(CFLAGS) -c -o sws-sws.obj `if test -f 'sws.c'; then $(CYGPATH_W) 'sws.c'; else $(CYGPATH_W) '$(srcdir)/sws.c'; fi`
+
+sws-inet_pton.o: $(top_srcdir)/lib/inet_pton.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sws_CFLAGS) $(CFLAGS) -MT sws-inet_pton.o -MD -MP -MF "$(DEPDIR)/sws-inet_pton.Tpo" -c -o sws-inet_pton.o `test -f '$(top_srcdir)/lib/inet_pton.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/inet_pton.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sws-inet_pton.Tpo" "$(DEPDIR)/sws-inet_pton.Po"; else rm -f "$(DEPDIR)/sws-inet_pton.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lib/inet_pton.c' object='sws-inet_pton.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sws_CFLAGS) $(CFLAGS) -c -o sws-inet_pton.o `test -f '$(top_srcdir)/lib/inet_pton.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/inet_pton.c
+
+sws-inet_pton.obj: $(top_srcdir)/lib/inet_pton.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sws_CFLAGS) $(CFLAGS) -MT sws-inet_pton.obj -MD -MP -MF "$(DEPDIR)/sws-inet_pton.Tpo" -c -o sws-inet_pton.obj `if test -f '$(top_srcdir)/lib/inet_pton.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/inet_pton.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/inet_pton.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sws-inet_pton.Tpo" "$(DEPDIR)/sws-inet_pton.Po"; else rm -f "$(DEPDIR)/sws-inet_pton.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$(top_srcdir)/lib/inet_pton.c' object='sws-inet_pton.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sws_CFLAGS) $(CFLAGS) -c -o sws-inet_pton.obj `if test -f '$(top_srcdir)/lib/inet_pton.c'; then $(CYGPATH_W) '$(top_srcdir)/lib/inet_pton.c'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/lib/inet_pton.c'; fi`
 
 tftpd-mprintf.o: $(top_srcdir)/lib/mprintf.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(tftpd_CFLAGS) $(CFLAGS) -MT tftpd-mprintf.o -MD -MP -MF "$(DEPDIR)/tftpd-mprintf.Tpo" -c -o tftpd-mprintf.o `test -f '$(top_srcdir)/lib/mprintf.c' || echo '$(srcdir)/'`$(top_srcdir)/lib/mprintf.c; \

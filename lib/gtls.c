@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,7 +34,9 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
+#ifndef USE_GNUTLS_NETTLE
 #include <gcrypt.h>
+#endif
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -85,8 +87,7 @@ static bool gtls_inited = FALSE;
 #    define USE_GNUTLS_PRIORITY_SET_DIRECT 1
 #  endif
 #  if (GNUTLS_VERSION_NUMBER >= 0x020c03)
-#    undef gnutls_transport_set_global_errno
-#    define gnutls_transport_set_global_errno(A) SET_ERRNO((A))
+#    define GNUTLS_MAPS_WINSOCK_ERRORS 1
 #  endif
 #endif
 
@@ -107,9 +108,13 @@ static bool gtls_inited = FALSE;
  * resort global errno variable using gnutls_transport_set_global_errno,
  * with a transport agnostic error value. This implies that some winsock
  * error translation must take place in these callbacks.
+ *
+ * Paragraph above applies to GNU TLS versions older than 2.12.3, since
+ * this version GNU TLS does its own internal winsock error translation
+ * using system_errno() function.
  */
 
-#ifdef USE_WINSOCK
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
 #  define gtls_EINTR  4
 #  define gtls_EIO    5
 #  define gtls_EAGAIN 11
@@ -130,7 +135,7 @@ static int gtls_mapped_sockerrno(void)
 static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 {
   ssize_t ret = swrite(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
-#ifdef USE_WINSOCK
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
@@ -140,7 +145,7 @@ static ssize_t Curl_gtls_push(void *s, const void *buf, size_t len)
 static ssize_t Curl_gtls_pull(void *s, void *buf, size_t len)
 {
   ssize_t ret = sread(GNUTLS_POINTER_TO_INT_CAST(s), buf, len);
-#ifdef USE_WINSOCK
+#if defined(USE_WINSOCK) && !defined(GNUTLS_MAPS_WINSOCK_ERRORS)
   if(ret < 0)
     gnutls_transport_set_global_errno(gtls_mapped_sockerrno());
 #endif
@@ -198,7 +203,7 @@ static void showtime(struct SessionHandle *data,
            tm->tm_hour,
            tm->tm_min,
            tm->tm_sec);
-  infof(data, "%s", data->state.buffer);
+  infof(data, "%s\n", data->state.buffer);
 }
 
 static gnutls_datum load_file (const char *file)
@@ -448,7 +453,13 @@ gtls_connect_step1(struct connectdata *conn,
     rc = gnutls_protocol_set_priority(session, protocol_priority);
 #else
     const char *err;
-    rc = gnutls_priority_set_direct(session, "-VERS-TLS-ALL:+VERS-SSL3.0",
+    /* the combination of the cipher ARCFOUR with SSL 3.0 and TLS 1.0 is not
+       vulnerable to attacks such as the BEAST, why this code now explicitly
+       asks for that
+    */
+    rc = gnutls_priority_set_direct(session,
+                                    "NORMAL:-VERS-TLS-ALL:+VERS-SSL3.0:"
+                                    "-CIPHER-ALL:+ARCFOUR-128",
                                     &err);
 #endif
     if(rc != GNUTLS_E_SUCCESS)
@@ -1032,7 +1043,9 @@ int Curl_gtls_seed(struct SessionHandle *data)
   static bool ssl_seeded = FALSE;
 
   /* Quickly add a bit of entropy */
+#ifndef USE_GNUTLS_NETTLE
   gcry_fast_random_poll();
+#endif
 
   if(!ssl_seeded || data->set.str[STRING_SSL_RANDOM_FILE] ||
      data->set.str[STRING_SSL_EGDSOCKET]) {

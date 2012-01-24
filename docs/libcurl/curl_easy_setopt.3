@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -294,10 +294,9 @@ argument in the sockopt callback set with \fICURLOPT_SOCKOPTFUNCTION\fP.
 Function pointer that should match the \fIcurl_opensocket_callback\fP
 prototype found in \fI<curl/curl.h>\fP. This function gets called by libcurl
 instead of the \fIsocket(2)\fP call. The callback's \fIpurpose\fP argument
-identifies the exact purpose for this particular socket, and currently only
-one value is supported: \fICURLSOCKTYPE_IPCXN\fP for the primary connection
-(meaning the control connection in the FTP case). Future versions of libcurl
-may support more purposes. It passes the resolved peer address as a
+identifies the exact purpose for this particular socket:
+\fICURLSOCKTYPE_IPCXN\fP is for IP based connections. Future versions of
+libcurl may support more purposes. It passes the resolved peer address as a
 \fIaddress\fP argument so the callback can modify the address or refuse to
 connect at all. The callback function should return the socket or
 \fICURL_SOCKET_BAD\fP in case no connection should be established or any error
@@ -595,8 +594,8 @@ terminated string which must be URL-encoded in the following format:
 
 scheme://host:port/path
 
-For a greater explanation of the format please see RFC 2396
-(http://curl.haxx.se/rfc/rfc2396.txt).
+For a greater explanation of the format please see RFC 3986
+(http://curl.haxx.se/rfc/rfc3986.txt).
 
 If the given URL lacks the scheme, or protocol, part ("http://" or "ftp://"
 etc), libcurl will attempt to resolve which protocol to use based on the
@@ -844,6 +843,15 @@ negotiation. (Added in 7.19.4).
 Pass a char * as parameter. This sets the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address, or a host
 name.
+
+Starting with 7.24.0: If the parameter starts with "if!" then it is treated as
+only as interface name and no attempt will ever be named to do treat it as an
+IP address or to do name resolution on it.  If the parameter starts with
+\&"host!" it is treated as either an IP address or a hostname.  Hostnames are
+resolved synchronously.  Using the if! format is highly recommended when using
+the multi interfaces to avoid allowing the code to block.  If "if!" is
+specified but the parameter does not match an existing interface,
+CURLE_INTERFACE_FAILED is returned.
 .IP CURLOPT_LOCALPORT
 Pass a long. This sets the local port number of the socket used for
 connection. This can be used in combination with \fICURLOPT_INTERFACE\fP and
@@ -1337,7 +1345,7 @@ option and thus you need to concatenate them all in one single string. Set
 multiple cookies in one string like this: "name1=content1; name2=content2;"
 etc.
 
-This option sets the cookie header explictly in the outgoing request(s). If
+This option sets the cookie header explicitly in the outgoing request(s). If
 multiple requests are done due to authentication, followed redirections or
 similar, they will all get this cookie passed on.
 
@@ -1485,9 +1493,9 @@ fully valid list of 'struct curl_slist' structs properly filled in with text
 strings. Use \fIcurl_slist_append(3)\fP to append strings (commands) to the
 list, and clear the entire list afterwards with
 \fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a NULL
-to this option. When speaking to a FTP server, prefix the command with an
-asterisk (*) to make libcurl continue even if the command fails as by default
-libcurl will stop at first failure.
+to this option. When speaking to a FTP (or SFTP since 7.24.0) server, prefix
+the command with an asterisk (*) to make libcurl continue even if the command
+fails as by default libcurl will stop at first failure.
 
 The set of valid FTP commands depends on the server (see RFC959 for a list of
 mandatory commands).
@@ -1842,6 +1850,9 @@ as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
 For uploading using SCP, this option or \fICURLOPT_INFILESIZE_LARGE\fP is
 mandatory.
 
+When sending emails using SMTP, this command can be used to specify the
+optional SIZE parameter for the MAIL FROM command. (Added in 7.23.0)
+
 This option does not limit how much data libcurl will actually send, as that
 is controlled entirely by what the read callback returns.
 .IP CURLOPT_INFILESIZE_LARGE
@@ -1971,9 +1982,9 @@ re-use (default behavior).
 .IP CURLOPT_CONNECTTIMEOUT
 Pass a long. It should contain the maximum time in seconds that you allow the
 connection to the server to take.  This only limits the connection phase, once
-it has connected, this option is of no more use. Set to zero to disable
-connection timeout (it will then only timeout on the system's internal
-timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
+it has connected, this option is of no more use. Set to zero to switch to the
+default built-in connection timeout - 300 seconds. See also the
+\fICURLOPT_TIMEOUT\fP option.
 
 In unix-like systems, this might cause signals to be used unless
 \fICURLOPT_NOSIGNAL\fP is set.
@@ -2045,6 +2056,24 @@ resolves, by including a string in the linked list that uses the format
 and port number must exactly match what was already added previously.
 
 (Added in 7.21.3)
+.IP CURLOPT_DNS_SERVERS
+Set the list of DNS servers to be used instead of the system default.
+The format of the dns servers option is:
+
+host[:port][,host[:port]]...
+
+For example:
+
+192.168.1.100,192.168.1.101,3.4.5.6
+
+This option requires that libcurl was built with a resolver backend that
+supports this operation. The c-ares backend is the only such one.
+
+(Added in 7.24.0)
+.IP CURLOPT_ACCEPTTIMEOUT_MS
+Pass a long telling libcurl the maximum number of milliseconds to wait for a
+server to connect back to libcurl when an active FTP connection is used. If no
+timeout is set, the internal default of 60000 will be used. (Added in 7.24.0)
 .SH SSL and SECURITY OPTIONS
 .IP CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be

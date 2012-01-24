@@ -133,7 +133,7 @@ const struct Curl_handler Curl_handler_smtp = {
   ZERO_NULL,                        /* readwrite */
   PORT_SMTP,                        /* defport */
   CURLPROTO_SMTP,                   /* protocol */
-  PROTOPT_CLOSEACTION               /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_NOURLQUERY /* flags */
 };
 
 #ifdef USE_SSL
@@ -158,7 +158,8 @@ const struct Curl_handler Curl_handler_smtps = {
   ZERO_NULL,                        /* readwrite */
   PORT_SMTPS,                       /* defport */
   CURLPROTO_SMTP | CURLPROTO_SMTPS, /* protocol */
-  PROTOPT_CLOSEACTION | PROTOPT_SSL /* flags */
+  PROTOPT_CLOSEACTION | PROTOPT_SSL
+  | PROTOPT_NOURLQUERY              /* flags */
 };
 #endif
 
@@ -509,7 +510,7 @@ static CURLcode smtp_state_starttls_resp(struct connectdata *conn,
   if(smtpcode != 220) {
     if(data->set.use_ssl != CURLUSESSL_TRY) {
       failf(data, "STARTTLS denied. %c", smtpcode);
-      result = CURLE_LOGIN_DENIED;
+      result = CURLE_USE_SSL_FAILED;
     }
     else
       result = smtp_authenticate(conn);
@@ -1243,7 +1244,6 @@ static CURLcode smtp_connect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   struct pingpong *pp = &smtpc->pp;
   const char *path = conn->data->state.path;
-  int len;
   char localhost[HOSTNAME_MAX + 1];
 
   *done = FALSE; /* default to not done yet */
@@ -1315,9 +1315,9 @@ static CURLcode smtp_connect(struct connectdata *conn,
   }
 
   /* url decode the path and use it as domain with EHLO */
-  smtpc->domain = curl_easy_unescape(conn->data, path, 0, &len);
-  if(!smtpc->domain)
-    return CURLE_OUT_OF_MEMORY;
+  result = Curl_urldecode(conn->data, path, 0, &smtpc->domain, NULL, TRUE);
+  if(result)
+    return result;
 
   /* When we connect, we start in the state where we await the server greeting
    */

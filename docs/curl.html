@@ -201,8 +201,8 @@ p.roffit {
 <p class="level1">If curl is built against the NSS SSL library then this option tells curl the nickname of the CA certificate to use within the NSS database defined by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the NSS PEM PKCS#11 module (libnsspem.so) is available then PEM files may be loaded. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--capath"></a><span class="nroffip">--capath &lt;CA certificate directory&gt;</span> 
-<p class="level1">(SSL) Tells curl to use the specified certificate directory to verify the peer. The certificates must be in PEM format, and if curl is built against OpenSSL, the directory must have been processed using the c_rehash utility supplied with OpenSSL. Using <a class="emphasis" href="#--capath">--capath</a> can allow OpenSSL-powered curl to make SSL-connections much more efficiently than using <a class="emphasis" href="#--cacert">--cacert</a> if the <a class="emphasis" href="#--cacert">--cacert</a> file contains many CA certificates. 
-<p class="level1">If this option is used several times, the last one will be used. 
+<p class="level1">(SSL) Tells curl to use the specified certificate directory to verify the peer. Multiple paths can be provided by separating them with ":" (e.g. "path1:path2:path3"). The certificates must be in PEM format, and if curl is built against OpenSSL, the directory must have been processed using the c_rehash utility supplied with OpenSSL. Using <a class="emphasis" href="#--capath">--capath</a> can allow OpenSSL-powered curl to make SSL-connections much more efficiently than using <a class="emphasis" href="#--cacert">--cacert</a> if the <a class="emphasis" href="#--cacert">--cacert</a> file contains many CA certificates. 
+<p class="level1">If this option is set, the default capath value will be ignored, and if it is used several times, the last one will be used. 
 <p class="level0"><a name="-f"></a><span class="nroffip">-f, --fail</span> 
 <p class="level1">(HTTP) Fail silently (no output at all) on server errors. This is mostly done to better enable scripts etc to better deal with failed attempts. In normal cases when a HTTP server fails to deliver a document, it returns an HTML document stating so (which often also describes why and more). This flag will prevent curl from outputting that and return error 22. 
 <p class="level1">This method is not fail-safe and there are occasions where non-successful response codes will slip through, especially when authentication is involved (response codes 401 and 407). 
@@ -553,7 +553,7 @@ p.roffit {
 <p class="level0"><a name="--socks5-gssapi-nec"></a><span class="nroffip">--socks5-gssapi-nec</span> 
 <p class="level1">As part of the gssapi negotiation a protection mode is negotiated. <a href="http://www.ietf.org/rfc/rfc1961.txt">RFC 1961</a> says in section 4.3/4.4 it should be protected, but the NEC reference implementation does not.  The option <a class="emphasis" href="#--socks5-gssapi-nec">--socks5-gssapi-nec</a> allows the unprotected exchange of the protection mode negotiation. (Added in 7.19.4). 
 <p class="level0"><a name="--stderr"></a><span class="nroffip">--stderr &lt;file&gt;</span> 
-<p class="level1">Redirect all writes to stderr to the specified file instead. If the file name is a plain '-', it is instead written to stdout. This option has no point when you're using a shell with decent redirecting capabilities. 
+<p class="level1">Redirect all writes to stderr to the specified file instead. If the file name is a plain '-', it is instead written to stdout. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-t"></a><span class="nroffip">-t, --telnet-option &lt;OPT=val&gt;</span> 
 <p class="level1">Pass options to the telnet protocol. Supported options are: 

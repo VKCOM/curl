@@ -2,6 +2,9 @@
 TESTUTIL = testutil.c testutil.h
 
 # files used only in some libcurl test programs
+TSTTRACE = testtrace.c testtrace.h
+
+# files used only in some libcurl test programs
 WARNLESS = $(top_srcdir)/lib/warnless.c $(top_srcdir)/lib/warnless.h
 
 # these files are used in every single test program below
@@ -15,15 +18,15 @@ noinst_PROGRAMS = chkhostname \
   lib579 lib529 lib530 lib532 lib533 lib536 lib537 lib540 lib541 lib542	\
   lib543 lib544 lib545 lib547 lib548 lib549 lib552 lib553 lib554 lib555	\
   lib556 lib539 lib557 lib560 lib562 lib564 lib565 lib566 lib567 lib568	\
-  lib569 lib570 lib571 lib572 lib573 lib582 lib583 lib585 lib587 lib590 \
-  lib591
+  lib569 lib570 lib571 lib572 lib573 lib582 lib583 lib585 lib586 lib587 \
+  lib590 lib591 lib597
 
 chkhostname_SOURCES = chkhostname.c $(top_srcdir)/lib/curl_gethostname.c
 chkhostname_LDADD = @CURL_NETWORK_LIBS@
 chkhostname_DEPENDENCIES =
 chkhostname_CFLAGS = $(AM_CFLAGS)
 
-lib500_SOURCES = lib500.c $(SUPPORTFILES)
+lib500_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE)
 
 lib501_SOURCES = lib501.c $(SUPPORTFILES)
 
@@ -155,7 +158,7 @@ lib571_SOURCES = lib571.c $(SUPPORTFILES)
 
 lib572_SOURCES = lib572.c $(SUPPORTFILES)
 
-lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(TSTTRACE)
 
 lib578_SOURCES = lib578.c $(SUPPORTFILES)
 
@@ -165,8 +168,10 @@ lib582_SOURCES = lib582.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 
 lib583_SOURCES = lib583.c $(SUPPORTFILES)
 
-lib585_SOURCES = lib500.c $(SUPPORTFILES)
+lib585_SOURCES = lib500.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE)
 lib585_CPPFLAGS = $(AM_CPPFLAGS) -DLIB585
+
+lib586_SOURCES = lib586.c $(SUPPORTFILES)
 
 lib587_SOURCES = lib554.c $(SUPPORTFILES)
 lib587_CPPFLAGS = $(AM_CPPFLAGS) -DLIB587
@@ -174,3 +179,5 @@ lib587_CPPFLAGS = $(AM_CPPFLAGS) -DLIB587
 lib590_SOURCES = lib590.c $(SUPPORTFILES)
 
 lib591_SOURCES = lib591.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+
+lib597_SOURCES = lib597.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)

@@ -47,7 +47,7 @@ RETR 1208
 QUIT
 </protocol>
 <errorcode>
-19
+12
 </errorcode>
 </verify>
 </testcase>
