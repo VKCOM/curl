@@ -1,8 +1,6 @@
 dont_link_to_krb5
 runtests_gdb
 art_http_scripting
-versioned
-fix_manpage_spelling
 
 gnutls
 # this must be the last
