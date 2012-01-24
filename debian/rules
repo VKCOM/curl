@@ -89,9 +89,14 @@ configure-stamp:
 	for flavour in build build-gnutls build-nss; do \
 		(cd debian/$$flavour && ./buildconf) \
 	done
-	cd debian/build && ./configure ${CONFIGURE_ARGS} --with-librtmp --with-ca-path=/etc/ssl/certs
-	cd debian/build-gnutls && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-gnutls --without-libssh2
-	cd debian/build-nss && ./configure ${CONFIGURE_ARGS} --with-ca-bundle=/etc/ssl/certs/ca-certificates.crt --without-ssl --with-nss --without-libssh2
+	cd debian/build && ./configure ${CONFIGURE_ARGS}		\
+		--with-librtmp --with-ca-path=/etc/ssl/certs
+	cd debian/build-gnutls && ./configure ${CONFIGURE_ARGS}		\
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt	\
+		--without-ssl --with-gnutls
+	cd debian/build-nss && ./configure ${CONFIGURE_ARGS}		\
+		--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt	\
+		--without-ssl --with-nss
 	touch configure-stamp
 
 #build-stamp: DH_OPTIONS=
