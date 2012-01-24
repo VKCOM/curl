@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -332,7 +332,7 @@ static void read_rewind(struct connectdata *conn,
     }
 
     DEBUGF(infof(conn->data,
-                 "Buffer after stream rewind (read_pos = %zu): [%s]",
+                 "Buffer after stream rewind (read_pos = %zu): [%s]\n",
                  conn->read_pos, buf));
   }
 #endif
@@ -606,7 +606,8 @@ static CURLcode readwrite_data(struct SessionHandle *data,
 
           dataleft = conn->chunk.dataleft;
           if(dataleft != 0) {
-            infof(conn->data, "Leftovers after chunking: %zu bytes", dataleft);
+            infof(conn->data, "Leftovers after chunking: %zu bytes\n",
+                  dataleft);
             if(conn->data->multi &&
                Curl_multi_canPipeline(conn->data->multi)) {
               /* only attempt the rewind if we truly are pipelining */
@@ -1405,52 +1406,6 @@ Transfer(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static CURLcode loadhostpairs(struct SessionHandle *data)
-{
-  struct curl_slist *hostp;
-  char hostname[256];
-  char address[256];
-  int port;
-
-  for(hostp = data->change.resolve; hostp; hostp = hostp->next ) {
-    if(!hostp->data)
-      continue;
-    if(hostp->data[0] == '-') {
-      /* TODO: mark an entry for removal */
-    }
-    else if(3 == sscanf(hostp->data, "%255[^:]:%d:%255s", hostname, &port,
-                        address)) {
-      struct Curl_dns_entry *dns;
-      Curl_addrinfo *addr;
-
-      addr = Curl_str2addr(address, port);
-      if(!addr) {
-        infof(data, "Resolve %s found illegal!\n", hostp->data);
-        continue;
-      }
-      infof(data, "Added %s:%d:%s to DNS cache\n",
-            hostname, port, address);
-
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
-      /* put this host in the cache */
-      dns = Curl_cache_addr(data, addr, hostname, port);
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
-      if(!dns) {
-        Curl_freeaddrinfo(addr);
-        return CURLE_OUT_OF_MEMORY;
-      }
-    }
-  }
-  data->change.resolve = NULL; /* dealt with now */
-
-  return CURLE_OK;
-}
-
 
 /*
  * Curl_pretransfer() is called immediately before a transfer starts.
@@ -1465,9 +1420,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   }
 
   /* Init the SSL session ID cache here. We do it here since we want to do it
-     after the *_setopt() calls (that could change the size of the cache) but
+     after the *_setopt() calls (that could specify the size of the cache) but
      before any transfer takes place. */
-  res = Curl_ssl_initsessions(data, data->set.ssl.numsessions);
+  res = Curl_ssl_initsessions(data, data->set.ssl.max_ssl_sessions);
   if(res)
     return res;
 
@@ -1490,7 +1445,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   /* If there is a list of host pairs to deal with */
   if(data->change.resolve)
-    res = loadhostpairs(data);
+    res = Curl_loadhostpairs(data);
 
   if(!res) {
     /* Allow data->set.use_port to set which port to use. This needs to be
@@ -2364,7 +2319,7 @@ Curl_setup_transfer(
          (data->state.proto.http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->exp100 = EXP100_AWAITING_CONTINUE;
-        k->start100 = k->start;
+        k->start100 = Curl_tvnow();
 
         /* set a timeout for the multi interface */
         Curl_expire(data, CURL_TIMEOUT_EXPECT_100);

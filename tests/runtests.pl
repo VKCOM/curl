@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -138,6 +138,7 @@ my $GOPHERPORT;          # Gopher
 my $GOPHER6PORT;         # Gopher IPv6 server port
 my $HTTPTLSPORT;         # HTTP TLS (non-stunnel) server port
 my $HTTPTLS6PORT;        # HTTP TLS (non-stunnel) IPv6 server port
+my $HTTPPROXYPORT;       # HTTP proxy port, when using CONNECT
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $CURL="../src/curl".exe_ext(); # what curl executable to run on the tests
@@ -149,8 +150,10 @@ my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $UNITDIR="./unit";
+# TODO: change this to use server_inputfilename()
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
+my $PROXYIN="$LOGDIR/proxy.input"; # what curl sent the proxy
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 my $SERVERLOGS_LOCK="$LOGDIR/serverlogs.lock"; # server logs advisor read lock
@@ -216,7 +219,7 @@ my $has_yassl;   # built with yassl
 my $has_polarssl;# built with polarssl
 my $has_axtls;   # built with axTLS
 
-my $has_shared;  # built shared
+my $has_shared = "unknown";  # built shared
 
 my $ssllib;      # name of the lib we use (for human presentation)
 my $has_crypto;  # set if libcurl is built with cryptographic support
@@ -230,7 +233,7 @@ my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
 my %enabled_keywords;   # key words of tests to run
-my %disabled;           # disabled test cases 
+my %disabled;           # disabled test cases
 
 my $sshdid;      # for socks server, ssh daemon version id
 my $sshdvernum;  # for socks server, ssh daemon version number
@@ -254,7 +257,7 @@ my $testnumcheck; # test number, set in singletest sub.
 my %oldenv;
 
 #######################################################################
-# variables the command line options may set
+# variables that command line options may set
 #
 
 my $short;
@@ -1154,7 +1157,7 @@ sub responsiveserver {
 # start the http server
 #
 sub runhttpserver {
-    my ($proto, $verbose, $ipv6, $port) = @_;
+    my ($proto, $verbose, $alt, $port) = @_;
     my $ip = $HOSTIP;
     my $ipvnum = 4;
     my $idnum = 1;
@@ -1164,10 +1167,14 @@ sub runhttpserver {
     my $logfile;
     my $flags = "";
 
-    if($ipv6) {
+    if($alt eq "ipv6") {
         # if IPv6, use a different setup
         $ipvnum = 6;
         $ip = $HOST6IP;
+    }
+    elsif($alt eq "proxy") {
+        # basically the same, but another ID
+        $idnum = 2;
     }
 
     $server = servername_id($proto, $ipvnum, $idnum);
@@ -1191,6 +1198,7 @@ sub runhttpserver {
 
     $flags .= "--fork " if($forkserver);
     $flags .= "--gopher " if($proto eq "gopher");
+    $flags .= "--connect $HOSTIP " if($alt eq "proxy");
     $flags .= "--verbose " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" --logfile \"$logfile\" ";
     $flags .= "--id $idnum " if($idnum > 1);
@@ -1974,15 +1982,18 @@ sub runsocksserver {
 # be used to verify that a server present in %run hash is still functional
 #
 sub responsive_http_server {
-    my ($proto, $verbose, $ipv6, $port) = @_;
+    my ($proto, $verbose, $alt, $port) = @_;
     my $ip = $HOSTIP;
     my $ipvnum = 4;
     my $idnum = 1;
 
-    if($ipv6) {
+    if($alt eq "ipv6") {
         # if IPv6, use a different setup
         $ipvnum = 6;
         $ip = $HOST6IP;
+    }
+    elsif($alt eq "proxy") {
+        $idnum = 2;
     }
 
     return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port);
@@ -2265,7 +2276,7 @@ sub checksystem {
                $has_polarssl=1;
                $has_openssl=1;
                $ssllib="polarssl";
-           } 
+           }
            elsif ($libcurl =~ /axtls/i) {
                $has_axtls=1;
                $ssllib="axTLS";
@@ -2279,6 +2290,9 @@ sub checksystem {
             # IPv6 <server> name. This works even if IPv6 support isn't
             # compiled in because the <features> test will fail.
             push @protocols, map($_ . '-ipv6', @protocols);
+
+            # 'http-proxy' is used in test cases to do CONNECT through
+            push @protocols, 'http-proxy';
 
             # 'none' is used in test cases to mean no server
             push @protocols, 'none';
@@ -2505,6 +2519,7 @@ sub subVariables {
   $$thing =~ s/%HTTP6PORT/$HTTP6PORT/g;
   $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
   $$thing =~ s/%HTTPPORT/$HTTPPORT/g;
+  $$thing =~ s/%PROXYPORT/$HTTPPROXYPORT/g;
 
   $$thing =~ s/%IMAP6PORT/$IMAP6PORT/g;
   $$thing =~ s/%IMAPPORT/$IMAPPORT/g;
@@ -2868,7 +2883,7 @@ sub singletest {
         $teststat[$testnum]=$why; # store reason for this test case
 
         if(!$short) {
-            printf "test %03d SKIPPED: $why\n", $testnum;
+            logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
         }
 
         timestampskippedevents($testnum);
@@ -2895,6 +2910,9 @@ sub singletest {
 
     # this is the valid protocol blurb curl should generate
     my @protocol= fixarray ( getpart("verify", "protocol") );
+
+    # this is the valid protocol blurb curl should generate to a proxy
+    my @proxyprot = fixarray ( getpart("verify", "proxy") );
 
     # redirected stdout/stderr to these files
     $STDOUT="$LOGDIR/stdout$testnum";
@@ -2933,9 +2951,10 @@ sub singletest {
         chomp $tool;
     }
 
-    # remove server output logfiles
+    # remove server output logfile
     unlink($SERVERIN);
     unlink($SERVER2IN);
+    unlink($PROXYIN);
 
     if(@ftpservercmd) {
         # write the instructions to file
@@ -3025,7 +3044,7 @@ sub singletest {
             $inc = "--include ";
         }
 
-        $cmdargs ="$out $inc--verbose --trace-time $cmd";
+        $cmdargs ="$out $inc--trace-ascii log/trace$testnum --trace-time $cmd";
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
@@ -3039,7 +3058,7 @@ sub singletest {
         }
 
         if(! -f $CMDLINE) {
-            print "The tool set in the test case for this: '$tool' does not exist\n";
+            logmsg "The tool set in the test case for this: '$tool' does not exist\n";
             timestampskippedevents($testnum);
             return -1;
         }
@@ -3429,6 +3448,56 @@ sub singletest {
         $ok .= "-"; # protocol not checked
     }
 
+    if(@proxyprot) {
+        # Verify the sent proxy request
+        my @out = loadarray($PROXYIN);
+
+        # what to cut off from the live protocol sent by curl, we use the
+        # same rules as for <protocol>
+        my @strip = getpart("verify", "strip");
+
+        my @protstrip=@proxyprot;
+
+        # check if there's any attributes on the verify/protocol section
+        my %hash = getpartattr("verify", "proxy");
+
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the protocol data
+            chomp($protstrip[$#protstrip]);
+        }
+
+        for(@strip) {
+            # strip off all lines that match the patterns from both arrays
+            chomp $_;
+            @out = striparray( $_, \@out);
+            @protstrip= striparray( $_, \@protstrip);
+        }
+
+        # what parts to cut off from the protocol
+        my @strippart = getpart("verify", "strippart");
+        my $strip;
+        for $strip (@strippart) {
+            chomp $strip;
+            for(@out) {
+                eval $strip;
+            }
+        }
+
+        $res = compare("proxy", \@out, \@protstrip);
+        if($res) {
+            # timestamp test result verification end
+            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+            return 1;
+        }
+
+        $ok .= "P";
+
+    }
+    else {
+        $ok .= "-"; # protocol not checked
+    }
+
     my @outfile=getpart("verify", "file");
     if(@outfile) {
         # we're supposed to verify a dynamically generated file!
@@ -3493,8 +3562,8 @@ sub singletest {
     }
     else {
         if(!$short) {
-            printf("\n%s returned $cmdres, when expecting %s\n",
-                   (!$tool)?"curl":$tool, $errorcode);
+            logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
+                           (!$tool)?"curl":$tool, $errorcode);
         }
         logmsg " exit FAILED\n";
         # timestamp test result verification end
@@ -3585,7 +3654,7 @@ sub singletest {
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-    printf "OK (%-3d out of %-3d, %s)\n", $count, $total, $left;
+    logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
@@ -3680,7 +3749,7 @@ sub startservers {
             }
         }
         elsif($what eq "ftp2") {
-            if($torture && $run{'ftp2'} && 
+            if($torture && $run{'ftp2'} &&
                !responsive_pingpong_server("ftp", "2", $verbose)) {
                 stopserver('ftp2');
             }
@@ -3719,7 +3788,8 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting GOPHER server";
                 }
-                printf ("* pid gopher => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf ("* pid gopher => %d %d\n", $pid, $pid2)
+                    if($verbose);
                 $run{'gopher'}="$pid $pid2";
             }
         }
@@ -3751,8 +3821,26 @@ sub startservers {
                 if($pid <= 0) {
                     return "failed starting HTTP server";
                 }
-                printf ("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                logmsg sprintf ("* pid http => %d %d\n", $pid, $pid2)
+                    if($verbose);
                 $run{'http'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "http-proxy") {
+            if($torture && $run{'http-proxy'} &&
+               !responsive_http_server("http", $verbose, "proxy",
+                                       $HTTPPROXYPORT)) {
+                stopserver('http-proxy');
+            }
+            if(!$run{'http-proxy'}) {
+                ($pid, $pid2) = runhttpserver("http", $verbose, "proxy",
+                                              $HTTPPROXYPORT);
+                if($pid <= 0) {
+                    return "failed starting HTTP-proxy server";
+                }
+                logmsg sprintf ("* pid http-proxy => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http-proxy'}="$pid $pid2";
             }
         }
         elsif($what eq "http-ipv6") {
@@ -3761,7 +3849,7 @@ sub startservers {
                 stopserver('http-ipv6');
             }
             if(!$run{'http-ipv6'}) {
-                ($pid, $pid2) = runhttpserver("http", $verbose, "IPv6",
+                ($pid, $pid2) = runhttpserver("http", $verbose, "ipv6",
                                               $HTTP6PORT);
                 if($pid <= 0) {
                     return "failed starting HTTP-IPv6 server";
@@ -4022,7 +4110,7 @@ sub serverfortest {
                         return "curl lacks $tlsext support";
                     }
                     else {
-                        return "curl lacks $server support";
+                        return "curl lacks $server server support";
                     }
                 }
             }
@@ -4412,6 +4500,7 @@ $GOPHERPORT      = $base++; # Gopher IPv4 server port
 $GOPHER6PORT     = $base++; # Gopher IPv6 server port
 $HTTPTLSPORT     = $base++; # HTTP TLS (non-stunnel) server port
 $HTTPTLS6PORT    = $base++; # HTTP TLS (non-stunnel) IPv6 server port
+$HTTPPROXYPORT   = $base++; # HTTP proxy port, when using CONNECT
 
 #######################################################################
 # clear and create logging directory:
@@ -4570,6 +4659,9 @@ sub displaylogs {
         }
         if(($log =~ /^netrc\d+/) && ($log !~ /^netrc$testnum/)) {
             next; # skip netrcNnn of other tests
+        }
+        if(($log =~ /^trace\d+/) && ($log !~ /^trace$testnum/)) {
+            next; # skip traceNnn of other tests
         }
         if(($log =~ /^valgrind\d+/) && ($log !~ /^valgrind$testnum(\..*|)$/)) {
             next; # skip valgrindNnn of other tests

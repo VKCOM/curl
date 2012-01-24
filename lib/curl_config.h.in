@@ -382,9 +382,6 @@
 /* Define to 1 if you have the `ldap_url_parse' function. */
 #undef HAVE_LDAP_URL_PARSE
 
-/* Define to 1 if you have the `gcrypt' library (-lgcrypt). */
-#undef HAVE_LIBGCRYPT
-
 /* Define to 1 if you have the <libgen.h> header file. */
 #undef HAVE_LIBGEN_H
 
@@ -610,6 +607,9 @@
 
 /* if you have the function SRP_Calc_client_key */
 #undef HAVE_SSLEAY_SRP
+
+/* Define to 1 if you have the `SSLv2_client_method' function. */
+#undef HAVE_SSLV2_CLIENT_METHOD
 
 /* Define to 1 if you have the `SSL_get_shutdown' function. */
 #undef HAVE_SSL_GET_SHUTDOWN
@@ -980,6 +980,9 @@
 
 /* if GnuTLS is enabled */
 #undef USE_GNUTLS
+
+/* if GnuTLS uses nettle as crypto backend */
+#undef USE_GNUTLS_NETTLE
 
 /* if librtmp is in use */
 #undef USE_LIBRTMP

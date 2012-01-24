@@ -663,6 +663,9 @@ NROFF
 PERL
 IPV6_ENABLED
 IDN_ENABLED
+VERSIONED_SYMBOLS_FALSE
+VERSIONED_SYMBOLS_TRUE
+VERSIONED_FLAVOUR
 USE_LIBRTMP
 USE_LIBSSH2
 CURL_CA_BUNDLE
@@ -673,6 +676,7 @@ HAVE_PK11_CREATEGENERICOBJECT
 USE_CYASSL
 USE_POLARSSL
 HAVE_GNUTLS_SRP
+USE_GNUTLS_NETTLE
 USE_GNUTLS
 HAVE_SSLEAY_SRP
 RANDOM_FILE
@@ -885,6 +889,7 @@ with_ca_bundle
 with_ca_path
 with_libssh2
 with_librtmp
+enable_versioned_symbols
 with_libidn
 enable_nonblocking
 enable_threaded_resolver
@@ -1580,6 +1585,10 @@ Optional Features:
   --enable-libgcc         use libgcc when linking
   --enable-ipv6           Enable ipv6 (with ipv4) support
   --disable-ipv6          Disable ipv6 support
+  --enable-versioned-symbols
+                          Enable versioned symbols in shared library
+  --disable-versioned-symbols
+                          Disable versioned symbols in shared library
   --enable-nonblocking    Enable non-blocking communications
   --disable-nonblocking   Disable non-blocking communications
   --enable-threaded-resolver
@@ -2673,6 +2682,7 @@ ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
 
 
 
@@ -9310,7 +9320,7 @@ static const void *lt_preloaded_setup() {
 #endif
 _LT_EOF
 	  # Now try linking the two files.
-	  mv conftest.$ac_objext conftstm.$ac_objext
+	  mv -f conftest.$ac_objext conftstm.$ac_objext
 	  lt_globsym_save_LIBS=$LIBS
 	  lt_globsym_save_CFLAGS=$CFLAGS
 	  LIBS="conftstm.$ac_objext"
@@ -12239,9 +12249,9 @@ fi
 
     hpux9*)
       if test "$GCC" = yes; then
-	archive_cmds='$RM $output_objdir/$soname~$CC -shared $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
+	archive_cmds='$RM $output_objdir/$soname~$CC -shared $pic_flag ${wl}+b ${wl}$install_libdir -o $output_objdir/$soname $libobjs $deplibs $compiler_flags~test $output_objdir/$soname = $lib || mv -f $output_objdir/$soname $lib'
       else
-	archive_cmds='$RM $output_objdir/$soname~$LD -b +b $install_libdir -o $output_objdir/$soname $libobjs $deplibs $linker_flags~test $output_objdir/$soname = $lib || mv $output_objdir/$soname $lib'
+	archive_cmds='$RM $output_objdir/$soname~$LD -b +b $install_libdir -o $output_objdir/$soname $libobjs $deplibs $linker_flags~test $output_objdir/$soname = $lib || mv -f $output_objdir/$soname $lib'
       fi
       hardcode_libdir_flag_spec='${wl}+b ${wl}$libdir'
       hardcode_libdir_separator=:
@@ -20637,7 +20647,8 @@ fi
                     RAND_egd \
                     ENGINE_cleanup \
                     CRYPTO_cleanup_all_ex_data \
-                    SSL_get_shutdown
+                    SSL_get_shutdown \
+                    SSLv2_client_method
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -21808,7 +21819,126 @@ $as_echo "$as_me: Added $gtlslib to LD_LIBRARY_PATH" >&6;}
 fi
 
 if test "$GNUTLS_ENABLED" = "1"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcry_control in -lgcrypt" >&5
+  USE_GNUTLS_NETTLE=
+  # First check if we can detect either crypto library via transitive linking
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nettle_MD5Init in -lgnutls" >&5
+$as_echo_n "checking for nettle_MD5Init in -lgnutls... " >&6; }
+if test "${ac_cv_lib_gnutls_nettle_MD5Init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgnutls  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char nettle_MD5Init ();
+int main (void)
+{
+return nettle_MD5Init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gnutls_nettle_MD5Init=yes
+else
+  ac_cv_lib_gnutls_nettle_MD5Init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gnutls_nettle_MD5Init" >&5
+$as_echo "$ac_cv_lib_gnutls_nettle_MD5Init" >&6; }
+if test "x$ac_cv_lib_gnutls_nettle_MD5Init" = x""yes; then :
+   USE_GNUTLS_NETTLE=1
+fi
+
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcry_control in -lgnutls" >&5
+$as_echo_n "checking for gcry_control in -lgnutls... " >&6; }
+if test "${ac_cv_lib_gnutls_gcry_control+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgnutls  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char gcry_control ();
+int main (void)
+{
+return gcry_control ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gnutls_gcry_control=yes
+else
+  ac_cv_lib_gnutls_gcry_control=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gnutls_gcry_control" >&5
+$as_echo "$ac_cv_lib_gnutls_gcry_control" >&6; }
+if test "x$ac_cv_lib_gnutls_gcry_control" = x""yes; then :
+   USE_GNUTLS_NETTLE=0
+fi
+
+  fi
+  # If not, try linking directly to both of them to see if they are available
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nettle_MD5Init in -lnettle" >&5
+$as_echo_n "checking for nettle_MD5Init in -lnettle... " >&6; }
+if test "${ac_cv_lib_nettle_nettle_MD5Init+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lnettle  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char nettle_MD5Init ();
+int main (void)
+{
+return nettle_MD5Init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_nettle_nettle_MD5Init=yes
+else
+  ac_cv_lib_nettle_nettle_MD5Init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nettle_nettle_MD5Init" >&5
+$as_echo "$ac_cv_lib_nettle_nettle_MD5Init" >&6; }
+if test "x$ac_cv_lib_nettle_nettle_MD5Init" = x""yes; then :
+   USE_GNUTLS_NETTLE=1
+fi
+
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcry_control in -lgcrypt" >&5
 $as_echo_n "checking for gcry_control in -lgcrypt... " >&6; }
 if test "${ac_cv_lib_gcrypt_gcry_control+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -21842,18 +21972,20 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gcrypt_gcry_control" >&5
 $as_echo "$ac_cv_lib_gcrypt_gcry_control" >&6; }
 if test "x$ac_cv_lib_gcrypt_gcry_control" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBGCRYPT 1
-_ACEOF
-
-  LIBS="-lgcrypt $LIBS"
-
-else
-
-      as_fn_error "need GnuTLS built with gcrypt to function with GnuTLS" "$LINENO" 5
-
+   USE_GNUTLS_NETTLE=0
 fi
 
+  fi
+  if test "$USE_GNUTLS_NETTLE" = ""; then
+    as_fn_error "GnuTLS found, but neither gcrypt nor nettle found" "$LINENO" 5
+  fi
+  if test "$USE_GNUTLS_NETTLE" = "1"; then
+
+$as_echo "#define USE_GNUTLS_NETTLE 1" >>confdefs.h
+
+    USE_GNUTLS_NETTLE=1
+
+  fi
 fi
 
 if test "$GNUTLS_ENABLED" = "1"; then
@@ -23186,133 +23318,508 @@ fi
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with libidn" >&5
-$as_echo_n "checking whether to build with libidn... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if libraries can be versioned" >&5
+$as_echo_n "checking if libraries can be versioned... " >&6; }
+GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+if test -z "$GLD"; then
+    versioned_symbols_flavour=
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: ***
+*** You need an ld version supporting the --version-script option.
+" >&5
+$as_echo "$as_me: WARNING: ***
+*** You need an ld version supporting the --version-script option.
+" >&2;}
+else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
 
-# Check whether --with-libidn was given.
-if test "${with_libidn+set}" = set; then :
-  withval=$with_libidn; LIBIDN="$withval"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether versioned symbols are wanted" >&5
+$as_echo_n "checking whether versioned symbols are wanted... " >&6; }
+versioned_symbols_flavour=
+
+# Check whether --enable-versioned-symbols was given.
+if test "${enable_versioned_symbols+set}" = set; then :
+  enableval=$enable_versioned_symbols;  case "$enableval" in
+  yes) { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    if test "x$OPENSSL_ENABLED" = "x1"; then
+      versioned_symbols_flavour="OPENSSL_"
+    elif test "x$GNUTLS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="GNUTLS_"
+    elif test "x$NSS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="NSS_"
+    elif test "x$POLARSSL_ENABLED" == "x1"; then
+      versioned_symbols_flavour="POLARSSL_"
+    elif test "x$CYASSL_ENABLED" == "x1"; then
+      versioned_symbols_flavour="CYASSL_"
+    elif test "x$AXTLS_ENABLED" == "x1"; then
+      versioned_symbols_flavour="AXTLS_"
+    else
+      versioned_symbols_flavour=""
+    fi
+    versioned_symbols="yes"
+    ;;
+
+  *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  esac
+
+else
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+
+fi
+
+fi
+
+VERSIONED_FLAVOUR="$versioned_symbols_flavour"
+
+
+
+if test "x$versioned_symbols" = "xyes"; then
+  VERSIONED_SYMBOLS_TRUE=
+  VERSIONED_SYMBOLS_FALSE='#'
+else
+  VERSIONED_SYMBOLS_TRUE='#'
+  VERSIONED_SYMBOLS_FALSE=
 fi
 
 
-case "$LIBIDN" in
-  no)
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-       ;;
-  *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
 
-       idn=""
-              if test -n "$LIBIDN"; then
-         if test "x$LIBIDN" != "xyes"; then
-            oldLDFLAGS=$LDFLAGS
-            oldCPPFLAGS=$CPPFLAGS
-            LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-            CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-            idn="yes"
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for idna_to_ascii_4i in -lidn" >&5
-$as_echo_n "checking for idna_to_ascii_4i in -lidn... " >&6; }
-if test "${ac_cv_lib_idn_idna_to_ascii_4i+set}" = set; then :
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with libidn" >&5
+$as_echo_n "checking whether to build with libidn... " >&6; }
+OPT_IDN="default"
+
+# Check whether --with-libidn was given.
+if test "${with_libidn+set}" = set; then :
+  withval=$with_libidn; OPT_IDN=$withval
+fi
+
+case "$OPT_IDN" in
+  no)
+        want_idn="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  default)
+        want_idn="yes"
+    want_idn_path="default"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: (assumed) yes" >&5
+$as_echo "(assumed) yes" >&6; }
+    ;;
+  yes)
+        want_idn="yes"
+    want_idn_path="default"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  *)
+        want_idn="yes"
+    want_idn_path="$withval"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
+$as_echo "yes ($withval)" >&6; }
+    ;;
+esac
+
+if test "$want_idn" = "yes"; then
+    clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  PKGCONFIG="no"
+  #
+  if test "$want_idn_path" != "default"; then
+        IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
+
+
+    PKGCONFIG="no"
+
+    if test x$cross_compiling = xyes; then
+            # Extract the first word of "${host}-pkg-config", so it can be a program name with args.
+set dummy ${host}-pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lidn  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG = xno; then
+      # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libidn options with pkg-config" >&5
+$as_echo_n "checking for libidn options with pkg-config... " >&6; }
+            itexists=`
+    if test -n "$IDN_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$IDN_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists libidn >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`
+    if test -n "$IDN_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$IDN_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`
+    if test -n "$IDN_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$IDN_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`
+    if test -n "$IDN_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$IDN_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+            IDN_LIBS="-lidn"
+      IDN_LDFLAGS="-L$want_idn_path/lib$libsuff"
+      IDN_CPPFLAGS="-I$want_idn_path/include"
+      IDN_DIR="$want_idn_path/lib$libsuff"
+    fi
+  else
+
+
+    PKGCONFIG="no"
+
+    if test x$cross_compiling = xyes; then
+            # Extract the first word of "${host}-pkg-config", so it can be a program name with args.
+set dummy ${host}-pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG = xno; then
+      # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libidn options with pkg-config" >&5
+$as_echo_n "checking for libidn options with pkg-config... " >&6; }
+            itexists=`
+    if test -n ""; then
+      PKG_CONFIG_LIBDIR=""
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists libidn >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+    if test "$PKGCONFIG" != "no"; then
+      IDN_LIBS=`$PKGCONFIG --libs-only-l libidn 2>/dev/null`
+      IDN_LDFLAGS=`$PKGCONFIG --libs-only-L libidn 2>/dev/null`
+      IDN_CPPFLAGS=`$PKGCONFIG --cflags-only-I libidn 2>/dev/null`
+      IDN_DIR=`echo $IDN_LDFLAGS | $SED -e 's/-L//'`
+    else
+            IDN_LIBS="-lidn"
+    fi
+  fi
+  #
+  if test "$PKGCONFIG" != "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: pkg-config: IDN_LIBS: \"$IDN_LIBS\"" >&5
+$as_echo "$as_me: pkg-config: IDN_LIBS: \"$IDN_LIBS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: pkg-config: IDN_LDFLAGS: \"$IDN_LDFLAGS\"" >&5
+$as_echo "$as_me: pkg-config: IDN_LDFLAGS: \"$IDN_LDFLAGS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: pkg-config: IDN_CPPFLAGS: \"$IDN_CPPFLAGS\"" >&5
+$as_echo "$as_me: pkg-config: IDN_CPPFLAGS: \"$IDN_CPPFLAGS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: pkg-config: IDN_DIR: \"$IDN_DIR\"" >&5
+$as_echo "$as_me: pkg-config: IDN_DIR: \"$IDN_DIR\"" >&6;}
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: IDN_LIBS: \"$IDN_LIBS\"" >&5
+$as_echo "$as_me: IDN_LIBS: \"$IDN_LIBS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: IDN_LDFLAGS: \"$IDN_LDFLAGS\"" >&5
+$as_echo "$as_me: IDN_LDFLAGS: \"$IDN_LDFLAGS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: IDN_CPPFLAGS: \"$IDN_CPPFLAGS\"" >&5
+$as_echo "$as_me: IDN_CPPFLAGS: \"$IDN_CPPFLAGS\"" >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: IDN_DIR: \"$IDN_DIR\"" >&5
+$as_echo "$as_me: IDN_DIR: \"$IDN_DIR\"" >&6;}
+  fi
+  #
+  CPPFLAGS="$IDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$IDN_LDFLAGS $LDFLAGS"
+  LIBS="$IDN_LIBS $LIBS"
+  #
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if idna_to_ascii_4i can be linked" >&5
+$as_echo_n "checking if idna_to_ascii_4i can be linked... " >&6; }
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
+#define idna_to_ascii_4i innocuous_idna_to_ascii_4i
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+#undef idna_to_ascii_4i
 #ifdef __cplusplus
 extern "C"
 #endif
 char idna_to_ascii_4i ();
+#if defined __stub_idna_to_ascii_4i || defined __stub___idna_to_ascii_4i
+choke me
+#endif
+
 int main (void)
 {
 return idna_to_ascii_4i ();
  ;
  return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_idn_idna_to_ascii_4i=yes
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    tst_links_libidn="yes"
+
 else
-  ac_cv_lib_idn_idna_to_ascii_4i=no
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    tst_links_libidn="no"
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_idn_idna_to_ascii_4i" >&5
-$as_echo "$ac_cv_lib_idn_idna_to_ascii_4i" >&6; }
-if test "x$ac_cv_lib_idn_idna_to_ascii_4i" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBIDN 1
-_ACEOF
-
-  LIBS="-lidn $LIBS"
-
-else
-  idn=""
-                         LDFLAGS=$oldLDFLAGS
-                         CPPFLAGS=$oldCPPFLAGS
-fi
-
-         fi
-       fi
-
-       if test "x$idn" != "xyes"; then
-                    idn="yes"
-          { $as_echo "$as_me:${as_lineno-$LINENO}: checking for idna_to_ascii_lz in -lidn" >&5
-$as_echo_n "checking for idna_to_ascii_lz in -lidn... " >&6; }
-if test "${ac_cv_lib_idn_idna_to_ascii_lz+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lidn  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  if test "$tst_links_libidn" = "no"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if idna_to_ascii_lz can be linked" >&5
+$as_echo_n "checking if idna_to_ascii_lz can be linked... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
+#define idna_to_ascii_lz innocuous_idna_to_ascii_lz
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+#undef idna_to_ascii_lz
 #ifdef __cplusplus
 extern "C"
 #endif
 char idna_to_ascii_lz ();
+#if defined __stub_idna_to_ascii_lz || defined __stub___idna_to_ascii_lz
+choke me
+#endif
+
 int main (void)
 {
 return idna_to_ascii_lz ();
  ;
  return 0;
 }
+
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_idn_idna_to_ascii_lz=yes
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      tst_links_libidn="yes"
+
 else
-  ac_cv_lib_idn_idna_to_ascii_lz=no
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      tst_links_libidn="no"
+
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_idn_idna_to_ascii_lz" >&5
-$as_echo "$ac_cv_lib_idn_idna_to_ascii_lz" >&6; }
-if test "x$ac_cv_lib_idn_idna_to_ascii_lz" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBIDN 1
-_ACEOF
+  fi
+  #
+  if test "$tst_links_libidn" = "yes"; then
 
-  LIBS="-lidn $LIBS"
+$as_echo "#define HAVE_LIBIDN 1" >>confdefs.h
 
-else
-  idn=""
-fi
-
-       fi
-
-       if test "x$idn" = "xyes"; then
-         curl_idn_msg="enabled"
-         IDN_ENABLED=1
-
-                  for ac_func in idn_free idna_strerror tld_strerror
+        for ac_func in idn_free idna_strerror tld_strerror
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -23325,7 +23832,7 @@ _ACEOF
 fi
 done
 
-         for ac_header in idn-free.h tld.h
+    for ac_header in idn-free.h tld.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -23339,10 +23846,31 @@ fi
 
 done
 
-       fi
+    if test "x$ac_cv_header_tld_h" = "xyes"; then
+      IDN_ENABLED=1
 
-       ;;
-esac
+      curl_idn_msg="enabled"
+      if test -n "$IDN_DIR"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
+        export LD_LIBRARY_PATH
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $IDN_DIR to LD_LIBRARY_PATH" >&5
+$as_echo "$as_me: Added $IDN_DIR to LD_LIBRARY_PATH" >&6;}
+      fi
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Libraries for IDN support too old: IDN disabled" >&5
+$as_echo "$as_me: WARNING: Libraries for IDN support too old: IDN disabled" >&2;}
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+    fi
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot find libraries for IDN support: IDN disabled" >&5
+$as_echo "$as_me: WARNING: Cannot find libraries for IDN support: IDN disabled" >&2;}
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 
 
@@ -37265,7 +37793,7 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
-ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile tests/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
+ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile lib/libcurl.vers tests/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -37402,6 +37930,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LIBZ_TRUE}" && test -z "${HAVE_LIBZ_FALSE}"; then
   as_fn_error "conditional \"HAVE_LIBZ\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${VERSIONED_SYMBOLS_TRUE}" && test -z "${VERSIONED_SYMBOLS_FALSE}"; then
+  as_fn_error "conditional \"VERSIONED_SYMBOLS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_MANUAL_TRUE}" && test -z "${USE_MANUAL_FALSE}"; then
@@ -38300,6 +38832,7 @@ do
     "include/curl/Makefile") CONFIG_FILES="$CONFIG_FILES include/curl/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "lib/libcurl.vers") CONFIG_FILES="$CONFIG_FILES lib/libcurl.vers" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/data/Makefile") CONFIG_FILES="$CONFIG_FILES tests/data/Makefile" ;;
     "tests/server/Makefile") CONFIG_FILES="$CONFIG_FILES tests/server/Makefile" ;;

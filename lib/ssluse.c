@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -125,6 +125,11 @@
 
 #if OPENSSL_VERSION_NUMBER >= 0x10000000L
 #define HAVE_ERR_REMOVE_THREAD_STATE 1
+#endif
+
+#ifndef HAVE_SSLV2_CLIENT_METHOD
+#undef OPENSSL_NO_SSL2 /* undef first to avoid compiler warnings */
+#define OPENSSL_NO_SSL2
 #endif
 
 /*
@@ -461,6 +466,7 @@ int cert_stuff(struct connectdata *conn,
         failf(data, SSL_CLIENT_CERT_ERR);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
 
@@ -469,6 +475,7 @@ int cert_stuff(struct connectdata *conn,
               cert_file);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
 
@@ -477,6 +484,7 @@ int cert_stuff(struct connectdata *conn,
               "does not match certificate in same file", cert_file);
         EVP_PKEY_free(pri);
         X509_free(x509);
+        sk_X509_pop_free(ca, X509_free);
         return 0;
       }
       /* Set Certificate Verification chain */
@@ -486,12 +494,14 @@ int cert_stuff(struct connectdata *conn,
             failf(data, "cannot add certificate to certificate chain");
             EVP_PKEY_free(pri);
             X509_free(x509);
+            sk_X509_pop_free(ca, X509_free);
             return 0;
           }
           if(!SSL_CTX_add_client_CA(ctx, sk_X509_value(ca, i))) {
             failf(data, "cannot add certificate to client CA list");
             EVP_PKEY_free(pri);
             X509_free(x509);
+            sk_X509_pop_free(ca, X509_free);
             return 0;
           }
         }
@@ -499,6 +509,7 @@ int cert_stuff(struct connectdata *conn,
 
       EVP_PKEY_free(pri);
       X509_free(x509);
+      sk_X509_pop_free(ca, X509_free);
       cert_done = 1;
       break;
 #else
@@ -1420,6 +1431,7 @@ ossl_connect_step1(struct connectdata *conn,
   X509_LOOKUP *lookup=NULL;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
+  long ctx_options;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
   bool sni;
 #ifdef ENABLE_IPV6
@@ -1525,20 +1537,43 @@ ossl_connect_step1(struct connectdata *conn,
      If someone writes an application with libcurl and openssl who wants to
      enable the feature, one can do this in the SSL callback.
 
+     SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG option enabling allowed proper
+     interoperability with web server Netscape Enterprise Server 2.0.1 which
+     was released back in 1996.
+
+     Due to CVE-2010-4180, option SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG has
+     become ineffective as of OpenSSL 0.9.8q and 1.0.0c. In order to mitigate
+     CVE-2010-4180 when using previous OpenSSL versions we no longer enable
+     this option regardless of OpenSSL version and SSL_OP_ALL definition.
+
+     OpenSSL added a work-around for a SSL 3.0/TLS 1.0 CBC vulnerability
+     (http://www.openssl.org/~bodo/tls-cbc.txt). In 0.9.6e they added a bit to
+     SSL_OP_ALL that _disables_ that work-around despite the fact that
+     SSL_OP_ALL is documented to do "rather harmless" workarounds. In order to
+     keep the secure work-around, the SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit
+     must not be set.
   */
+
+  ctx_options = SSL_OP_ALL;
+
 #ifdef SSL_OP_NO_TICKET
-  /* expect older openssl releases to not have this define so only use it if
-     present */
-#define CURL_CTX_OPTIONS SSL_OP_ALL|SSL_OP_NO_TICKET
-#else
-#define CURL_CTX_OPTIONS SSL_OP_ALL
+  ctx_options |= SSL_OP_NO_TICKET;
 #endif
 
-  SSL_CTX_set_options(connssl->ctx, CURL_CTX_OPTIONS);
+#ifdef SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG
+  /* mitigate CVE-2010-4180 */
+  ctx_options &= ~SSL_OP_NETSCAPE_REUSE_CIPHER_CHANGE_BUG;
+#endif
+
+#ifdef SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS
+  ctx_options &= ~SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS;
+#endif
 
   /* disable SSLv2 in the default case (i.e. allow SSLv3 and TLSv1) */
   if(data->set.ssl.version == CURL_SSLVERSION_DEFAULT)
-    SSL_CTX_set_options(connssl->ctx, SSL_OP_NO_SSLv2);
+    ctx_options |= SSL_OP_NO_SSLv2;
+
+  SSL_CTX_set_options(connssl->ctx, ctx_options);
 
 #if 0
   /*
@@ -1631,7 +1666,8 @@ ossl_connect_step1(struct connectdata *conn,
   if(data->set.str[STRING_SSL_CRLFILE]) {
     /* tell SSL where to find CRL file that is used to check certificate
      * revocation */
-    lookup=X509_STORE_add_lookup(connssl->ctx->cert_store,X509_LOOKUP_file());
+    lookup=X509_STORE_add_lookup(SSL_CTX_get_cert_store(connssl->ctx),
+                                 X509_LOOKUP_file());
     if(!lookup ||
        (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                             X509_FILETYPE_PEM)) ) {
@@ -1642,7 +1678,7 @@ ossl_connect_step1(struct connectdata *conn,
     else {
       /* Everything is fine. */
       infof(data, "successfully load CRL file:\n");
-      X509_STORE_set_flags(connssl->ctx->cert_store,
+      X509_STORE_set_flags(SSL_CTX_get_cert_store(connssl->ctx),
                            X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
     }
     infof(data,

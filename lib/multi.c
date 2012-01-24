@@ -1085,12 +1085,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* check if we have the name resolved by now */
       easy->result = Curl_resolver_is_resolved(easy->easy_conn, &dns);
 
-      if(dns) {
-        /* Update sockets here. Mainly because the socket(s) may have been
-           closed and the application thus needs to be told, even if it is
-           likely that the same socket(s) will again be used further down. */
-        singlesocket(multi, easy);
+      /* Update sockets here, because the socket(s) may have been
+         closed and the application thus needs to be told, even if it
+         is likely that the same socket(s) will again be used further
+         down.  If the name has not yet been resolved, it is likely
+         that new sockets have been opened in an attempt to contact
+         another resolver. */
+      singlesocket(multi, easy);
 
+      if(dns) {
         /* Perform the next step in the connection phase, and then move on
            to the WAITCONNECT state */
         easy->result = Curl_async_resolved(easy->easy_conn,
@@ -1236,7 +1239,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         easy->easy_conn->bits.close = FALSE;
         multistate(easy, CURLM_STATE_DONE);
         easy->result = CURLE_OK;
-        result = CURLM_OK;
+        result = CURLM_CALL_MULTI_PERFORM;
       }
       else {
         /* Perform the protocol's DO action */
@@ -1358,29 +1361,27 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       break;
 
     case CURLM_STATE_DO_MORE:
-      /* Ready to do more? */
-      easy->result = Curl_is_connected(easy->easy_conn,
-                                       SECONDARYSOCKET,
-                                       &connected);
-      if(connected) {
-        /*
-         * When we are connected, DO MORE and then go DO_DONE
-         */
-        easy->result = Curl_do_more(easy->easy_conn);
+      /*
+       * When we are connected, DO MORE and then go DO_DONE
+       */
+      easy->result = Curl_do_more(easy->easy_conn, &dophase_done);
 
-        /* No need to remove ourselves from the send pipeline here since that
-           is done for us in Curl_done() */
-
-        if(CURLE_OK == easy->result) {
+      /* No need to remove this handle from the send pipeline here since that
+         is done in Curl_done() */
+      if(CURLE_OK == easy->result) {
+        if(dophase_done) {
           multistate(easy, CURLM_STATE_DO_DONE);
           result = CURLM_CALL_MULTI_PERFORM;
         }
-        else {
-          /* failure detected */
-          Curl_posttransfer(data);
-          Curl_done(&easy->easy_conn, easy->result, FALSE);
-          disconnect_conn = TRUE;
-        }
+        else
+          /* stay in DO_MORE */
+          result = CURLM_OK;
+      }
+      else {
+        /* failure detected */
+        Curl_posttransfer(data);
+        Curl_done(&easy->easy_conn, easy->result, FALSE);
+        disconnect_conn = TRUE;
       }
       break;
 
@@ -1937,11 +1938,12 @@ static void singlesocket(struct Curl_multi *multi,
     }
 
     /* we know (entry != NULL) at this point, see the logic above */
-    multi->socket_cb(easy->easy_handle,
-                     s,
-                     action,
-                     multi->socket_userp,
-                     entry->socketp);
+    if(multi->socket_cb)
+      multi->socket_cb(easy->easy_handle,
+                       s,
+                       action,
+                       multi->socket_userp,
+                       entry->socketp);
 
     entry->action = action; /* store the current action state */
   }
@@ -2016,11 +2018,12 @@ static void singlesocket(struct Curl_multi *multi,
         remove_sock_from_hash = FALSE;
 
       if(remove_sock_from_hash) {
-        multi->socket_cb(easy->easy_handle,
-                         s,
-                         CURL_POLL_REMOVE,
-                         multi->socket_userp,
-                         entry ? entry->socketp : NULL);
+        if(multi->socket_cb)
+          multi->socket_cb(easy->easy_handle,
+                           s,
+                           CURL_POLL_REMOVE,
+                           multi->socket_userp,
+                           entry ? entry->socketp : NULL);
         sh_delentry(multi->sockhash, s);
       }
 
