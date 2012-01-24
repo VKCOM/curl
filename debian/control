@@ -30,6 +30,7 @@ Homepage: http://curl.haxx.se
 
 Package: curl
 Architecture: any
+Replaces: curl-ssl
 Provides: curl-ssl
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: command line tool for transferring data with URL syntax
@@ -47,6 +48,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
+Replaces: libcurl2 (<< 1:7.11.2-2), libcurl4
+Conflicts: libcurl4
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (OpenSSL flavour)
@@ -70,6 +73,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
+Replaces: libcurl4-gnutls
+Conflicts: libcurl4-gnutls
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (GnuTLS flavour)
@@ -93,6 +98,8 @@ Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
+Replaces: libcurl4-nss
+Conflicts: libcurl4-nss
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (NSS flavour)
@@ -120,6 +127,10 @@ Provides: libcurl-dev,
  libcurl3-openssl-dev,
  libcurl4-dev,
  libcurl3-dev
+Replaces: libcurl-dev,
+ libcurl-ssl-dev,
+ libcurl3-openssl-dev,
+ libcurl3-dev (<< 7.14.1-1)
 Conflicts: libcurl-dev
 Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}),
  libc6-dev | libc-dev,
@@ -155,6 +166,10 @@ Architecture: any
 Section: libdevel
 Suggests: libcurl3-dbg
 Provides: libcurl-dev,
+ libcurl-ssl-dev,
+ libcurl3-gnutls-dev,
+ libcurl4-dev
+Replaces: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-gnutls-dev,
  libcurl4-dev
@@ -195,6 +210,10 @@ Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-nss-dev,
  libcurl4-dev
+Replaces: libcurl-dev,
+ libcurl-ssl-dev,
+ libcurl3-nss-dev,
+ libcurl4-dev
 Conflicts: libcurl-dev
 Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
  libc6-dev | libc-dev,
@@ -230,6 +249,8 @@ Section: debug
 Priority: extra
 Suggests: libc-dbg
 Provides: libcurl4-dbg
+Replaces: libcurl4-dbg
+Conflicts: libcurl4-dbg
 Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}) | libcurl3-gnutls (= ${binary:Version}) | libcurl3-nss (= ${binary:Version})
 Multi-Arch: same
 Description: debugging symbols for libcurl (OpenSSL, GnuTLS and NSS flavours)
