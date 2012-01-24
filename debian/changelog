@@ -9,8 +9,6 @@ curl (7.24.0-1) unstable; urgency=high
     - Set urgency=high accordingly
   * Remove curl_links_with_rt patch (curl links to librt anyway)
   * Improve descriptions of -dev and -dbg packages
-  * Remove Replaces and Conflicts (those packages do not exist even in
-    oldstable)
   * Drop fix_manpage_spelling and versioned patches (merged upstream)
   * Refresh patches
   * Add keep_symbols_compat patch to not break backwards ABI compatibility
