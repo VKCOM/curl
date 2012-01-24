@@ -181,6 +181,7 @@ Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version}),
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
+ libssh2-1-dev,
  zlib1g-dev
 Description: development files and documentation for libcurl (GnuTLS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
@@ -222,6 +223,7 @@ Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
  libldap2-dev,
  libnss3-dev,
  librtmp-dev,
+ libssh2-1-dev,
  zlib1g-dev
 Description: development files and documentation for libcurl (NSS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
