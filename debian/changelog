@@ -4,7 +4,7 @@ curl (7.24.0-1) unstable; urgency=high
     - Improve documentation for the --capath option (Closes: #628697)
     - Fix URL sanitization vulnerability as per CVE-2012-0036
       http://curl.haxx.se/docs/adv_20120124.html
-    - Fix SSL CBC IV vulnerability
+    - Fix SSL CBC IV vulnerability as per CVE-2011-3389
       http://curl.haxx.se/docs/adv_20120124B.html
     - Set urgency=high accordingly
   * Remove curl_links_with_rt patch (curl links to librt anyway)
