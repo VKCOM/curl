@@ -1,3 +1,17 @@
+curl (7.24.0-2) UNRELEASED; urgency=low
+
+  * Add libssh2-1-dev to libcurl4-gnutls-dev and libcurl4-nss-dev Depends
+  * Bump debhelper compat level to 9
+    - Make *.links files executable to simplify rules file
+  * Pass --as-needed ld flag to avoid unneeded dependencies
+    - Add workaround_as_needed_bug to workaround a libtool bug
+    - Drop dont_link_to_krb5 (not needed because of --as-needed)
+    - Manually set CFLAGS and LDFLAGS from dpkg-buildflags
+      (this also makes curl backportable to stable)
+  * Do some clean-up in debian/rules
+
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Sat, 18 Feb 2012 19:39:34 +0100
+
 curl (7.24.0-1) unstable; urgency=high
 
   * New upstream release
