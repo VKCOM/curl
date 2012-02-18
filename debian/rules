@@ -117,21 +117,12 @@ clean:
 	dh_testroot
 	-quilt pop -a
 	rm -rf build-stamp configure-stamp debian/build debian/build-gnutls debian/build-nss debian/tmp-gnutls debian/tmp-nss
-	dh_clean debian/shlibs.local debian/libcurl3.links \
-		debian/libcurl3-gnutls.links debian/libcurl3-nss.links \
-		debian/libcurl4-gnutls-dev.links debian/libcurl4-nss-dev.links
 
 #install: DH_OPTIONS=
 install: build-stamp
 	dh_testdir
 	dh_testroot
 	dh_prep
-	for file in libcurl3.links libcurl3-gnutls.links libcurl3-nss.links \
-	            libcurl4-gnutls-dev.links libcurl4-nss-dev.links; \
-	do \
-		sed -e"s,\$${DEB_HOST_MULTIARCH},$(DEB_HOST_MULTIARCH),g" \
-			debian/$${file}.in > debian/$$file; \
-	done
 	${MAKE} -C debian/build DESTDIR=$(shell pwd)/debian/tmp install
 	${MAKE} -C debian/build-gnutls DESTDIR=$(shell pwd)/debian/tmp-gnutls install
 	${MAKE} -C debian/build-nss DESTDIR=$(shell pwd)/debian/tmp-nss install
