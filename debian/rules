@@ -59,6 +59,9 @@ CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
 # --with-ldap-lib=/usr/lib/libldap_r.so
 
+# this will avoid unneded dependencies
+LDFLAGS=-Wl,--as-needed
+
 ifneq (${DEB_BUILD_ARCH_OS},hurd)
 CONFIGURE_ARGS += --with-gssapi=/usr
 endif
@@ -86,8 +89,9 @@ configure-stamp:
 	quilt push
 	# get the source with nss patch applied
 	tar -cf - --exclude=debian --exclude=.pc . | tar -xf - -C debian/build-nss
+	# run buildconf and make sure to copy the patched ltmain.sh
 	for flavour in build build-gnutls build-nss; do \
-		(cd debian/$$flavour && ./buildconf) \
+		(cd debian/$$flavour && ./buildconf && cp ../../ltmain.sh .) \
 	done
 	cd debian/build && ./configure ${CONFIGURE_ARGS}		\
 		--with-librtmp --with-ca-path=/etc/ssl/certs
