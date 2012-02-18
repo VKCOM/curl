@@ -42,18 +42,21 @@ else
     endif
 endif
 
-# this will catch miss-linking. (e.g. undefined symbols)
-#LDFLAGS = -Wl,-z,defs
+CFLAGS  = $(shell dpkg-buildflags --get CFLAGS)
+LDFLAGS = $(shell dpkg-buildflags --get LDFLAGS)
 
 # this will avoid unneded dependencies
-LDFLAGS = -Wl,--as-needed
+LDFLAGS+= -Wl,--as-needed
+
+# this will catch miss-linking. (e.g. undefined symbols)
+#LDFLAGS+= -Wl,-z,defs
 
 CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 		--disable-dependency-tracking --enable-ipv6	\
 		--with-lber-lib=lber --enable-manual		\
 		--enable-versioned-symbols --enable-debug	\
 		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)	\
-		$(shell dpkg-buildflags --export=configure)
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 # this is still not ready
 #		--enable-ares
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
