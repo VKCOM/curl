@@ -1,8 +1,5 @@
 #! /usr/bin/make -f
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
@@ -11,11 +8,11 @@ export QUILT_PATCHES=$(shell pwd)/debian/patches
 
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
-DEB_BUILD_ARCH ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
-DEB_BUILD_ARCH_OS ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH_OS)
-DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+DEB_BUILD_ARCH		?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+DEB_BUILD_ARCH_OS	?= $(shell dpkg-architecture -qDEB_BUILD_ARCH_OS)
+DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_HOST_MULTIARCH	?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
 
 # set the number of build jobs
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
@@ -46,7 +43,10 @@ else
 endif
 
 # this will catch miss-linking. (e.g. undefined symbols)
-# LDFLAGS = -Wl,-z,defs
+#LDFLAGS = -Wl,-z,defs
+
+# this will avoid unneded dependencies
+LDFLAGS = -Wl,--as-needed
 
 CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 		--disable-dependency-tracking --enable-ipv6	\
@@ -55,12 +55,9 @@ CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)	\
 		$(shell dpkg-buildflags --export=configure)
 # this is still not ready
-# --enable-ares
+#		--enable-ares
 # this fixes the ldap warning of dpkg-shlibdebs, but we dont want that.
-# --with-ldap-lib=/usr/lib/libldap_r.so
-
-# this will avoid unneded dependencies
-LDFLAGS=-Wl,--as-needed
+#		--with-ldap-lib=/usr/lib/libldap_r.so
 
 ifneq (${DEB_BUILD_ARCH_OS},hurd)
 CONFIGURE_ARGS += --with-gssapi=/usr
@@ -134,7 +131,7 @@ install: build-stamp
 	dh_install -plibcurl3-nss -plibcurl4-nss-dev --sourcedir=debian/tmp-nss
 	dh_install -Nlibcurl3-gnutls -Nlibcurl4-gnutls-dev -Nlibcurl3-nss -Nlibcurl4-nss-dev --sourcedir=debian/tmp
 	dh_lintian
-	for i in `find debian/lib* -name "lib*.la"`; do echo "removing dependency_libs from $$i"; sed -i -e "/dependency_libs/ s/'.*'/''/" $$i; done
+	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 
 # Build architecture-independent files here.
 #binary-indep: DH_OPTIONS=-i
