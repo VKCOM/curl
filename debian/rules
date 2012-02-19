@@ -1,11 +1,5 @@
 #! /usr/bin/make -f
 
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
-
-# These are locations of quilt stuff
-export QUILT_PATCHES=$(shell pwd)/debian/patches
-
 # These are used for cross-compiling and for saving the configure script
 # from having to guess our platform (since we know it already)
 DEB_BUILD_ARCH		?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
@@ -70,11 +64,10 @@ build-arch: build-stamp
 build-indep: build-stamp
 
 build: build-arch build-indep
-#configure-stamp: DH_OPTIONS=
+
 configure-stamp:
 	dh_testdir
 	mkdir -p debian/build debian/build-gnutls debian/build-nss
-	-quilt push -a
 	# pop the last patch (nss)
 	quilt pop
 	# pop the second last patch (gnutls)
@@ -103,7 +96,6 @@ configure-stamp:
 		--without-ssl --with-nss
 	touch configure-stamp
 
-#build-stamp: DH_OPTIONS=
 build-stamp: configure-stamp
 	dh_testdir
 	${MAKE} $(JOBS) -C debian/build
@@ -119,8 +111,7 @@ endif
 clean:
 	dh_testdir
 	dh_testroot
-	-quilt pop -a
-	rm -rf build-stamp configure-stamp debian/build debian/build-gnutls debian/build-nss debian/tmp-gnutls debian/tmp-nss
+	$(RM) -r build-stamp configure-stamp debian/build* debian/tmp*
 
 #install: DH_OPTIONS=
 install: build-stamp
@@ -137,12 +128,10 @@ install: build-stamp
 	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 
 # Build architecture-independent files here.
-#binary-indep: DH_OPTIONS=-i
 binary-indep: build-stamp install
 # We have nothing to do here.
 
 # Build architecture-dependent files here.
-#binary-arch: DH_OPTIONS=-a
 binary-arch: build-stamp install
 	dh_testdir
 	dh_testroot
