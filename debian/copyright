@@ -1,4 +1,4 @@
-Format: http://dep.debian.net/deps/dep5
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: curl
 Source: http://curl.haxx.se
 
@@ -92,7 +92,7 @@ License:
 
 Files: src/macos/src/macos_main.cpp
 Copyright: 2001, Eric Lavigne
-License: 
+License:
  Permission is granted to anyone to use this software for any purpose on any computer system, and to redistribute it freely, subject to the following restrictions: - The author is not responsible for the consequences of use of this software, no matter how awful, even if they arise from defects in it. - The origin of this software must not be misrepresented, either by explicit claim or by omission. - You are allowed to distributed modified copies of the software, in source and binary form, provided they are marked plainly as altered versions, and are not misrepresented as being the original software.
 
 Files: lib/polarssl.*
