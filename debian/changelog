@@ -9,8 +9,10 @@ curl (7.24.0-2) UNRELEASED; urgency=low
     - Manually set CFLAGS and LDFLAGS from dpkg-buildflags
       (this also makes curl backportable to stable)
   * Do some clean-up in debian/rules
+  * Update debian/copyright format as in Debian Policy 3.9.3
+  * Bump Standards-Version to 3.9.3
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Sat, 18 Feb 2012 19:39:34 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 23 Feb 2012 11:58:39 +0100
 
 curl (7.24.0-1) unstable; urgency=high
 
