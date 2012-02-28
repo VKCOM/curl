@@ -131,7 +131,9 @@ Replaces: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-openssl-dev,
  libcurl3-dev (<< 7.14.1-1)
-Conflicts: libcurl-dev
+Conflicts: libcurl-dev,
+ libcurl4-gnutls-dev,
+ libcurl4-nss-dev
 Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}),
  libc6-dev | libc-dev,
  libidn11-dev,
@@ -173,7 +175,9 @@ Replaces: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-gnutls-dev,
  libcurl4-dev
-Conflicts: libcurl-dev
+Conflicts: libcurl-dev,
+ libcurl4-openssl-dev,
+ libcurl4-nss-dev
 Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version}),
  libc6-dev | libc-dev,
  libgnutls-dev,
@@ -215,7 +219,9 @@ Replaces: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-nss-dev,
  libcurl4-dev
-Conflicts: libcurl-dev
+Conflicts: libcurl-dev,
+ libcurl4-gnutls-dev,
+ libcurl4-nss-dev
 Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
  libc6-dev | libc-dev,
  libidn11-dev,
