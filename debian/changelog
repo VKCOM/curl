@@ -6,14 +6,13 @@ curl (7.24.0-2) UNRELEASED; urgency=low
   * Pass --as-needed ld flag to avoid unneeded dependencies
     - Add workaround_as_needed_bug to workaround a libtool bug
     - Drop dont_link_to_krb5 (not needed because of --as-needed)
-    - Manually set CFLAGS and LDFLAGS from dpkg-buildflags 
-      plus --as-needed
   * Do some clean-up in debian/rules
   * Update debian/copyright format as in Debian Policy 3.9.3
   * Bump Standards-Version to 3.9.3
   * Explicit Conflicts in -dev packages (fixes binaries-have-file-conflict)
+  * Add openssh-server to build depends to enable some more tests
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Wed, 29 Feb 2012 18:32:07 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 01 Mar 2012 00:26:08 +0100
 
 curl (7.24.0-1) unstable; urgency=high
 
