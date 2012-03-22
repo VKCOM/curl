@@ -1,4 +1,4 @@
-curl (7.25.0-1) UNRELEASED; urgency=low
+curl (7.25.0-1) unstable; urgency=low
 
   * New upstream release
     - Add --ssl-allow-beast and CURLOPT_SSL_OPTIONS (Closes: #658276)
@@ -14,8 +14,10 @@ curl (7.25.0-1) UNRELEASED; urgency=low
   * Bump Standards-Version to 3.9.3
   * Explicit Conflicts in -dev packages (fixes binaries-have-file-conflict)
   * Add openssh-server to build depends to enable some more tests
+  * Update upstream copyright years
+  * Refresh patches
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 22 Mar 2012 20:15:50 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Fri, 23 Mar 2012 16:24:51 +0100
 
 curl (7.24.0-1) unstable; urgency=high
 
