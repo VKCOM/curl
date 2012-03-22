@@ -865,6 +865,7 @@ enable_imap
 enable_smtp
 enable_gopher
 enable_manual
+enable_libcurl_option
 enable_libgcc
 with_ldap_lib
 with_lber_lib
@@ -1582,6 +1583,9 @@ Optional Features:
   --disable-gopher        Disable Gopher support
   --enable-manual         Enable built-in manual
   --disable-manual        Disable built-in manual
+  --enable-libcurl-option Enable --libcurl C code generation support
+  --disable-libcurl-option
+                          Disable --libcurl C code generation support
   --enable-libgcc         use libgcc when linking
   --enable-ipv6           Enable ipv6 (with ipv4) support
   --disable-ipv6          Disable ipv6 support
@@ -1651,7 +1655,7 @@ Optional Packages:
                           installation root
   --without-polarssl      disable PolarSSL detection
   --with-cyassl=PATH      where to look for CyaSSL, PATH points to the
-                          installation root (default: /usr/local/cyassl)
+                          installation root (default: system lib default)
   --without-cyassl        disable CyaSSL detection
   --with-nss=PATH         where to look for NSS, PATH points to the
                           installation root
@@ -3650,6 +3654,7 @@ curl_tls_srp_msg="no      (--enable-tls-srp)"
    curl_ipv6_msg="no      (--enable-ipv6)"
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
+curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
@@ -17813,6 +17818,30 @@ $as_echo "yes" >&6; }
 fi
 
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable generation of C code" >&5
+$as_echo_n "checking whether to enable generation of C code... " >&6; }
+# Check whether --enable-libcurl_option was given.
+if test "${enable_libcurl_option+set}" = set; then :
+  enableval=$enable_libcurl_option;  case "$enableval" in
+  no)
+       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+$as_echo "#define CURL_DISABLE_LIBCURL_OPTION 1" >>confdefs.h
+
+       curl_libcurl_msg="no"
+       ;;
+  *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+       ;;
+  esac
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+fi
+
+
 
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking if X/Open network library is required" >&5
@@ -20707,11 +20736,12 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-
-       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_OPENSSL"
-       export LD_LIBRARY_PATH
-       { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_OPENSSL to LD_LIBRARY_PATH" >&5
+                            if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_OPENSSL"
+         export LD_LIBRARY_PATH
+         { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_OPENSSL to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $LIB_OPENSSL to LD_LIBRARY_PATH" >&6;}
+       fi
     fi
 
   #
@@ -21805,11 +21835,12 @@ fi
 $as_echo "$as_me: detected GnuTLS version $version" >&6;}
 
         if test -n "$gtlslib"; then
-
-          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
-          export LD_LIBRARY_PATH
-          { $as_echo "$as_me:${as_lineno-$LINENO}: Added $gtlslib to LD_LIBRARY_PATH" >&5
+                                                  if test "x$cross_compiling" != "xyes"; then
+            LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlslib"
+            export LD_LIBRARY_PATH
+            { $as_echo "$as_me:${as_lineno-$LINENO}: Added $gtlslib to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $gtlslib to LD_LIBRARY_PATH" >&6;}
+          fi
         fi
       fi
 
@@ -21985,6 +22016,9 @@ $as_echo "#define USE_GNUTLS_NETTLE 1" >>confdefs.h
 
     USE_GNUTLS_NETTLE=1
 
+    LIBS="$LIBS -lnettle"
+  else
+    LIBS="$LIBS -lgcrypt"
   fi
 fi
 
@@ -22175,13 +22209,13 @@ $as_echo "$as_me: detected PolarSSL" >&6;}
       LIBS="$LIBS -lpolarssl"
 
       if test -n "$polarssllib"; then
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
-        export LD_LIBRARY_PATH
-        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $polarssllib to LD_LIBRARY_PATH" >&5
+                                        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$polarssllib"
+          export LD_LIBRARY_PATH
+          { $as_echo "$as_me:${as_lineno-$LINENO}: Added $polarssllib to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $polarssllib to LD_LIBRARY_PATH" >&6;}
+        fi
       fi
-
     fi
 
   fi
@@ -22208,14 +22242,9 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
     if test -z "$OPT_CYASSL" ; then
 
-      trycyassldir="/usr/local/cyassl"
-
-      LDFLAGS="$LDFLAGS -L$trycyassldir/lib"
-      CPPFLAGS="$CPPFLAGS -I$trycyassldir/include"
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for InitCyaSSL in -lcyassl" >&5
-$as_echo_n "checking for InitCyaSSL in -lcyassl... " >&6; }
-if test "${ac_cv_lib_cyassl_InitCyaSSL+set}" = set; then :
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CyaSSL_Init in -lcyassl" >&5
+$as_echo_n "checking for CyaSSL_Init in -lcyassl... " >&6; }
+if test "${ac_cv_lib_cyassl_CyaSSL_Init+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -22227,26 +22256,26 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char InitCyaSSL ();
+char CyaSSL_Init ();
 int main (void)
 {
-return InitCyaSSL ();
+return CyaSSL_Init ();
  ;
  return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_cyassl_InitCyaSSL=yes
+  ac_cv_lib_cyassl_CyaSSL_Init=yes
 else
-  ac_cv_lib_cyassl_InitCyaSSL=no
+  ac_cv_lib_cyassl_CyaSSL_Init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cyassl_InitCyaSSL" >&5
-$as_echo "$ac_cv_lib_cyassl_InitCyaSSL" >&6; }
-if test "x$ac_cv_lib_cyassl_InitCyaSSL" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cyassl_CyaSSL_Init" >&5
+$as_echo "$ac_cv_lib_cyassl_CyaSSL_Init" >&6; }
+if test "x$ac_cv_lib_cyassl_CyaSSL_Init" = x""yes; then :
 
 
 $as_echo "#define USE_CYASSL 1" >>confdefs.h
@@ -22271,9 +22300,9 @@ fi
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for InitCyaSSL in -lcyassl" >&5
-$as_echo_n "checking for InitCyaSSL in -lcyassl... " >&6; }
-if test "${ac_cv_lib_cyassl_InitCyaSSL+set}" = set; then :
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for CyaSSL_Init in -lcyassl" >&5
+$as_echo_n "checking for CyaSSL_Init in -lcyassl... " >&6; }
+if test "${ac_cv_lib_cyassl_CyaSSL_Init+set}" = set; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -22285,26 +22314,26 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char InitCyaSSL ();
+char CyaSSL_Init ();
 int main (void)
 {
-return InitCyaSSL ();
+return CyaSSL_Init ();
  ;
  return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_cyassl_InitCyaSSL=yes
+  ac_cv_lib_cyassl_CyaSSL_Init=yes
 else
-  ac_cv_lib_cyassl_InitCyaSSL=no
+  ac_cv_lib_cyassl_CyaSSL_Init=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cyassl_InitCyaSSL" >&5
-$as_echo "$ac_cv_lib_cyassl_InitCyaSSL" >&6; }
-if test "x$ac_cv_lib_cyassl_InitCyaSSL" = x""yes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cyassl_CyaSSL_Init" >&5
+$as_echo "$ac_cv_lib_cyassl_CyaSSL_Init" >&6; }
+if test "x$ac_cv_lib_cyassl_CyaSSL_Init" = x""yes; then :
 
 
 $as_echo "#define USE_CYASSL 1" >>confdefs.h
@@ -22332,11 +22361,12 @@ $as_echo "$as_me: detected CyaSSL" >&6;}
       LIBS="$LIBS -lcyassl -lm"
 
       if test -n "$cyassllib"; then
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
-        export LD_LIBRARY_PATH
-        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $cyassllib to LD_LIBRARY_PATH" >&5
+                                        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$cyassllib"
+          export LD_LIBRARY_PATH
+          { $as_echo "$as_me:${as_lineno-$LINENO}: Added $cyassllib to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $cyassllib to LD_LIBRARY_PATH" >&6;}
+        fi
       fi
 
     fi
@@ -22609,11 +22639,12 @@ fi
         { $as_echo "$as_me:${as_lineno-$LINENO}: detected NSS version $version" >&5
 $as_echo "$as_me: detected NSS version $version" >&6;}
 
-
-        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
-        export LD_LIBRARY_PATH
-        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH" >&5
+                                        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
+          export LD_LIBRARY_PATH
+          { $as_echo "$as_me:${as_lineno-$LINENO}: Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $nssprefix/lib$libsuff to LD_LIBRARY_PATH" >&6;}
+        fi
       fi
 
     fi
@@ -23074,11 +23105,12 @@ _ACEOF
 fi
 done
 
-
-       LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
-       export LD_LIBRARY_PATH
-       { $as_echo "$as_me:${as_lineno-$LINENO}: Added $DIR_SSH2 to LD_LIBRARY_PATH" >&5
+       if test "x$cross_compiling" != "xyes"; then
+         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$DIR_SSH2"
+         export LD_LIBRARY_PATH
+         { $as_echo "$as_me:${as_lineno-$LINENO}: Added $DIR_SSH2 to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $DIR_SSH2 to LD_LIBRARY_PATH" >&6;}
+       fi
     fi
   else
         LDFLAGS=$CLEANLDFLAGS
@@ -28883,6 +28915,35 @@ $as_echo_n "checking if getaddrinfo is threadsafe... " >&6; }
                 tst_tsafe_getaddrinfo="yes"
         ;;
     esac
+    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+
+int main (void)
+{
+
+#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+          return 0;
+#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+          return 0;
+#else
+          force compilation error
+#endif
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+        tst_tsafe_getaddrinfo="yes"
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
 
 
@@ -40365,59 +40426,61 @@ _EOF
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configured to build curl/libcurl:
 
-  curl version:    ${CURLVERSION}
-  Host setup:      ${host}
-  Install prefix:  ${prefix}
-  Compiler:        ${CC}
-  SSL support:     ${curl_ssl_msg}
-  SSH support:     ${curl_ssh_msg}
-  zlib support:    ${curl_zlib_msg}
-  krb4 support:    ${curl_krb4_msg}
-  GSSAPI support:  ${curl_gss_msg}
-  SPNEGO support:  ${curl_spnego_msg}
-  TLS-SRP support: ${curl_tls_srp_msg}
-  resolver:        ${curl_res_msg}
-  ipv6 support:    ${curl_ipv6_msg}
-  IDN support:     ${curl_idn_msg}
-  Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
-  Built-in manual: ${curl_manual_msg}
-  Verbose errors:  ${curl_verbose_msg}
-  SSPI support:    ${curl_sspi_msg}
-  ca cert bundle:  ${ca}
-  ca cert path:    ${capath}
-  LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg}
-  RTSP support:    ${curl_rtsp_msg}
-  RTMP support:    ${curl_rtmp_msg}
-  Protocols:       ${SUPPORT_PROTOCOLS}
+  curl version:     ${CURLVERSION}
+  Host setup:       ${host}
+  Install prefix:   ${prefix}
+  Compiler:         ${CC}
+  SSL support:      ${curl_ssl_msg}
+  SSH support:      ${curl_ssh_msg}
+  zlib support:     ${curl_zlib_msg}
+  krb4 support:     ${curl_krb4_msg}
+  GSSAPI support:   ${curl_gss_msg}
+  SPNEGO support:   ${curl_spnego_msg}
+  TLS-SRP support:  ${curl_tls_srp_msg}
+  resolver:         ${curl_res_msg}
+  ipv6 support:     ${curl_ipv6_msg}
+  IDN support:      ${curl_idn_msg}
+  Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
+  Built-in manual:  ${curl_manual_msg}
+  --libcurl option: ${curl_libcurl_msg}
+  Verbose errors:   ${curl_verbose_msg}
+  SSPI support:     ${curl_sspi_msg}
+  ca cert bundle:   ${ca}
+  ca cert path:     ${capath}
+  LDAP support:     ${curl_ldap_msg}
+  LDAPS support:    ${curl_ldaps_msg}
+  RTSP support:     ${curl_rtsp_msg}
+  RTMP support:     ${curl_rtmp_msg}
+  Protocols:        ${SUPPORT_PROTOCOLS}
 " >&5
 $as_echo "$as_me: Configured to build curl/libcurl:
 
-  curl version:    ${CURLVERSION}
-  Host setup:      ${host}
-  Install prefix:  ${prefix}
-  Compiler:        ${CC}
-  SSL support:     ${curl_ssl_msg}
-  SSH support:     ${curl_ssh_msg}
-  zlib support:    ${curl_zlib_msg}
-  krb4 support:    ${curl_krb4_msg}
-  GSSAPI support:  ${curl_gss_msg}
-  SPNEGO support:  ${curl_spnego_msg}
-  TLS-SRP support: ${curl_tls_srp_msg}
-  resolver:        ${curl_res_msg}
-  ipv6 support:    ${curl_ipv6_msg}
-  IDN support:     ${curl_idn_msg}
-  Build libcurl:   Shared=${enable_shared}, Static=${enable_static}
-  Built-in manual: ${curl_manual_msg}
-  Verbose errors:  ${curl_verbose_msg}
-  SSPI support:    ${curl_sspi_msg}
-  ca cert bundle:  ${ca}
-  ca cert path:    ${capath}
-  LDAP support:    ${curl_ldap_msg}
-  LDAPS support:   ${curl_ldaps_msg}
-  RTSP support:    ${curl_rtsp_msg}
-  RTMP support:    ${curl_rtmp_msg}
-  Protocols:       ${SUPPORT_PROTOCOLS}
+  curl version:     ${CURLVERSION}
+  Host setup:       ${host}
+  Install prefix:   ${prefix}
+  Compiler:         ${CC}
+  SSL support:      ${curl_ssl_msg}
+  SSH support:      ${curl_ssh_msg}
+  zlib support:     ${curl_zlib_msg}
+  krb4 support:     ${curl_krb4_msg}
+  GSSAPI support:   ${curl_gss_msg}
+  SPNEGO support:   ${curl_spnego_msg}
+  TLS-SRP support:  ${curl_tls_srp_msg}
+  resolver:         ${curl_res_msg}
+  ipv6 support:     ${curl_ipv6_msg}
+  IDN support:      ${curl_idn_msg}
+  Build libcurl:    Shared=${enable_shared}, Static=${enable_static}
+  Built-in manual:  ${curl_manual_msg}
+  --libcurl option: ${curl_libcurl_msg}
+  Verbose errors:   ${curl_verbose_msg}
+  SSPI support:     ${curl_sspi_msg}
+  ca cert bundle:   ${ca}
+  ca cert path:     ${capath}
+  LDAP support:     ${curl_ldap_msg}
+  LDAPS support:    ${curl_ldaps_msg}
+  RTSP support:     ${curl_rtsp_msg}
+  RTMP support:     ${curl_rtmp_msg}
+  Protocols:        ${SUPPORT_PROTOCOLS}
 " >&6;}
 
 if test "x$soname_bump" = "xyes"; then

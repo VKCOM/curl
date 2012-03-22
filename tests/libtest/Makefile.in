@@ -63,7 +63,7 @@ noinst_PROGRAMS = chkhostname$(EXEEXT) lib500$(EXEEXT) lib501$(EXEEXT) \
 	lib571$(EXEEXT) lib572$(EXEEXT) lib573$(EXEEXT) \
 	lib582$(EXEEXT) lib583$(EXEEXT) lib585$(EXEEXT) \
 	lib586$(EXEEXT) lib587$(EXEEXT) lib590$(EXEEXT) \
-	lib591$(EXEEXT) lib597$(EXEEXT)
+	lib591$(EXEEXT) lib597$(EXEEXT) lib598$(EXEEXT)
 subdir = tests/libtest
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -296,7 +296,7 @@ am_lib549_OBJECTS = lib549.$(OBJEXT) $(am__objects_1)
 lib549_OBJECTS = $(am_lib549_OBJECTS)
 lib549_LDADD = $(LDADD)
 lib549_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-am_lib552_OBJECTS = lib552.$(OBJEXT) $(am__objects_1)
+am_lib552_OBJECTS = lib552.$(OBJEXT) $(am__objects_1) $(am__objects_4)
 lib552_OBJECTS = $(am_lib552_OBJECTS)
 lib552_LDADD = $(LDADD)
 lib552_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
@@ -360,7 +360,7 @@ am_lib570_OBJECTS = lib570.$(OBJEXT) $(am__objects_1)
 lib570_OBJECTS = $(am_lib570_OBJECTS)
 lib570_LDADD = $(LDADD)
 lib570_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-am_lib571_OBJECTS = lib571.$(OBJEXT) $(am__objects_1)
+am_lib571_OBJECTS = lib571.$(OBJEXT) $(am__objects_1) $(am__objects_4)
 lib571_OBJECTS = $(am_lib571_OBJECTS)
 lib571_LDADD = $(LDADD)
 lib571_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
@@ -434,6 +434,10 @@ am_lib597_OBJECTS = lib597.$(OBJEXT) $(am__objects_1) $(am__objects_2) \
 lib597_OBJECTS = $(am_lib597_OBJECTS)
 lib597_LDADD = $(LDADD)
 lib597_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
+am_lib598_OBJECTS = lib598.$(OBJEXT) $(am__objects_1)
+lib598_OBJECTS = $(am_lib598_OBJECTS)
+lib598_LDADD = $(LDADD)
+lib598_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -470,7 +474,7 @@ SOURCES = $(libhostname_la_SOURCES) $(chkhostname_SOURCES) \
 	$(lib578_SOURCES) $(lib579_SOURCES) $(lib582_SOURCES) \
 	$(lib583_SOURCES) $(lib585_SOURCES) $(lib586_SOURCES) \
 	$(lib587_SOURCES) $(lib590_SOURCES) $(lib591_SOURCES) \
-	$(lib597_SOURCES)
+	$(lib597_SOURCES) $(lib598_SOURCES)
 DIST_SOURCES = $(libhostname_la_SOURCES) $(chkhostname_SOURCES) \
 	$(lib500_SOURCES) $(lib501_SOURCES) $(lib502_SOURCES) \
 	$(lib503_SOURCES) $(lib504_SOURCES) $(lib505_SOURCES) \
@@ -496,7 +500,7 @@ DIST_SOURCES = $(libhostname_la_SOURCES) $(chkhostname_SOURCES) \
 	$(lib578_SOURCES) $(lib579_SOURCES) $(lib582_SOURCES) \
 	$(lib583_SOURCES) $(lib585_SOURCES) $(lib586_SOURCES) \
 	$(lib587_SOURCES) $(lib590_SOURCES) $(lib591_SOURCES) \
-	$(lib597_SOURCES)
+	$(lib597_SOURCES) $(lib598_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -817,7 +821,7 @@ lib548_SOURCES = lib547.c $(SUPPORTFILES)
 lib548_CPPFLAGS = $(AM_CPPFLAGS) -DLIB548
 lib549_SOURCES = lib549.c $(SUPPORTFILES)
 lib555_SOURCES = lib555.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
-lib552_SOURCES = lib552.c $(SUPPORTFILES)
+lib552_SOURCES = lib552.c $(SUPPORTFILES) $(WARNLESS)
 lib553_SOURCES = lib553.c $(SUPPORTFILES)
 lib554_SOURCES = lib554.c $(SUPPORTFILES)
 lib556_SOURCES = lib556.c $(SUPPORTFILES)
@@ -835,7 +839,7 @@ lib567_SOURCES = lib567.c $(SUPPORTFILES)
 lib568_SOURCES = lib568.c $(SUPPORTFILES)
 lib569_SOURCES = lib569.c $(SUPPORTFILES)
 lib570_SOURCES = lib570.c $(SUPPORTFILES)
-lib571_SOURCES = lib571.c $(SUPPORTFILES)
+lib571_SOURCES = lib571.c $(SUPPORTFILES) $(WARNLESS)
 lib572_SOURCES = lib572.c $(SUPPORTFILES)
 lib573_SOURCES = lib573.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(TSTTRACE)
 lib578_SOURCES = lib578.c $(SUPPORTFILES)
@@ -850,6 +854,7 @@ lib587_CPPFLAGS = $(AM_CPPFLAGS) -DLIB587
 lib590_SOURCES = lib590.c $(SUPPORTFILES)
 lib591_SOURCES = lib591.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib597_SOURCES = lib597.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib598_SOURCES = lib598.c $(SUPPORTFILES)
 @BUILD_LIBHOSTNAME_FALSE@noinst_LTLIBRARIES = 
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
@@ -1138,6 +1143,9 @@ lib591$(EXEEXT): $(lib591_OBJECTS) $(lib591_DEPENDENCIES)
 lib597$(EXEEXT): $(lib597_OBJECTS) $(lib597_DEPENDENCIES) 
 	@rm -f lib597$(EXEEXT)
 	$(LINK) $(lib597_LDFLAGS) $(lib597_OBJECTS) $(lib597_LDADD) $(LIBS)
+lib598$(EXEEXT): $(lib598_OBJECTS) $(lib598_DEPENDENCIES) 
+	@rm -f lib598$(EXEEXT)
+	$(LINK) $(lib598_LDFLAGS) $(lib598_OBJECTS) $(lib598_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1243,6 +1251,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib590.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib591.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib597.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lib598.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sethostname.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testtrace.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testutil.Po@am__quote@

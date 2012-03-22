@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -170,6 +170,7 @@ static const struct LongShort aliases[]= {
   {"$E", "proto-redir",              TRUE},
   {"$F", "resolve",                  TRUE},
   {"$G", "delegation",               TRUE},
+  {"$H", "mail-auth",                TRUE},
   {"0",  "http1.0",                  FALSE},
   {"1",  "tlsv1",                    FALSE},
   {"2",  "sslv2",                    FALSE},
@@ -202,6 +203,7 @@ static const struct LongShort aliases[]= {
   {"Ek", "tlsuser",                  TRUE},
   {"El", "tlspassword",              TRUE},
   {"Em", "tlsauthtype",              TRUE},
+  {"En", "ssl-allow-beast",          FALSE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -738,8 +740,14 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         config->ftp_ssl_ccc_mode = ftpcccmethod(config, nextarg);
         break;
       case 'z': /* --libcurl */
+#ifdef CURL_DISABLE_LIBCURL_OPTION
+        warnf(config,
+              "--libcurl option was disabled at build-time!\n");
+        return PARAM_OPTION_UNKNOWN;
+#else
         GetStr(&config->libcurl, nextarg);
         break;
+#endif
       case '#': /* --raw */
         config->raw = toggle;
         break;
@@ -805,6 +813,9 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'G': /* --delegation LEVEL */
         config->gssapi_delegation = delegation(config, nextarg);
+        break;
+      case 'H': /* --mail-auth */
+        GetStr(&config->mail_auth, nextarg);
         break;
       }
       break;
@@ -1143,6 +1154,10 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         }
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
+        break;
+      case 'n': /* no empty SSL fragments */
+        if(curlinfo->features & CURL_VERSION_SSL)
+          config->ssl_allow_beast = toggle;
         break;
       default: /* certificate file */
       {
