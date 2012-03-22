@@ -7,7 +7,7 @@ Last-Update: 2011-11-01
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1761,7 +1761,7 @@
+@@ -1781,7 +1781,7 @@
        CLEANCPPFLAGS="$CPPFLAGS"
        CLEANLDFLAGS="$LDFLAGS"
  

@@ -4,9 +4,9 @@ Bug-Debian: http://bugs.debian.org/347650
 Forwarded: not-needed
 Last-Update: 2012-02-18
 
---- curl-7.24.0.orig/ltmain.sh
-+++ curl-7.24.0/ltmain.sh
-@@ -5800,6 +5800,11 @@ func_mode_link ()
+--- a/ltmain.sh
++++ b/ltmain.sh
+@@ -5800,6 +5800,11 @@
  	arg=$func_stripname_result
  	;;
  
@@ -18,7 +18,7 @@ Last-Update: 2012-02-18
        -Wl,*)
  	func_stripname '-Wl,' '' "$arg"
  	args=$func_stripname_result
-@@ -6163,6 +6168,15 @@ func_mode_link ()
+@@ -6163,6 +6168,15 @@
  	lib=
  	found=no
  	case $deplib in

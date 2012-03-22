@@ -7,7 +7,7 @@ Last-Update: 2011-11-01
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1759,9 +1759,9 @@
+@@ -1779,9 +1779,9 @@
  
        CLEANLIBS="$LIBS"
        CLEANCPPFLAGS="$CPPFLAGS"
