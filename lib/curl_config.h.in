@@ -39,6 +39,9 @@
 /* to disable LDAPS */
 #undef CURL_DISABLE_LDAPS
 
+/* to disable --libcurl C code generation option */
+#undef CURL_DISABLE_LIBCURL_OPTION
+
 /* to disable POP3 */
 #undef CURL_DISABLE_POP3
 

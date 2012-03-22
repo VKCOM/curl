@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -41,6 +41,10 @@
 #  include <locale.h>
 #endif
 
+#ifdef HAVE_NETINET_TCP_H
+#  include <netinet/tcp.h>
+#endif
+
 #include "rawstr.h"
 
 #define ENABLE_CURLX_PRINTF
@@ -54,7 +58,6 @@
 #include "tool_cb_prg.h"
 #include "tool_cb_rea.h"
 #include "tool_cb_see.h"
-#include "tool_cb_skt.h"
 #include "tool_cb_wrt.h"
 #include "tool_dirhie.h"
 #include "tool_doswin.h"
@@ -101,6 +104,24 @@
   " not match the domain name in the URL).\n"                               \
   "If you'd like to turn off curl's verification of the certificate, use\n" \
   " the -k (or --insecure) option.\n"
+
+static int is_fatal_error(int code)
+{
+  switch(code) {
+  /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
+  case CURLE_FAILED_INIT:
+  case CURLE_OUT_OF_MEMORY:
+  case CURLE_UNKNOWN_OPTION:
+  case CURLE_FUNCTION_NOT_FOUND:
+  case CURLE_BAD_FUNCTION_ARGUMENT:
+    /* critical error */
+    return 1;
+  default:
+    break;
+  }
+  /* no error or not critical */
+  return 0;
+}
 
 int operate(struct Configurable *config, int argc, argv_item_t argv[])
 {
@@ -333,13 +354,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     }
   }
 
-  /* This is the first entry added to easysrc and it initializes the slist */
-  easysrc = curl_slist_append(easysrc, "CURL *hnd = curl_easy_init();");
-  if(!easysrc) {
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+  res = easysrc_init();
+  if(res) {
     helpf(config->errors, "out of memory\n");
-    res = CURLE_OUT_OF_MEMORY;
     goto quit_curl;
   }
+#endif
 
   if(config->list_engines) {
     struct curl_slist *engines = NULL;
@@ -384,7 +405,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     URLGlob *inglob;
 
     outfiles = NULL;
-    infilenum = 0;
+    infilenum = 1;
     inglob = NULL;
 
     /* urlnode->url is the full URL (it might be NULL) */
@@ -422,7 +443,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
     /* Here's the loop for uploading multiple files within the same
        single globbed string. If no upload, we enter the loop once anyway. */
-    for(up = 0 ;; up++) {
+    for(up = 0 ; up < infilenum; up++) {
 
       char *uploadfile; /* a single file, never a glob */
       int separator;
@@ -472,7 +493,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
       separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
-      for(i = 0 ;; i++) {
+      for(i = 0 ; i < urlnum; i++) {
 
         int infd;
         bool infdopen;
@@ -812,25 +833,25 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.5 */
           if(config->proxy)
-            my_setopt(curl, CURLOPT_PROXYTYPE, config->proxyver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->proxyver);
 
           /* new in libcurl 7.10 */
           if(config->socksproxy) {
             my_setopt_str(curl, CURLOPT_PROXY, config->socksproxy);
-            my_setopt(curl, CURLOPT_PROXYTYPE, config->socksver);
+            my_setopt_enum(curl, CURLOPT_PROXYTYPE, config->socksver);
           }
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
           else if(config->proxynegotiate)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
           else if(config->proxydigest)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
           else if(config->proxybasic)
-            my_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
@@ -873,7 +894,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
                       config->postfieldsize);
             break;
           case HTTPREQ_POST:
-            my_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
+            my_setopt_httppost(curl, CURLOPT_HTTPPOST, config->httppost);
             break;
           default:
             break;
@@ -882,18 +903,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_REFERER, config->referer);
           my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer);
           my_setopt_str(curl, CURLOPT_USERAGENT, config->useragent);
-          my_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
+          my_setopt_slist(curl, CURLOPT_HTTPHEADER, config->headers);
 
           /* new in libcurl 7.5 */
           my_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
 
           /* new in libcurl 7.9.1 */
           if(config->httpversion)
-            my_setopt(curl, CURLOPT_HTTP_VERSION, config->httpversion);
+            my_setopt_enum(curl, CURLOPT_HTTP_VERSION, config->httpversion);
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt(curl, CURLOPT_HTTPAUTH, config->authtype);
+            my_setopt_flags(curl, CURLOPT_HTTPAUTH, config->authtype);
 
           /* curl 7.19.1 (the 301 version existed in 7.18.2) */
           my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
@@ -988,9 +1009,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         my_setopt(curl, CURLOPT_CRLF, config->crlf);
-        my_setopt(curl, CURLOPT_QUOTE, config->quote);
-        my_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
-        my_setopt(curl, CURLOPT_PREQUOTE, config->prequote);
+        my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
+        my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
+        my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         {
@@ -1011,8 +1032,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 #endif
 
-        my_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
-        my_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
+        my_setopt_enum(curl, CURLOPT_SSLVERSION, config->ssl_version);
+        my_setopt_enum(curl, CURLOPT_TIMECONDITION, config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
         my_setopt_str(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         my_setopt(curl, CURLOPT_STDERR, config->errors);
@@ -1031,7 +1052,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         }
 
         /* new in libcurl 7.6.2: */
-        my_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
+        my_setopt_slist(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
 
         /* new in libcurl 7.7: */
         my_setopt_str(curl, CURLOPT_RANDOM_FILE, config->random_file);
@@ -1095,7 +1116,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* new in curl 7.16.1 */
         if(config->ftp_ssl_ccc)
-          my_setopt(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
+          my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC, config->ftp_ssl_ccc_mode);
 
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
         {
@@ -1147,9 +1168,18 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         /* curl 7.17.1 */
         if(!config->nokeepalive) {
-          my_setopt(curl, CURLOPT_SOCKOPTFUNCTION, tool_sockopt_cb);
-          my_setopt(curl, CURLOPT_SOCKOPTDATA, config);
+          my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 1L);
+          if(config->alivetime != 0) {
+#if !defined(TCP_KEEPIDLE) || !defined(TCP_KEEPINTVL)
+            warnf(config, "Keep-alive functionality somewhat crippled due to "
+                "missing support in your operating system!\n");
+#endif
+            my_setopt(curl, CURLOPT_TCP_KEEPIDLE, config->alivetime);
+            my_setopt(curl, CURLOPT_TCP_KEEPINTVL, config->alivetime);
+          }
         }
+        else
+          my_setopt(curl, CURLOPT_TCP_KEEPALIVE, 0L);
 
         /* curl 7.20.0 */
         if(config->tftp_blksize)
@@ -1159,16 +1189,16 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_MAIL_FROM, config->mail_from);
 
         if(config->mail_rcpt)
-          my_setopt(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
+          my_setopt_slist(curl, CURLOPT_MAIL_RCPT, config->mail_rcpt);
 
         /* curl 7.20.x */
         if(config->ftp_pret)
           my_setopt(curl, CURLOPT_FTP_USE_PRET, TRUE);
 
         if(config->proto_present)
-          my_setopt(curl, CURLOPT_PROTOCOLS, config->proto);
+          my_setopt_flags(curl, CURLOPT_PROTOCOLS, config->proto);
         if(config->proto_redir_present)
-          my_setopt(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
+          my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if((urlnode->flags & GETOUT_USEREMOTE)
            && config->content_disposition) {
@@ -1184,7 +1214,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
         if(config->resolve)
           /* new in 7.21.3 */
-          my_setopt(curl, CURLOPT_RESOLVE, config->resolve);
+          my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
 
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1204,6 +1234,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           my_setopt_str(curl, CURLOPT_GSSAPI_DELEGATION,
                         config->gssapi_delegation);
 
+        /* new in 7.25.0 */
+        if(config->ssl_allow_beast)
+          my_setopt(curl, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_ALLOW_BEAST);
+
+        if(config->mail_auth)
+          my_setopt_str(curl, CURLOPT_MAIL_AUTH, config->mail_auth);
+
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
           config->retry_delay*1000L : RETRY_SLEEP_DEFAULT; /* ms */
@@ -1212,10 +1249,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         retry_sleep = retry_sleep_default; /* ms */
         retrystart = tvnow();
 
-        if(!curl_slist_append(easysrc, "ret = curl_easy_perform(hnd);")) {
-          res = CURLE_OUT_OF_MEMORY;
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+        res = easysrc_perform();
+        if(res) {
           goto show_error;
         }
+#endif
 
         for(;;) {
           res = curl_easy_perform(curl);
@@ -1463,8 +1502,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           infd = STDIN_FILENO;
         }
 
-        /* upon error exit loop */
-        if(res)
+        if(urlnum > 1) {
+          /* when url globbing, exit loop upon critical error */
+          if(is_fatal_error(res))
+            break;
+        }
+        else if(res)
+          /* when not url globbing, exit loop upon any error */
           break;
 
       } /* loop to the next URL */
@@ -1479,8 +1523,13 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         urls = NULL;
       }
 
-      /* upon error exit loop */
-      if(res)
+      if(infilenum > 1) {
+        /* when file globbing, exit loop upon critical error */
+        if(is_fatal_error(res))
+          break;
+      }
+      else if(res)
+        /* when not file globbing, exit loop upon any error */
         break;
 
     } /* loop to the next globbed upload file */
@@ -1502,21 +1551,11 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     Curl_safefree(urlnode->infile);
     urlnode->flags = 0;
 
-    /* TODO: Should CURLE_SSL_CACERT be included as critical error ? */
-
     /*
     ** Bail out upon critical errors
     */
-    switch(res) {
-    case CURLE_FAILED_INIT:
-    case CURLE_OUT_OF_MEMORY:
-    case CURLE_FUNCTION_NOT_FOUND:
-    case CURLE_BAD_FUNCTION_ARGUMENT:
+    if(is_fatal_error(res))
       goto quit_curl;
-    default:
-      /* Merrily loop to next URL */
-      break;
-    }
 
   } /* for-loop through all URLs */
 
@@ -1538,8 +1577,9 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
     curl_easy_cleanup(curl);
     config->easy = curl = NULL;
   }
-  if(easysrc)
-    curl_slist_append(easysrc, "curl_easy_cleanup(hnd);");
+#ifndef CURL_DISABLE_LIBCURL_OPTION
+  easysrc_cleanup();
+#endif
 
   /* Close function-local opened file descriptors */
 
@@ -1551,10 +1591,12 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
   if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
 
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   /* Dump the libcurl code if previously enabled.
      NOTE: that this function relies on config->errors amongst other things
      so not everything can be closed and cleaned before this is called */
   dumpeasysrc(config);
+#endif
 
   if(config->errors_fopened && config->errors)
     fclose(config->errors);

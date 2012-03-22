@@ -75,14 +75,14 @@ am__objects_1 = hugehelp.$(OBJEXT) tool_binmode.$(OBJEXT) \
 	tool_bname.$(OBJEXT) tool_cb_dbg.$(OBJEXT) \
 	tool_cb_hdr.$(OBJEXT) tool_cb_prg.$(OBJEXT) \
 	tool_cb_rea.$(OBJEXT) tool_cb_see.$(OBJEXT) \
-	tool_cb_skt.$(OBJEXT) tool_cb_wrt.$(OBJEXT) \
-	tool_cfgable.$(OBJEXT) tool_convert.$(OBJEXT) \
-	tool_dirhie.$(OBJEXT) tool_doswin.$(OBJEXT) \
-	tool_easysrc.$(OBJEXT) tool_formparse.$(OBJEXT) \
-	tool_getparam.$(OBJEXT) tool_getpass.$(OBJEXT) \
-	tool_help.$(OBJEXT) tool_helpers.$(OBJEXT) \
-	tool_homedir.$(OBJEXT) tool_libinfo.$(OBJEXT) \
-	tool_main.$(OBJEXT) tool_mfiles.$(OBJEXT) tool_msgs.$(OBJEXT) \
+	tool_cb_wrt.$(OBJEXT) tool_cfgable.$(OBJEXT) \
+	tool_convert.$(OBJEXT) tool_dirhie.$(OBJEXT) \
+	tool_doswin.$(OBJEXT) tool_easysrc.$(OBJEXT) \
+	tool_formparse.$(OBJEXT) tool_getparam.$(OBJEXT) \
+	tool_getpass.$(OBJEXT) tool_help.$(OBJEXT) \
+	tool_helpers.$(OBJEXT) tool_homedir.$(OBJEXT) \
+	tool_libinfo.$(OBJEXT) tool_main.$(OBJEXT) \
+	tool_mfiles.$(OBJEXT) tool_msgs.$(OBJEXT) \
 	tool_operate.$(OBJEXT) tool_operhlp.$(OBJEXT) \
 	tool_panykey.$(OBJEXT) tool_paramhlp.$(OBJEXT) \
 	tool_parsecfg.$(OBJEXT) tool_setopt.$(OBJEXT) \
@@ -368,7 +368,6 @@ CURL_CFILES = hugehelp.c \
 	tool_cb_prg.c \
 	tool_cb_rea.c \
 	tool_cb_see.c \
-	tool_cb_skt.c \
 	tool_cb_wrt.c \
 	tool_cfgable.c \
 	tool_convert.c \
@@ -408,7 +407,6 @@ CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	tool_cb_prg.h \
 	tool_cb_rea.h \
 	tool_cb_see.h \
-	tool_cb_skt.h \
 	tool_cb_wrt.h \
 	tool_cfgable.h \
 	tool_convert.h \
@@ -559,7 +557,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cb_prg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cb_rea.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cb_see.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cb_skt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cb_wrt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_cfgable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_convert.Po@am__quote@

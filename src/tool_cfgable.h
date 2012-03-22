@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -77,6 +77,7 @@ struct Configurable {
   char *noproxy;
   char *mail_from;
   struct curl_slist *mail_rcpt;
+  char *mail_auth;
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
   bool mute;                /* don't show messages, --silent given */
@@ -195,7 +196,7 @@ struct Configurable {
 
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
-
+  bool ssl_allow_beast;     /* allow this SSL vulnerability */
 }; /* struct Configurable */
 
 void free_config_fields(struct Configurable *config);

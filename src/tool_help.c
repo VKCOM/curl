@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -110,7 +110,9 @@ static const char *const helptext[] = {
   "     --key KEY       Private key file name (SSL/SSH)",
   "     --key-type TYPE Private key file type (DER/PEM/ENG) (SSL)",
   "     --krb LEVEL     Enable Kerberos with specified security level (F)",
+#ifndef CURL_DISABLE_LIBCURL_OPTION
   "     --libcurl FILE  Dump libcurl equivalent code of this command line",
+#endif
   "     --limit-rate RATE  Limit transfer speed to this rate",
   " -l, --list-only     List only names of an FTP directory (F)",
   "     --local-port RANGE  Force use of these local port numbers",
@@ -119,6 +121,7 @@ static const char *const helptext[] = {
   " -M, --manual        Display the full manual",
   "     --mail-from FROM  Mail from this address",
   "     --mail-rcpt TO  Mail to this receiver(s)",
+  "     --mail-auth AUTH  Originator address of the original email",
   "     --max-filesize BYTES  Maximum file size to download (H/F)",
   "     --max-redirs NUM  Maximum number of redirects allowed (H)",
   " -m, --max-time SECONDS  Maximum time allowed for the transfer",
@@ -187,6 +190,7 @@ static const char *const helptext[] = {
   "     --ssl-reqd      Require SSL/TLS (FTP, IMAP, POP3, SMTP)",
   " -2, --sslv2         Use SSLv2 (SSL)",
   " -3, --sslv3         Use SSLv3 (SSL)",
+  "     --ssl-allow-beast Allow security flaw to improve interop (SSL)",
   "     --stderr FILE   Where to redirect stderr. - means stdout",
   "     --tcp-nodelay   Use the TCP_NODELAY option",
   " -t, --telnet-option OPT=VAL  Set telnet option",
