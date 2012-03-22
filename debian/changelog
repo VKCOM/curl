@@ -1,5 +1,8 @@
-curl (7.24.0-2) UNRELEASED; urgency=low
+curl (7.25.0-1) UNRELEASED; urgency=low
 
+  * New upstream release
+    - Add --ssl-allow-beast and CURLOPT_SSL_OPTIONS (Closes: #658276)
+    - Allow negative numbers as option value (Closes: #659591)
   * Add libssh2-1-dev to libcurl4-gnutls-dev and libcurl4-nss-dev Depends
   * Bump debhelper compat level to 9
     - Make *.links files executable to simplify rules file
@@ -12,7 +15,7 @@ curl (7.24.0-2) UNRELEASED; urgency=low
   * Explicit Conflicts in -dev packages (fixes binaries-have-file-conflict)
   * Add openssh-server to build depends to enable some more tests
 
- -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 01 Mar 2012 00:26:08 +0100
+ -- Alessandro Ghedini <al3xbio@gmail.com>  Thu, 22 Mar 2012 20:15:50 +0100
 
 curl (7.24.0-1) unstable; urgency=high
 
