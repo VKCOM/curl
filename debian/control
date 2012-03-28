@@ -33,7 +33,8 @@ Package: curl
 Architecture: any
 Replaces: curl-ssl
 Provides: curl-ssl
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends},
+ libcurl3 (= ${binary:Version})
 Description: command line tool for transferring data with URL syntax
  curl is a command line tool for transferring data with URL syntax, supporting
  DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S,
