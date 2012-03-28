@@ -149,7 +149,7 @@ License:
 Files: debian/*
 Copyright: 2000-2010, Domenico Andreoli <cavok@debian.org>
  2010-2011, Ramakrishnan Muthukrishnan <rkrishnan@debian.org>
- 2011, Alessandro Ghedini <al3xbio@gmail.com>
+ 2011, Alessandro Ghedini <ghedo@debian.org>
 License: curl
 
 License: curl
