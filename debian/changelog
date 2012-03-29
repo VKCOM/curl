@@ -1,8 +1,9 @@
 curl (7.25.0-2) UNRELEASED; urgency=low
 
   * Email change: Alessandro Ghedini -> ghedo@debian.org
+  * Stricter Depends on libcur3 (Closes: #666089)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 28 Mar 2012 12:29:38 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 29 Mar 2012 16:26:32 +0200
 
 curl (7.25.0-1) unstable; urgency=low
 
