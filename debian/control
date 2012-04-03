@@ -1,9 +1,8 @@
 Source: curl
 Section: web
 Priority: optional
-Maintainer: Ramakrishnan Muthukrishnan <rkrishnan@debian.org>
-Uploaders: Alessandro Ghedini <ghedo@debian.org>,
- Ian Jackson <ijackson@chiark.greenend.org.uk>,
+Maintainer: Alessandro Ghedini <ghedo@debian.org>
+Uploaders: Ian Jackson <ijackson@chiark.greenend.org.uk>,
  Luk Claes <luk@debian.org>
 Build-Depends: debhelper (>= 9),
  autoconf,
