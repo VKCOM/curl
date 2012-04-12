@@ -47,10 +47,11 @@ LDFLAGS += -Wl,--as-needed
 #LDFLAGS+= -Wl,-z,defs
 
 CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
+		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)	\
 		--disable-dependency-tracking --enable-ipv6	\
 		--with-lber-lib=lber --enable-manual		\
-		--enable-versioned-symbols --enable-debug	\
-		--libdir=\$${prefix}/lib/$(DEB_HOST_MULTIARCH)	\
+		--enable-versioned-symbols			\
+		--enable-debug --disable-curldebug		\
 		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 # this is still not ready
 #		--enable-ares
