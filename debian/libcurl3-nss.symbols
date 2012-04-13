@@ -1,16 +1,6 @@
 libcurl-nss.so.4 libcurl3-nss #MINVER#
  CURL_NSS_3@CURL_NSS_3 7.23.1
  HIDDEN@HIDDEN 7.23.1
- curl_accept@CURL_NSS_3 7.23.1
- curl_debuglogfile@CURL_NSS_3 7.23.1
- curl_docalloc@CURL_NSS_3 7.23.1
- curl_dofree@CURL_NSS_3 7.23.1
- curl_dofreeaddrinfo@CURL_NSS_3 7.23.1
- curl_dogetaddrinfo@CURL_NSS_3 7.23.1
- curl_dogetnameinfo@CURL_NSS_3 7.23.1
- curl_domalloc@CURL_NSS_3 7.23.1
- curl_dorealloc@CURL_NSS_3 7.23.1
- curl_dostrdup@CURL_NSS_3 7.23.1
  curl_easy_cleanup@CURL_NSS_3 7.23.1
  curl_easy_duphandle@CURL_NSS_3 7.23.1
  curl_easy_escape@CURL_NSS_3 7.23.1
@@ -25,9 +15,6 @@ libcurl-nss.so.4 libcurl3-nss #MINVER#
  curl_easy_strerror@CURL_NSS_3 7.23.1
  curl_easy_unescape@CURL_NSS_3 7.23.1
  curl_escape@CURL_NSS_3 7.23.1
- curl_fclose@CURL_NSS_3 7.23.1
- curl_fdopen@CURL_NSS_3 7.23.1
- curl_fopen@CURL_NSS_3 7.23.1
  curl_formadd@CURL_NSS_3 7.23.1
  curl_formfree@CURL_NSS_3 7.23.1
  curl_formget@CURL_NSS_3 7.23.1
@@ -39,10 +26,6 @@ libcurl-nss.so.4 libcurl3-nss #MINVER#
  curl_global_init_mem@CURL_NSS_3 7.23.1
  curl_jmpenv@CURL_NSS_3 7.23.1
  curl_maprintf@CURL_NSS_3 7.23.1
- curl_mark_sclose@CURL_NSS_3 7.23.1
- curl_memdebug@CURL_NSS_3 7.23.1
- curl_memlimit@CURL_NSS_3 7.23.1
- curl_memlog@CURL_NSS_3 7.23.1
  curl_mfprintf@CURL_NSS_3 7.23.1
  curl_mprintf@CURL_NSS_3 7.23.1
  curl_msnprintf@CURL_NSS_3 7.23.1
@@ -66,15 +49,12 @@ libcurl-nss.so.4 libcurl3-nss #MINVER#
  curl_mvprintf@CURL_NSS_3 7.23.1
  curl_mvsnprintf@CURL_NSS_3 7.23.1
  curl_mvsprintf@CURL_NSS_3 7.23.1
- curl_sclose@CURL_NSS_3 7.23.1
  curl_share_cleanup@CURL_NSS_3 7.23.1
  curl_share_init@CURL_NSS_3 7.23.1
  curl_share_setopt@CURL_NSS_3 7.23.1
  curl_share_strerror@CURL_NSS_3 7.23.1
  curl_slist_append@CURL_NSS_3 7.23.1
  curl_slist_free_all@CURL_NSS_3 7.23.1
- curl_socket@CURL_NSS_3 7.23.1
- curl_socketpair@CURL_NSS_3 7.23.1
  curl_strequal@CURL_NSS_3 7.23.1
  curl_strnequal@CURL_NSS_3 7.23.1
  curl_unescape@CURL_NSS_3 7.23.1

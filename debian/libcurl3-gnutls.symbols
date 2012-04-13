@@ -1,16 +1,6 @@
 libcurl-gnutls.so.4 libcurl3-gnutls #MINVER#
  CURL_GNUTLS_3@CURL_GNUTLS_3 7.16.2
  HIDDEN@HIDDEN 7.16.2
- curl_accept@CURL_GNUTLS_3 7.23.1
- curl_debuglogfile@CURL_GNUTLS_3 7.23.1
- curl_docalloc@CURL_GNUTLS_3 7.23.1
- curl_dofree@CURL_GNUTLS_3 7.23.1
- curl_dofreeaddrinfo@CURL_GNUTLS_3 7.23.1
- curl_dogetaddrinfo@CURL_GNUTLS_3 7.23.1
- curl_dogetnameinfo@CURL_GNUTLS_3 7.23.1
- curl_domalloc@CURL_GNUTLS_3 7.23.1
- curl_dorealloc@CURL_GNUTLS_3 7.23.1
- curl_dostrdup@CURL_GNUTLS_3 7.23.1
  curl_easy_cleanup@CURL_GNUTLS_3 7.16.2
  curl_easy_duphandle@CURL_GNUTLS_3 7.16.2
  curl_easy_escape@CURL_GNUTLS_3 7.16.2
@@ -25,9 +15,6 @@ libcurl-gnutls.so.4 libcurl3-gnutls #MINVER#
  curl_easy_strerror@CURL_GNUTLS_3 7.16.2
  curl_easy_unescape@CURL_GNUTLS_3 7.16.2
  curl_escape@CURL_GNUTLS_3 7.16.2
- curl_fclose@CURL_GNUTLS_3 7.23.1
- curl_fdopen@CURL_GNUTLS_3 7.23.1
- curl_fopen@CURL_GNUTLS_3 7.23.1
  curl_formadd@CURL_GNUTLS_3 7.16.2
  curl_formfree@CURL_GNUTLS_3 7.16.2
  curl_formget@CURL_GNUTLS_3 7.16.2
@@ -39,10 +26,6 @@ libcurl-gnutls.so.4 libcurl3-gnutls #MINVER#
  curl_global_init_mem@CURL_GNUTLS_3 7.16.2
  curl_jmpenv@CURL_GNUTLS_3 7.16.2
  curl_maprintf@CURL_GNUTLS_3 7.16.2
- curl_mark_sclose@CURL_GNUTLS_3 7.23.1
- curl_memdebug@CURL_GNUTLS_3 7.23.1
- curl_memlimit@CURL_GNUTLS_3 7.23.1
- curl_memlog@CURL_GNUTLS_3 7.23.1
  curl_mfprintf@CURL_GNUTLS_3 7.16.2
  curl_mprintf@CURL_GNUTLS_3 7.16.2
  curl_msnprintf@CURL_GNUTLS_3 7.16.2
@@ -66,15 +49,12 @@ libcurl-gnutls.so.4 libcurl3-gnutls #MINVER#
  curl_mvprintf@CURL_GNUTLS_3 7.16.2
  curl_mvsnprintf@CURL_GNUTLS_3 7.16.2
  curl_mvsprintf@CURL_GNUTLS_3 7.16.2
- curl_sclose@CURL_GNUTLS_3 7.16.2
  curl_share_cleanup@CURL_GNUTLS_3 7.16.2
  curl_share_init@CURL_GNUTLS_3 7.16.2
  curl_share_setopt@CURL_GNUTLS_3 7.16.2
  curl_share_strerror@CURL_GNUTLS_3 7.16.2
  curl_slist_append@CURL_GNUTLS_3 7.16.2
  curl_slist_free_all@CURL_GNUTLS_3 7.16.2
- curl_socket@CURL_GNUTLS_3 7.23.1
- curl_socketpair@CURL_GNUTLS_3 7.23.1
  curl_strequal@CURL_GNUTLS_3 7.16.2
  curl_strnequal@CURL_GNUTLS_3 7.16.2
  curl_unescape@CURL_GNUTLS_3 7.16.2
