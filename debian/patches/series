@@ -1,8 +1,7 @@
-runtests_gdb
-art_http_scripting
-keep_symbols_compat
-workaround_as_needed_bug
+01_untests_gdb.patch
+02_art_http_scripting.patch
+03_keep_symbols_compat.patch
+04_workaround_as_needed_bug.patch
 
-gnutls
-# this must be the last
-nss
+90_gnutls.patch
+99_nss.patch
