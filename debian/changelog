@@ -1,11 +1,13 @@
 curl (7.25.0-2) UNRELEASED; urgency=low
 
   * Email change: Alessandro Ghedini -> ghedo@debian.org
-  * Stricter Depends on libcur3 (Closes: #666089)
+  * Stricter Depends on libcurl3 (Closes: #666089)
   * Remove Ramakrishnan (as per his request), move myself to Maintainer
     Thank you for all your work so far
+  * Disable memory tracking, but keep debug enabled
+    - Remove memdebug symbols (used by curl only)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Fri, 06 Apr 2012 11:29:10 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 19 Apr 2012 17:42:48 +0200
 
 curl (7.25.0-1) unstable; urgency=low
 
