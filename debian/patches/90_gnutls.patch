@@ -7,7 +7,7 @@ Last-Update: 2012-03-22
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1779,9 +1779,9 @@
+@@ -1791,9 +1791,9 @@
  
        CLEANLIBS="$LIBS"
        CLEANCPPFLAGS="$CPPFLAGS"
@@ -22,7 +22,7 @@ Last-Update: 2012-03-22
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
 @@ -48,7 +48,7 @@
- CPPFLAGS = -DCURL_NO_OLDIES $(STATICCPPFLAGS)
+ endif
  
  # Dependencies
 -LDADD = $(LIBDIR)/libcurl.la
@@ -41,16 +41,16 @@ Last-Update: 2012-03-22
  LIBCURL_LIBS = @LIBCURL_LIBS@
  
  # This might hold -Werror
-@@ -120,7 +120,7 @@
+@@ -134,7 +134,7 @@
  VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
  endif
  
 -libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 +libcurl_gnutls_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
  
- # unit testing static library built only along with unit tests
- if BUILD_UNITTESTS
-@@ -135,7 +135,7 @@
+ if DOING_CURL_SYMBOL_HIDING
+ libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
+@@ -158,7 +158,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
@@ -61,7 +61,7 @@ Last-Update: 2012-03-22
  WIN32SOURCES = $(CSOURCES)
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -49,8 +49,8 @@
+@@ -54,8 +54,8 @@
  # This might hold -Werror
  CFLAGS += @CURL_CFLAG_EXTRAS@
  
@@ -69,13 +69,13 @@ Last-Update: 2012-03-22
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 +curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 +curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
- BUILT_SOURCES = hugehelp.c config-win32.h
- CLEANFILES = hugehelp.c config-win32.h
+ BUILT_SOURCES = hugehelp.c
+ CLEANFILES = hugehelp.c
  # Use the C locale to ensure that only ASCII characters appear in the
 --- a/tests/libtest/Makefile.am
 +++ b/tests/libtest/Makefile.am
-@@ -54,8 +54,8 @@
- test1022.pl Makefile.inc
+@@ -56,8 +56,8 @@
+ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
  
  # Dependencies (may need to be overriden)
 -LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
@@ -83,5 +83,5 @@ Last-Update: 2012-03-22
 +LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  
- # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
- # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
+ # Mostly for Windows build targets, when using static libcurl
+ if USE_CPPFLAG_CURL_STATICLIB
