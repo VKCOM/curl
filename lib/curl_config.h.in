@@ -1,8 +1,5 @@
 /* lib/curl_config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* when building libcurl itself */
-#undef BUILDING_LIBCURL
-
 /* Location of default ca bundle */
 #undef CURL_CA_BUNDLE
 
@@ -66,17 +63,11 @@
 /* to disable verbose strings */
 #undef CURL_DISABLE_VERBOSE_STRINGS
 
-/* to make a symbol visible */
+/* Definition to make a library symbol externally visible. */
 #undef CURL_EXTERN_SYMBOL
-
-/* to enable hidden symbols */
-#undef CURL_HIDDEN_SYMBOLS
 
 /* Use Windows LDAP implementation */
 #undef CURL_LDAP_WIN
-
-/* when not building a shared library */
-#undef CURL_STATICLIB
 
 /* your Entropy Gathering Daemon socket pathname */
 #undef EGD_SOCKET
@@ -469,6 +460,9 @@
 /* Define to 1 if NI_WITHSCOPEID exists and works. */
 #undef HAVE_NI_WITHSCOPEID
 
+/* if you have the NSS_InitContext function */
+#undef HAVE_NSS_INITCONTEXT
+
 /* if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE
    */
 #undef HAVE_OLD_GSSMIT
@@ -505,9 +499,6 @@
 
 /* Define to 1 if you have the `pipe' function. */
 #undef HAVE_PIPE
-
-/* if you have the function PK11_CreateGenericObject */
-#undef HAVE_PK11_CREATEGENERICOBJECT
 
 /* Define to 1 if you have a working poll function. */
 #undef HAVE_POLL
@@ -803,9 +794,6 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
-
-/* Define to 1 if you are building a native Windows target. */
-#undef NATIVE_WINDOWS
 
 /* Define to 1 if you need the lber.h header file even with ldap.h */
 #undef NEED_LBER_H

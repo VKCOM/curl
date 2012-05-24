@@ -19,9 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
-
-#include <curl/curl.h>
+#include "tool_setup.h"
 
 #ifndef CURL_DISABLE_LIBCURL_OPTION
 

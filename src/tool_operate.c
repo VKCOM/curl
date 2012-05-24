@@ -19,9 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
-
-#include <curl/curl.h>
+#include "tool_setup.h"
 
 #ifdef HAVE_UNISTD_H
 #  include <unistd.h>
@@ -682,7 +680,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           int authbits = 0;
           int bitcheck = 0;
           while(bitcheck < 32) {
-            if(config->authtype & (1 << bitcheck++)) {
+            if(config->authtype & (1UL << bitcheck++)) {
               authbits++;
               if(authbits > 1) {
                 /* more than one, we're done! */
@@ -843,15 +841,20 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 */
           if(config->proxyanyauth)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_ANY);
           else if(config->proxynegotiate)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_GSSNEGOTIATE);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_GSSNEGOTIATE);
           else if(config->proxyntlm)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_NTLM);
           else if(config->proxydigest)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_DIGEST);
           else if(config->proxybasic)
-            my_setopt_flags(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
+            my_setopt_bitmask(curl, CURLOPT_PROXYAUTH,
+                              (long) CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
           my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
@@ -880,6 +883,8 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
         my_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
 
         if(built_in_protos & CURLPROTO_HTTP) {
+
+          long postRedir = 0;
 
           my_setopt(curl, CURLOPT_FOLLOWLOCATION,
                     config->followlocation);
@@ -914,11 +919,17 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
 
           /* new in libcurl 7.10.6 (default is Basic) */
           if(config->authtype)
-            my_setopt_flags(curl, CURLOPT_HTTPAUTH, config->authtype);
+            my_setopt_bitmask(curl, CURLOPT_HTTPAUTH, (long) config->authtype);
 
-          /* curl 7.19.1 (the 301 version existed in 7.18.2) */
-          my_setopt(curl, CURLOPT_POSTREDIR, config->post301 |
-                    (config->post302 ? CURL_REDIR_POST_302 : FALSE));
+          /* curl 7.19.1 (the 301 version existed in 7.18.2),
+             303 was added in 7.26.0 */
+          if(config->post301)
+            postRedir |= CURL_REDIR_POST_301;
+          if(config->post302)
+            postRedir |= CURL_REDIR_POST_302;
+          if(config->post303)
+            postRedir |= CURL_REDIR_POST_303;
+          my_setopt(curl, CURLOPT_POSTREDIR, postRedir);
 
           /* new in libcurl 7.21.6 */
           if(config->encoding)
@@ -1391,7 +1402,7 @@ int operate(struct Configurable *config, int argc, argv_item_t argv[])
           fputs("\n", progressbar.out);
 
         if(config->writeout)
-          ourWriteOut(curl, config->writeout);
+          ourWriteOut(curl, &outs, config->writeout);
 
         if(config->writeenv)
           ourWriteEnv(curl);
