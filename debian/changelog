@@ -1,5 +1,7 @@
-curl (7.25.0-2) UNRELEASED; urgency=low
+curl (7.26.0-1) UNRELEASED; urgency=low
 
+  * New upstream release
+    - Reject numerical IPv6 addresses outside brackets (Closes: #670126)
   * Email change: Alessandro Ghedini -> ghedo@debian.org
   * Stricter Depends on libcurl3 (Closes: #666089)
   * Remove Ramakrishnan (as per his request), move myself to Maintainer
@@ -7,7 +9,7 @@ curl (7.25.0-2) UNRELEASED; urgency=low
   * Disable memory tracking, but keep debug enabled
     - Remove memdebug symbols (used by curl only)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 19 Apr 2012 17:42:48 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 24 May 2012 19:57:38 +0200
 
 curl (7.25.0-1) unstable; urgency=low
 
