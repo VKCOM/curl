@@ -103,6 +103,7 @@
 			Name="Source Files"
 			>
 
+<File RelativePath="amigaos.c"></File>
 <File RelativePath="asyn-ares.c"></File>
 <File RelativePath="asyn-thread.c"></File>
 <File RelativePath="axtls.c"></File>
@@ -204,6 +205,7 @@
 <File RelativePath="warnless.c"></File>
 <File RelativePath="wildcard.c"></File>
 </Filter><Filter	Name="Header Files">
+<File RelativePath="amigaos.h"></File>
 <File RelativePath="arpa_telnet.h"></File>
 <File RelativePath="asyn.h"></File>
 <File RelativePath="axtls.h"></File>

@@ -150,6 +150,10 @@ LIB32=link.exe -lib
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\amigaos.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\asyn-ares.c
 # End Source File
 # Begin Source File
@@ -552,6 +556,10 @@ SOURCE=.\wildcard.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\amigaos.h
+# End Source File
 # Begin Source File
 
 SOURCE=.\arpa_telnet.h

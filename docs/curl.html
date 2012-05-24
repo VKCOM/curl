@@ -622,6 +622,7 @@ p.roffit {
 <p class="level1">The variables available at this point are: 
 <p class="level2">
 <p class="level2"><span Class="bold">url_effective</span> The URL that was fetched last. This is most meaningful if you've told curl to follow location: headers. 
+<p class="level2"><span Class="bold">filename_effective</span> The ultimate filename that curl writes out to. This is only meaningful if curl is told to write to a file with the --remote-name or --output option. It's most useful in combination with the --remote-header-name option. (Added in 7.25.1) 
 <p class="level2"><span Class="bold">http_code</span> The numerical response code that was found in the last retrieved HTTP(S) or FTP(s) transfer. In 7.18.2 the alias <span Class="bold">response_code</span> was added to show the same info. 
 <p class="level2"><span Class="bold">http_connect</span> The numerical code that was found in the last response (from a proxy) to a curl CONNECT request. (Added in 7.12.4) 
 <p class="level2"><span Class="bold">time_total</span> The total time, in seconds, that the full operation lasted. The time will be displayed with millisecond resolution. 
@@ -645,10 +646,11 @@ p.roffit {
 <p class="level2"><span Class="bold">ssl_verify_result</span> The result of the SSL peer certificate verification that was requested. 0 means the verification was successful. (Added in 7.19.0) 
 <p class="level1">
 <p class="level1">If this option is used several times, the last one will be used. 
-<p class="level0"><a name="-x"></a><span class="nroffip">-x, --proxy &lt;[protocol://][user@password]proxyhost[:port]&gt;</span> 
+<p class="level0"><a name="-x"></a><span class="nroffip">-x, --proxy &lt;[protocol://][user:password@]proxyhost[:port]&gt;</span> 
 <p class="level1">Use the specified HTTP proxy. If the port number is not specified, it is assumed at port 1080. 
 <p class="level1">This option overrides existing environment variables that set the proxy to use. If there's an environment variable setting a proxy, you can set proxy to "" to override it. 
 <p class="level1">All operations that are performed over a HTTP proxy will transparently be converted to HTTP. It means that certain protocol specific operations might not be available. This is not the case if you can tunnel through the proxy, as one with the <a class="emphasis" href="#-p">-p, --proxytunnel</a> option. 
+<p class="level1">User and password that might be provided in the proxy string are URL decoded by libcurl. This allows you to pass in special characters such as @ by using %40 or pass in a colon with %3a. 
 <p class="level1">The proxy host can be specified the exact same way as the proxy environment variables, including the protocol prefix (http://) and the embedded user + password. 
 <p class="level1">From 7.21.7, the proxy string may be specified with a protocol:// prefix to specify alternative proxy protocols. Use socks4://, socks4a://, socks5:// or socks5h:// to request the specific SOCKS version to be used. No protocol specified, http:// and all others will be treated as HTTP proxies. 
 <p class="level1">If this option is used several times, the last one will be used. 
@@ -667,8 +669,8 @@ p.roffit {
 <p class="level0"><a name="-Y"></a><span class="nroffip">-Y, --speed-limit &lt;speed&gt;</span> 
 <p class="level1">If a download is slower than this given speed (in bytes per second) for speed-time seconds it gets aborted. speed-time is set with -y and is 30 if not set. 
 <p class="level1">If this option is used several times, the last one will be used. 
-<p class="level0"><a name="-z"></a><span class="nroffip">-z, --time-cond &lt;date expression&gt;</span> 
-<p class="level1">(HTTP/FTP/FILE) Request a file that has been modified later than the given time and date, or one that has been modified before that time. The date expression can be all sorts of date strings or if it doesn't match any internal ones, it tries to get the time from a given file name instead! See the <span Class="emphasis">curl_getdate(3)</span> man pages for date expression details. 
+<p class="level0"><a name="-z--time-cond"></a><span class="nroffip">-z/--time-cond &lt;date expression&gt;|&lt;file&gt;</span> 
+<p class="level1">(HTTP/FTP) Request a file that has been modified later than the given time and date, or one that has been modified before that time. The &lt;date expression&gt; can be all sorts of date strings or if it doesn't match any internal ones, it is taken as a filename and tries to get the modification date (mtime) from &lt;file&gt; instead. See the <span Class="emphasis">curl_getdate(3)</span> man pages for date expression details. 
 <p class="level1">Start the date expression with a dash (-) to make it request for a document that is older than the given date/time, default is a document that is newer than the specified date/time. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-h"></a><span class="nroffip">-h, --help</span> 

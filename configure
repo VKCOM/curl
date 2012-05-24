@@ -649,6 +649,9 @@ CURL_LIBS
 LIBCURL_LIBS
 SONAME_BUMP_FALSE
 SONAME_BUMP_TRUE
+CFLAG_CURL_SYMBOL_HIDING
+DOING_CURL_SYMBOL_HIDING_FALSE
+DOING_CURL_SYMBOL_HIDING_TRUE
 USE_WINDOWS_SSPI
 BUILD_LIBHOSTNAME_FALSE
 BUILD_LIBHOSTNAME_TRUE
@@ -671,8 +674,8 @@ USE_LIBSSH2
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
+HAVE_NSS_INITCONTEXT
 USE_NSS
-HAVE_PK11_CREATEGENERICOBJECT
 USE_CYASSL
 USE_POLARSSL
 HAVE_GNUTLS_SRP
@@ -702,6 +705,8 @@ CURL_DISABLE_FILE
 CURL_DISABLE_FTP
 CURL_DISABLE_RTSP
 CURL_DISABLE_HTTP
+DOING_NATIVE_WINDOWS_FALSE
+DOING_NATIVE_WINDOWS_TRUE
 BUILD_UNITTESTS_FALSE
 BUILD_UNITTESTS_TRUE
 CURLDEBUG_FALSE
@@ -709,8 +714,10 @@ CURLDEBUG_TRUE
 NO_UNDEFINED_FALSE
 NO_UNDEFINED_TRUE
 REQUIRE_LIB_DEPS
-STATICLIB_FALSE
-STATICLIB_TRUE
+USE_CPPFLAG_CURL_STATICLIB_FALSE
+USE_CPPFLAG_CURL_STATICLIB_TRUE
+USE_CPPFLAG_BUILDING_LIBCURL_FALSE
+USE_CPPFLAG_BUILDING_LIBCURL_TRUE
 MIMPURE_FALSE
 MIMPURE_TRUE
 OTOOL64
@@ -840,6 +847,8 @@ enable_optimize
 enable_warnings
 enable_werror
 enable_curldebug
+enable_symbol_hiding
+enable_hidden_symbols
 enable_ares
 enable_dependency_tracking
 enable_largefile
@@ -900,7 +909,6 @@ enable_crypto_auth
 enable_ntlm_wb
 enable_tls_srp
 enable_cookies
-enable_hidden_symbols
 enable_soname_bump
 '
       ac_precious_vars='build_alias
@@ -1543,6 +1551,11 @@ Optional Features:
   --disable-werror        Disable compiler warnings as errors
   --enable-curldebug      Enable curl debug memory tracking
   --disable-curldebug     Disable curl debug memory tracking
+  --enable-symbol-hiding  Enable hiding of library internal symbols
+  --disable-symbol-hiding Disable hiding of library internal symbols
+  --enable-hidden-symbols To be deprecated, use --enable-symbol-hiding
+  --disable-hidden-symbols
+                          To be deprecated, use --disable-symbol-hiding
   --enable-ares[=PATH]    Enable c-ares for DNS lookups
   --disable-ares          Disable c-ares for DNS lookups
   --disable-dependency-tracking  speeds up one-time build
@@ -1614,9 +1627,6 @@ Optional Features:
   --disable-tls-srp       Disable TLS-SRP authentication
   --enable-cookies        Enable cookies support
   --disable-cookies       Disable cookies support
-  --enable-hidden-symbols Hide internal symbols in library
-  --disable-hidden-symbols
-                          Leave all symbols with default visibility in library
   --enable-soname-bump    Enable enforced SONAME bump
   --disable-soname-bump   Disable enforced SONAME bump
 
@@ -2698,7 +2708,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-ac_config_headers="$ac_config_headers lib/curl_config.h src/curl_config.h include/curl/curlbuild.h"
+ac_config_headers="$ac_config_headers lib/curl_config.h include/curl/curlbuild.h"
 
 :
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
@@ -2856,6 +2866,38 @@ $as_echo "no" >&6; }
       ;;
     *)
                                                       want_curldebug="yes"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      ;;
+  esac
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable hiding of library internal symbols" >&5
+$as_echo_n "checking whether to enable hiding of library internal symbols... " >&6; }
+  OPT_SYMBOL_HIDING="default"
+  # Check whether --enable-symbol-hiding was given.
+if test "${enable_symbol_hiding+set}" = set; then :
+  enableval=$enable_symbol_hiding; OPT_SYMBOL_HIDING=$enableval
+fi
+
+  # Check whether --enable-hidden-symbols was given.
+if test "${enable_hidden_symbols+set}" = set; then :
+  enableval=$enable_hidden_symbols; OPT_SYMBOL_HIDING=$enableval
+fi
+
+  case "$OPT_SYMBOL_HIDING" in
+    no)
+                              want_symbol_hiding="no"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      ;;
+    default)
+                  want_symbol_hiding="yes"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      ;;
+    *)
+                        want_symbol_hiding="yes"
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
       ;;
@@ -14436,45 +14478,22 @@ else
 fi
 
 
-
-
-if false; then
-  STATICLIB_TRUE=
-  STATICLIB_FALSE='#'
-else
-  STATICLIB_TRUE='#'
-  STATICLIB_FALSE=
-fi
-
-
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we need BUILDING_LIBCURL" >&5
 $as_echo_n "checking if we need BUILDING_LIBCURL... " >&6; }
+use_cppflag_building_libcurl="no"
+use_cppflag_curl_staticlib="no"
 case $host in
   *-*-mingw*)
-
-$as_echo "#define BUILDING_LIBCURL 1" >>confdefs.h
-
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
+    use_cppflag_building_libcurl="yes"
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we need CURL_STATICLIB" >&5
 $as_echo_n "checking if we need CURL_STATICLIB... " >&6; }
     if test "X$enable_shared" = "Xno"
     then
-
-$as_echo "#define CURL_STATICLIB 1" >>confdefs.h
-
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-
-
-if true; then
-  STATICLIB_TRUE=
-  STATICLIB_FALSE='#'
-else
-  STATICLIB_TRUE='#'
-  STATICLIB_FALSE=
-fi
-
+      use_cppflag_curl_staticlib="yes"
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -14485,6 +14504,26 @@ $as_echo "no" >&6; }
 $as_echo "no" >&6; }
     ;;
 esac
+
+
+if test x$use_cppflag_building_libcurl = xyes; then
+  USE_CPPFLAG_BUILDING_LIBCURL_TRUE=
+  USE_CPPFLAG_BUILDING_LIBCURL_FALSE='#'
+else
+  USE_CPPFLAG_BUILDING_LIBCURL_TRUE='#'
+  USE_CPPFLAG_BUILDING_LIBCURL_FALSE=
+fi
+
+
+
+if test x$use_cppflag_curl_staticlib = xyes; then
+  USE_CPPFLAG_CURL_STATICLIB_TRUE=
+  USE_CPPFLAG_CURL_STATICLIB_FALSE='#'
+else
+  USE_CPPFLAG_CURL_STATICLIB_TRUE='#'
+  USE_CPPFLAG_CURL_STATICLIB_FALSE=
+fi
+
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
@@ -15058,6 +15097,46 @@ $as_echo "yes" >&6; }
     flags_opt_all="-O -O0 -O1 -O2 -O3 -Os"
     flags_opt_yes="-O2"
     flags_opt_off="-O0"
+
+      if test -z "$SED"; then
+    as_fn_error "SED not set. Cannot continue without SED being set." "$LINENO" 5
+  fi
+  if test -z "$GREP"; then
+    as_fn_error "GREP not set. Cannot continue without GREP being set." "$LINENO" 5
+  fi
+
+  tmp_exp=""
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef _WIN32
+CURL_DEF_TOKEN _WIN32
+#endif
+
+
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+
+    tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
+      "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
+      "$SED" 's/.*CURL_DEF_TOKEN[ ][ ]*//' 2>/dev/null | \
+      "$SED" 's/["][ ]*["]//g' 2>/dev/null`
+    if test -z "$tmp_exp" || test "$tmp_exp" = "_WIN32"; then
+      tmp_exp=""
+    fi
+
+fi
+rm -f conftest.err conftest.$ac_ext
+  if test -z "$tmp_exp"; then
+    curl_cv_have_def__WIN32=no
+
+  else
+    curl_cv_have_def__WIN32=yes
+    curl_cv_def__WIN32=$tmp_exp
+
+  fi
+
   else
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -16433,6 +16512,12 @@ $as_echo "$as_me: WARNING: compiler options rejected: $tmp_options" >&2;}
             tmp_CFLAGS="$tmp_CFLAGS -Wconversion -Wno-sign-conversion -Wvla"
           fi
           #
+                    if test "$compiler_num" -ge "405"; then
+                        if test "$curl_cv_have_def__WIN32" = "yes"; then
+              tmp_CFLAGS="$tmp_CFLAGS -Wno-pedantic-ms-format"
+            fi
+          fi
+          #
         fi
         #
                 if test "$compiler_num" -ge "300"; then
@@ -16760,6 +16845,133 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking if compiler supports hiding library internal symbols" >&5
+$as_echo_n "checking if compiler supports hiding library internal symbols... " >&6; }
+  supports_symbol_hiding="no"
+  symbol_hiding_CFLAGS=""
+  symbol_hiding_EXTERN=""
+  tmp_CFLAGS=""
+  tmp_EXTERN=""
+  case "$compiler_id" in
+    CLANG)
+            tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+      tmp_CFLAGS="-fvisibility=hidden"
+      supports_symbol_hiding="yes"
+      ;;
+    GNU_C)
+            if test "$compiler_num" -ge "304"; then
+        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+          tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+          tmp_CFLAGS="-fvisibility=hidden"
+          supports_symbol_hiding="yes"
+        fi
+      fi
+      ;;
+    INTEL_UNIX_C)
+            if test "$compiler_num" -ge "900"; then
+        if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ; then
+          tmp_save_CFLAGS="$CFLAGS"
+          CFLAGS="$CFLAGS -fvisibility=hidden"
+          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#             include <stdio.h>
+
+int main (void)
+{
+
+              printf("icc fvisibility bug test");
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+            tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+            tmp_CFLAGS="-fvisibility=hidden"
+            supports_symbol_hiding="yes"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+          CFLAGS="$tmp_save_CFLAGS"
+        fi
+      fi
+      ;;
+    SUNPRO_C)
+      if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
+        tmp_EXTERN="__global"
+        tmp_CFLAGS="-xldscope=hidden"
+        supports_symbol_hiding="yes"
+      fi
+      ;;
+  esac
+  if test "$supports_symbol_hiding" = "yes"; then
+    tmp_save_CFLAGS="$CFLAGS"
+    CFLAGS="$tmp_save_CFLAGS $tmp_CFLAGS"
+    squeeze CFLAGS
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+        $tmp_EXTERN char *dummy(char *buff);
+        char *dummy(char *buff)
+        {
+         if(buff)
+           return ++buff;
+         else
+           return buff;
+        }
+
+int main (void)
+{
+
+        char b[16];
+        char *r = dummy(&b[0]);
+        if(r)
+          return (int)*r;
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+      supports_symbol_hiding="yes"
+      if test -f conftest.err; then
+        grep 'visibility' conftest.err >/dev/null
+        if test "$?" -eq "0"; then
+          supports_symbol_hiding="no"
+        fi
+      fi
+
+else
+
+      supports_symbol_hiding="no"
+      echo " " >&6
+      sed 's/^/cc-src: /' conftest.$ac_ext >&6
+      sed 's/^/cc-err: /' conftest.err >&6
+      echo " " >&6
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    CFLAGS="$tmp_save_CFLAGS"
+  fi
+  if test "$supports_symbol_hiding" = "yes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    symbol_hiding_CFLAGS="$tmp_CFLAGS"
+    symbol_hiding_EXTERN="$tmp_EXTERN"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+
+
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking if shared libraries need -no-undefined" >&5
 $as_echo_n "checking if shared libraries need -no-undefined... " >&6; }
@@ -16999,15 +17211,16 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_native_windows" >&5
 $as_echo "$ac_cv_native_windows" >&6; }
-  case "$ac_cv_native_windows" in
-    yes)
 
-cat >>confdefs.h <<_ACEOF
-#define NATIVE_WINDOWS 1
-_ACEOF
 
-      ;;
-  esac
+if test "x$ac_cv_native_windows" = xyes; then
+  DOING_NATIVE_WINDOWS_TRUE=
+  DOING_NATIVE_WINDOWS_FALSE='#'
+else
+  DOING_NATIVE_WINDOWS_TRUE='#'
+  DOING_NATIVE_WINDOWS_FALSE=
+fi
+
 
 case X-"$ac_cv_native_windows" in
   X-yes)
@@ -17961,6 +18174,51 @@ $as_echo "$ac_cv_lib_socket_gethostbyname" >&6; }
 if test "x$ac_cv_lib_socket_gethostbyname" = x""yes; then :
   HAVE_GETHOSTBYNAME="1"
                LIBS="$LIBS -lsocket"
+
+fi
+
+fi
+
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gethostbyname in -lwatt" >&5
+$as_echo_n "checking for gethostbyname in -lwatt... " >&6; }
+if test "${ac_cv_lib_watt_gethostbyname+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lwatt  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char gethostbyname ();
+int main (void)
+{
+return gethostbyname ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_watt_gethostbyname=yes
+else
+  ac_cv_lib_watt_gethostbyname=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_watt_gethostbyname" >&5
+$as_echo "$ac_cv_lib_watt_gethostbyname" >&6; }
+if test "x$ac_cv_lib_watt_gethostbyname" = x""yes; then :
+  HAVE_GETHOSTBYNAME="1"
+               CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
+               LDFLAGS="-L/dev/env/WATT_ROOT/lib"
+               LIBS="$LIBS -lwatt"
 
 fi
 
@@ -22530,6 +22788,16 @@ $as_echo "found" >&6; }
         nssprefix=$OPT_NSS
     fi
 
+    if test -n "$addlib"; then
+
+      CLEANLIBS="$LIBS"
+      CLEANCPPFLAGS="$CPPFLAGS"
+
+      LIBS="$LIBS $addlib"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
             { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PK11_CreateGenericObject in -lnss3" >&5
 $as_echo_n "checking for PK11_CreateGenericObject in -lnss3... " >&6; }
 if test "${ac_cv_lib_nss3_PK11_CreateGenericObject+set}" = set; then :
@@ -22566,59 +22834,6 @@ $as_echo "$ac_cv_lib_nss3_PK11_CreateGenericObject" >&6; }
 if test "x$ac_cv_lib_nss3_PK11_CreateGenericObject" = x""yes; then :
 
 
-$as_echo "#define HAVE_PK11_CREATEGENERICOBJECT 1" >>confdefs.h
-
-     HAVE_PK11_CREATEGENERICOBJECT=1
-
-
-fi
-
-    if test -n "$addlib"; then
-
-      CLEANLIBS="$LIBS"
-      CLEANCPPFLAGS="$CPPFLAGS"
-
-      LIBS="$LIBS $addlib"
-      if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-      fi
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for NSS_Initialize in -lnss3" >&5
-$as_echo_n "checking for NSS_Initialize in -lnss3... " >&6; }
-if test "${ac_cv_lib_nss3_NSS_Initialize+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lnss3  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-#ifdef __cplusplus
-extern "C"
-#endif
-char NSS_Initialize ();
-int main (void)
-{
-return NSS_Initialize ();
- ;
- return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nss3_NSS_Initialize=yes
-else
-  ac_cv_lib_nss3_NSS_Initialize=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_NSS_Initialize" >&5
-$as_echo "$ac_cv_lib_nss3_NSS_Initialize" >&6; }
-if test "x$ac_cv_lib_nss3_NSS_Initialize" = x""yes; then :
-
-
 $as_echo "#define USE_NSS 1" >>confdefs.h
 
        USE_NSS=1
@@ -22638,6 +22853,18 @@ fi
       if test "x$USE_NSS" = "xyes"; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: detected NSS version $version" >&5
 $as_echo "$as_me: detected NSS version $version" >&6;}
+
+                        ac_fn_c_check_func "$LINENO" "NSS_InitContext" "ac_cv_func_NSS_InitContext"
+if test "x$ac_cv_func_NSS_InitContext" = x""yes; then :
+
+
+$as_echo "#define HAVE_NSS_INITCONTEXT 1" >>confdefs.h
+
+          HAVE_NSS_INITCONTEXT=1
+
+
+fi
+
 
                                         if test "x$cross_compiling" != "xyes"; then
           LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"
@@ -23350,48 +23577,42 @@ fi
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if libraries can be versioned" >&5
-$as_echo_n "checking if libraries can be versioned... " >&6; }
-GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
-if test -z "$GLD"; then
-    versioned_symbols_flavour=
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: ***
-*** You need an ld version supporting the --version-script option.
-" >&5
-$as_echo "$as_me: WARNING: ***
-*** You need an ld version supporting the --version-script option.
-" >&2;}
-else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
+versioned_symbols_flavour=
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether versioned symbols are wanted" >&5
 $as_echo_n "checking whether versioned symbols are wanted... " >&6; }
-versioned_symbols_flavour=
-
 # Check whether --enable-versioned-symbols was given.
 if test "${enable_versioned_symbols+set}" = set; then :
   enableval=$enable_versioned_symbols;  case "$enableval" in
   yes) { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-    if test "x$OPENSSL_ENABLED" = "x1"; then
-      versioned_symbols_flavour="OPENSSL_"
-    elif test "x$GNUTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="GNUTLS_"
-    elif test "x$NSS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="NSS_"
-    elif test "x$POLARSSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="POLARSSL_"
-    elif test "x$CYASSL_ENABLED" == "x1"; then
-      versioned_symbols_flavour="CYASSL_"
-    elif test "x$AXTLS_ENABLED" == "x1"; then
-      versioned_symbols_flavour="AXTLS_"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if libraries can be versioned" >&5
+$as_echo_n "checking if libraries can be versioned... " >&6; }
+    GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
+    if test -z "$GLD"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: You need an ld version supporting the --version-script option" >&5
+$as_echo "$as_me: WARNING: You need an ld version supporting the --version-script option" >&2;}
     else
-      versioned_symbols_flavour=""
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+        if test "x$OPENSSL_ENABLED" = "x1"; then
+          versioned_symbols_flavour="OPENSSL_"
+        elif test "x$GNUTLS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="GNUTLS_"
+        elif test "x$NSS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="NSS_"
+        elif test "x$POLARSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="POLARSSL_"
+        elif test "x$CYASSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="CYASSL_"
+        elif test "x$AXTLS_ENABLED" == "x1"; then
+          versioned_symbols_flavour="AXTLS_"
+        else
+          versioned_symbols_flavour=""
+        fi
+        versioned_symbols="yes"
     fi
-    versioned_symbols="yes"
     ;;
 
   *)   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
@@ -23407,7 +23628,6 @@ $as_echo "no" >&6; }
 
 fi
 
-fi
 
 VERSIONED_FLAVOUR="$versioned_symbols_flavour"
 
@@ -28664,7 +28884,7 @@ done
 
 
 
-            #
+              #
   tst_links_getaddrinfo="unknown"
   tst_proto_getaddrinfo="unknown"
   tst_compi_getaddrinfo="unknown"
@@ -28915,34 +29135,9 @@ $as_echo_n "checking if getaddrinfo is threadsafe... " >&6; }
                 tst_tsafe_getaddrinfo="yes"
         ;;
     esac
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-
-int main (void)
-{
-
-#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
-          return 0;
-#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
-          return 0;
-#else
-          force compilation error
-#endif
-
- ;
- return 0;
-}
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-        tst_tsafe_getaddrinfo="yes"
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+    if test "$tst_tsafe_getaddrinfo" = "unknown" &&
+       test "$ac_cv_native_windows" = "yes"; then
+      tst_tsafe_getaddrinfo="yes"
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
 
@@ -28951,7 +29146,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 /* end confdefs.h.  */
 
 
-        $curl_includes_ws2tcpip
         $curl_includes_sys_socket
         $curl_includes_netdb
 
@@ -28984,12 +29178,78 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
   fi
 
-      if test "$curl_cv_have_def_h_errno" = "no"; then
-        tst_tsafe_getaddrinfo="no"
+      if test "$curl_cv_have_def_h_errno" = "yes"; then
+        tst_h_errno_macro="yes"
+      else
+        tst_h_errno_macro="no"
       fi
-    fi
-    if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      tst_tsafe_getaddrinfo="yes"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+          $curl_includes_sys_socket
+          $curl_includes_netdb
+
+int main (void)
+{
+
+          h_errno = 2;
+          if(0 != h_errno)
+            return 1;
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+        tst_h_errno_modifiable_lvalue="yes"
+
+else
+
+        tst_h_errno_modifiable_lvalue="no"
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+
+int main (void)
+{
+
+#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+          return 0;
+#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+          return 0;
+#else
+          force compilation error
+#endif
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+        tst_h_errno_sbs_issue_7="yes"
+
+else
+
+        tst_h_errno_sbs_issue_7="no"
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+      if test "$tst_h_errno_macro" = "no" &&
+         test "$tst_h_errno_modifiable_lvalue" = "no" &&
+         test "$tst_h_errno_sbs_issue_7" = "no"; then
+        tst_tsafe_getaddrinfo="no"
+      else
+        tst_tsafe_getaddrinfo="yes"
+      fi
     fi
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_tsafe_getaddrinfo" >&5
 $as_echo "$tst_tsafe_getaddrinfo" >&6; }
@@ -37610,58 +37870,38 @@ $as_echo "yes" >&6; }
 fi
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable hidden symbols in the library" >&5
-$as_echo_n "checking whether to enable hidden symbols in the library... " >&6; }
-# Check whether --enable-hidden-symbols was given.
-if test "${enable_hidden_symbols+set}" = set; then :
-  enableval=$enable_hidden_symbols;  case "$enableval" in
-  no)
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-       ;;
-  *)
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports it" >&5
-$as_echo_n "checking whether $CC supports it... " >&6; }
-       if test "$GCC" = yes ; then
-         if $CC --help --verbose 2>&1 | grep fvisibility= > /dev/null ||
-                                 test "$compiler_id" = "CLANG"; then
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether hiding of library internal symbols will actually happen" >&5
+$as_echo_n "checking whether hiding of library internal symbols will actually happen... " >&6; }
+  CFLAG_CURL_SYMBOL_HIDING=""
+  doing_symbol_hiding="no"
+  if test x"$ac_cv_native_windows" != "xyes" &&
+    test "$want_symbol_hiding" = "yes" &&
+    test "$supports_symbol_hiding" = "yes"; then
+    doing_symbol_hiding="yes"
+    CFLAG_CURL_SYMBOL_HIDING="$symbol_hiding_CFLAGS"
+
+cat >>confdefs.h <<_ACEOF
+#define CURL_EXTERN_SYMBOL $symbol_hiding_EXTERN
+_ACEOF
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-
-$as_echo "#define CURL_HIDDEN_SYMBOLS 1" >>confdefs.h
-
-
-$as_echo "#define CURL_EXTERN_SYMBOL __attribute__ ((visibility (\"default\")))" >>confdefs.h
-
-           CFLAGS="$CFLAGS -fvisibility=hidden"
-         else
-            { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-          fi
-
-       else
-                  if $CC 2>&1 | grep flags >/dev/null && $CC -flags | grep xldscope= >/dev/null ; then
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-
-$as_echo "#define CURL_HIDDEN_SYMBOLS 1" >>confdefs.h
+  fi
 
 
-$as_echo "#define CURL_EXTERN_SYMBOL __global" >>confdefs.h
-
-           CFLAGS="$CFLAGS -xldscope=hidden"
-         else
-           { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-         fi
-       fi
-       ;;
-  esac
+if test x$doing_symbol_hiding = xyes; then
+  DOING_CURL_SYMBOL_HIDING_TRUE=
+  DOING_CURL_SYMBOL_HIDING_FALSE='#'
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
+  DOING_CURL_SYMBOL_HIDING_TRUE='#'
+  DOING_CURL_SYMBOL_HIDING_FALSE=
 fi
+
+
 
 
 
@@ -37969,12 +38209,12 @@ if test -z "${MIMPURE_TRUE}" && test -z "${MIMPURE_FALSE}"; then
   as_fn_error "conditional \"MIMPURE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${STATICLIB_TRUE}" && test -z "${STATICLIB_FALSE}"; then
-  as_fn_error "conditional \"STATICLIB\" was never defined.
+if test -z "${USE_CPPFLAG_BUILDING_LIBCURL_TRUE}" && test -z "${USE_CPPFLAG_BUILDING_LIBCURL_FALSE}"; then
+  as_fn_error "conditional \"USE_CPPFLAG_BUILDING_LIBCURL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${STATICLIB_TRUE}" && test -z "${STATICLIB_FALSE}"; then
-  as_fn_error "conditional \"STATICLIB\" was never defined.
+if test -z "${USE_CPPFLAG_CURL_STATICLIB_TRUE}" && test -z "${USE_CPPFLAG_CURL_STATICLIB_FALSE}"; then
+  as_fn_error "conditional \"USE_CPPFLAG_CURL_STATICLIB\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${NO_UNDEFINED_TRUE}" && test -z "${NO_UNDEFINED_FALSE}"; then
@@ -37987,6 +38227,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_UNITTESTS_TRUE}" && test -z "${BUILD_UNITTESTS_FALSE}"; then
   as_fn_error "conditional \"BUILD_UNITTESTS\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DOING_NATIVE_WINDOWS_TRUE}" && test -z "${DOING_NATIVE_WINDOWS_FALSE}"; then
+  as_fn_error "conditional \"DOING_NATIVE_WINDOWS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LIBZ_TRUE}" && test -z "${HAVE_LIBZ_FALSE}"; then
@@ -38007,6 +38251,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_LIBHOSTNAME_TRUE}" && test -z "${BUILD_LIBHOSTNAME_FALSE}"; then
   as_fn_error "conditional \"BUILD_LIBHOSTNAME\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${DOING_CURL_SYMBOL_HIDING_TRUE}" && test -z "${DOING_CURL_SYMBOL_HIDING_FALSE}"; then
+  as_fn_error "conditional \"DOING_CURL_SYMBOL_HIDING\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SONAME_BUMP_TRUE}" && test -z "${SONAME_BUMP_FALSE}"; then
@@ -38881,7 +39129,6 @@ for ac_config_target in $ac_config_targets
 do
   case $ac_config_target in
     "lib/curl_config.h") CONFIG_HEADERS="$CONFIG_HEADERS lib/curl_config.h" ;;
-    "src/curl_config.h") CONFIG_HEADERS="$CONFIG_HEADERS src/curl_config.h" ;;
     "include/curl/curlbuild.h") CONFIG_HEADERS="$CONFIG_HEADERS include/curl/curlbuild.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;

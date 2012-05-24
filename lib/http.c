@@ -284,7 +284,7 @@ static bool pickoneauth(struct auth *pick)
 {
   bool picked;
   /* only deal with authentication we want */
-  long avail = pick->avail & pick->want;
+  unsigned long avail = pick->avail & pick->want;
   picked = TRUE;
 
   /* The order of these checks is highly relevant, as this will be the order
@@ -697,7 +697,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
    */
   struct SessionHandle *data = conn->data;
 
-  long *availp;
+  unsigned long *availp;
   const char *start;
   struct auth *authp;
 
@@ -1088,7 +1088,7 @@ CURLcode Curl_add_buffer_send(Curl_send_buffer *in,
     if(conn->data->set.verbose) {
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, headlen, conn);
-      if((size_t)amount > headlen) {
+      if(bodylen) {
         /* there was body data sent beyond the initial header part, pass that
            on to the debug callback too */
         Curl_debug(conn->data, CURLINFO_DATA_OUT,
@@ -1852,12 +1852,12 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
       int startsearch = 0;
       if(*cookiehost == '[') {
         char *closingbracket;
-        closingbracket = strchr(cookiehost+1, ']');
-        if(closingbracket)
-          *closingbracket = 0;
         /* since the 'cookiehost' is an allocated memory area that will be
            freed later we cannot simply increment the pointer */
         memmove(cookiehost, cookiehost + 1, strlen(cookiehost) - 1);
+        closingbracket = strchr(cookiehost, ']');
+        if(closingbracket)
+          *closingbracket = 0;
       }
       else {
         char *colon = strchr(cookiehost + startsearch, ':');
@@ -2480,11 +2480,13 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
           included_body = postsize;
         }
         else {
-          /* Append the POST data chunky-style */
-          result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
-          if(CURLE_OK == result)
-            result = Curl_add_buffer(req_buffer, data->set.postfields,
-                                     (size_t)postsize);
+          if(postsize) {
+            /* Append the POST data chunky-style */
+            result = Curl_add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+            if(CURLE_OK == result)
+              result = Curl_add_buffer(req_buffer, data->set.postfields,
+                                       (size_t)postsize);
+          }
           if(CURLE_OK == result)
             result = Curl_add_buffer(req_buffer,
                                      "\x0d\x0a\x30\x0d\x0a\x0d\x0a", 7);

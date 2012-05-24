@@ -21,7 +21,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
+#include "tool_setup.h"
 
 #include "tool_sdecls.h"
 
@@ -37,7 +37,7 @@ struct Configurable {
   bool cookiesession;       /* new session? */
   bool encoding;            /* Accept-Encoding please */
   bool tr_encoding;         /* Transfer-Encoding please */
-  long authtype;            /* auth bitmask */
+  unsigned long authtype;   /* auth bitmask */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -187,6 +187,7 @@ struct Configurable {
   bool raw;
   bool post301;
   bool post302;
+  bool post303;
   bool nokeepalive;         /* for keepalive needs */
   long alivetime;
   bool content_disposition; /* use Content-disposition filename */

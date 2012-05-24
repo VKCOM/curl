@@ -105,6 +105,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "rawstr.h"
 #include "warnless.h"
 #include "non-ascii.h"
+#include "inet_pton.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1111,12 +1112,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * CURL_REDIR_GET_ALL - POST is changed to GET after 301 and 302
      * CURL_REDIR_POST_301 - POST is kept as POST after 301
      * CURL_REDIR_POST_302 - POST is kept as POST after 302
-     * CURL_REDIR_POST_ALL - POST is kept as POST after 301 and 302
+     * CURL_REDIR_POST_303 - POST is kept as POST after 303
+     * CURL_REDIR_POST_ALL - POST is kept as POST after 301, 302 and 303
      * other - POST is kept as POST after 301 and 302
      */
-    long postRedir = va_arg(param, long);
-    data->set.post301 = (postRedir & CURL_REDIR_POST_301)?TRUE:FALSE;
-    data->set.post302 = (postRedir & CURL_REDIR_POST_302)?TRUE:FALSE;
+    int postRedir = curlx_sltosi(va_arg(param, long));
+    data->set.keep_post = postRedir & CURL_REDIR_POST_ALL;
   }
   break;
 
@@ -1397,7 +1398,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set HTTP Authentication type BITMASK.
      */
   {
-    long auth = va_arg(param, long);
+    int bitcheck;
+    bool authbits;
+    unsigned long auth = va_arg(param, unsigned long);
+
+    if(auth == CURLAUTH_NONE) {
+      data->set.httpauth = auth;
+      break;
+    }
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
@@ -1419,7 +1427,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
                                        WINDOWS_SSPI */
 #endif
-    if(!auth)
+
+    /* check if any auth bit lower than CURLAUTH_ONLY is still set */
+    bitcheck = 0;
+    authbits = FALSE;
+    while(bitcheck < 31) {
+      if(auth & (1UL << bitcheck++)) {
+        authbits = TRUE;
+        break;
+      }
+    }
+    if(!authbits)
       return CURLE_NOT_BUILT_IN; /* no supported types left! */
 
     data->set.httpauth = auth;
@@ -1461,7 +1479,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      * Set HTTP Authentication type BITMASK.
      */
   {
-    long auth = va_arg(param, long);
+    int bitcheck;
+    bool authbits;
+    unsigned long auth = va_arg(param, unsigned long);
+
+    if(auth == CURLAUTH_NONE) {
+      data->set.proxyauth = auth;
+      break;
+    }
 
     /* the DIGEST_IE bit is only used to set a special marker, for all the
        rest we need to handle it as normal DIGEST */
@@ -1482,7 +1507,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI or
                                        WINDOWS_SSPI */
 #endif
-    if(!auth)
+
+    /* check if any auth bit lower than CURLAUTH_ONLY is still set */
+    bitcheck = 0;
+    authbits = FALSE;
+    while(bitcheck < 31) {
+      if(auth & (1UL << bitcheck++)) {
+        authbits = TRUE;
+        break;
+      }
+    }
+    if(!authbits)
       return CURLE_NOT_BUILT_IN; /* no supported types left! */
 
     data->set.proxyauth = auth;
@@ -4461,8 +4496,19 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
         portptr = NULL; /* no port number available */
     }
   }
-  else
+  else {
+#ifdef ENABLE_IPV6
+    struct in6_addr in6;
+    if(Curl_inet_pton(AF_INET6, conn->host.name, &in6) > 0) {
+      /* This is a numerical IPv6 address, meaning this is a wrongly formatted
+         URL */
+      failf(data, "IPv6 numerical address used in URL without brackets");
+      return CURLE_URL_MALFORMAT;
+    }
+#endif
+
     portptr = strrchr(conn->host.name, ':');
+  }
 
   if(data->set.use_port && data->state.allow_port) {
     /* if set, we use this and ignore the port possibly given in the URL */

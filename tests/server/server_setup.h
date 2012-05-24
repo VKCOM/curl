@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_SERVER_SETUP_H
+#define HEADER_CURL_SERVER_SETUP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,27 +21,9 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-/* Simple hack trying to get a valid printf format string for size_t.
- * If that fails for your platform you can define your own _FMT_SIZE_T,
- * f.e.: -D_FMT_SIZE_T="zd"
- */
-#ifndef _PRINTF_MACRO_H
-#define _PRINTF_MACRO_H
 
-#ifndef _FMT_SIZE_T
-#ifdef WIN32
-#define _FMT_SIZE_T "Id"
-#else
-/*
-"zd" is a GNU extension to POSIX; so we dont use it for size_t but hack around
-#define _FMT_SIZE_T "zd"
-*/
-#ifdef __x86_64__
-#define _FMT_SIZE_T "lu"
-#else
-#define _FMT_SIZE_T "u"
-#endif /* __x86_64__ */
-#endif /* WIN32 */
-#endif /* !_FMT_SIZE_T */
+#define CURL_NO_OLDIES
 
-#endif /* !_PRINTF_MACRO_H */
+#include "setup.h" /* portability help from the lib directory */
+
+#endif /* HEADER_CURL_SERVER_SETUP_H */

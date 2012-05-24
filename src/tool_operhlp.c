@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -19,9 +19,7 @@
  * KIND, either express or implied.
  *
  ***************************************************************************/
-#include "setup.h"
-
-#include <curl/curl.h>
+#include "tool_setup.h"
 
 #include "rawstr.h"
 
@@ -41,12 +39,7 @@
  */
 char *my_useragent(void)
 {
-  char useragent[256]; /* we don't want a larger default user agent */
-
-  snprintf(useragent, sizeof(useragent),
-           CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
-
-  return strdup(useragent);
+  return strdup( CURL_NAME "/" CURL_VERSION );
 }
 
 /*
