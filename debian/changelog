@@ -1,4 +1,4 @@
-curl (7.26.0-1) UNRELEASED; urgency=low
+curl (7.26.0-1) unstable; urgency=low
 
   * New upstream release
     - Reject numerical IPv6 addresses outside brackets (Closes: #670126)
@@ -8,8 +8,10 @@ curl (7.26.0-1) UNRELEASED; urgency=low
     Thank you for all your work so far
   * Disable memory tracking, but keep debug enabled
     - Remove memdebug symbols (used by curl only)
+  * Refresh 01_runtests_gdb.patch, 90_gnutls.patch and 99_nss.patch
+  * Disable not-quite-working symbols hiding
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 24 May 2012 19:57:38 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 25 May 2012 15:19:51 +0200
 
 curl (7.25.0-1) unstable; urgency=low
 
