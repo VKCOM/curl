@@ -120,12 +120,18 @@ install: build-stamp
 	dh_testdir
 	dh_testroot
 	dh_prep
-	${MAKE} -C debian/build DESTDIR=$(shell pwd)/debian/tmp install
-	${MAKE} -C debian/build-gnutls DESTDIR=$(shell pwd)/debian/tmp-gnutls install
-	${MAKE} -C debian/build-nss DESTDIR=$(shell pwd)/debian/tmp-nss install
-	dh_install -plibcurl3-gnutls -plibcurl4-gnutls-dev --sourcedir=debian/tmp-gnutls
-	dh_install -plibcurl3-nss -plibcurl4-nss-dev --sourcedir=debian/tmp-nss
-	dh_install -Nlibcurl3-gnutls -Nlibcurl4-gnutls-dev -Nlibcurl3-nss -Nlibcurl4-nss-dev --sourcedir=debian/tmp
+	${MAKE} -C debian/build		\
+		DESTDIR=$(shell pwd)/debian/tmp install
+	${MAKE} -C debian/build-gnutls	\
+		DESTDIR=$(shell pwd)/debian/tmp-gnutls install
+	${MAKE} -C debian/build-nss	\
+		DESTDIR=$(shell pwd)/debian/tmp-nss install
+	dh_install -plibcurl3-gnutls -plibcurl4-gnutls-dev	\
+		--sourcedir=debian/tmp-gnutls
+	dh_install -plibcurl3-nss -plibcurl4-nss-dev		\
+		--sourcedir=debian/tmp-nss
+	dh_install -pcurl -plibcurl3 -plibcurl4-openssl-dev	\
+		--sourcedir=debian/tmp
 	dh_lintian
 	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 
@@ -142,8 +148,9 @@ binary-arch: build-stamp install
 	dh_installexamples
 	dh_installchangelogs CHANGES
 	dh_link
-	dh_strip -Nlibcurl3 -Nlibcurl3-gnutls -Nlibcurl3-nss
-	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss --dbg-package=libcurl3-dbg
+	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss	\
+		--dbg-package=libcurl3-dbg
+	dh_strip --remaining-packages
 	dh_compress
 	dh_fixperms
 	dh_makeshlibs
