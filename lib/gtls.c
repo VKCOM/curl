@@ -413,7 +413,7 @@ gtls_connect_step1(struct connectdata *conn,
                                               data->set.ssl.CRLfile,
                                               GNUTLS_X509_FMT_PEM);
     if(rc < 0) {
-      failf(data, "error reading crl file %s (%s)\n",
+      failf(data, "error reading crl file %s (%s)",
             data->set.ssl.CRLfile, gnutls_strerror(rc));
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -1058,6 +1058,38 @@ int Curl_gtls_seed(struct SessionHandle *data)
     ssl_seeded = TRUE;
   }
   return 0;
+}
+
+void Curl_gtls_random(struct SessionHandle *data,
+                      unsigned char *entropy,
+                      size_t length)
+{
+#if defined(USE_GNUTLS_NETTLE)
+  (void)data;
+  gnutls_rnd(GNUTLS_RND_RANDOM, entropy, length);
+#elif defined(USE_GNUTLS)
+  Curl_gtls_seed(data); /* Initiate the seed if not already done */
+  gcry_randomize(entropy, length, GCRY_STRONG_RANDOM);
+#endif
+}
+
+void Curl_gtls_md5sum(unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *md5sum, /* output */
+                      size_t md5len)
+{
+#if defined(USE_GNUTLS_NETTLE)
+  struct md5_ctx MD5pw;
+  md5_init(&MD5pw);
+  md5_update(&MD5pw, tmplen, tmp);
+  md5_digest(&MD5pw, md5len, md5sum);
+#elif defined(USE_GNUTLS)
+  gcry_md_hd_t MD5pw;
+  gcry_md_open(&MD5pw, GCRY_MD_MD5, 0);
+  gcry_md_write(MD5pw, tmp, tmplen);
+  memcpy(md5sum, gcry_md_read (MD5pw, 0), md5len);
+  gcry_md_close(MD5pw);
+#endif
 }
 
 #endif /* USE_GNUTLS */

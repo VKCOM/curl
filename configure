@@ -652,7 +652,6 @@ SONAME_BUMP_TRUE
 CFLAG_CURL_SYMBOL_HIDING
 DOING_CURL_SYMBOL_HIDING_FALSE
 DOING_CURL_SYMBOL_HIDING_TRUE
-USE_WINDOWS_SSPI
 BUILD_LIBHOSTNAME_FALSE
 BUILD_LIBHOSTNAME_TRUE
 USE_EMBEDDED_ARES_FALSE
@@ -671,6 +670,9 @@ VERSIONED_SYMBOLS_TRUE
 VERSIONED_FLAVOUR
 USE_LIBRTMP
 USE_LIBSSH2
+LIBMETALINK_CFLAGS
+LIBMETALINK_LDFLAGS
+LIBMETALINK_LIBS
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
@@ -688,6 +690,9 @@ HAVE_LIBZ_TRUE
 HAVE_LIBZ
 USE_SSLEAY
 PKGCONFIG
+USE_DARWINSSL
+USE_WINDOWS_SSPI
+USE_SCHANNEL
 KRB4_ENABLED
 USE_OPENLDAP
 CURL_DISABLE_GOPHER
@@ -714,6 +719,7 @@ CURLDEBUG_TRUE
 NO_UNDEFINED_FALSE
 NO_UNDEFINED_TRUE
 REQUIRE_LIB_DEPS
+CPPFLAG_CURL_STATICLIB
 USE_CPPFLAG_CURL_STATICLIB_FALSE
 USE_CPPFLAG_CURL_STATICLIB_TRUE
 USE_CPPFLAG_BUILDING_LIBCURL_FALSE
@@ -886,6 +892,8 @@ with_spnego
 with_gssapi_includes
 with_gssapi_libs
 with_gssapi
+with_winssl
+with_darwinssl
 with_ssl
 with_zlib
 with_egd_socket
@@ -897,9 +905,11 @@ with_nss
 with_axtls
 with_ca_bundle
 with_ca_path
+with_libmetalink
 with_libssh2
 with_librtmp
 enable_versioned_symbols
+with_winidn
 with_libidn
 enable_nonblocking
 enable_threaded_resolver
@@ -1649,6 +1659,10 @@ Optional Packages:
                           Specify location of GSSAPI header
   --with-gssapi-libs=DIR  Specify location of GSSAPI libs
   --with-gssapi=DIR       Where to look for GSSAPI
+  --with-winssl           enable Windows native SSL/TLS
+  --without-winssl        disable Windows native SSL/TLS
+  --with-darwinssl        enable iOS/Mac OS X native SSL/TLS
+  --without-darwinssl     disable iOS/Mac OS X native SSL/TLS
   --with-ssl=PATH         Where to look for OpenSSL, PATH points to the SSL
                           installation (default: /usr/local/ssl); when
                           possible, set the PKG_CONFIG_PATH environment
@@ -1679,6 +1693,9 @@ Optional Packages:
   --with-ca-path=DIRECTORY
                           Directory to use as CA path
   --without-ca-path       Don't use a default CA path
+  --with-libmetalink=PATH where to look for libmetalink, PATH points to the
+                          installation root
+  --without-libmetalink   disable libmetalink detection
   --with-libssh2=PATH     Where to look for libssh2, PATH points to the
                           LIBSSH2 installation; when possible, set the
                           PKG_CONFIG_PATH environment variable instead of
@@ -1689,6 +1706,8 @@ Optional Packages:
                           PKG_CONFIG_PATH environment variable instead of
                           using this option
   --without-librtmp       disable LIBRTMP
+  --with-winidn=PATH      enable Windows native IDN
+  --without-winidn        disable Windows native IDN
   --with-libidn=PATH      Enable libidn usage
   --without-libidn        Disable libidn usage
 
@@ -3685,7 +3704,7 @@ PKGADD_VENDOR="curl.haxx.se"
 
 
 
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -3694,7 +3713,7 @@ PKGADD_VENDOR="curl.haxx.se"
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
-    curl_idn_msg="no      (--with-libidn)"
+    curl_idn_msg="no      (--with-{libidn,winidn})"
  curl_manual_msg="no      (--enable-manual)"
 curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
@@ -3703,6 +3722,8 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
+  curl_mtlnk_msg="no      (--with-libmetalink)"
+
     init_ssl_msg=${curl_ssl_msg}
 
 ALL_LIBS=$LIBS
@@ -8434,10 +8455,6 @@ freebsd* | dragonfly*)
   fi
   ;;
 
-gnu*)
-  lt_cv_deplibs_check_method=pass_all
-  ;;
-
 haiku*)
   lt_cv_deplibs_check_method=pass_all
   ;;
@@ -8476,7 +8493,7 @@ irix5* | irix6* | nonstopux*)
   ;;
 
 # This must be glibc/ELF.
-linux* | k*bsd*-gnu | kopensolaris*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
   lt_cv_deplibs_check_method=pass_all
   ;;
 
@@ -11127,7 +11144,7 @@ lt_prog_compiler_static=
       lt_prog_compiler_static='-non_shared'
       ;;
 
-    linux* | k*bsd*-gnu | kopensolaris*-gnu)
+    linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
       case $cc_basename in
       # old Intel for x86_64 which still supported -KPIC.
       ecc*)
@@ -13295,17 +13312,6 @@ freebsd* | dragonfly*)
   esac
   ;;
 
-gnu*)
-  version_type=linux # correct to gnu/linux during the next big refactor
-  need_lib_prefix=no
-  need_version=no
-  library_names_spec='${libname}${release}${shared_ext}$versuffix ${libname}${release}${shared_ext}${major} ${libname}${shared_ext}'
-  soname_spec='${libname}${release}${shared_ext}$major'
-  shlibpath_var=LD_LIBRARY_PATH
-  shlibpath_overrides_runpath=no
-  hardcode_into_libs=yes
-  ;;
-
 haiku*)
   version_type=linux # correct to gnu/linux during the next big refactor
   need_lib_prefix=no
@@ -13422,7 +13428,7 @@ linux*oldld* | linux*aout* | linux*coff*)
   ;;
 
 # This must be glibc/ELF.
-linux* | k*bsd*-gnu | kopensolaris*-gnu)
+linux* | k*bsd*-gnu | kopensolaris*-gnu | gnu*)
   version_type=linux # correct to gnu/linux during the next big refactor
   need_lib_prefix=no
   need_version=no
@@ -14482,6 +14488,7 @@ fi
 $as_echo_n "checking if we need BUILDING_LIBCURL... " >&6; }
 use_cppflag_building_libcurl="no"
 use_cppflag_curl_staticlib="no"
+CPPFLAG_CURL_STATICLIB=""
 case $host in
   *-*-mingw*)
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
@@ -14494,6 +14501,7 @@ $as_echo_n "checking if we need CURL_STATICLIB... " >&6; }
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
       use_cppflag_curl_staticlib="yes"
+      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB"
     else
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
@@ -14523,6 +14531,7 @@ else
   USE_CPPFLAG_CURL_STATICLIB_TRUE='#'
   USE_CPPFLAG_CURL_STATICLIB_FALSE=
 fi
+
 
 
 # Determine whether all dependent libraries must be specified when linking
@@ -16416,7 +16425,7 @@ $as_echo "$as_me: WARNING: compiler options rejected: $tmp_options" >&2;}
       CLANG)
         #
         if test "$want_warnings" = "yes"; then
-                              tmp_CFLAGS="$tmp_CFLAGS -pedantic"
+          tmp_CFLAGS="$tmp_CFLAGS -pedantic"
           tmp_CFLAGS="$tmp_CFLAGS -Wall -Wextra"
           tmp_CFLAGS="$tmp_CFLAGS -Wpointer-arith -Wwrite-strings"
           tmp_CFLAGS="$tmp_CFLAGS -Wshadow"
@@ -16499,6 +16508,10 @@ $as_echo "$as_me: WARNING: compiler options rejected: $tmp_options" >&2;}
           #
                     if test "$compiler_num" -ge "304"; then
             tmp_CFLAGS="$tmp_CFLAGS -Wdeclaration-after-statement"
+          fi
+          #
+                    if test "$compiler_num" -ge "400"; then
+            tmp_CFLAGS="$tmp_CFLAGS -Wstrict-aliasing=3"
           fi
           #
                     if test "$compiler_num" -ge "402"; then
@@ -19517,12 +19530,12 @@ $as_echo "#define CURL_DISABLE_LDAP 1" >>confdefs.h
 
       CURL_DISABLE_LDAP=1
 
-fi
-
 
 $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
 
       CURL_DISABLE_LDAPS=1
+
+fi
 
   else
 
@@ -19699,12 +19712,12 @@ $as_echo "#define CURL_DISABLE_LDAP 1" >>confdefs.h
 
         CURL_DISABLE_LDAP=1
 
-fi
-
 
 $as_echo "#define CURL_DISABLE_LDAPS 1" >>confdefs.h
 
         CURL_DISABLE_LDAPS=1
+
+fi
 
     fi
   fi
@@ -20392,6 +20405,77 @@ else
 fi
 
 
+OPT_WINSSL=no
+
+# Check whether --with-winssl was given.
+if test "${with_winssl+set}" = set; then :
+  withval=$with_winssl; OPT_WINSSL=$withval
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable Windows native SSL/TLS (Windows native builds only)" >&5
+$as_echo_n "checking whether to enable Windows native SSL/TLS (Windows native builds only)... " >&6; }
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_WINSSL" != "xno"  &&
+     test "x$ac_cv_native_windows" = "xyes"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define USE_SCHANNEL 1" >>confdefs.h
+
+    USE_SCHANNEL=1
+
+    curl_ssl_msg="enabled (Windows-native)"
+    WINSSL_ENABLED=1
+    # --with-winssl implies --enable-sspi
+
+$as_echo "#define USE_WINDOWS_SSPI 1" >>confdefs.h
+
+    USE_WINDOWS_SSPI=1
+
+    curl_sspi_msg="enabled"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+OPT_DARWINSSL=no
+
+# Check whether --with-darwinssl was given.
+if test "${with_darwinssl+set}" = set; then :
+  withval=$with_darwinssl; OPT_DARWINSSL=$withval
+fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable iOS/Mac OS X native SSL/TLS" >&5
+$as_echo_n "checking whether to enable iOS/Mac OS X native SSL/TLS... " >&6; }
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_DARWINSSL" != "xno" &&
+     test -d "/System/Library/Frameworks/Security.framework"; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+$as_echo "#define USE_DARWINSSL 1" >>confdefs.h
+
+    USE_DARWINSSL=1
+
+    curl_ssl_msg="enabled (iOS/Mac OS X-native)"
+    DARWINSSL_ENABLED=1
+    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
 OPT_SSL=off
 ca="no"
 
@@ -20401,7 +20485,7 @@ if test "${with_ssl+set}" = set; then :
 fi
 
 
-if test X"$OPT_SSL" != Xno; then
+if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
     CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
@@ -21867,7 +21951,7 @@ if test "${with_gnutls+set}" = set; then :
 fi
 
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_GNUTLS" != Xno; then
 
@@ -22107,6 +22191,7 @@ $as_echo "$as_me: Added $gtlslib to LD_LIBRARY_PATH" >&6;}
   fi
 fi
 
+
 if test "$GNUTLS_ENABLED" = "1"; then
   USE_GNUTLS_NETTLE=
   # First check if we can detect either crypto library via transitive linking
@@ -22338,7 +22423,7 @@ if test "${with_polarssl+set}" = set; then :
 fi
 
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_POLARSSL" != Xno; then
 
@@ -22479,6 +22564,7 @@ $as_echo "$as_me: Added $polarssllib to LD_LIBRARY_PATH" >&6;}
   fi
 fi
 
+
 OPT_CYASSL=no
 
 _cppflags=$CPPFLAGS
@@ -22490,7 +22576,7 @@ if test "${with_cyassl+set}" = set; then :
 fi
 
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_CYASSL" != Xno; then
 
@@ -22632,6 +22718,7 @@ $as_echo "$as_me: Added $cyassllib to LD_LIBRARY_PATH" >&6;}
   fi
 fi
 
+
 OPT_NSS=no
 
 
@@ -22641,7 +22728,7 @@ if test "${with_nss+set}" = set; then :
 fi
 
 
-if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_NSS" != Xno; then
     if test "x$OPT_NSS" = "xyes"; then
@@ -22973,11 +23060,11 @@ fi
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&5
 $as_echo "$as_me: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&2;}
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss or --with-axtls to address this." >&5
-$as_echo "$as_me: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss or --with-axtls to address this." >&2;}
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls or --with-winssl to address this." >&5
+$as_echo "$as_me: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls or --with-winssl to address this." >&2;}
 else
   # SSL is enabled, genericly
 
@@ -23088,6 +23175,354 @@ $as_echo "$capath (capath)" >&6; }
 $as_echo "no" >&6; }
   fi
 
+
+
+OPT_LIBMETALINK=no
+
+
+# Check whether --with-libmetalink was given.
+if test "${with_libmetalink+set}" = set; then :
+  withval=$with_libmetalink; OPT_LIBMETALINK=$withval
+fi
+
+
+if test X"$OPT_LIBMETALINK" != Xno; then
+
+  addlib=""
+  addld=""
+  addcflags=""
+  version=""
+  libmetalinklib=""
+  PKGTEST="no"
+  if test "x$OPT_LIBMETALINK" = "xyes"; then
+        PKGTEST="yes"
+
+
+    PKGCONFIG="no"
+
+    if test x$cross_compiling = xyes; then
+            # Extract the first word of "${host}-pkg-config", so it can be a program name with args.
+set dummy ${host}-pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG = xno; then
+      # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libmetalink options with pkg-config" >&5
+$as_echo_n "checking for libmetalink options with pkg-config... " >&6; }
+            itexists=`
+    if test -n ""; then
+      PKG_CONFIG_LIBDIR=""
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists libmetalink >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+  else
+        LIBMETALINK_PCDIR="$OPT_LIBMETALINK/lib/pkgconfig"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: PKG_CONFIG_LIBDIR will be set to \"$LIBMETALINK_PCDIR\"" >&5
+$as_echo "$as_me: PKG_CONFIG_LIBDIR will be set to \"$LIBMETALINK_PCDIR\"" >&6;}
+    if test -f "$LIBMETALINK_PCDIR/libmetalink.pc"; then
+      PKGTEST="yes"
+    fi
+    if test "$PKGTEST" = "yes"; then
+
+
+    PKGCONFIG="no"
+
+    if test x$cross_compiling = xyes; then
+            # Extract the first word of "${host}-pkg-config", so it can be a program name with args.
+set dummy ${host}-pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG = xno; then
+      # Extract the first word of "pkg-config", so it can be a program name with args.
+set dummy pkg-config; ac_word=$2
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PKGCONFIG+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  case $PKGCONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PKGCONFIG="$PKGCONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+as_dummy="$PATH:/usr/bin:/usr/local/bin"
+for as_dir in $as_dummy
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PKGCONFIG="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  test -z "$ac_cv_path_PKGCONFIG" && ac_cv_path_PKGCONFIG="no"
+  ;;
+esac
+fi
+PKGCONFIG=$ac_cv_path_PKGCONFIG
+if test -n "$PKGCONFIG"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $PKGCONFIG" >&5
+$as_echo "$PKGCONFIG" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+    fi
+
+    if test x$PKGCONFIG != xno; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libmetalink options with pkg-config" >&5
+$as_echo_n "checking for libmetalink options with pkg-config... " >&6; }
+            itexists=`
+    if test -n "$LIBMETALINK_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$LIBMETALINK_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+         $PKGCONFIG --exists libmetalink >/dev/null 2>&1 && echo 1`
+
+      if test -z "$itexists"; then
+                        PKGCONFIG="no"
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: found" >&5
+$as_echo "found" >&6; }
+      fi
+    fi
+
+    fi
+  fi
+  if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
+    addlib=`
+    if test -n "$LIBMETALINK_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$LIBMETALINK_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+       $PKGCONFIG --libs-only-l libmetalink`
+    addld=`
+    if test -n "$LIBMETALINK_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$LIBMETALINK_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+       $PKGCONFIG --libs-only-L libmetalink`
+    addcflags=`
+    if test -n "$LIBMETALINK_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$LIBMETALINK_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+       $PKGCONFIG --cflags-only-I libmetalink`
+    version=`
+    if test -n "$LIBMETALINK_PCDIR"; then
+      PKG_CONFIG_LIBDIR="$LIBMETALINK_PCDIR"
+      export PKG_CONFIG_LIBDIR
+    fi
+       $PKGCONFIG --modversion libmetalink`
+    libmetalinklib=`echo $addld | $SED -e 's/-L//'`
+  fi
+  if test -n "$addlib"; then
+
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
+    clean_LIBS="$LIBS"
+    CPPFLAGS="$addcflags $clean_CPPFLAGS"
+    LDFLAGS="$addld $clean_LDFLAGS"
+    LIBS="$addlib $clean_LIBS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking if libmetalink is recent enough" >&5
+$as_echo_n "checking if libmetalink is recent enough... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#       include <metalink/metalink.h>
+
+int main (void)
+{
+
+        if(0 != metalink_strerror(0)) /* added in 0.1.0 */
+          return 1;
+
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($version)" >&5
+$as_echo "yes ($version)" >&6; }
+      want_metalink="yes"
+
+else
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no ($version)" >&5
+$as_echo "no ($version)" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: libmetalink library defective or too old" >&5
+$as_echo "$as_me: libmetalink library defective or too old" >&6;}
+      want_metalink="no"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+    if test "$want_metalink" = "yes"; then
+
+$as_echo "#define USE_METALINK 1" >>confdefs.h
+
+      LIBMETALINK_LIBS=$addlib
+      LIBMETALINK_LDFLAGS=$addld
+      LIBMETALINK_CFLAGS=$addcflags
+
+
+
+      curl_mtlnk_msg="enabled"
+    fi
+
+  fi
+fi
 
 
 OPT_LIBSSH2=off
@@ -23608,6 +24043,10 @@ $as_echo "yes" >&6; }
           versioned_symbols_flavour="CYASSL_"
         elif test "x$AXTLS_ENABLED" == "x1"; then
           versioned_symbols_flavour="AXTLS_"
+        elif test "x$WINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="WINSSL_"
+        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="DARWINSSL_"
         else
           versioned_symbols_flavour=""
         fi
@@ -23642,6 +24081,115 @@ else
 fi
 
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable Windows native IDN (Windows native builds only)" >&5
+$as_echo_n "checking whether to enable Windows native IDN (Windows native builds only)... " >&6; }
+OPT_WINIDN="default"
+
+# Check whether --with-winidn was given.
+if test "${with_winidn+set}" = set; then :
+  withval=$with_winidn; OPT_WINIDN=$withval
+fi
+
+case "$OPT_WINIDN" in
+  no|default)
+        want_winidn="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  yes)
+        want_winidn="yes"
+    want_winidn_path="default"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  *)
+        want_winidn="yes"
+    want_winidn_path="$withval"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
+$as_echo "yes ($withval)" >&6; }
+    ;;
+esac
+
+if test "$want_winidn" = "yes"; then
+    clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  WINIDN_LIBS="-lnormaliz"
+  #
+  if test "$want_winidn_path" != "default"; then
+            WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
+    WINIDN_CPPFLAGS="-I$want_winidn_path/include"
+    WINIDN_DIR="$want_winidn_path/lib$libsuff"
+  fi
+  #
+  CPPFLAGS="$WINIDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$WINIDN_LDFLAGS $LDFLAGS"
+  LIBS="$WINIDN_LIBS $LIBS"
+  #
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if IdnToUnicode can be linked" >&5
+$as_echo_n "checking if IdnToUnicode can be linked... " >&6; }
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#define IdnToUnicode innocuous_IdnToUnicode
+#ifdef __STDC__
+# include <limits.h>
+#else
+# include <assert.h>
+#endif
+#undef IdnToUnicode
+#ifdef __cplusplus
+extern "C"
+#endif
+char IdnToUnicode ();
+#if defined __stub_IdnToUnicode || defined __stub___IdnToUnicode
+choke me
+#endif
+
+int main (void)
+{
+return IdnToUnicode ();
+ ;
+ return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    tst_links_winidn="yes"
+
+else
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    tst_links_winidn="no"
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  #
+  if test "$tst_links_winidn" = "yes"; then
+
+$as_echo "#define USE_WIN32_IDN 1" >>confdefs.h
+
+
+$as_echo "#define WANT_IDN_PROTOTYPES 1" >>confdefs.h
+
+    IDN_ENABLED=1
+
+    curl_idn_msg="enabled (Windows-native)"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot find libraries for IDN support: IDN disabled" >&5
+$as_echo "$as_me: WARNING: Cannot find libraries for IDN support: IDN disabled" >&2;}
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to build with libidn" >&5
@@ -37732,13 +38280,25 @@ $as_echo "$as_me: WARNING: --enable-sspi Ignored. Only supported on native Windo
        fi
        ;;
   *)
-       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+       if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+       else
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+       fi
        ;;
   esac
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+  if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+       else
+         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+       fi
 
 fi
 
@@ -37992,7 +38552,8 @@ if test "x$USE_WINDOWS_SSPI" = "x1"; then
 fi
 if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
+      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
+      -o "x$DARWINSSL_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
     if test "x$NTLM_WB_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
@@ -40698,6 +41259,7 @@ _EOF
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
+  metalink support: ${curl_mtlnk_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&5
 $as_echo "$as_me: Configured to build curl/libcurl:
@@ -40727,6 +41289,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
+  metalink support: ${curl_mtlnk_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&6;}
 

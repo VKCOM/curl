@@ -82,13 +82,14 @@ am__objects_1 = hugehelp.$(OBJEXT) tool_binmode.$(OBJEXT) \
 	tool_getpass.$(OBJEXT) tool_help.$(OBJEXT) \
 	tool_helpers.$(OBJEXT) tool_homedir.$(OBJEXT) \
 	tool_libinfo.$(OBJEXT) tool_main.$(OBJEXT) \
-	tool_mfiles.$(OBJEXT) tool_msgs.$(OBJEXT) \
-	tool_operate.$(OBJEXT) tool_operhlp.$(OBJEXT) \
-	tool_panykey.$(OBJEXT) tool_paramhlp.$(OBJEXT) \
-	tool_parsecfg.$(OBJEXT) tool_setopt.$(OBJEXT) \
-	tool_sleep.$(OBJEXT) tool_urlglob.$(OBJEXT) \
-	tool_util.$(OBJEXT) tool_vms.$(OBJEXT) tool_writeenv.$(OBJEXT) \
-	tool_writeout.$(OBJEXT) tool_xattr.$(OBJEXT)
+	tool_metalink.$(OBJEXT) tool_mfiles.$(OBJEXT) \
+	tool_msgs.$(OBJEXT) tool_operate.$(OBJEXT) \
+	tool_operhlp.$(OBJEXT) tool_panykey.$(OBJEXT) \
+	tool_paramhlp.$(OBJEXT) tool_parsecfg.$(OBJEXT) \
+	tool_setopt.$(OBJEXT) tool_sleep.$(OBJEXT) \
+	tool_urlglob.$(OBJEXT) tool_util.$(OBJEXT) tool_vms.$(OBJEXT) \
+	tool_writeenv.$(OBJEXT) tool_writeout.$(OBJEXT) \
+	tool_xattr.$(OBJEXT)
 am__objects_2 = strtoofft.$(OBJEXT) strdup.$(OBJEXT) rawstr.$(OBJEXT) \
 	nonblock.$(OBJEXT)
 am__objects_3 =
@@ -128,11 +129,12 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 
 # This might hold -Werror
-CFLAGS = @CFLAGS@ @CURL_CFLAG_EXTRAS@
+CFLAGS = @CFLAGS@ @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 CONFIGURE_OPTIONS = @CONFIGURE_OPTIONS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CPPFLAG_CURL_STATICLIB = @CPPFLAG_CURL_STATICLIB@
 CROSSCOMPILING_FALSE = @CROSSCOMPILING_FALSE@
 CROSSCOMPILING_TRUE = @CROSSCOMPILING_TRUE@
 CURLDEBUG_FALSE = @CURLDEBUG_FALSE@
@@ -191,6 +193,9 @@ KRB4_ENABLED = @KRB4_ENABLED@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBMETALINK_CFLAGS = @LIBMETALINK_CFLAGS@
+LIBMETALINK_LDFLAGS = @LIBMETALINK_LDFLAGS@
+LIBMETALINK_LIBS = @LIBMETALINK_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -250,6 +255,7 @@ USE_CPPFLAG_BUILDING_LIBCURL_TRUE = @USE_CPPFLAG_BUILDING_LIBCURL_TRUE@
 USE_CPPFLAG_CURL_STATICLIB_FALSE = @USE_CPPFLAG_CURL_STATICLIB_FALSE@
 USE_CPPFLAG_CURL_STATICLIB_TRUE = @USE_CPPFLAG_CURL_STATICLIB_TRUE@
 USE_CYASSL = @USE_CYASSL@
+USE_DARWINSSL = @USE_DARWINSSL@
 USE_EMBEDDED_ARES_FALSE = @USE_EMBEDDED_ARES_FALSE@
 USE_EMBEDDED_ARES_TRUE = @USE_EMBEDDED_ARES_TRUE@
 USE_GNUTLS = @USE_GNUTLS@
@@ -261,6 +267,7 @@ USE_MANUAL_TRUE = @USE_MANUAL_TRUE@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
 USE_POLARSSL = @USE_POLARSSL@
+USE_SCHANNEL = @USE_SCHANNEL@
 USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
@@ -392,6 +399,7 @@ CURL_CFILES = hugehelp.c \
 	tool_homedir.c \
 	tool_libinfo.c \
 	tool_main.c \
+	tool_metalink.c \
 	tool_mfiles.c \
 	tool_msgs.c \
 	tool_operate.c \
@@ -430,6 +438,7 @@ CURL_HFILES = hugehelp.h \
 	tool_homedir.h \
 	tool_libinfo.h \
 	tool_main.h \
+	tool_metalink.h \
 	tool_mfiles.h \
 	tool_msgs.h \
 	tool_operate.h \
@@ -450,7 +459,8 @@ CURL_HFILES = hugehelp.h \
 	tool_xattr.h
 
 curl_SOURCES = $(CURL_CFILES) $(CURLX_ONES) $(CURL_HFILES)
-curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@ @LIBMETALINK_LIBS@
+curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
@@ -563,6 +573,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_homedir.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_libinfo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_metalink.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_mfiles.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_msgs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tool_operate.Po@am__quote@

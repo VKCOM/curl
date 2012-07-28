@@ -145,7 +145,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
@@ -154,7 +154,7 @@ dnl initialize all the info variables
 curl_tls_srp_msg="no      (--enable-tls-srp)"
     curl_res_msg="default (--enable-ares / --enable-threaded-resolver)"
    curl_ipv6_msg="no      (--enable-ipv6)"
-    curl_idn_msg="no      (--with-libidn)"
+    curl_idn_msg="no      (--with-{libidn,winidn})"
  curl_manual_msg="no      (--enable-manual)"
 curl_libcurl_msg="enabled (--disable-libcurl-option)"
 curl_verbose_msg="enabled (--disable-verbose)"
@@ -163,6 +163,8 @@ curl_verbose_msg="enabled (--disable-verbose)"
   curl_ldaps_msg="no      (--enable-ldaps)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
+  curl_mtlnk_msg="no      (--with-libmetalink)"
+
     init_ssl_msg=${curl_ssl_msg}
 
 dnl
@@ -240,6 +242,7 @@ AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
 use_cppflag_building_libcurl="no"
 use_cppflag_curl_staticlib="no"
+CPPFLAG_CURL_STATICLIB=""
 case $host in
   *-*-mingw*)
     AC_MSG_RESULT(yes)
@@ -249,6 +252,7 @@ case $host in
     then
       AC_MSG_RESULT(yes)
       use_cppflag_curl_staticlib="yes"
+      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB"
     else
       AC_MSG_RESULT(no)
     fi
@@ -259,6 +263,7 @@ case $host in
 esac
 AM_CONDITIONAL(USE_CPPFLAG_BUILDING_LIBCURL, test x$use_cppflag_building_libcurl = xyes)
 AM_CONDITIONAL(USE_CPPFLAG_CURL_STATICLIB, test x$use_cppflag_curl_staticlib = xyes)
+AC_SUBST(CPPFLAG_CURL_STATICLIB)
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"
@@ -917,9 +922,9 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     AC_CHECK_LIB("$LDAPLIBNAME", ldap_init,, [
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      AC_SUBST(CURL_DISABLE_LDAP, [1])])
+      AC_SUBST(CURL_DISABLE_LDAP, [1])
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      AC_SUBST(CURL_DISABLE_LDAPS, [1])
+      AC_SUBST(CURL_DISABLE_LDAPS, [1])])
   else
     dnl Try to find the right ldap libraries for this system
     CURL_CHECK_LIBS_LDAP
@@ -944,9 +949,9 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
         AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        AC_SUBST(CURL_DISABLE_LDAP, [1])])
+        AC_SUBST(CURL_DISABLE_LDAP, [1])
         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        AC_SUBST(CURL_DISABLE_LDAPS, [1])
+        AC_SUBST(CURL_DISABLE_LDAPS, [1])])
     fi
   fi
 fi
@@ -1336,6 +1341,59 @@ else
   CPPFLAGS="$save_CPPFLAGS"
 fi
 
+dnl -------------------------------------------------
+dnl check winssl option before other SSL libraries
+dnl -------------------------------------------------
+
+OPT_WINSSL=no
+AC_ARG_WITH(winssl,dnl
+AC_HELP_STRING([--with-winssl],[enable Windows native SSL/TLS])
+AC_HELP_STRING([--without-winssl], [disable Windows native SSL/TLS]),
+  OPT_WINSSL=$withval)
+
+AC_MSG_CHECKING([whether to enable Windows native SSL/TLS (Windows native builds only)])
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_WINSSL" != "xno"  &&
+     test "x$ac_cv_native_windows" = "xyes"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
+    AC_SUBST(USE_SCHANNEL, [1])
+    curl_ssl_msg="enabled (Windows-native)"
+    WINSSL_ENABLED=1
+    # --with-winssl implies --enable-sspi
+    AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
+    AC_SUBST(USE_WINDOWS_SSPI, [1])
+    curl_sspi_msg="enabled"
+  else
+    AC_MSG_RESULT(no)
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+
+OPT_DARWINSSL=no
+AC_ARG_WITH(darwinssl,dnl
+AC_HELP_STRING([--with-darwinssl],[enable iOS/Mac OS X native SSL/TLS])
+AC_HELP_STRING([--without-darwinssl], [disable iOS/Mac OS X native SSL/TLS]),
+  OPT_DARWINSSL=$withval)
+
+AC_MSG_CHECKING([whether to enable iOS/Mac OS X native SSL/TLS])
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+  if test "x$OPT_DARWINSSL" != "xno" &&
+     test -d "/System/Library/Frameworks/Security.framework"; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(USE_DARWINSSL, 1, [to enable iOS/Mac OS X native SSL/TLS support])
+    AC_SUBST(USE_DARWINSSL, [1])
+    curl_ssl_msg="enabled (iOS/Mac OS X-native)"
+    DARWINSSL_ENABLED=1
+    LDFLAGS="$LDFLAGS -framework CoreFoundation -framework Security"
+  else
+    AC_MSG_RESULT(no)
+  fi
+else
+  AC_MSG_RESULT(no)
+fi
+
 dnl **********************************************************************
 dnl Check for the presence of SSL libraries and headers
 dnl **********************************************************************
@@ -1349,7 +1407,7 @@ AC_HELP_STRING([--with-ssl=PATH],[Where to look for OpenSSL, PATH points to the 
 AC_HELP_STRING([--without-ssl], [disable OpenSSL]),
   OPT_SSL=$withval)
 
-if test X"$OPT_SSL" != Xno; then
+if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
   dnl backup the pre-ssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -1736,7 +1794,7 @@ AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to th
 AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
   OPT_GNUTLS=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_GNUTLS" != Xno; then
 
@@ -1832,7 +1890,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl GNUTLS not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ---
 dnl Check which crypto backend GnuTLS uses
@@ -1889,7 +1947,7 @@ AC_HELP_STRING([--with-polarssl=PATH],[where to look for PolarSSL, PATH points t
 AC_HELP_STRING([--without-polarssl], [disable PolarSSL detection]),
   OPT_POLARSSL=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_POLARSSL" != Xno; then
 
@@ -1957,7 +2015,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl PolarSSL not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ----------------------------------------------------
 dnl check for CyaSSL
@@ -1973,7 +2031,7 @@ AC_HELP_STRING([--with-cyassl=PATH],[where to look for CyaSSL, PATH points to th
 AC_HELP_STRING([--without-cyassl], [disable CyaSSL detection]),
   OPT_CYASSL=$withval)
 
-if test "$OPENSSL_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_CYASSL" != Xno; then
 
@@ -2042,7 +2100,7 @@ if test "$OPENSSL_ENABLED" != "1"; then
 
   fi dnl CyaSSL not disabled
 
-fi dnl OPENSSL != 1
+fi
 
 dnl ----------------------------------------------------
 dnl NSS. Only check if GnuTLS and OpenSSL are not enabled
@@ -2056,7 +2114,7 @@ AC_HELP_STRING([--with-nss=PATH],[where to look for NSS, PATH points to the inst
 AC_HELP_STRING([--without-nss], [disable NSS detection]),
   OPT_NSS=$withval)
 
-if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
   if test X"$OPT_NSS" != Xno; then
     if test "x$OPT_NSS" = "xyes"; then
@@ -2141,7 +2199,7 @@ if test "$OPENSSL_ENABLED" != "1" -a "$GNUTLS_ENABLED" != "1"; then
 
   fi dnl NSS not disabled
 
-fi dnl OPENSSL != 1 -a GNUTLS_ENABLED != 1
+fi dnl curl_ssl_msg = init_ssl_msg
 
 OPT_AXTLS=off
 
@@ -2198,9 +2256,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
   AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
-  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss or --with-axtls to address this.])
+  AC_MSG_WARN([Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls or --with-winssl to address this.])
 else
   # SSL is enabled, genericly
   AC_SUBST(SSL_ENABLED)
@@ -2212,6 +2270,93 @@ dnl Check for the CA bundle
 dnl **********************************************************************
 
 CURL_CHECK_CA_BUNDLE
+
+dnl **********************************************************************
+dnl Check for libmetalink
+dnl **********************************************************************
+
+OPT_LIBMETALINK=no
+
+AC_ARG_WITH(libmetalink,dnl
+AC_HELP_STRING([--with-libmetalink=PATH],[where to look for libmetalink, PATH points to the installation root])
+AC_HELP_STRING([--without-libmetalink], [disable libmetalink detection]),
+  OPT_LIBMETALINK=$withval)
+
+if test X"$OPT_LIBMETALINK" != Xno; then
+
+  addlib=""
+  addld=""
+  addcflags=""
+  version=""
+  libmetalinklib=""
+  PKGTEST="no"
+  if test "x$OPT_LIBMETALINK" = "xyes"; then
+    dnl this is with no partiular path given
+    PKGTEST="yes"
+    CURL_CHECK_PKGCONFIG(libmetalink)
+  else
+    dnl When particular path is given, set PKG_CONFIG_LIBDIR using the path.
+    LIBMETALINK_PCDIR="$OPT_LIBMETALINK/lib/pkgconfig"
+    AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$LIBMETALINK_PCDIR"])
+    if test -f "$LIBMETALINK_PCDIR/libmetalink.pc"; then
+      PKGTEST="yes"
+    fi
+    if test "$PKGTEST" = "yes"; then
+      CURL_CHECK_PKGCONFIG(libmetalink, [$LIBMETALINK_PCDIR])
+    fi
+  fi
+  if test "$PKGTEST" = "yes" && test "$PKGCONFIG" != "no"; then
+    addlib=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --libs-only-l libmetalink`
+    addld=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --libs-only-L libmetalink`
+    addcflags=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --cflags-only-I libmetalink`
+    version=`CURL_EXPORT_PCDIR([$LIBMETALINK_PCDIR]) dnl
+      $PKGCONFIG --modversion libmetalink`
+    libmetalinklib=`echo $addld | $SED -e 's/-L//'`
+  fi
+  if test -n "$addlib"; then
+
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
+    clean_LIBS="$LIBS"
+    CPPFLAGS="$addcflags $clean_CPPFLAGS"
+    LDFLAGS="$addld $clean_LDFLAGS"
+    LIBS="$addlib $clean_LIBS"
+    AC_MSG_CHECKING([if libmetalink is recent enough])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+#       include <metalink/metalink.h>
+      ]],[[
+        if(0 != metalink_strerror(0)) /* added in 0.1.0 */
+          return 1;
+      ]])
+    ],[
+      AC_MSG_RESULT([yes ($version)])
+      want_metalink="yes"
+    ],[
+      AC_MSG_RESULT([no ($version)])
+      AC_MSG_NOTICE([libmetalink library defective or too old])
+      want_metalink="no"
+    ])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+    if test "$want_metalink" = "yes"; then
+      dnl finally libmetalink will be used
+      AC_DEFINE(USE_METALINK, 1, [Define to enable metalink support])
+      LIBMETALINK_LIBS=$addlib
+      LIBMETALINK_LDFLAGS=$addld
+      LIBMETALINK_CFLAGS=$addcflags
+      AC_SUBST([LIBMETALINK_LIBS])
+      AC_SUBST([LIBMETALINK_LDFLAGS])
+      AC_SUBST([LIBMETALINK_CFLAGS])
+      curl_mtlnk_msg="enabled"
+    fi
+
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of LIBSSH2 libraries and headers
@@ -2413,6 +2558,10 @@ AC_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
           versioned_symbols_flavour="CYASSL_"
         elif test "x$AXTLS_ENABLED" == "x1"; then
           versioned_symbols_flavour="AXTLS_"
+        elif test "x$WINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="WINSSL_"
+        elif test "x$DARWINSSL_ENABLED" == "x1"; then
+          versioned_symbols_flavour="DARWINSSL_"
         else
           versioned_symbols_flavour=""
         fi
@@ -2431,6 +2580,78 @@ AC_MSG_RESULT(no)
 AC_SUBST(VERSIONED_FLAVOUR, ["$versioned_symbols_flavour"])
 AM_CONDITIONAL(VERSIONED_SYMBOLS, test "x$versioned_symbols" = "xyes")
 
+dnl -------------------------------------------------
+dnl check winidn option before other IDN libraries
+dnl -------------------------------------------------
+
+AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+OPT_WINIDN="default"
+AC_ARG_WITH(winidn,
+AC_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+AC_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+  OPT_WINIDN=$withval)
+case "$OPT_WINIDN" in
+  no|default)
+    dnl --without-winidn option used or configure option not specified
+    want_winidn="no"
+    AC_MSG_RESULT([no])
+    ;;
+  yes)
+    dnl --with-winidn option used without path
+    want_winidn="yes"
+    want_winidn_path="default"
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    dnl --with-winidn option used with path
+    want_winidn="yes"
+    want_winidn_path="$withval"
+    AC_MSG_RESULT([yes ($withval)])
+    ;;
+esac
+
+if test "$want_winidn" = "yes"; then
+  dnl winidn library support has been requested
+  clean_CPPFLAGS="$CPPFLAGS"
+  clean_LDFLAGS="$LDFLAGS"
+  clean_LIBS="$LIBS"
+  WINIDN_LIBS="-lnormaliz"
+  #
+  if test "$want_winidn_path" != "default"; then
+    dnl path has been specified
+    dnl pkg-config not available or provides no info
+    WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
+    WINIDN_CPPFLAGS="-I$want_winidn_path/include"
+    WINIDN_DIR="$want_winidn_path/lib$libsuff"
+  fi
+  #
+  CPPFLAGS="$WINIDN_CPPFLAGS $CPPFLAGS"
+  LDFLAGS="$WINIDN_LDFLAGS $LDFLAGS"
+  LIBS="$WINIDN_LIBS $LIBS"
+  #
+  AC_MSG_CHECKING([if IdnToUnicode can be linked])
+  AC_LINK_IFELSE([
+    AC_LANG_FUNC_LINK_TRY([IdnToUnicode])
+  ],[
+    AC_MSG_RESULT([yes])
+    tst_links_winidn="yes"
+  ],[
+    AC_MSG_RESULT([no])
+    tst_links_winidn="no"
+  ])
+  #
+  if test "$tst_links_winidn" = "yes"; then
+    AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
+    AC_DEFINE(WANT_IDN_PROTOTYPES, 1, [Define to 1 to provide own prototypes.])
+    AC_SUBST([IDN_ENABLED], [1])
+    curl_idn_msg="enabled (Windows-native)"
+  else
+    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+    CPPFLAGS="$clean_CPPFLAGS"
+    LDFLAGS="$clean_LDFLAGS"
+    LIBS="$clean_LIBS"
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of IDN libraries and headers
@@ -2985,10 +3206,20 @@ AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
        fi
        ;;
   *)
-       AC_MSG_RESULT(no)
+       if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         AC_MSG_RESULT(yes)
+       else
+         AC_MSG_RESULT(no)
+       fi
        ;;
   esac ],
-       AC_MSG_RESULT(no)
+       if test "x$WINSSL_ENABLED" = "x1"; then
+         # --with-winssl implies --enable-sspi
+         AC_MSG_RESULT(yes)
+       else
+         AC_MSG_RESULT(no)
+       fi
 )
 
 dnl ************************************************************
@@ -3119,7 +3350,7 @@ AC_SUBST(ENABLE_SHARED)
 
 dnl
 dnl For keeping supported features and protocols also in pkg-config file
-dnl since it is more cross-compile frient than curl-config
+dnl since it is more cross-compile friendly than curl-config
 dnl
 
 if test "x$USE_SSLEAY" = "x1"; then
@@ -3147,7 +3378,8 @@ if test "x$USE_WINDOWS_SSPI" = "x1"; then
 fi
 if test "x$CURL_DISABLE_HTTP" != "x1"; then
   if test "x$USE_SSLEAY" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \
-      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1"; then
+      -o "x$GNUTLS_ENABLED" = "x1" -o "x$NSS_ENABLED" = "x1" \
+      -o "x$DARWINSSL_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM"
     if test "x$NTLM_WB_ENABLED" = "x1"; then
       SUPPORT_FEATURES="$SUPPORT_FEATURES NTLM_WB"
@@ -3316,6 +3548,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   LDAPS support:    ${curl_ldaps_msg}
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
+  metalink support: ${curl_mtlnk_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 ])
 

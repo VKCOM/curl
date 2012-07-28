@@ -1,54 +1,52 @@
-Curl and libcurl 7.26.0
+Curl and libcurl 7.27.0
 
- Public curl releases:         127
- Command line options:         151
+ Public curl releases:         128
+ Command line options:         152
  curl_easy_setopt() options:   199
  Public functions in libcurl:  58
  Known libcurl bindings:       39
- Contributors:                 929
+ Contributors:                 953
 
 This release includes the following changes:
 
- o nss: the minimal supported version of NSS bumped to 3.12.x
- o nss: human-readable names are now provided for NSS errors if available
- o add a manual page for mk-ca-bundle
- o added --post303 and the CURL_REDIR_POST_303 option for CURLOPT_POSTREDIR
- o smtp: Add support for DIGEST-MD5 authentication
- o pop3: Added support for additional pop3 commands
+ o nss: use human-readable error messages provided by NSS
+ o added --metalink for metalink download support [5]
+ o pop3: Added support for sasl plain text authentication
+ o pop3: Added support for sasl login authentication 
+ o pop3: Added support for sasl ntlm authentication
+ o pop3: Added support for sasl cram-md5 authentication
+ o pop3: Added support for sasl digest-md5 authentication
+ o pop3: Added support for apop authentication
+ o Added support for Schannel (Native Windows) SSL/TLS encryption [2]
+ o Added support for Darwin SSL (Native Mac OS X and iOS) [6]
+ o http: print reason phrase from HTTP status line on error [8]
 
 This release includes the following bugfixes:
 
- o nss: libcurl now uses NSS_InitContext() to prevent collisions if available
-   [1]
- o URL parse: reject numerical IPv6 addresses outside brackets [4]
- o MD5: fix OOM memory leak [5]
- o OpenSSL cert: provide more details when cert check fails
- o HTTP: empty chunked POST ended up in two zero size chunks [6]
- o fixed a regression when curl resolved to multiple addresses and the first
-   isn't supported [7]
- o -# progress meter: avoid superfluous updates and duplicate lines [8]
- o headers: surround GCC attribute names with double underscores [9]
- o PolarSSL: correct return code for CRL matches
- o PolarSSL: include version number in version string
- o PolarSSL: add support for asynchronous connect
- o mk-ca-bundle: revert the LWP usage [12]
- o IPv6 cookie domain: get rid of the first bracket before the second
- o connect.c: return changed to CURLE_COULDNT_CONNECT when opensocket fails
- o OpenSSL: Made cert hostname check conform to RFC 6125 [10]
- o HTTP: reset expected DL/UL sizes on redirects [11]
- o CMake: fix Windows LDAP/LDAPS option handling [2]
- o CMake: fix MS Visual Studio x64 unsigned long long literal suffix [3]
- o configure: update detection logic of getaddrinfo() thread-safeness
- o configure: check for gethostbyname in the watt lib
- o curl-config.1: fix curl-config usage in example [13]
- o smtp: Fixed non-escaping of dot character at beginning of line
- o MakefileBuild.vc: use the correct IDN variable
- o autoconf: improve handling of versioned symbols
- o curl.1: clarify -x usage
- o curl: shorten user-agent
- o smtp: issue with the multi-interface always sending postdata [14]
- o compile error with GnuTLS+Nettle fixed
- o winbuild: fix IPv6 enabled build
+ o pop3: Fixed the issue of having to supply the user name for all requests
+ o configure: fix LDAPS disabling related misplaced closing parenthesis
+ o cmdline: made -D option work with -O and -J
+ o configure: Fix libcurl.pc and curl-config generation for static MingW*
+   cross builds
+ o ssl: fix duplicated SSL handshake with multi interface and proxy [1]
+ o winbuild: Fix Makefile.vc ignoring USE_IPV6 and USE_IDN flags
+ o OpenSSL: support longer certificate subject names [3]
+ o openldap: OOM fixes
+ o log2changes.pl: fix the Version output
+ o lib554.c: use curl_formadd() properly [4]
+ o urldata.h: fix cyassl build clash with wincrypt.h
+ o cookies: changed the URL in the cookiejar headers [7]
+ o http-proxy: keep CONNECT connections alive (for NTLM)
+ o NTLM SSPI: fixed to work with unicode user names and passwords
+ o OOM fix in the curl tool when cloning cmdline options
+ o fixed some examples to use curl_global_init() properly
+ o cmdline: stricter numerical option parser
+ o HTTP HEAD: don't force-close after response-headers
+ o test231: fix wrong -C use
+ o docs: switch to proper UTF-8 for text file encoding
+ o keepalive: DragonFly uses milliseconds [9]
+ o HTTP Digest: Client's "qop" value should not be quoted
+ o make distclean works again
 
 This release includes the following known bugs:
 
@@ -57,29 +55,22 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Andrei Cipu, Armel Asselin, Benjamin Johnson, Dag Ekengren, Dave Reisner,
- Gokhan Sengun, Guenter Knauf, Jan Schaumann, Jonathan Nieder, Kamil Dudka,
- Lijo Antony, Olaf Flebbe, Rodrigo Silva, Steve Holme, Tatsuhiro Tsujikawa,
- Tim Heckman, Yang Tse, Arnaud Compan, Blaise Potard, Daniel Theron,
- Michael Mueller, Michael Wallner, Tim Heckman, Roman Mamedov, Julian Taylor,
- Claes Jakobsson, Pierre Chapuis, Jan Ehrhardt
+ Anthony Bryan, Guenter Knauf, Kamil Dudka, Steve Holme, Tatsuhiro Tsujikawa,
+ Yang Tse, Gokhan Sengun, Marc Hoersken, Ghennadi Procopciuc, Gisle Vanem,
+ Mark Salisbury, Anthony G. Basile, Enrico Scholz, Robert B. Harris,
+ Neil Bowers, Marcel Raad, Christian Hägele, Philip Craig, Nick Zitzmann,
+ Eelco Dolstra, Anton Yabchinskiy, Santhana Todatry, John Marino
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = https://bugzilla.redhat.com/738456
- [2] = http://curl.haxx.se/mail/lib-2012-03/0278.html
- [3] = http://curl.haxx.se/mail/lib-2012-03/0255.html
- [4] = http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=670126
- [5] = http://curl.haxx.se/mail/lib-2012-04/0246.html
- [6] = http://curl.haxx.se/mail/archive-2012-04/0060.html
- [7] = http://curl.haxx.se/bug/view.cgi?id=3516508
- [8] = http://curl.haxx.se/bug/view.cgi?id=3517418
- [9] = http://curl.haxx.se/mail/lib-2012-04/0127.html
- [10] = http://tools.ietf.org/html/rfc6125#section-6.4.3
- [11] = http://curl.haxx.se/bug/view.cgi?id=3510057
- [12] = http://curl.haxx.se/mail/lib-2012-03/0238.html
- [13] = http://curl.haxx.se/bug/view.cgi?id=3528241
- [14] = http://curl.haxx.se/mail/lib-2012-05/0108.html
- 
+ [1] = https://bugzilla.redhat.com/788526
+ [2] = http://daniel.haxx.se/blog/2012/06/12/schannel-support-in-libcurl/
+ [3] = http://curl.haxx.se/bug/view.cgi?id=3533045
+ [4] = http://curl.haxx.se/mail/lib-2012-06/0001.html
+ [5] = http://daniel.haxx.se/blog/2012/06/03/curling-the-metalink/
+ [6] = http://daniel.haxx.se/blog/2012/06/28/darwin-native-ssl-for-curl/
+ [7] = http://daniel.haxx.se/blog/2012/07/08/curls-new-http-cookies-docs/
+ [8] = https://bugzilla.redhat.com/676596
+ [9] = http://curl.haxx.se/bug/view.cgi?id=3546257

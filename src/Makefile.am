@@ -52,9 +52,10 @@ endif
 include Makefile.inc
 
 # This might hold -Werror
-CFLAGS += @CURL_CFLAG_EXTRAS@
+CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
 
-curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@ @LIBMETALINK_LIBS@
+curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c

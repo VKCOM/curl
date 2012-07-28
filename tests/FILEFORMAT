@@ -133,6 +133,10 @@ skip: [num]     instructs the server to ignore reading this many bytes from a PU
 rtp: part [num] channel [num] size [num]
                stream a fake RTP packet for the given part on a chosen channel
                with the given payload size
+
+connection-monitor When used, this will log [DISCONNECT] to the server.input
+               log when the connection is disconnected.
+
 </servercmd>
 </reply>
 
@@ -186,6 +190,7 @@ socks
 unittest
 debug
 TLS-SRP
+Metalink
 
 as well as each protocol that curl supports.  A protocol only needs to be
 specified if it is different from the server (useful when the server

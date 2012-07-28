@@ -21,7 +21,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -110,6 +110,7 @@ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 CONFIGURE_OPTIONS = @CONFIGURE_OPTIONS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CPPFLAG_CURL_STATICLIB = @CPPFLAG_CURL_STATICLIB@
 CROSSCOMPILING_FALSE = @CROSSCOMPILING_FALSE@
 CROSSCOMPILING_TRUE = @CROSSCOMPILING_TRUE@
 CURLDEBUG_FALSE = @CURLDEBUG_FALSE@
@@ -168,6 +169,9 @@ KRB4_ENABLED = @KRB4_ENABLED@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBMETALINK_CFLAGS = @LIBMETALINK_CFLAGS@
+LIBMETALINK_LDFLAGS = @LIBMETALINK_LDFLAGS@
+LIBMETALINK_LIBS = @LIBMETALINK_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -225,6 +229,7 @@ USE_CPPFLAG_BUILDING_LIBCURL_TRUE = @USE_CPPFLAG_BUILDING_LIBCURL_TRUE@
 USE_CPPFLAG_CURL_STATICLIB_FALSE = @USE_CPPFLAG_CURL_STATICLIB_FALSE@
 USE_CPPFLAG_CURL_STATICLIB_TRUE = @USE_CPPFLAG_CURL_STATICLIB_TRUE@
 USE_CYASSL = @USE_CYASSL@
+USE_DARWINSSL = @USE_DARWINSSL@
 USE_EMBEDDED_ARES_FALSE = @USE_EMBEDDED_ARES_FALSE@
 USE_EMBEDDED_ARES_TRUE = @USE_EMBEDDED_ARES_TRUE@
 USE_GNUTLS = @USE_GNUTLS@
@@ -236,6 +241,7 @@ USE_MANUAL_TRUE = @USE_MANUAL_TRUE@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
 USE_POLARSSL = @USE_POLARSSL@
+USE_SCHANNEL = @USE_SCHANNEL@
 USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
@@ -300,9 +306,15 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  certs/srp-verifier-conf certs/srp-verifier-db
 
 @BUILD_UNITTESTS_FALSE@BUILD_UNIT = 
+
+# we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
+# added twice as then targets such as 'distclean' misbehave and try to
+# do things twice in that subdir at times (and thus fails).
 @BUILD_UNITTESTS_TRUE@BUILD_UNIT = unit
+@BUILD_UNITTESTS_FALSE@DIST_UNIT = unit
+@BUILD_UNITTESTS_TRUE@DIST_UNIT = 
 SUBDIRS = data server libtest $(BUILD_UNIT)
-DIST_SUBDIRS = $(SUBDIRS) unit
+DIST_SUBDIRS = $(SUBDIRS) $(DIST_UNIT)
 PERLFLAGS = -I$(srcdir)
 CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 MAN2HTML = roffit < $< >$@
@@ -327,9 +339,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  tests/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  tests/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu  tests/Makefile
+	  $(AUTOMAKE) --foreign  tests/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

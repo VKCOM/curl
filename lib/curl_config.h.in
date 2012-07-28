@@ -969,6 +969,9 @@
 /* if CyaSSL is enabled */
 #undef USE_CYASSL
 
+/* to enable iOS/Mac OS X native SSL/TLS support */
+#undef USE_DARWINSSL
+
 /* if GnuTLS is enabled */
 #undef USE_GNUTLS
 
@@ -984,6 +987,9 @@
 /* If you want to build curl with the built-in manual */
 #undef USE_MANUAL
 
+/* Define to enable metalink support */
+#undef USE_METALINK
+
 /* if NSS is enabled */
 #undef USE_NSS
 
@@ -996,6 +1002,9 @@
 /* if PolarSSL is enabled */
 #undef USE_POLARSSL
 
+/* to enable Windows native SSL/TLS support */
+#undef USE_SCHANNEL
+
 /* if SSL is enabled */
 #undef USE_SSLEAY
 
@@ -1004,6 +1013,9 @@
 
 /* Use TLS-SRP authentication */
 #undef USE_TLS_SRP
+
+/* Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz). */
+#undef USE_WIN32_IDN
 
 /* Define to 1 if you are building a Windows target with large file support.
    */
@@ -1021,6 +1033,9 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Define to 1 to provide own prototypes. */
+#undef WANT_IDN_PROTOTYPES
 
 /* Define to avoid automatic inclusion of winsock.h */
 #undef WIN32_LEAN_AND_MEAN
