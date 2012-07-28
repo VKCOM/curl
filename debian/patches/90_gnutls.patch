@@ -7,7 +7,7 @@ Last-Update: 2012-03-22
 
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1791,9 +1791,9 @@
+@@ -1849,9 +1849,9 @@
  
        CLEANLIBS="$LIBS"
        CLEANCPPFLAGS="$CPPFLAGS"
@@ -61,13 +61,14 @@ Last-Update: 2012-03-22
  WIN32SOURCES = $(CSOURCES)
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -54,8 +54,8 @@
+@@ -54,9 +54,9 @@
  # This might hold -Werror
- CFLAGS += @CURL_CFLAG_EXTRAS@
+ CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
  
--curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@
+-curl_LDADD = $(top_builddir)/lib/libcurl.la @CURL_LIBS@ @LIBMETALINK_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@ @LIBMETALINK_LIBS@
+ curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl.la
-+curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
 +curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  BUILT_SOURCES = hugehelp.c
  CLEANFILES = hugehelp.c
