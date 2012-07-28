@@ -1371,9 +1371,10 @@ static CURLcode https_connecting(struct connectdata *conn, bool *done)
 }
 #endif
 
-#if defined(USE_SSLEAY) || defined(USE_GNUTLS)
-/* This function is for OpenSSL and GnuTLS only. It should be made to query
-   the generic SSL layer instead. */
+#if defined(USE_SSLEAY) || defined(USE_GNUTLS) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL)
+/* This function is for OpenSSL, GnuTLS, darwinssl, and schannel only.
+   It should be made to query the generic SSL layer instead. */
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
@@ -1398,8 +1399,7 @@ static int https_getsock(struct connectdata *conn,
   return CURLE_OK;
 }
 #else
-#if defined(USE_NSS) || defined(USE_QSOSSL) || \
-  defined(USE_POLARSSL) || defined(USE_AXTLS) || defined(USE_CYASSL)
+#ifdef USE_SSL
 static int https_getsock(struct connectdata *conn,
                          curl_socket_t *socks,
                          int numsocks)
@@ -1409,8 +1409,8 @@ static int https_getsock(struct connectdata *conn,
   (void)numsocks;
   return GETSOCK_BLANK;
 }
-#endif /* USE_AXTLS || USE_POLARSSL || USE_QSOSSL || USE_NSS */
-#endif /* USE_SSLEAY || USE_GNUTLS */
+#endif /* USE_SSL */
+#endif /* USE_SSLEAY || USE_GNUTLS || USE_SCHANNEL */
 
 /*
  * Curl_http_done() gets called from Curl_done() after a single HTTP request
@@ -1602,7 +1602,7 @@ CURLcode Curl_add_timecondition(struct SessionHandle *data,
 
   result = Curl_gmtime(data->set.timevalue, &keeptime);
   if(result) {
-    failf(data, "Invalid TIMEVALUE\n");
+    failf(data, "Invalid TIMEVALUE");
     return result;
   }
   tm = &keeptime;
@@ -2727,6 +2727,42 @@ static CURLcode header_append(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+static void print_http_error(struct SessionHandle *data)
+{
+  struct SingleRequest *k = &data->req;
+  char *beg = k->p;
+
+  /* make sure that data->req.p points to the HTTP status line */
+  if(!strncmp(beg, "HTTP", 4)) {
+
+    /* skip to HTTP status code */
+    beg = strchr(beg, ' ');
+    if(beg && *++beg) {
+
+      /* find trailing CR */
+      char end_char = '\r';
+      char *end = strchr(beg, end_char);
+      if(!end) {
+        /* try to find LF (workaround for non-compliant HTTP servers) */
+        end_char = '\n';
+        end = strchr(beg, end_char);
+      }
+
+      if(end) {
+        /* temporarily replace CR or LF by NUL and print the error message */
+        *end = '\0';
+        failf(data, "The requested URL returned error: %s", beg);
+
+        /* restore the previously replaced CR or LF */
+        *end = end_char;
+        return;
+      }
+    }
+  }
+
+  /* fall-back to printing the HTTP status code only */
+  failf(data, "The requested URL returned error: %d", k->httpcode);
+}
 
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
@@ -2852,7 +2888,8 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
 
         if((k->size == -1) && !k->chunk && !conn->bits.close &&
            (conn->httpversion >= 11) &&
-           !(conn->handler->protocol & CURLPROTO_RTSP)) {
+           !(conn->handler->protocol & CURLPROTO_RTSP) &&
+           data->set.httpreq != HTTPREQ_HEAD) {
           /* On HTTP 1.1, when connection is not to get closed, but no
              Content-Length nor Content-Encoding chunked have been
              received, according to RFC2616 section 4.4 point 5, we
@@ -3114,8 +3151,7 @@ CURLcode Curl_http_readwrite_headers(struct SessionHandle *data,
           }
           else {
             /* serious error, go home! */
-            failf (data, "The requested URL returned error: %d",
-                   k->httpcode);
+            print_http_error(data);
             return CURLE_HTTP_RETURNED_ERROR;
           }
         }

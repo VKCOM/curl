@@ -25,6 +25,8 @@
 
 #include "tool_sdecls.h"
 
+#include "tool_metalink.h"
+
 struct Configurable {
   CURL *easy;               /* once we have one, we keep it here */
   bool remote_time;
@@ -198,6 +200,10 @@ struct Configurable {
   bool xattr;               /* store metadata in extended attributes */
   long gssapi_delegation;
   bool ssl_allow_beast;     /* allow this SSL vulnerability */
+
+  bool use_metalink;        /* process given URLs as metalink XML file */
+  metalinkfile *metalinkfile_list; /* point to the first node */
+  metalinkfile *metalinkfile_last; /* point to the last/current node */
 }; /* struct Configurable */
 
 void free_config_fields(struct Configurable *config);

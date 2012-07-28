@@ -223,6 +223,12 @@
  */
 
 #ifdef HAVE_WINDOWS_H
+#  if defined(UNICODE) && !defined(_UNICODE)
+#    define _UNICODE
+#  endif
+#  if defined(_UNICODE) && !defined(UNICODE)
+#    define UNICODE
+#  endif
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
@@ -237,6 +243,7 @@
 #      include <winsock.h>
 #    endif
 #  endif
+#  include <tchar.h>
 #endif
 
 /*
@@ -349,11 +356,13 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  undef  lseek
-#  define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
-#  define fstat(fdes,stp)            _fstat(fdes, stp)
-#  define stat(fname,stp)            _stat(fname, stp)
-#  define struct_stat                struct _stat
+#  ifndef _WIN32_WCE
+#    undef  lseek
+#    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
+#    define fstat(fdes,stp)            _fstat(fdes, stp)
+#    define stat(fname,stp)            _stat(fname, stp)
+#    define struct_stat                struct _stat
+#  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
 
@@ -579,7 +588,8 @@ int netware_init(void);
 
 #if defined(USE_GNUTLS) || defined(USE_SSLEAY) || defined(USE_NSS) || \
     defined(USE_QSOSSL) || defined(USE_POLARSSL) || defined(USE_AXTLS) || \
-    defined(USE_CYASSL)
+    defined(USE_CYASSL) || defined(USE_SCHANNEL) || \
+    defined(USE_DARWINSSL)
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
@@ -590,7 +600,7 @@ int netware_init(void);
 /* Single point where USE_NTLM definition might be done */
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_NTLM)
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI) || \
-   defined(USE_GNUTLS) || defined(USE_NSS)
+    defined(USE_GNUTLS) || defined(USE_NSS) || defined(USE_DARWINSSL)
 #define USE_NTLM
 #endif
 #endif

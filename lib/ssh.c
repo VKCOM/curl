@@ -2540,7 +2540,7 @@ static CURLcode ssh_easy_statemach(struct connectdata *conn,
 
     left = Curl_timeleft(data, NULL, duringconnect);
     if(left < 0) {
-      failf(data, "Operation timed out\n");
+      failf(data, "Operation timed out");
       return CURLE_OPERATION_TIMEDOUT;
     }
 
@@ -2820,7 +2820,8 @@ static CURLcode ssh_done(struct connectdata *conn, CURLcode status)
 
   if(sftp_scp)
     Curl_safefree(sftp_scp->path);
-  Curl_pgrsDone(conn);
+  if(Curl_pgrsDone(conn))
+    return CURLE_ABORTED_BY_CALLBACK;
 
   conn->data->req.keepon = 0; /* clear all bits */
   return result;

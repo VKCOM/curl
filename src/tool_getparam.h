@@ -32,10 +32,13 @@ typedef enum {
   PARAM_HELP_REQUESTED,
   PARAM_GOT_EXTRA_PARAMETER,
   PARAM_BAD_NUMERIC,
+  PARAM_NEGATIVE_NUMERIC,
   PARAM_LIBCURL_DOESNT_SUPPORT,
   PARAM_NO_MEM,
   PARAM_LAST
 } ParameterError;
+
+struct Configurable;
 
 ParameterError getparameter(char *flag,
                             char *nextarg,

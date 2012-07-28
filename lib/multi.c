@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2011, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -982,6 +982,16 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       data->state.pipe_broke = FALSE;
       easy->easy_conn = NULL;
       break;
+    }
+
+    if(!easy->easy_conn &&
+       easy->state > CURLM_STATE_CONNECT &&
+       easy->state < CURLM_STATE_DONE) {
+      /* In all these states, the code will blindly access 'easy->easy_conn'
+         so this is precaution that it isn't NULL. And it silences static
+         analyzers. */
+      failf(data, "In state %d with no easy_conn, bail out!\n", easy->state);
+      return CURLM_INTERNAL_ERROR;
     }
 
     if(easy->easy_conn && easy->state > CURLM_STATE_CONNECT &&
@@ -2018,12 +2028,13 @@ static void singlesocket(struct Curl_multi *multi,
         remove_sock_from_hash = FALSE;
 
       if(remove_sock_from_hash) {
+        /* in this case 'entry' is always non-NULL */
         if(multi->socket_cb)
           multi->socket_cb(easy->easy_handle,
                            s,
                            CURL_POLL_REMOVE,
                            multi->socket_userp,
-                           entry ? entry->socketp : NULL);
+                           entry->socketp);
         sh_delentry(multi->sockhash, s);
       }
 

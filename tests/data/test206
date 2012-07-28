@@ -12,6 +12,9 @@ HTTP proxy Digest auth
 
 # Server-side
 <reply>
+<servercmd>
+connection-monitor
+</servercmd>
 
 # this is returned first since we get no proxy-auth
 <data>
@@ -95,6 +98,7 @@ User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6
 Host: test.remote.haxx.se:206
 Accept: */*
 
+[DISCONNECT]
 </protocol>
 </verify>
 </testcase>

@@ -128,7 +128,9 @@ am__objects_1 = libcurl_la-file.lo libcurl_la-timeval.lo \
 	libcurl_la-asyn-ares.lo libcurl_la-asyn-thread.lo \
 	libcurl_la-curl_gssapi.lo libcurl_la-curl_ntlm.lo \
 	libcurl_la-curl_ntlm_wb.lo libcurl_la-curl_ntlm_core.lo \
-	libcurl_la-curl_ntlm_msgs.lo
+	libcurl_la-curl_ntlm_msgs.lo libcurl_la-curl_sasl.lo \
+	libcurl_la-curl_schannel.lo libcurl_la-curl_multibyte.lo \
+	libcurl_la-curl_darwinssl.lo
 am__objects_2 =
 am_libcurl_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libcurl_la_OBJECTS = $(am_libcurl_la_OBJECTS)
@@ -181,7 +183,9 @@ am__objects_3 = libcurlu_la-file.lo libcurlu_la-timeval.lo \
 	libcurlu_la-asyn-ares.lo libcurlu_la-asyn-thread.lo \
 	libcurlu_la-curl_gssapi.lo libcurlu_la-curl_ntlm.lo \
 	libcurlu_la-curl_ntlm_wb.lo libcurlu_la-curl_ntlm_core.lo \
-	libcurlu_la-curl_ntlm_msgs.lo
+	libcurlu_la-curl_ntlm_msgs.lo libcurlu_la-curl_sasl.lo \
+	libcurlu_la-curl_schannel.lo libcurlu_la-curl_multibyte.lo \
+	libcurlu_la-curl_darwinssl.lo
 am_libcurlu_la_OBJECTS = $(am__objects_3) $(am__objects_2)
 libcurlu_la_OBJECTS = $(am_libcurlu_la_OBJECTS)
 @BUILD_UNITTESTS_TRUE@am_libcurlu_la_rpath =
@@ -224,6 +228,7 @@ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 CONFIGURE_OPTIONS = @CONFIGURE_OPTIONS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CPPFLAG_CURL_STATICLIB = @CPPFLAG_CURL_STATICLIB@
 CROSSCOMPILING_FALSE = @CROSSCOMPILING_FALSE@
 CROSSCOMPILING_TRUE = @CROSSCOMPILING_TRUE@
 CURLDEBUG_FALSE = @CURLDEBUG_FALSE@
@@ -282,6 +287,9 @@ KRB4_ENABLED = @KRB4_ENABLED@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBCURL_LIBS = @LIBCURL_LIBS@
+LIBMETALINK_CFLAGS = @LIBMETALINK_CFLAGS@
+LIBMETALINK_LDFLAGS = @LIBMETALINK_LDFLAGS@
+LIBMETALINK_LIBS = @LIBMETALINK_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -339,6 +347,7 @@ USE_CPPFLAG_BUILDING_LIBCURL_TRUE = @USE_CPPFLAG_BUILDING_LIBCURL_TRUE@
 USE_CPPFLAG_CURL_STATICLIB_FALSE = @USE_CPPFLAG_CURL_STATICLIB_FALSE@
 USE_CPPFLAG_CURL_STATICLIB_TRUE = @USE_CPPFLAG_CURL_STATICLIB_TRUE@
 USE_CYASSL = @USE_CYASSL@
+USE_DARWINSSL = @USE_DARWINSSL@
 USE_EMBEDDED_ARES_FALSE = @USE_EMBEDDED_ARES_FALSE@
 USE_EMBEDDED_ARES_TRUE = @USE_EMBEDDED_ARES_TRUE@
 USE_GNUTLS = @USE_GNUTLS@
@@ -350,6 +359,7 @@ USE_MANUAL_TRUE = @USE_MANUAL_TRUE@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
 USE_POLARSSL = @USE_POLARSSL@
+USE_SCHANNEL = @USE_SCHANNEL@
 USE_SSLEAY = @USE_SSLEAY@
 USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
@@ -434,14 +444,14 @@ DOCS = README.encoding README.memoryleak README.ares README.curlx	\
  README.curl_off_t README.pingpong
 
 CMAKE_DIST = CMakeLists.txt curl_config.h.cmake
-EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)                 \
- vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h            \
- config-mac.h curl_config.h.in makefile.dj config-dos.h libcurl.plist      \
- libcurl.rc config-amigaos.h makefile.amiga                                \
- Makefile.netware nwlib.c nwos.c libcurl.imp msvcproj.head msvcproj.foot   \
- config-win32ce.h config-os400.h setup-os400.h config-symbian.h		   \
- Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		   \
- mk-ca-bundle.vbs firefox-db2pem.sh $(CMAKE_DIST) config-vxworks.h	   \
+EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)              \
+ vc6libcurl.dsw config-win32.h config-win32ce.h config-riscos.h         \
+ config-mac.h curl_config.h.in makefile.dj config-dos.h libcurl.plist   \
+ libcurl.rc config-amigaos.h makefile.amiga                             \
+ Makefile.netware nwlib.c nwos.c msvcproj.head msvcproj.foot		\
+ config-win32ce.h config-os400.h setup-os400.h config-symbian.h		\
+ Makefile.Watcom config-tpf.h $(DOCS) $(VCPROJ) mk-ca-bundle.pl		\
+ mk-ca-bundle.vbs firefox-db2pem.sh $(CMAKE_DIST) config-vxworks.h	\
  Makefile.vxworks config-vms.h checksrc.pl
 
 CLEANFILES = $(DSP) $(VCPROJ)
@@ -535,7 +545,8 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   curl_rtmp.c openldap.c curl_gethostname.c gopher.c axtls.c		\
   idn_win32.c http_negotiate_sspi.c cyassl.c http_proxy.c non-ascii.c	\
   asyn-ares.c asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c	\
-  curl_ntlm_core.c curl_ntlm_msgs.c
+  curl_ntlm_core.c curl_ntlm_msgs.c curl_sasl.c curl_schannel.c	\
+  curl_multibyte.c curl_darwinssl.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -550,8 +561,9 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   curl_base64.h rawstr.h curl_addrinfo.h curl_sspi.h slist.h nonblock.h	\
   curl_memrchr.h imap.h pop3.h smtp.h pingpong.h rtsp.h curl_threads.h	\
   warnless.h curl_hmac.h polarssl.h curl_rtmp.h curl_gethostname.h	\
-  gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h \
-  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h
+  gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h	\
+  curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h	\
+  curl_sasl.h curl_schannel.h curl_multibyte.h curl_darwinssl.h
 
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
@@ -670,16 +682,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-content_encoding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-cookie.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_addrinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_darwinssl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_fnmatch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_gethostname.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_gssapi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_memrchr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_multibyte.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_ntlm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_ntlm_core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_ntlm_msgs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_ntlm_wb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_rand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_rtmp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_sasl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_schannel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_sspi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-curl_threads.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-cyassl.Plo@am__quote@
@@ -771,16 +787,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-content_encoding.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-cookie.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_addrinfo.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_darwinssl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_fnmatch.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_gethostname.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_gssapi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_memrchr.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_multibyte.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_ntlm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_ntlm_core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_ntlm_msgs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_ntlm_wb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_rand.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_rtmp.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_sasl.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_schannel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_sspi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-curl_threads.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-cyassl.Plo@am__quote@
@@ -1592,6 +1612,34 @@ libcurl_la-curl_ntlm_msgs.lo: curl_ntlm_msgs.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_ntlm_msgs.lo `test -f 'curl_ntlm_msgs.c' || echo '$(srcdir)/'`curl_ntlm_msgs.c
 
+libcurl_la-curl_sasl.lo: curl_sasl.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_sasl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_sasl.Tpo" -c -o libcurl_la-curl_sasl.lo `test -f 'curl_sasl.c' || echo '$(srcdir)/'`curl_sasl.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurl_la-curl_sasl.Tpo" "$(DEPDIR)/libcurl_la-curl_sasl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_sasl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_sasl.c' object='libcurl_la-curl_sasl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_sasl.lo `test -f 'curl_sasl.c' || echo '$(srcdir)/'`curl_sasl.c
+
+libcurl_la-curl_schannel.lo: curl_schannel.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_schannel.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_schannel.Tpo" -c -o libcurl_la-curl_schannel.lo `test -f 'curl_schannel.c' || echo '$(srcdir)/'`curl_schannel.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurl_la-curl_schannel.Tpo" "$(DEPDIR)/libcurl_la-curl_schannel.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_schannel.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_schannel.c' object='libcurl_la-curl_schannel.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_schannel.lo `test -f 'curl_schannel.c' || echo '$(srcdir)/'`curl_schannel.c
+
+libcurl_la-curl_multibyte.lo: curl_multibyte.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_multibyte.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_multibyte.Tpo" -c -o libcurl_la-curl_multibyte.lo `test -f 'curl_multibyte.c' || echo '$(srcdir)/'`curl_multibyte.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurl_la-curl_multibyte.Tpo" "$(DEPDIR)/libcurl_la-curl_multibyte.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_multibyte.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_multibyte.c' object='libcurl_la-curl_multibyte.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_multibyte.lo `test -f 'curl_multibyte.c' || echo '$(srcdir)/'`curl_multibyte.c
+
+libcurl_la-curl_darwinssl.lo: curl_darwinssl.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-curl_darwinssl.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-curl_darwinssl.Tpo" -c -o libcurl_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurl_la-curl_darwinssl.Tpo" "$(DEPDIR)/libcurl_la-curl_darwinssl.Plo"; else rm -f "$(DEPDIR)/libcurl_la-curl_darwinssl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_darwinssl.c' object='libcurl_la-curl_darwinssl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c
+
 libcurlu_la-file.lo: file.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-file.Tpo" -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-file.Tpo" "$(DEPDIR)/libcurlu_la-file.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-file.Tpo"; exit 1; fi
@@ -2298,6 +2346,34 @@ libcurlu_la-curl_ntlm_msgs.lo: curl_ntlm_msgs.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_ntlm_msgs.c' object='libcurlu_la-curl_ntlm_msgs.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_ntlm_msgs.lo `test -f 'curl_ntlm_msgs.c' || echo '$(srcdir)/'`curl_ntlm_msgs.c
+
+libcurlu_la-curl_sasl.lo: curl_sasl.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_sasl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_sasl.Tpo" -c -o libcurlu_la-curl_sasl.lo `test -f 'curl_sasl.c' || echo '$(srcdir)/'`curl_sasl.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-curl_sasl.Tpo" "$(DEPDIR)/libcurlu_la-curl_sasl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_sasl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_sasl.c' object='libcurlu_la-curl_sasl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_sasl.lo `test -f 'curl_sasl.c' || echo '$(srcdir)/'`curl_sasl.c
+
+libcurlu_la-curl_schannel.lo: curl_schannel.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_schannel.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_schannel.Tpo" -c -o libcurlu_la-curl_schannel.lo `test -f 'curl_schannel.c' || echo '$(srcdir)/'`curl_schannel.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-curl_schannel.Tpo" "$(DEPDIR)/libcurlu_la-curl_schannel.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_schannel.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_schannel.c' object='libcurlu_la-curl_schannel.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_schannel.lo `test -f 'curl_schannel.c' || echo '$(srcdir)/'`curl_schannel.c
+
+libcurlu_la-curl_multibyte.lo: curl_multibyte.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_multibyte.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_multibyte.Tpo" -c -o libcurlu_la-curl_multibyte.lo `test -f 'curl_multibyte.c' || echo '$(srcdir)/'`curl_multibyte.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-curl_multibyte.Tpo" "$(DEPDIR)/libcurlu_la-curl_multibyte.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_multibyte.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_multibyte.c' object='libcurlu_la-curl_multibyte.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_multibyte.lo `test -f 'curl_multibyte.c' || echo '$(srcdir)/'`curl_multibyte.c
+
+libcurlu_la-curl_darwinssl.lo: curl_darwinssl.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-curl_darwinssl.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-curl_darwinssl.Tpo" -c -o libcurlu_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-curl_darwinssl.Tpo" "$(DEPDIR)/libcurlu_la-curl_darwinssl.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-curl_darwinssl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_darwinssl.c' object='libcurlu_la-curl_darwinssl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

@@ -112,6 +112,8 @@
 #endif
 
 #ifdef USE_CYASSL
+#undef OCSP_REQUEST  /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
+#undef OCSP_RESPONSE /* avoid cyassl/openssl/ssl.h clash with wincrypt.h */
 #include <cyassl/openssl/ssl.h>
 #endif
 
@@ -130,6 +132,19 @@
 #undef calloc
 #undef realloc
 #endif /* USE_AXTLS */
+
+#ifdef USE_SCHANNEL
+#include "curl_sspi.h"
+#include <schnlsp.h>
+#include <schannel.h>
+#endif
+
+#ifdef USE_DARWINSSL
+#include <Security/Security.h>
+/* For some reason, when building for iOS, the omnibus header above does
+ * not include SecureTransport.h as of iOS SDK 5.1. */
+#include <Security/SecureTransport.h>
+#endif
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -214,6 +229,19 @@ enum protection_level {
 };
 #endif
 
+#ifdef USE_SCHANNEL
+/* Structs to store Schannel handles */
+struct curl_schannel_cred {
+  CredHandle cred_handle;
+  TimeStamp time_stamp;
+};
+
+struct curl_schannel_ctxt {
+  CtxtHandle ctxt_handle;
+  TimeStamp time_stamp;
+};
+#endif
+
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
   ssl_connect_1,
@@ -282,6 +310,22 @@ struct ssl_connect_data {
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
 #endif /* USE_AXTLS */
+#ifdef USE_SCHANNEL
+  struct curl_schannel_cred *cred;
+  struct curl_schannel_ctxt *ctxt;
+  SecPkgContext_StreamSizes stream_sizes;
+  ssl_connect_state connecting_state;
+  size_t encdata_length, decdata_length;
+  size_t encdata_offset, decdata_offset;
+  unsigned char *encdata_buffer, *decdata_buffer;
+  unsigned long req_flags, ret_flags;
+#endif /* USE_SCHANNEL */
+#ifdef USE_DARWINSSL
+  SSLContextRef ssl_ctx;
+  curl_socket_t ssl_sockfd;
+  ssl_connect_state connecting_state;
+  bool ssl_direction; /* true if writing, false if reading */
+#endif /* USE_DARWINSSL */
 };
 
 struct ssl_config_data {

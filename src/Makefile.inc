@@ -36,6 +36,7 @@ CURL_CFILES = hugehelp.c \
 	tool_homedir.c \
 	tool_libinfo.c \
 	tool_main.c \
+	tool_metalink.c \
 	tool_mfiles.c \
 	tool_msgs.c \
 	tool_operate.c \
@@ -74,6 +75,7 @@ CURL_HFILES = hugehelp.h \
 	tool_homedir.h \
 	tool_libinfo.h \
 	tool_main.h \
+	tool_metalink.h \
 	tool_mfiles.h \
 	tool_msgs.h \
 	tool_operate.h \

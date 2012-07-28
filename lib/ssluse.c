@@ -62,6 +62,7 @@
 #include <openssl/dsa.h>
 #include <openssl/dh.h>
 #include <openssl/err.h>
+#include <openssl/md5.h>
 #else
 #include <rand.h>
 #include <x509v3.h>
@@ -236,11 +237,6 @@ static int ossl_seed(struct SessionHandle *data)
 
   /* If we get here, it means we need to seed the PRNG using a "silly"
      approach! */
-#ifdef HAVE_RAND_SCREEN
-  /* if RAND_screen() is present, this is windows and thus we assume that the
-     randomness is already taken care of */
-  nread = 100; /* just a value */
-#else
   {
     int len;
     char *area;
@@ -262,7 +258,6 @@ static int ossl_seed(struct SessionHandle *data)
       free(area); /* now remove the random junk */
     } while(!RAND_status());
   }
-#endif
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
@@ -1653,7 +1648,7 @@ ossl_connect_step1(struct connectdata *conn,
       if(data->set.ssl.verifypeer) {
         /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
-              "  CAfile: %s\n  CApath: %s\n",
+              "  CAfile: %s\n  CApath: %s",
               data->set.str[STRING_SSL_CAFILE]?
               data->set.str[STRING_SSL_CAFILE]: "none",
               data->set.str[STRING_SSL_CAPATH]?
@@ -1688,7 +1683,7 @@ ossl_connect_step1(struct connectdata *conn,
     if(!lookup ||
        (!X509_load_crl_file(lookup,data->set.str[STRING_SSL_CRLFILE],
                             X509_FILETYPE_PEM)) ) {
-      failf(data,"error loading CRL file: %s\n",
+      failf(data,"error loading CRL file: %s",
             data->set.str[STRING_SSL_CRLFILE]);
       return CURLE_SSL_CRL_BADFILE;
     }
@@ -2284,7 +2279,7 @@ static CURLcode servercert(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   X509 *issuer;
   FILE *fp;
-  char buffer[256];
+  char *buffer = data->state.buffer;
 
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
@@ -2301,7 +2296,7 @@ static CURLcode servercert(struct connectdata *conn,
   infof (data, "Server certificate:\n");
 
   rc = x509_name_oneline(X509_get_subject_name(connssl->server_cert),
-                          buffer, sizeof(buffer));
+                         buffer, BUFSIZE);
   if(rc) {
     if(strict)
       failf(data, "SSL: couldn't get X509-subject!");
@@ -2346,7 +2341,7 @@ static CURLcode servercert(struct connectdata *conn,
       fp=fopen(data->set.str[STRING_SSL_ISSUERCERT],"r");
       if(!fp) {
         if(strict)
-          failf(data, "SSL: Unable to open issuer cert (%s)\n",
+          failf(data, "SSL: Unable to open issuer cert (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         connssl->server_cert = NULL;
@@ -2355,7 +2350,7 @@ static CURLcode servercert(struct connectdata *conn,
       issuer = PEM_read_X509(fp,NULL,ZERO_NULL,NULL);
       if(!issuer) {
         if(strict)
-          failf(data, "SSL: Unable to read issuer cert (%s)\n",
+          failf(data, "SSL: Unable to read issuer cert (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         X509_free(issuer);
@@ -2365,7 +2360,7 @@ static CURLcode servercert(struct connectdata *conn,
       fclose(fp);
       if(X509_check_issued(issuer,connssl->server_cert) != X509_V_OK) {
         if(strict)
-          failf(data, "SSL: Certificate issuer check failed (%s)\n",
+          failf(data, "SSL: Certificate issuer check failed (%s)",
                 data->set.str[STRING_SSL_ISSUERCERT]);
         X509_free(connssl->server_cert);
         X509_free(issuer);
@@ -2785,5 +2780,24 @@ size_t Curl_ossl_version(char *buffer, size_t size)
 #endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
 
 #endif /* YASSL_VERSION */
+}
+
+void Curl_ossl_random(struct SessionHandle *data, unsigned char *entropy,
+                      size_t length)
+{
+  Curl_ossl_seed(data); /* Initiate the seed if not already done */
+  RAND_bytes(entropy, curlx_uztosi(length));
+}
+
+void Curl_ossl_md5sum(unsigned char *tmp, /* input */
+                      size_t tmplen,
+                      unsigned char *md5sum /* output */,
+                      size_t unused)
+{
+  MD5_CTX MD5pw;
+  (void)unused;
+  MD5_Init(&MD5pw);
+  MD5_Update(&MD5pw, tmp, tmplen);
+  MD5_Final(md5sum, &MD5pw);
 }
 #endif /* USE_SSLEAY */

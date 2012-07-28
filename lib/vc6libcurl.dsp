@@ -186,6 +186,10 @@ SOURCE=.\curl_addrinfo.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\curl_darwinssl.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\curl_fnmatch.c
 # End Source File
 # Begin Source File
@@ -199,6 +203,10 @@ SOURCE=.\curl_gssapi.c
 # Begin Source File
 
 SOURCE=.\curl_memrchr.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_multibyte.c
 # End Source File
 # Begin Source File
 
@@ -223,6 +231,14 @@ SOURCE=.\curl_rand.c
 # Begin Source File
 
 SOURCE=.\curl_rtmp.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_sasl.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_schannel.c
 # End Source File
 # Begin Source File
 
@@ -598,6 +614,10 @@ SOURCE=.\curl_base64.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\curl_darwinssl.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\curl_fnmatch.h
 # End Source File
 # Begin Source File
@@ -634,6 +654,10 @@ SOURCE=.\curl_memrchr.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\curl_multibyte.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\curl_ntlm_core.h
 # End Source File
 # Begin Source File
@@ -655,6 +679,14 @@ SOURCE=.\curl_rand.h
 # Begin Source File
 
 SOURCE=.\curl_rtmp.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_sasl.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_schannel.h
 # End Source File
 # Begin Source File
 

@@ -65,7 +65,7 @@ Andrew Fuller
 Andrew Moise
 Andrew Wansink
 Andrew de los Reyes
-Andrés García
+AndrÃ©s GarcÃ­a
 Andy Cedilnik
 Andy Serpa
 Andy Tsouladze
@@ -76,6 +76,7 @@ Anton Bychkov
 Anton Kalmykov
 Arkadiusz Miskiewicz
 Armel Asselin
+Arnaud Compan
 Arnaud Ebalard
 Arthur Murray
 Arve Knudsen
@@ -94,6 +95,7 @@ Ben Van Hof
 Ben Winslow
 Benbuck Nason
 Benjamin Gerard
+Benjamin Johnson
 Bernard Leak
 Bernhard Reutner-Fischer
 Bertrand Demiddelaer
@@ -102,7 +104,8 @@ Bill Hoffman
 Bjoern Sikora
 Bjorn Augustsson
 Bjorn Reese
-Björn Stenberg
+BjÃ¶rn Stenberg
+Blaise Potard
 Bob Richmond
 Bob Schader
 Bogdan Nicula
@@ -171,6 +174,7 @@ Cris Bailiff
 Cristian Rodriguez
 Curt Bogmine
 Cyrill Osterwalder
+Dag Ekengren
 Dagobert Michelsen
 Damien Adant
 Dan Becker
@@ -184,11 +188,11 @@ Dan Zitter
 Daniel Black
 Daniel Cater
 Daniel Egger
-Daniel Fandrich
 Daniel Johnson
 Daniel Mentz
 Daniel Steinberg
 Daniel Stenberg
+Daniel Theron
 Daniel at touchtunes
 Darryl House
 Darshan Mody
@@ -311,7 +315,7 @@ Georg Lippitsch
 Georg Wicherski
 Gerd v. Egidy
 Gerhard Herre
-Gerrit Bruchhäuser
+Gerrit BruchhÃ¤user
 Giancarlo Formicuccia
 Giaslas Georgios
 Gil Weber
@@ -335,7 +339,7 @@ Guenter Knauf
 Guillaume Arluison
 Gustaf Hui
 Gwenole Beauchesne
-Götz Babin-Ebell
+GÃ¶tz Babin-Ebell
 Hamish Mackenzie
 Hang Kin Lau
 Hanno Kranzhoff
@@ -387,7 +391,9 @@ James MacMillan
 Jamie Lokier
 Jamie Newton
 Jamie Wilkinson
+Jan Ehrhardt
 Jan Kunder
+Jan Schaumann
 Jan Van Boghout
 Jared Lundell
 Jari Sundell
@@ -453,6 +459,7 @@ Jonas Forsman
 Jonas Schnelli
 Jonatan Lander
 Jonathan Hseu
+Jonathan Nieder
 Jongki Suwandi
 Jose Kahan
 Josef Wolf
@@ -461,18 +468,19 @@ Joshua Kwan
 Josue Andrade Gomes
 Juan Barreto
 Juan F. Codagnone
-Juan Ignacio Hervás
+Juan Ignacio HervÃ¡s
 Judson Bishop
 Juergen Wilke
 Jukka Pihl
 Julian Noble
+Julian Taylor
 Julien Chaffraix
 Julien Royer
 Jun-ichiro itojun Hagino
 Jurij Smakov
 Justin Fletcher
-Jörg Mueller-Tolk
-Jörn Hartroth
+JÃ¶rg Mueller-Tolk
+JÃ¶rn Hartroth
 Kai Sommerfeld
 Kai-Uwe Rommel
 Kalle Vahlman
@@ -506,7 +514,7 @@ Kris Kennaway
 Krishnendu Majumdar
 Krister Johansen
 Kristian Gunstone
-Kristian Köhntopp
+Kristian KÃ¶hntopp
 Kyle Sallee
 Lachlan O'Dea
 Larry Campbell
@@ -523,6 +531,7 @@ Len Krause
 Lenaic Lefever
 Lenny Rachitsky
 Liam Healy
+Lijo Antony
 Linas Vepstas
 Ling Thio
 Linus Nielsen Feltzing
@@ -544,6 +553,7 @@ Mandy Wu
 Manfred Schwarb
 Manuel Massing
 Marc Boucher
+Marc Hoersken
 Marc Kleine-Budde
 Marcel Roelofs
 Marcelo Juchem
@@ -644,7 +654,7 @@ Nick Zitzmann
 Nico Baggus
 Nicolas Berloquin
 Nicolas Croiset
-Nicolas François
+Nicolas FranÃ§ois
 Niels van Tongeren
 Nikita Schmidt
 Nikitinskit Dmitriy
@@ -658,8 +668,9 @@ Nodak Sodak
 Norbert Frese
 Norbert Novotny
 Ofer
+Olaf Flebbe
 Olaf Stueben
-Olaf Stüben
+Olaf StÃ¼ben
 Oren Tirosh
 Ori Avtalion
 P R Schaffner
@@ -714,6 +725,7 @@ Philippe Raoult
 Philippe Vaucher
 Pierre
 Pierre Brico
+Pierre Chapuis
 Pierre Joye
 Pierre Ynard
 Pooyan McSporran
@@ -772,11 +784,13 @@ Robin Johnson
 Robin Kay
 Robson Braga Araujo
 Rodney Simmons
+Rodrigo Silva
 Roland Blom
 Roland Krikava
 Roland Zimmermann
 Rolland Dudemaine
 Roman Koifman
+Roman Mamedov
 Ron Zapp
 Rosimildo da Silva
 Roy Shan
@@ -787,11 +801,11 @@ Ryan Chan
 Ryan Nelson
 Ryan Schmidt
 S. Moonesamy
-Salvador Dávila
+Salvador DÃ¡vila
 Salvatore Sorrentino
 Sam Listopad
 Sampo Kellomaki
-Samuel Díaz García
+Samuel DÃ­az GarcÃ­a
 Samuel Listopad
 Samuel Thibault
 Sander Gates
@@ -849,11 +863,12 @@ Stoned Elipot
 Sven Anders
 Sven Neuhaus
 Sven Wegener
-Sébastien Willemijns
+SÃ©bastien Willemijns
 T. Bharath
 T. Yamada
 Taneli Vahakangas
 Tanguy Fautre
+Tatsuhiro Tsujikawa
 Temprimus
 Thomas J. Moore
 Thomas Klausner
@@ -867,10 +882,11 @@ Tim Bartley
 Tim Chen
 Tim Costello
 Tim Harder
+Tim Heckman
 Tim Newsome
 Tim Sneddon
 Tinus van den Berg
-Tobias Rundström
+Tobias RundstrÃ¶m
 Toby Peterson
 Todd A Ouska
 Todd Kulesza
@@ -901,7 +917,7 @@ Traian Nicolescu
 Troels Walsted Hansen
 Troy Engel
 Tupone Alfredo
-Ulf Härnhammar
+Ulf HÃ¤rnhammar
 Ulrich Zadow
 Venkat Akella
 Victor Snezhko

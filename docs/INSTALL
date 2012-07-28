@@ -157,6 +157,9 @@ UNIX
      To get support for SCP and SFTP, build with --with-libssh2 and have
      libssh2 0.16 or later installed.
 
+     To get Metalink support, build with --with-libmetalink and have the
+     libmetalink packages installed.
+
    SPECIAL CASES
    -------------
    Some versions of uClibc require configuring with CPPFLAGS=-D_GNU_SOURCE=1
@@ -196,6 +199,9 @@ Win32
    from memory corruption, before asking for further help, please try
    first to rebuild every single library your app uses as well as your
    app using the debug multithreaded dynamic C runtime.
+
+   If you get linkage errors read section 5.7 of the FAQ document.
+
 
    MingW32
    -------
@@ -540,7 +546,7 @@ VMS
    Curl seems to work with FTP & HTTP other protocols are not tested.  (the
    perl http/ftp testing server supplied as testing too cannot work on VMS
    because vms has no concept of fork(). [ I tried to give it a whack, but
-   thats of no use.
+   that's of no use.
 
    SSL stuff has not been ported.
 
@@ -673,7 +679,7 @@ NetWare
      you can find precompiled packages at:
      http://www.gknw.net/development/ossl/netware/
      for CLIB-based builds OpenSSL 0.9.8h or later is required  - earlier versions
-     dont support buildunf with CLIB BSD sockets.
+     don't support building with CLIB BSD sockets.
    - optional SSH2 sources (version 0.17 or later);
 
    Set a search path to your compiler, linker and tools; on Linux make
@@ -843,10 +849,10 @@ Android
    Method using the static makefile:
       - see the build notes in the Android.mk file.
 
-   Method using a configure cross-compile (tested with Android NDK r7b):
+   Method using a configure cross-compile (tested with Android NDK r7c, r8):
       - prepare the toolchain of the Android NDK for standalone use; this can
         be done by invoking the script:
-        ./tools/make-standalone-toolchain.sh
+        ./build/tools/make-standalone-toolchain.sh
         which creates a usual cross-compile toolchain. Lets assume that you put
         this toolchain below /opt then invoke configure with something like:
         export PATH=/opt/arm-linux-androideabi-4.4.3/bin:$PATH
@@ -864,6 +870,20 @@ Android
         you need to replace your system-own versions which usually can be
         found in your automake folder:
         find /usr -name config.sub
+
+   Wrapper for pkg-config
+      - In order to make proper use of pkg-config so that configure is able to
+        find all dependencies you should create a wrapper script for pkg-config;
+        file /opt/arm-linux-androideabi-4.4.3/bin/arm-linux-androideabi-pkg-config:
+
+        #!/bin/sh
+        SYSROOT=$(dirname ${0%/*})/sysroot
+        export PKG_CONFIG_DIR=
+        export PKG_CONFIG_LIBDIR=${SYSROOT}/usr/local/lib/pkgconfig:${SYSROOT}/usr/share/pkgconfig
+        export PKG_CONFIG_SYSROOT_DIR=${SYSROOT}
+        exec pkg-config "$@"
+
+        also create a copy or symlink with name arm-unknown-linux-androideabi-pkg-config.
 
 
 CROSS COMPILE

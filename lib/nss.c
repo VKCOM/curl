@@ -27,6 +27,8 @@
 
 #include "setup.h"
 
+#ifdef USE_NSS
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -43,8 +45,6 @@
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
-
-#ifdef USE_NSS
 
 #include "nssg.h"
 #include <nspr.h>
@@ -66,6 +66,7 @@
 
 #include "curl_memory.h"
 #include "rawstr.h"
+#include "warnless.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -184,6 +185,11 @@ static const char* nss_error_to_name(PRErrorCode code)
     return name;
 
   return "unknown error";
+}
+
+static void nss_print_error_message(struct SessionHandle *data, PRUint32 err)
+{
+  failf(data, "%s", PR_ErrorToString(err, PR_LANGUAGE_I_DEFAULT));
 }
 
 static SECStatus set_ciphers(struct SessionHandle *data, PRFileDesc * model,
@@ -612,69 +618,13 @@ static SECStatus nss_auth_cert_hook(void *arg, PRFileDesc *fd, PRBool checksig,
   return SSL_AuthCertificate(CERT_GetDefaultCertDB(), fd, checksig, isServer);
 }
 
-static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
-{
-  SECStatus result = SECFailure;
-  struct connectdata *conn = (struct connectdata *)arg;
-  PRErrorCode err = PR_GetError();
-  CERTCertificate *cert = NULL;
-  char *subject, *subject_cn, *issuer;
-
-  conn->data->set.ssl.certverifyresult=err;
-  cert = SSL_PeerCertificate(sock);
-  subject = CERT_NameToAscii(&cert->subject);
-  subject_cn = CERT_GetCommonName(&cert->subject);
-  issuer = CERT_NameToAscii(&cert->issuer);
-  CERT_DestroyCertificate(cert);
-
-  switch(err) {
-  case SEC_ERROR_CA_CERT_INVALID:
-    infof(conn->data, "Issuer certificate is invalid: '%s'\n", issuer);
-    break;
-  case SEC_ERROR_UNTRUSTED_ISSUER:
-    infof(conn->data, "Certificate is signed by an untrusted issuer: '%s'\n",
-          issuer);
-    break;
-  case SSL_ERROR_BAD_CERT_DOMAIN:
-    if(conn->data->set.ssl.verifyhost) {
-      failf(conn->data, "SSL: certificate subject name '%s' does not match "
-            "target host name '%s'", subject_cn, conn->host.dispname);
-    }
-    else {
-      result = SECSuccess;
-      infof(conn->data, "warning: SSL: certificate subject name '%s' does not "
-            "match target host name '%s'\n", subject_cn, conn->host.dispname);
-    }
-    break;
-  case SEC_ERROR_EXPIRED_CERTIFICATE:
-    infof(conn->data, "Remote Certificate has expired.\n");
-    break;
-  case SEC_ERROR_UNKNOWN_ISSUER:
-    infof(conn->data, "Peer's certificate issuer is not recognized: '%s'\n",
-          issuer);
-    break;
-  default:
-    infof(conn->data, "Bad certificate received. Subject = '%s', "
-          "Issuer = '%s'\n", subject, issuer);
-    break;
-  }
-  if(result == SECSuccess)
-    infof(conn->data, "SSL certificate verify ok.\n");
-  PR_Free(subject);
-  PR_Free(subject_cn);
-  PR_Free(issuer);
-
-  return result;
-}
-
 /**
  * Inform the application that the handshake is complete.
  */
-static SECStatus HandshakeCallback(PRFileDesc *sock, void *arg)
+static void HandshakeCallback(PRFileDesc *sock, void *arg)
 {
   (void)sock;
   (void)arg;
-  return SECSuccess;
 }
 
 static void display_cert_info(struct SessionHandle *data,
@@ -727,6 +677,31 @@ static void display_conn_info(struct connectdata *conn, PRFileDesc *sock)
   CERT_DestroyCertificate(cert);
 
   return;
+}
+
+static SECStatus BadCertHandler(void *arg, PRFileDesc *sock)
+{
+  struct connectdata *conn = (struct connectdata *)arg;
+  struct SessionHandle *data = conn->data;
+  PRErrorCode err = PR_GetError();
+  CERTCertificate *cert;
+
+  /* remember the cert verification result */
+  data->set.ssl.certverifyresult = err;
+
+  if(err == SSL_ERROR_BAD_CERT_DOMAIN && !data->set.ssl.verifyhost)
+    /* we are asked not to verify the host name */
+    return SECSuccess;
+
+  /* print only info about the cert, the error is printed off the callback */
+  cert = SSL_PeerCertificate(sock);
+  if(cert) {
+    infof(data, "Server certificate:\n");
+    display_cert_info(data, cert);
+    CERT_DestroyCertificate(cert);
+  }
+
+  return SECFailure;
 }
 
 /**
@@ -1109,20 +1084,17 @@ int Curl_nss_close_all(struct SessionHandle *data)
   return 0;
 }
 
-/* handle client certificate related errors if any; return false otherwise */
-static bool handle_cc_error(PRInt32 err, struct SessionHandle *data)
+/* return true if the given error code is related to a client certificate */
+static bool is_cc_error(PRInt32 err)
 {
   switch(err) {
   case SSL_ERROR_BAD_CERT_ALERT:
-    failf(data, "SSL error: SSL_ERROR_BAD_CERT_ALERT");
     return true;
 
   case SSL_ERROR_REVOKED_CERT_ALERT:
-    failf(data, "SSL error: SSL_ERROR_REVOKED_CERT_ALERT");
     return true;
 
   case SSL_ERROR_EXPIRED_CERT_ALERT:
-    failf(data, "SSL error: SSL_ERROR_EXPIRED_CERT_ALERT");
     return true;
 
   default:
@@ -1341,12 +1313,10 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
     goto error;
 
   data->set.ssl.certverifyresult=0; /* not checked yet */
-  if(SSL_BadCertHook(model, (SSLBadCertHandler) BadCertHandler, conn)
-     != SECSuccess) {
+  if(SSL_BadCertHook(model, BadCertHandler, conn) != SECSuccess)
     goto error;
-  }
-  if(SSL_HandshakeCallback(model, (SSLHandshakeCallback) HandshakeCallback,
-                           NULL) != SECSuccess)
+
+  if(SSL_HandshakeCallback(model, HandshakeCallback, NULL) != SECSuccess)
     goto error;
 
   if(data->set.ssl.verifypeer) {
@@ -1463,10 +1433,14 @@ CURLcode Curl_nss_connect(struct connectdata *conn, int sockindex)
   data->state.ssl_connect_retry = FALSE;
 
   err = PR_GetError();
-  if(handle_cc_error(err, data))
+  if(is_cc_error(err))
     curlerr = CURLE_SSL_CERTPROBLEM;
-  else
-    infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
+
+  /* print the error number and error string */
+  infof(data, "NSS error %d (%s)\n", err, nss_error_to_name(err));
+
+  /* print a human-readable message describing the error if available */
+  nss_print_error_message(data, err);
 
   if(model)
     PR_Close(model);
@@ -1499,12 +1473,17 @@ static ssize_t nss_send(struct connectdata *conn,  /* connection data */
     PRInt32 err = PR_GetError();
     if(err == PR_WOULD_BLOCK_ERROR)
       *curlcode = CURLE_AGAIN;
-    else if(handle_cc_error(err, conn->data))
-      *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
+      /* print the error number and error string */
       const char *err_name = nss_error_to_name(err);
-      failf(conn->data, "SSL write: error %d (%s)", err, err_name);
-      *curlcode = CURLE_SEND_ERROR;
+      infof(conn->data, "SSL write: error %d (%s)\n", err, err_name);
+
+      /* print a human-readable message describing the error if available */
+      nss_print_error_message(conn->data, err);
+
+      *curlcode = (is_cc_error(err))
+        ? CURLE_SSL_CERTPROBLEM
+        : CURLE_SEND_ERROR;
     }
     return -1;
   }
@@ -1526,12 +1505,17 @@ static ssize_t nss_recv(struct connectdata * conn, /* connection data */
 
     if(err == PR_WOULD_BLOCK_ERROR)
       *curlcode = CURLE_AGAIN;
-    else if(handle_cc_error(err, conn->data))
-      *curlcode = CURLE_SSL_CERTPROBLEM;
     else {
+      /* print the error number and error string */
       const char *err_name = nss_error_to_name(err);
-      failf(conn->data, "SSL read: errno %d (%s)", err, err_name);
-      *curlcode = CURLE_RECV_ERROR;
+      infof(conn->data, "SSL read: errno %d (%s)\n", err, err_name);
+
+      /* print a human-readable message describing the error if available */
+      nss_print_error_message(conn->data, err);
+
+      *curlcode = (is_cc_error(err))
+        ? CURLE_SSL_CERTPROBLEM
+        : CURLE_RECV_ERROR;
     }
     return -1;
   }
@@ -1548,6 +1532,26 @@ int Curl_nss_seed(struct SessionHandle *data)
   /* TODO: implement? */
   (void) data;
   return 0;
+}
+
+void Curl_nss_random(struct SessionHandle *data,
+                     unsigned char *entropy,
+                     size_t length)
+{
+  Curl_nss_seed(data);  /* Initiate the seed if not already done */
+  PK11_GenerateRandom(entropy, curlx_uztosi(length));
+}
+
+void Curl_nss_md5sum(unsigned char *tmp, /* input */
+                     size_t tmplen,
+                     unsigned char *md5sum, /* output */
+                     size_t md5len)
+{
+  PK11Context *MD5pw = PK11_CreateDigestContext(SEC_OID_MD5);
+  unsigned int MD5out;
+  PK11_DigestOp(MD5pw, tmp, curlx_uztoui(tmplen));
+  PK11_DigestFinal(MD5pw, md5sum, &MD5out, curlx_uztoui(md5len));
+  PK11_DestroyContext(MD5pw, PR_TRUE);
 }
 
 #endif /* USE_NSS */
