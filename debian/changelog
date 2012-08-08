@@ -1,8 +1,10 @@
-curl (7.27.0-1) UNRELEASED; urgency=low
+curl (7.27.0-1) unstable; urgency=low
 
   * New upstream release
+  * Update upstream copyright
+  * Refresh 01_runtests_gdb.patch, 90_gnutls.patch and 99_nss.patch
 
- -- Alessandro Ghedini <ghedo@debian.org>  Sat, 28 Jul 2012 13:28:59 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 08 Aug 2012 17:22:00 +0200
 
 curl (7.26.0-1) unstable; urgency=low
 
