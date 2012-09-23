@@ -22,7 +22,6 @@ Build-Depends: debhelper (>= 9),
  quilt,
  stunnel4,
  zlib1g-dev
-Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.4
 Vcs-Browser: http://git.debian.org/?p=collab-maint/curl.git
 Vcs-Git: git://git.debian.org/collab-maint/curl.git
