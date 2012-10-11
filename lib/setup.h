@@ -188,6 +188,24 @@
 #  ifndef CURL_DISABLE_RTSP
 #    define CURL_DISABLE_RTSP
 #  endif
+#  ifndef CURL_DISABLE_POP3
+#    define CURL_DISABLE_POP3
+#  endif
+#  ifndef CURL_DISABLE_IMAP
+#    define CURL_DISABLE_IMAP
+#  endif
+#  ifndef CURL_DISABLE_SMTP
+#    define CURL_DISABLE_SMTP
+#  endif
+#  ifndef CURL_DISABLE_RTSP
+#    define CURL_DISABLE_RTSP
+#  endif
+#  ifndef CURL_DISABLE_RTMP
+#    define CURL_DISABLE_RTMP
+#  endif
+#  ifndef CURL_DISABLE_GOPHER
+#    define CURL_DISABLE_GOPHER
+#  endif
 #endif
 
 /*
@@ -610,11 +628,6 @@ int netware_init(void);
 #define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")
 #endif
 
-/* Define S_ISREG if not defined by system headers, f.e. MSVC */
-#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
-#endif
-
 /*
  * Provide a mechanism to silence picky compilers, such as gcc 4.6+.
  * Parameters should of course normally not be unused, but for example when
@@ -666,6 +679,11 @@ int netware_init(void);
 #  define SHUT_RD   0x00
 #  define SHUT_WR   0x01
 #  define SHUT_RDWR 0x02
+#endif
+
+/* Define S_ISREG if not defined by system headers, f.e. MSVC */
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

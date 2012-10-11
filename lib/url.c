@@ -2928,10 +2928,14 @@ ConnectionExists(struct SessionHandle *data,
 {
   long i;
   struct connectdata *check;
+  struct connectdata *chosen = 0;
   bool canPipeline = IsPipeliningPossible(data, needle);
+  bool wantNTLM = (data->state.authhost.want==CURLAUTH_NTLM) ||
+                  (data->state.authhost.want==CURLAUTH_NTLM_WB);
 
   for(i=0; i< data->state.connc->num; i++) {
     bool match = FALSE;
+    bool credentialsMatch = FALSE;
     size_t pipeLen = 0;
     /*
      * Note that if we use a HTTP proxy, we check connections to that
@@ -3102,9 +3106,7 @@ ConnectionExists(struct SessionHandle *data,
           }
         }
         if((needle->handler->protocol & CURLPROTO_FTP) ||
-           ((needle->handler->protocol & CURLPROTO_HTTP) &&
-            ((data->state.authhost.want==CURLAUTH_NTLM) ||
-             (data->state.authhost.want==CURLAUTH_NTLM_WB)))) {
+           ((needle->handler->protocol & CURLPROTO_HTTP) && wantNTLM)) {
           /* This is FTP or HTTP+NTLM, verify that we're using the same name
              and password as well */
           if(!strequal(needle->user, check->user) ||
@@ -3112,6 +3114,7 @@ ConnectionExists(struct SessionHandle *data,
             /* one of them was different */
             continue;
           }
+          credentialsMatch = TRUE;
         }
         match = TRUE;
       }
@@ -3129,12 +3132,27 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      check->inuse = TRUE; /* mark this as being in use so that no other
-                              handle in a multi stack may nick it */
+      chosen = check;
 
-      *usethis = check;
-      return TRUE; /* yes, we found one to use! */
+      /* If we are not looking for an NTLM connection, we can choose this one
+         immediately. */
+      if(!wantNTLM)
+        break;
+
+      /* Otherwise, check if this is already authenticating with the right
+         credentials. If not, keep looking so that we can reuse NTLM
+         connections if possible. (Especially we must reuse the same
+         connection if partway through a handshake!) */
+      if(credentialsMatch && chosen->ntlm.state != NTLMSTATE_NONE)
+        break;
     }
+  }
+
+  if(chosen) {
+    chosen->inuse = TRUE; /* mark this as being in use so that no other
+                            handle in a multi stack may nick it */
+    *usethis = chosen;
+    return TRUE; /* yes, we found one to use! */
   }
 
   return FALSE; /* no matching connecting exists */
@@ -4231,7 +4249,7 @@ static CURLcode parse_proxy(struct SessionHandle *data,
       conn->proxytype = CURLPROXY_SOCKS5;
     else if(checkprefix("socks4a", proxy))
       conn->proxytype = CURLPROXY_SOCKS4A;
-    else if(checkprefix("socks4", proxy))
+    else if(checkprefix("socks4", proxy) || checkprefix("socks", proxy))
       conn->proxytype = CURLPROXY_SOCKS4;
     /* Any other xxx:// : change to http proxy */
   }
@@ -4659,13 +4677,12 @@ static CURLcode resolve_server(struct SessionHandle *data,
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
-  if(conn->bits.reuse) {
-    /* We're reusing the connection - no need to resolve anything */
+  if(conn->bits.reuse)
+    /* We're reusing the connection - no need to resolve anything, and
+       fix_hostname() was called already in create_conn() for the re-use
+       case. */
     *async = FALSE;
 
-    if(conn->bits.proxy)
-      fix_hostname(data, conn, &conn->host);
-  }
   else {
     /* this is a fresh connect */
     int rc;
@@ -4779,6 +4796,7 @@ static void reuse_conn(struct connectdata *old_conn,
   Curl_safefree(old_conn->passwd);
   Curl_safefree(old_conn->proxyuser);
   Curl_safefree(old_conn->proxypasswd);
+  Curl_safefree(old_conn->localdev);
 
   Curl_llist_destroy(old_conn->send_pipe, NULL);
   Curl_llist_destroy(old_conn->recv_pipe, NULL);
@@ -5135,6 +5153,10 @@ static CURLcode create_conn(struct SessionHandle *data,
     free(conn);          /* we don't need this anymore */
     conn = conn_temp;
     *in_connect = conn;
+
+    /* set a pointer to the hostname we display */
+    fix_hostname(data, conn, &conn->host);
+
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
           conn->proxy.name?conn->proxy.dispname:conn->host.dispname);

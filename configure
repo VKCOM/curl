@@ -11,7 +11,7 @@
 # This configure script is free software; the Free Software Foundation
 # gives unlimited permission to copy, distribute and modify it.
 #
-# Copyright (c) 1998 - 2011 Daniel Stenberg, <daniel@haxx.se>
+# Copyright (c) 1998 - 2012 Daniel Stenberg, <daniel@haxx.se>
 # This configure script may be copied, distributed and modified under the
 # terms of the curl license; see COPYING for more details
 ## -------------------- ##
@@ -911,7 +911,6 @@ with_librtmp
 enable_versioned_symbols
 with_winidn
 with_libidn
-enable_nonblocking
 enable_threaded_resolver
 enable_verbose
 enable_sspi
@@ -1616,8 +1615,6 @@ Optional Features:
                           Enable versioned symbols in shared library
   --disable-versioned-symbols
                           Disable versioned symbols in shared library
-  --enable-nonblocking    Enable non-blocking communications
-  --disable-nonblocking   Disable non-blocking communications
   --enable-threaded-resolver
                           Enable threaded resolver
   --disable-threaded-resolver
@@ -1794,7 +1791,7 @@ Copyright (C) 2009 Free Software Foundation, Inc.
 This configure script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it.
 
-Copyright (c) 1998 - 2011 Daniel Stenberg, <daniel@haxx.se>
+Copyright (c) 1998 - 2012 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details
 _ACEOF
@@ -37827,60 +37824,27 @@ $as_echo "#define HAVE_NI_WITHSCOPEID 1" >>confdefs.h
 fi
 
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable non-blocking communications" >&5
-$as_echo_n "checking whether to enable non-blocking communications... " >&6; }
-  OPT_NONBLOCKING="default"
-  # Check whether --enable-nonblocking was given.
-if test "${enable_nonblocking+set}" = set; then :
-  enableval=$enable_nonblocking; OPT_NONBLOCKING=$enableval
-fi
-
-  case "$OPT_NONBLOCKING" in
-    no)
-            want_nonblocking="no"
-      ;;
-    default)
-            want_nonblocking="yes"
-      ;;
-    *)
-            want_nonblocking="yes"
-      ;;
-  esac
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $want_nonblocking" >&5
-$as_echo "$want_nonblocking" >&6; }
-
-
-              #
+            #
   tst_method="unknown"
-  if test "$want_nonblocking" = "yes"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to set a socket into non-blocking mode" >&5
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking how to set a socket into non-blocking mode" >&5
 $as_echo_n "checking how to set a socket into non-blocking mode... " >&6; }
-    if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
-      tst_method="fcntl O_NONBLOCK"
-    elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
-      tst_method="ioctl FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
-      tst_method="ioctlsocket FIONBIO"
-    elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
-      tst_method="IoctlSocket FIONBIO"
-    elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
-      tst_method="setsockopt SO_NONBLOCK"
-    fi
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_method" >&5
-$as_echo "$tst_method" >&6; }
-    if test "$tst_method" = "unknown"; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot determine non-blocking socket method." >&5
-$as_echo "$as_me: WARNING: cannot determine non-blocking socket method." >&2;}
-    fi
+  if test "x$ac_cv_func_fcntl_o_nonblock" = "xyes"; then
+    tst_method="fcntl O_NONBLOCK"
+  elif test "x$ac_cv_func_ioctl_fionbio" = "xyes"; then
+    tst_method="ioctl FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_fionbio" = "xyes"; then
+    tst_method="ioctlsocket FIONBIO"
+  elif test "x$ac_cv_func_ioctlsocket_camel_fionbio" = "xyes"; then
+    tst_method="IoctlSocket FIONBIO"
+  elif test "x$ac_cv_func_setsockopt_so_nonblock" = "xyes"; then
+    tst_method="setsockopt SO_NONBLOCK"
   fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $tst_method" >&5
+$as_echo "$tst_method" >&6; }
   if test "$tst_method" = "unknown"; then
-
-cat >>confdefs.h <<_ACEOF
-#define USE_BLOCKING_SOCKETS 1
-_ACEOF
-
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: non-blocking sockets disabled." >&5
-$as_echo "$as_me: WARNING: non-blocking sockets disabled." >&2;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: cannot determine non-blocking socket method." >&5
+$as_echo "$as_me: WARNING: cannot determine non-blocking socket method." >&2;}
   fi
 
 

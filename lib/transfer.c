@@ -1433,6 +1433,10 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   data->state.ssl_connect_retry = FALSE;
 
+  /* zero out auth state */
+  memset(&data->state.authhost, 0, sizeof(struct auth));
+  memset(&data->state.authproxy, 0, sizeof(struct auth));
+
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
@@ -1981,7 +1985,9 @@ Curl_reconnect_request(struct connectdata **connp)
   conn->bits.close = TRUE; /* enforce close of this connection */
   result = Curl_done(&conn, result, FALSE); /* we are so done with this */
 
-  /* conn may no longer be a good pointer */
+  /* conn may no longer be a good pointer, clear it to avoid mistakes by
+     parent functions */
+  *connp = NULL;
 
   /*
    * According to bug report #1330310. We need to check for CURLE_SEND_ERROR
@@ -2056,7 +2062,9 @@ CURLcode Curl_retry_request(struct connectdata *conn,
                                 error just because nothing has been
                                 transferred! */
 
-    if(data->state.proto.http->writebytecount)
+
+    if((conn->handler->protocol&CURLPROTO_HTTP) &&
+       data->state.proto.http->writebytecount)
       return Curl_readrewind(conn);
   }
   return CURLE_OK;

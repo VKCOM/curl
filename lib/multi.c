@@ -43,6 +43,7 @@
 #include "http.h"
 #include "select.h"
 #include "warnless.h"
+#include "speedcheck.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -941,6 +942,100 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
   return CURLM_OK;
 }
 
+CURLMcode curl_multi_wait(CURLM *multi_handle,
+                          struct curl_waitfd extra_fds[],
+                          unsigned int extra_nfds,
+                          int timeout_ms,
+                          int *ret)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  curl_socket_t sockbunch[MAX_SOCKSPEREASYHANDLE];
+  int bitmap;
+  unsigned int i;
+  unsigned int nfds = extra_nfds;
+  struct pollfd *ufds;
+
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
+
+  /* Count up how many fds we have from the multi handle */
+  easy=multi->easy.next;
+  while(easy != &multi->easy) {
+    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      curl_socket_t s = CURL_SOCKET_BAD;
+
+      if(bitmap & GETSOCK_READSOCK(i)) {
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(bitmap & GETSOCK_WRITESOCK(i)) {
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(s == CURL_SOCKET_BAD) {
+        break;
+      }
+    }
+
+    easy = easy->next; /* check next handle */
+  }
+
+  ufds = (struct pollfd *)malloc(nfds * sizeof(struct pollfd));
+  nfds = 0;
+
+  /* Add the curl handles to our pollfds first */
+  easy=multi->easy.next;
+  while(easy != &multi->easy) {
+    bitmap = multi_getsock(easy, sockbunch, MAX_SOCKSPEREASYHANDLE);
+
+    for(i=0; i< MAX_SOCKSPEREASYHANDLE; i++) {
+      curl_socket_t s = CURL_SOCKET_BAD;
+
+      if(bitmap & GETSOCK_READSOCK(i)) {
+        ufds[nfds].fd = sockbunch[i];
+        ufds[nfds].events = POLLIN;
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(bitmap & GETSOCK_WRITESOCK(i)) {
+        ufds[nfds].fd = sockbunch[i];
+        ufds[nfds].events = POLLOUT;
+        ++nfds;
+        s = sockbunch[i];
+      }
+      if(s == CURL_SOCKET_BAD) {
+        break;
+      }
+    }
+
+    easy = easy->next; /* check next handle */
+  }
+
+  /* Add external file descriptions from poll-like struct curl_waitfd */
+  for(i = 0; i < extra_nfds; i++) {
+    ufds[nfds].fd = extra_fds[i].fd;
+    ufds[nfds].events = (short) (
+      ((extra_fds[i].events & CURL_WAIT_POLLIN)  ? POLLIN  : 0) |
+      ((extra_fds[i].events & CURL_WAIT_POLLPRI) ? POLLPRI : 0) |
+      ((extra_fds[i].events & CURL_WAIT_POLLOUT) ? POLLOUT : 0) );
+    ++nfds;
+  }
+
+  if(nfds)
+    /* wait... */
+    i = Curl_poll(ufds, nfds, timeout_ms);
+  else
+    i = 0;
+
+  free(ufds);
+  if(ret)
+    *ret = i;
+  return CURLM_OK;
+}
+
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
                                  struct timeval now,
                                  struct Curl_one_easy *easy)
@@ -1428,7 +1523,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_TOOFAST: /* limit-rate exceeded in either direction */
       /* if both rates are within spec, resume transfer */
-      Curl_pgrsUpdate(easy->easy_conn);
+      if(Curl_pgrsUpdate(easy->easy_conn))
+        easy->result = CURLE_ABORTED_BY_CALLBACK;
+      else
+        easy->result = Curl_speedcheck(data, now);
+
       if(( (data->set.max_send_speed == 0) ||
            (data->progress.ulspeed < data->set.max_send_speed ))  &&
          ( (data->set.max_recv_speed == 0) ||
@@ -2079,14 +2178,14 @@ static CURLMcode add_next_timeout(struct timeval now,
       break;
     e = n;
   }
-  if(!list->size)  {
+  e = list->head;
+  if(!e) {
     /* clear the expire times within the handles that we remove from the
        splay tree */
     tv->tv_sec = 0;
     tv->tv_usec = 0;
   }
   else {
-    e = list->head;
     /* copy the first entry to 'tv' */
     memcpy(tv, e->ptr, sizeof(*tv));
 

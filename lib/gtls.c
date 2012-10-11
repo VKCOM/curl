@@ -34,7 +34,10 @@
 
 #include <gnutls/gnutls.h>
 #include <gnutls/x509.h>
-#ifndef USE_GNUTLS_NETTLE
+#ifdef USE_GNUTLS_NETTLE
+#include <gnutls/crypto.h>
+#include <nettle/md5.h>
+#else
 #include <gcrypt.h>
 #endif
 
@@ -299,15 +302,17 @@ static CURLcode handshake(struct connectdata *conn,
       if(nonblocking)
         return CURLE_OK;
     }
+    else if((rc < 0) && gnutls_error_is_fatal(rc)) {
+      failf(data, "gnutls_handshake() warning: %s", gnutls_strerror(rc));
+    }
     else if(rc < 0) {
       failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
       return CURLE_SSL_CONNECT_ERROR;
     }
-    else {
-      /* Reset our connect state machine */
-      connssl->connecting_state = ssl_connect_1;
-      return CURLE_OK;
-    }
+
+    /* Reset our connect state machine */
+    connssl->connecting_state = ssl_connect_1;
+    return CURLE_OK;
   }
 }
 

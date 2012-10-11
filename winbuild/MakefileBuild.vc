@@ -100,7 +100,7 @@ SSL_LIBS     = libeay32.lib ssleay32.lib
 USE_SSL      = true
 SSL          = dll
 !ELSEIF "$(WITH_SSL)"=="static"
-SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib advapi32.lib
+SSL_LIBS     = libeay32.lib ssleay32.lib gdi32.lib user32.lib
 USE_SSL      = true
 SSL          = static
 !ENDIF
@@ -143,14 +143,15 @@ SSH2_CFLAGS = $(SSH2_CFLAGS) /I$(WITH_DEVEL)/include/libssh2
 !ENDIF
 
 
-!IFNDEF USE_SSPI
-USE_SSPI  = true
-!ELSEIF "$(USE_SSPI)"=="yes"
-USE_SSPI  = true
+!IFNDEF USE_IDN
+USE_IDN   = true
+!ELSEIF "$(USE_IDN)"=="yes"
+USE_IDN   = true
 !ENDIF
 
-!IF "$(USE_SSPI)"=="true"
-SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
+!IF "$(USE_IDN)"=="true"
+CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN /DWANT_IDN_PROTOTYPES
+LFLAGS    = $(LFLAGS) Normaliz.lib
 !ENDIF
 
 
@@ -165,15 +166,25 @@ IPV6_CFLAGS = $(IPV6_CFLAGS) /DUSE_IPV6
 !ENDIF
 
 
-!IFNDEF USE_IDN
-USE_IDN   = true
-!ELSEIF "$(USE_IDN)"=="yes"
-USE_IDN   = true
+!IFNDEF USE_SSPI
+USE_SSPI  = true
+!ELSEIF "$(USE_SSPI)"=="yes"
+USE_SSPI  = true
 !ENDIF
 
-!IF "$(USE_IDN)"=="true"
-CFLAGS    = $(CFLAGS) /DUSE_WIN32_IDN
-LFLAGS    = $(LFLAGS) Normaliz.lib
+!IF "$(USE_SSPI)"=="true"
+SSPI_CFLAGS = $(SSPI_CFLAGS) /DUSE_WINDOWS_SSPI
+!ENDIF
+
+
+!IFNDEF USE_SPNEGO
+USE_SPNEGO  = true
+!ELSEIF "$(USE_SPNEGO)"=="yes"
+USE_SPNEGO  = true
+!ENDIF
+
+!IF "$(USE_SPNEGO)"=="true"
+SPNEGO_CFLAGS = $(SPNEGO_CFLAGS) /DHAVE_SPNEGO
 !ENDIF
 
 
@@ -229,7 +240,7 @@ AS_DLL = true
 CFGSET = true
 !ENDIF
 
-WIN_LIBS    = ws2_32.lib wldap32.lib
+WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib
 !IF "$(CFGSET)" == "FALSE"
 !ERROR please choose a valid mode
 !ENDIF
@@ -314,6 +325,11 @@ CFLAGS = $(CFLAGS) $(SSPI_CFLAGS)
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-sspi
 !ENDIF
 
+!IF "$(USE_SPNEGO)"=="true"
+CFLAGS = $(CFLAGS) $(SPNEGO_CFLAGS)
+CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-spnego
+!ENDIF
+
 !IF "$(USE_WINSSL)"=="true"
 CONFIG_NAME_LIB = $(CONFIG_NAME_LIB)-winssl
 !ENDIF
@@ -372,9 +388,10 @@ $(TARGET): $(LIB_OBJS) $(LIB_DIROBJ) $(DISTDIR)
 	@echo Using SSL: $(USE_SSL)
 	@echo Using SSH2: $(USE_SSH2)
 	@echo Using ZLIB: $(USE_ZLIB)
-	@echo Using SSPI: $(USE_SSPI)
-	@echo Using IPv6: $(USE_IPV6)
 	@echo Using IDN:  $(USE_IDN)
+	@echo Using IPv6: $(USE_IPV6)
+	@echo Using SSPI: $(USE_SSPI)
+	@echo Using SPNEGO: $(USE_SPNEGO)
 	@echo Using WinSSL: $(USE_WINSSL)
 	@echo CFLAGS:     $(CFLAGS)
 	@echo LFLAGS:     $(LFLAGS)
