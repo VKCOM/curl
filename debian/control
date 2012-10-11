@@ -6,7 +6,7 @@ Uploaders: Ian Jackson <ijackson@chiark.greenend.org.uk>,
  Luk Claes <luk@debian.org>
 Build-Depends: debhelper (>= 9),
  autoconf,
- automake,
+ automake1.9,
  groff-base,
  libgcrypt11-dev,
  libgnutls-dev,
