@@ -1,11 +1,13 @@
-curl (7.27.0-2) UNRELEASED; urgency=low
+curl (7.28.0-1) UNRELEASED; urgency=low
 
+  * New upstream release
+    - gnutls: do not fail on non-fatal handshake errors (Closes: #685402)
   * Do not build depend on a specific automake version
   * Remove versioned build depends on libssh2 (already in stable)
   * Bump Standards-Version to 3.9.4 (no changes needed)
   * Remove outdated Build-Conflicts
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Aug 2012 17:08:45 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 11 Oct 2012 16:19:06 +0200
 
 curl (7.27.0-1) unstable; urgency=low
 
