@@ -324,7 +324,8 @@ static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
 static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
   (void)abstract; /* arg not used */
-  free(ptr);
+  if(ptr) /* ssh2 agent sometimes call free with null ptr */
+    free(ptr);
 }
 
 /*
@@ -345,6 +346,9 @@ static void state(struct connectdata *conn, sshstate nowstate)
     "SSH_AUTH_PKEY",
     "SSH_AUTH_PASS_INIT",
     "SSH_AUTH_PASS",
+    "SSH_AUTH_AGENT_INIT",
+    "SSH_AUTH_AGENT_LIST",
+    "SSH_AUTH_AGENT",
     "SSH_AUTH_HOST_INIT",
     "SSH_AUTH_HOST",
     "SSH_AUTH_KEY_INIT",
@@ -635,6 +639,49 @@ static CURLcode ssh_knownhost(struct connectdata *conn)
   return result;
 }
 
+static CURLcode ssh_check_fingerprint(struct connectdata *conn)
+{
+  struct ssh_conn *sshc = &conn->proto.sshc;
+  struct SessionHandle *data = conn->data;
+  const char *pubkey_md5 = data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5];
+  char md5buffer[33];
+  int i;
+
+  const char *fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
+      LIBSSH2_HOSTKEY_HASH_MD5);
+
+  if(fingerprint) {
+    /* The fingerprint points to static storage (!), don't free() it. */
+    for(i = 0; i < 16; i++)
+      snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
+    infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
+  }
+
+  /* Before we authenticate we check the hostkey's MD5 fingerprint
+   * against a known fingerprint, if available.
+   */
+  if(pubkey_md5 && strlen(pubkey_md5) == 32) {
+    if(!fingerprint || !strequal(md5buffer, pubkey_md5)) {
+      if(fingerprint)
+        failf(data,
+            "Denied establishing ssh session: mismatch md5 fingerprint. "
+            "Remote %s is not equal to %s", md5buffer, pubkey_md5);
+      else
+        failf(data,
+            "Denied establishing ssh session: md5 fingerprint not available");
+      state(conn, SSH_SESSION_FREE);
+      sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
+      return sshc->actualcode;
+    }
+    else {
+      infof(data, "MD5 checksum match!\n");
+      /* as we already matched, we skip the check for known hosts */
+      return CURLE_OK;
+    }
+  }
+  else
+    return ssh_knownhost(conn);
+}
 
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
@@ -650,10 +697,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
   struct SSHPROTO *sftp_scp = data->state.proto.ssh;
   struct ssh_conn *sshc = &conn->proto.sshc;
   curl_socket_t sock = conn->sock[FIRSTSOCKET];
-  const char *fingerprint;
-  char md5buffer[33];
   char *new_readdir_line;
-  int rc = LIBSSH2_ERROR_NONE, i;
+  int rc = LIBSSH2_ERROR_NONE;
   int err;
   int seekerr = CURL_SEEKFUNC_OK;
   *block = 0; /* we're not blocking by default */
@@ -694,36 +739,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
        * against our known hosts. How that is handled (reading from file,
        * whatever) is up to us.
        */
-      fingerprint = libssh2_hostkey_hash(sshc->ssh_session,
-                                         LIBSSH2_HOSTKEY_HASH_MD5);
-
-      /* The fingerprint points to static storage (!), don't free() it. */
-      for(i = 0; i < 16; i++)
-        snprintf(&md5buffer[i*2], 3, "%02x", (unsigned char) fingerprint[i]);
-      infof(data, "SSH MD5 fingerprint: %s\n", md5buffer);
-
-      /* Before we authenticate we check the hostkey's MD5 fingerprint
-       * against a known fingerprint, if available.
-       */
-      if(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5] &&
-         strlen(data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) == 32) {
-        if(!strequal(md5buffer,
-                     data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5])) {
-          failf(data,
-                "Denied establishing ssh session: mismatch md5 fingerprint. "
-                "Remote %s is not equal to %s",
-                md5buffer, data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]);
-          state(conn, SSH_SESSION_FREE);
-          result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
-        }
-        else
-          infof(data, "MD5 checksum match!\n");
-        /* as we already matched, we skip the check for known hosts */
-      }
-      else
-        result = ssh_knownhost(conn);
-
-      if(!result)
+      result = ssh_check_fingerprint(conn);
+      if(result == CURLE_OK)
         state(conn, SSH_AUTHLIST);
       break;
 
@@ -893,12 +910,101 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         state(conn, SSH_AUTH_HOST);
       }
       else {
-        state(conn, SSH_AUTH_KEY_INIT);
+        state(conn, SSH_AUTH_AGENT_INIT);
       }
       break;
 
     case SSH_AUTH_HOST:
-      state(conn, SSH_AUTH_KEY_INIT);
+      state(conn, SSH_AUTH_AGENT_INIT);
+      break;
+
+    case SSH_AUTH_AGENT_INIT:
+#ifdef HAVE_LIBSSH2_AGENT_API
+      if((data->set.ssh_auth_types & CURLSSH_AUTH_AGENT)
+         && (strstr(sshc->authlist, "publickey") != NULL)) {
+
+        /* Connect to the ssh-agent */
+        /* The agent could be shared by a curl thread i believe
+           but nothing obvious as keys can be added/removed at any time */
+        if(!sshc->ssh_agent) {
+          sshc->ssh_agent = libssh2_agent_init(sshc->ssh_session);
+          if(!sshc->ssh_agent) {
+            infof(data, "Could not create agent object\n");
+
+            state(conn, SSH_AUTH_KEY_INIT);
+          }
+        }
+
+        rc = libssh2_agent_connect(sshc->ssh_agent);
+        if(rc == LIBSSH2_ERROR_EAGAIN)
+          break;
+        if(rc < 0) {
+          infof(data, "Failure connecting to agent\n");
+          state(conn, SSH_AUTH_KEY_INIT);
+        }
+        else {
+          state(conn, SSH_AUTH_AGENT_LIST);
+        }
+      }
+      else
+#endif /* HAVE_LIBSSH2_AGENT_API */
+        state(conn, SSH_AUTH_KEY_INIT);
+      break;
+
+    case SSH_AUTH_AGENT_LIST:
+#ifdef HAVE_LIBSSH2_AGENT_API
+      rc = libssh2_agent_list_identities(sshc->ssh_agent);
+
+      if(rc == LIBSSH2_ERROR_EAGAIN)
+        break;
+      if(rc < 0) {
+        infof(data, "Failure requesting identities to agent\n");
+        state(conn, SSH_AUTH_KEY_INIT);
+      }
+      else {
+        state(conn, SSH_AUTH_AGENT);
+        sshc->sshagent_prev_identity = NULL;
+      }
+#endif
+      break;
+
+    case SSH_AUTH_AGENT:
+#ifdef HAVE_LIBSSH2_AGENT_API
+      /* as prev_identity evolves only after an identity user auth finished we
+         can safely request it again as long as EAGAIN is returned here or by
+         libssh2_agent_userauth */
+      rc = libssh2_agent_get_identity(sshc->ssh_agent,
+                                      &sshc->sshagent_identity,
+                                      sshc->sshagent_prev_identity);
+      if(rc == LIBSSH2_ERROR_EAGAIN)
+        break;
+
+      if(rc == 0) {
+        rc = libssh2_agent_userauth(sshc->ssh_agent, conn->user,
+                                    sshc->sshagent_identity);
+
+        if(rc < 0) {
+          if(rc != LIBSSH2_ERROR_EAGAIN) {
+            /* tried and failed? go to next identity */
+            sshc->sshagent_prev_identity = sshc->sshagent_identity;
+          }
+          break;
+        }
+      }
+
+      if(rc < 0)
+        infof(data, "Failure requesting identities to agent\n");
+      else if(rc == 1)
+        infof(data, "No identity would match\n");
+
+      if(rc == LIBSSH2_ERROR_NONE) {
+        sshc->authed = TRUE;
+        infof(data, "Agent based authentication successful\n");
+        state(conn, SSH_AUTH_DONE);
+      }
+      else
+        state(conn, SSH_AUTH_KEY_INIT);
+#endif
       break;
 
     case SSH_AUTH_KEY_INIT:
@@ -2354,6 +2460,25 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(sshc->kh) {
         libssh2_knownhost_free(sshc->kh);
         sshc->kh = NULL;
+      }
+#endif
+
+#ifdef HAVE_LIBSSH2_AGENT_API
+      if(sshc->ssh_agent) {
+        rc = libssh2_agent_disconnect(sshc->ssh_agent);
+        if(rc == LIBSSH2_ERROR_EAGAIN) {
+          break;
+        }
+        else if(rc < 0) {
+          infof(data, "Failed to disconnect from libssh2 agent\n");
+        }
+        libssh2_agent_free (sshc->ssh_agent);
+        sshc->ssh_agent = NULL;
+
+        /* NB: there is no need to free identities, they are part of internal
+           agent stuff */
+        sshc->sshagent_identity = NULL;
+        sshc->sshagent_prev_identity = NULL;
       }
 #endif
 

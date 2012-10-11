@@ -52,6 +52,34 @@
 #  define MD5_CTX    gcry_md_hd_t
 #  define SHA_CTX    gcry_md_hd_t
 #  define SHA256_CTX gcry_md_hd_t
+#elif defined(USE_DARWINSSL)
+/* For darwinssl: CommonCrypto has the functions we need. The library's
+   headers are even backward-compatible with OpenSSL's headers as long as
+   we define COMMON_DIGEST_FOR_OPENSSL first.
+
+   These functions are available on Tiger and later, as well as iOS 5.0
+   and later. If you're building for an older cat, well, sorry. */
+#  define COMMON_DIGEST_FOR_OPENSSL
+#  include <CommonCrypto/CommonDigest.h>
+#elif defined(_WIN32)
+/* For Windows: If no other crypto library is provided, we fallback
+   to the hash functions provided within the Microsoft Windows CryptoAPI */
+#  include <wincrypt.h>
+/* Custom structure in order to store the required provider and hash handle */
+struct win32_crypto_hash {
+  HCRYPTPROV hCryptProv;
+  HCRYPTHASH hHash;
+};
+/* Custom Microsoft AES Cryptographic Provider defines required for MinGW */
+#  ifndef ALG_SID_SHA_256
+#    define ALG_SID_SHA_256  12
+#  endif
+#  ifndef CALG_SHA_256
+#    define CALG_SHA_256 (ALG_CLASS_HASH | ALG_TYPE_ANY | ALG_SID_SHA_256)
+#  endif
+#  define MD5_CTX    struct win32_crypto_hash
+#  define SHA_CTX    struct win32_crypto_hash
+#  define SHA256_CTX struct win32_crypto_hash
 #else
 #  error "Can't compile METALINK support without a crypto library."
 #endif
@@ -81,64 +109,6 @@
   if(!(val)) \
     return PARAM_NO_MEM; \
 } WHILE_FALSE
-
-const digest_params MD5_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) MD5_Init,
-    (Curl_digest_update_func) MD5_Update,
-    (Curl_digest_final_func) MD5_Final,
-    sizeof(MD5_CTX),
-    16
-  }
-};
-
-const digest_params SHA1_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) SHA1_Init,
-    (Curl_digest_update_func) SHA1_Update,
-    (Curl_digest_final_func) SHA1_Final,
-    sizeof(SHA_CTX),
-    20
-  }
-};
-
-const digest_params SHA256_DIGEST_PARAMS[] = {
-  {
-    (Curl_digest_init_func) SHA256_Init,
-    (Curl_digest_update_func) SHA256_Update,
-    (Curl_digest_final_func) SHA256_Final,
-    sizeof(SHA256_CTX),
-    32
-  }
-};
-
-static const metalink_digest_def SHA256_DIGEST_DEF[] = {
-  {"sha-256", SHA256_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def SHA1_DIGEST_DEF[] = {
-  {"sha-1", SHA1_DIGEST_PARAMS}
-};
-
-static const metalink_digest_def MD5_DIGEST_DEF[] = {
-  {"md5", MD5_DIGEST_PARAMS}
-};
-
-/*
- * The alias of supported hash functions in the order by preference
- * (basically stronger hash comes first). We included "sha-256" and
- * "sha256". The former is the name defined in the IANA registry named
- * "Hash Function Textual Names". The latter is widely (and
- * historically) used in Metalink version 3.
- */
-static const metalink_digest_alias digest_aliases[] = {
-  {"sha-256", SHA256_DIGEST_DEF},
-  {"sha256", SHA256_DIGEST_DEF},
-  {"sha-1", SHA1_DIGEST_DEF},
-  {"sha1", SHA1_DIGEST_DEF},
-  {"md5", MD5_DIGEST_DEF},
-  {NULL, NULL}
-};
 
 #ifdef USE_GNUTLS_NETTLE
 
@@ -249,7 +219,141 @@ static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
   gcry_md_close(*ctx);
 }
 
+#elif defined(_WIN32)
+
+static void win32_crypto_final(struct win32_crypto_hash *ctx,
+                               unsigned char *digest,
+                               unsigned int digestLen)
+{
+  unsigned long length;
+  CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
+  if(length == digestLen)
+    CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
+  if(ctx->hHash)
+    CryptDestroyHash(ctx->hHash);
+  if(ctx->hCryptProv)
+    CryptReleaseContext(ctx->hCryptProv, 0);
+}
+
+static void MD5_Init(MD5_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_MD5, 0, 0, &ctx->hHash);
+  }
+}
+
+static void MD5_Update(MD5_CTX *ctx,
+                       const unsigned char *input,
+                       unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void MD5_Final(unsigned char digest[16], MD5_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 16);
+}
+
+static void SHA1_Init(SHA_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_SHA1, 0, 0, &ctx->hHash);
+  }
+}
+
+static void SHA1_Update(SHA_CTX *ctx,
+                        const unsigned char *input,
+                        unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void SHA1_Final(unsigned char digest[20], SHA_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 20);
+}
+
+static void SHA256_Init(SHA256_CTX *ctx)
+{
+  if(CryptAcquireContext(&ctx->hCryptProv, NULL, NULL,
+                         PROV_RSA_AES, CRYPT_VERIFYCONTEXT)) {
+    CryptCreateHash(ctx->hCryptProv, CALG_SHA_256, 0, 0, &ctx->hHash);
+  }
+}
+
+static void SHA256_Update(SHA256_CTX *ctx,
+                          const unsigned char *input,
+                          unsigned int inputLen)
+{
+  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+}
+
+static void SHA256_Final(unsigned char digest[32], SHA256_CTX *ctx)
+{
+  win32_crypto_final(ctx, digest, 32);
+}
+
 #endif /* CRYPTO LIBS */
+
+const digest_params MD5_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) MD5_Init,
+    (Curl_digest_update_func) MD5_Update,
+    (Curl_digest_final_func) MD5_Final,
+    sizeof(MD5_CTX),
+    16
+  }
+};
+
+const digest_params SHA1_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) SHA1_Init,
+    (Curl_digest_update_func) SHA1_Update,
+    (Curl_digest_final_func) SHA1_Final,
+    sizeof(SHA_CTX),
+    20
+  }
+};
+
+const digest_params SHA256_DIGEST_PARAMS[] = {
+  {
+    (Curl_digest_init_func) SHA256_Init,
+    (Curl_digest_update_func) SHA256_Update,
+    (Curl_digest_final_func) SHA256_Final,
+    sizeof(SHA256_CTX),
+    32
+  }
+};
+
+static const metalink_digest_def SHA256_DIGEST_DEF[] = {
+  {"sha-256", SHA256_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def SHA1_DIGEST_DEF[] = {
+  {"sha-1", SHA1_DIGEST_PARAMS}
+};
+
+static const metalink_digest_def MD5_DIGEST_DEF[] = {
+  {"md5", MD5_DIGEST_PARAMS}
+};
+
+/*
+ * The alias of supported hash functions in the order by preference
+ * (basically stronger hash comes first). We included "sha-256" and
+ * "sha256". The former is the name defined in the IANA registry named
+ * "Hash Function Textual Names". The latter is widely (and
+ * historically) used in Metalink version 3.
+ */
+static const metalink_digest_alias digest_aliases[] = {
+  {"sha-256", SHA256_DIGEST_DEF},
+  {"sha256", SHA256_DIGEST_DEF},
+  {"sha-1", SHA1_DIGEST_DEF},
+  {"sha1", SHA1_DIGEST_DEF},
+  {"md5", MD5_DIGEST_DEF},
+  {NULL, NULL}
+};
 
 digest_context *Curl_digest_init(const digest_params *dparams)
 {
@@ -328,12 +432,18 @@ static int check_hash(const char *filename,
 {
   unsigned char *result;
   digest_context *dctx;
-  int check_ok;
-  int fd;
-  fd = open(filename, O_RDONLY);
+  int check_ok, flags, fd;
+
+  flags = O_RDONLY;
+#ifdef O_BINARY
+  /* O_BINARY is required in order to avoid binary EOF in text mode */
+  flags |= O_BINARY;
+#endif
+
+  fd = open(filename, flags);
   if(fd == -1) {
-    fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
-            strerror(errno));
+    fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
+            digest_def->hash_name, strerror(errno));
     return -1;
   }
   dctx = Curl_digest_init(digest_def->dparams);
@@ -345,8 +455,8 @@ static int check_hash(const char *filename,
       break;
     }
     else if(len == -1) {
-      fprintf(error, "Metalink: validating (%s) FAILED (%s)\n", filename,
-              strerror(errno));
+      fprintf(error, "Metalink: validating (%s) [%s] FAILED (%s)\n", filename,
+              digest_def->hash_name, strerror(errno));
       Curl_digest_final(dctx, result);
       close(fd);
       return -1;
@@ -358,10 +468,11 @@ static int check_hash(const char *filename,
                     digest_def->dparams->digest_resultlen) == 0;
   /* sha*sum style verdict output */
   if(check_ok)
-    fprintf(error, "Metalink: validating (%s) OK\n", filename);
+    fprintf(error, "Metalink: validating (%s) [%s] OK\n", filename,
+            digest_def->hash_name);
   else
-    fprintf(error, "Metalink: validating (%s) FAILED (digest mismatch)\n",
-            filename);
+    fprintf(error, "Metalink: validating (%s) [%s] FAILED (digest mismatch)\n",
+            filename, digest_def->hash_name);
 
   free(result);
   close(fd);
@@ -462,9 +573,24 @@ static metalinkfile *new_metalinkfile(metalink_file_t *fileinfo)
     tail = &root;
     for(p = fileinfo->resources; *p; ++p) {
       metalink_resource *res;
-      res = new_metalink_resource((*p)->url);
-      tail->next = res;
-      tail = res;
+      /* Filter by type if it is non-NULL. In Metalink v3, type
+         includes the type of the resource. In curl, we are only
+         interested in HTTP, HTTPS and FTP. In addition to them,
+         Metalink v3 file may contain bittorrent type URL, which
+         points to the BitTorrent metainfo file. We ignore it here.
+         In Metalink v4, type was deprecated and all
+         fileinfo->resources point to the target file. BitTorrent
+         metainfo file URL may be appeared in fileinfo->metaurls.
+      */
+      if((*p)->type == NULL ||
+         Curl_raw_equal((*p)->type, "http") ||
+         Curl_raw_equal((*p)->type, "https") ||
+         Curl_raw_equal((*p)->type, "ftp") ||
+         Curl_raw_equal((*p)->type, "ftps")) {
+        res = new_metalink_resource((*p)->url);
+        tail->next = res;
+        tail = res;
+      }
     }
     f->resource = root.next;
   }

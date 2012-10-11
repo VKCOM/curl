@@ -30,7 +30,7 @@ XC_OVR_ZZ50
 CURL_OVERRIDE_AUTOCONF
 
 dnl configure script copyright
-AC_COPYRIGHT([Copyright (c) 1998 - 2011 Daniel Stenberg, <daniel@haxx.se>
+AC_COPYRIGHT([Copyright (c) 1998 - 2012 Daniel Stenberg, <daniel@haxx.se>
 This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
@@ -3074,10 +3074,6 @@ if test "$ipv6" = "yes"; then
   CURL_CHECK_NI_WITHSCOPEID
 fi
 
-dnl ************************************************************
-dnl enable non-blocking communications
-dnl
-CURL_CHECK_OPTION_NONBLOCKING
 CURL_CHECK_NONBLOCKING_SOCKET
 
 dnl ************************************************************

@@ -963,9 +963,6 @@
 /* if axTLS is enabled */
 #undef USE_AXTLS
 
-/* Define to disable non-blocking sockets. */
-#undef USE_BLOCKING_SOCKETS
-
 /* if CyaSSL is enabled */
 #undef USE_CYASSL
 
