@@ -3,6 +3,7 @@
 03_keep_symbols_compat.patch
 04_workaround_as_needed_bug.patch
 05_fix-git-over-https.patch
+06_always-disable-valgrind.patch
 
 90_gnutls.patch
 99_nss.patch
