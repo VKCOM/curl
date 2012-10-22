@@ -1,3 +1,10 @@
+curl (7.28.0-2) unstable; urgency=low
+
+  * Add 05_fix-git-over-https.patch (Closes: #690551)
+  * Add 06_always-disable-valgrind.patch (Closes: #690968)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 22 Oct 2012 14:35:02 +0200
+
 curl (7.28.0-1) unstable; urgency=low
 
   * New upstream release
