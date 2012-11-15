@@ -51,7 +51,6 @@ CONFIGURE_ARGS = $(CROSS) --prefix=/usr --mandir=/usr/share/man	\
 		--disable-dependency-tracking --enable-ipv6	\
 		--with-lber-lib=lber --disable-symbol-hiding	\
 		--enable-versioned-symbols --enable-manual	\
-		--enable-debug --disable-curldebug		\
 		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)"
 # this is still not ready
 #		--enable-ares
