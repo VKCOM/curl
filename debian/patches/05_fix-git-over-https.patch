@@ -1,33 +1,23 @@
-From 1a02e84589efb3f8717d50bdc78d3f369b799198 Mon Sep 17 00:00:00 2001
-From: Alessandro Ghedini <al3xbio@gmail.com>
-Date: Mon, 15 Oct 2012 16:06:54 +0200
-Subject: [PATCH] gnutls: put reset code into else block
+Description: Fix git over HTTPS
+Origin: upstream, commits 1a02e84 and 2045d83
+Bug-Debian: http://bugs.debian.org/690551
+Author: Alessandro Ghedini <ghedo@debian.org>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2012-11-16
 
-Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=690551
----
- lib/gtls.c |    9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
-
-diff --git a/lib/gtls.c b/lib/gtls.c
-index 3b4dc40..f5f95ae 100644
---- a/lib/gtls.c
+diff -u b/lib/gtls.c b/lib/gtls.c
+--- b/lib/gtls.c
 +++ b/lib/gtls.c
-@@ -309,10 +309,11 @@ static CURLcode handshake(struct connectdata *conn,
-       failf(data, "gnutls_handshake() failed: %s", gnutls_strerror(rc));
-       return CURLE_SSL_CONNECT_ERROR;
+@@ -299,10 +299,11 @@
+       connssl->connecting_state =
+         gnutls_record_get_direction(session)?
+         ssl_connect_2_writing:ssl_connect_2_reading;
++      continue;
+       if(nonblocking)
+         return CURLE_OK;
      }
--
--    /* Reset our connect state machine */
--    connssl->connecting_state = ssl_connect_1;
--    return CURLE_OK;
-+    else {
-+      /* Reset our connect state machine */
-+      connssl->connecting_state = ssl_connect_1;
-+      return CURLE_OK;
-+    }
-   }
- }
- 
--- 
-1.7.10
-
+-    else if((rc < 0) && gnutls_error_is_fatal(rc)) {
++    else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
+       failf(data, "gnutls_handshake() warning: %s", gnutls_strerror(rc));
+     }
+     else if(rc < 0) {
