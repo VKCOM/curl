@@ -5,6 +5,7 @@
 05_fix-git-over-https.patch
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
+08_fix-git-auth.patch
 
 90_gnutls.patch
 99_nss.patch
