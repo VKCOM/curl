@@ -1,7 +1,7 @@
 curl (7.28.0-3) unstable; urgency=low
 
   * Add 07_do-not-disable-debug-symbols.patch, do not pass --enable-debug
-    anymore (Closes: #683103)
+    anymore (Closes: #693110)
   * Update 05_fix-git-over-https.patch to reflect new upstream patch
   * Add 08_fix-git-auth.patch to fix HTTPS authentication (Closes: #690764)
 
