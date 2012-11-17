@@ -1,3 +1,12 @@
+curl (7.28.0-3) unstable; urgency=low
+
+  * Add 07_do-not-disable-debug-symbols.patch, do not pass --enable-debug
+    anymore (Closes: #683103)
+  * Update 05_fix-git-over-https.patch to reflect new upstream patch
+  * Add 08_fix-git-auth.patch to fix HTTPS authentication (Closes: #690764)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 17 Nov 2012 14:07:21 +0100
+
 curl (7.28.0-2) unstable; urgency=low
 
   * Add 05_fix-git-over-https.patch (Closes: #690551)
