@@ -303,7 +303,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl secureserver.pl runtests.pl getpart.pm \
  sshserver.pl sshhelp.pm testcurl.1 runtests.1 $(HTMLPAGES) $(PDFPAGES) \
  CMakeLists.txt certs/scripts/*.sh certs/Server* certs/EdelCurlRoot* \
  serverhelp.pm tftpserver.pl rtspserver.pl directories.pm symbol-scan.pl \
- certs/srp-verifier-conf certs/srp-verifier-db
+ certs/srp-verifier-conf certs/srp-verifier-db mem-include-scan.pl
 
 @BUILD_UNITTESTS_FALSE@BUILD_UNIT = 
 
@@ -339,9 +339,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  tests/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  tests/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  tests/Makefile
+	  $(AUTOMAKE) --gnu  tests/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

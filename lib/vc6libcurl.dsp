@@ -314,6 +314,10 @@ SOURCE=.\hostasyn.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\hostcheck.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\hostip4.c
 # End Source File
 # Begin Source File
@@ -751,6 +755,10 @@ SOURCE=.\gtls.h
 # Begin Source File
 
 SOURCE=.\hash.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\hostcheck.h
 # End Source File
 # Begin Source File
 

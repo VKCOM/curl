@@ -6,6 +6,565 @@
 
                                   Changelog
 
+Version 7.28.1 (20 Nov 2012)
+
+Daniel Stenberg (20 Nov 2012)
+- RELEASE-NOTES: synced with 52af6e69f079 / 7.28.1
+
+Kamil Dudka (20 Nov 2012)
+- [Anthony Bryan brought this change]
+
+  RELEASE-NOTES: NSS can be used for metalink hashing
+
+- [Fabian Keil brought this change]
+
+  Get test 2032 working when using valgrind
+  
+  If curl_multi_fdset() sets maxfd to -1, the socket detection
+  loop is skipped and thus !found_new_socket is no cause for alarm.
+
+- test2032: spurious failure caused by premature termination
+  
+  Bug: http://curl.haxx.se/mail/lib-2012-11/0095.html
+
+Daniel Stenberg (19 Nov 2012)
+- [Fabian Keil brought this change]
+
+  Fix comment typos in test 517
+
+- [Fabian Keil brought this change]
+
+  Test 92 and 194: normalize spaces in the Server headers
+  
+  It makes no difference from curl's point of view but
+  makes it more convenient to use the tests with a
+  lws-normalizing proxy between curl and the test server.
+
+- [Fabian Keil brought this change]
+
+  Add a HOSTIP precheck for tests 31 and 1105
+  
+  They currently only work for 127.0.0.1 which
+  is hardcoded and can't be easily changed.
+
+- [Fabian Keil brought this change]
+
+  Let test 8 work as long as %HOSTIP ends with ".0.0.1"
+  
+  .. and add a precheck to skip the test otherwise.
+
+- [Fabian Keil brought this change]
+
+  Add --resolve to the keywords and name of test 1318
+  
+  This makes it easier to skip it automatically when
+  the test suite is used with external proxies.
+
+- [Fabian Keil brought this change]
+
+  Add FTP keywords for a couple of currently keyword-less FTP tests
+
+- [Fabian Keil brought this change]
+
+  Add keywords for a couple of currently keyword-less HTTP tests
+
+- [Fabian Keil brought this change]
+
+  Use carriage returns in all headers in test 31
+  
+  Trailing spaces were left unmodifed, assuming they were intentional.
+
+- [Fabian Keil brought this change]
+
+  Do not mix CRLF and LF header endings in a couple of HTTP tests
+  
+  Consistently use CRLF instead. The mixed endings weren't
+  documented so I assume they were unintentional.
+  
+  This change doesn't matter for curl itself but makes using
+  the tests with a proxy between curl and the test server
+  more convenient.
+  
+  Tests that consistently use no carriage returns were
+  left unmodified as one can easily work around this.
+
+- fixed memory leak: CURLOPT_RESOLVE with multi interface
+  
+  DNS cache entries populated with CURLOPT_RESOLVE were not properly freed
+  again when done using the multi interface.
+  
+  Test case 1502 added to verify.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3575448
+  Reported by: Alex Gruz
+
+- RELEASE-NOTES: synced with ee588fe08807778
+  
+  4 more bug fixes and 4 more contributors
+
+- mem-include-scan: verify memory #includes
+  
+  If we use memory functions (malloc, free, strdup etc) in C sources in
+  libcurl and we fail to include curl_memory.h or memdebug.h we either
+  fail to properly support user-provided memory callbacks or the memory
+  leak system of the test suite fails.
+  
+  After Ajit's report of a failure in the first category in http_proxy.c,
+  I spotted a few in the second category as well. These problems are now
+  tested for by test 1132 which runs a perl program that scans for and
+  attempts to check that we use the correct include files if a memory
+  related function is used in the source code.
+  
+  Reported by: Ajit Dhumale
+  Bug: http://curl.haxx.se/mail/lib-2012-11/0125.html
+
+- tftp_rx: code style cleanup
+  
+  Fixed checksrc warnings
+
+- [Fabian Keil brought this change]
+
+  Fix the libauthretry changes from 7c0cbcf2f61
+  
+  They broke the NTLM tests from 2023 to 2031.
+
+- [Christian Vogt brought this change]
+
+  tftp_rx: handle resends
+  
+  Re-send ACK for block X in case we receive block X data again while
+  waiting for block X+1.
+  
+  Based on an earlier patch by Marcin Adamski.
+
+- autoconf: don't force-disable compiler debug option
+  
+  When nothing is told to configure, we should not enforce switching off
+  debug options with -g0 (or similar). We instead don't use -g at all in
+  that situaion and therefore allow the user's CFLAGS settings possibly
+  dictate what to do.
+
+- [Mark Snelling brought this change]
+
+  winbuild: Fix PDB file output
+  
+  And fix some newlines to be proper CRLF
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3586741
+
+- RELEASE-NOTES: synced with fa1ae0abcde
+
+- [Cristian Rodríguez brought this change]
+
+  OpenSSL: Disable SSL/TLS compression
+  
+  It either causes increased memory usage or exposes users
+  to the "CRIME attack" (CVE-2012-4929)
+
+- [Sebastian Rasmussen brought this change]
+
+  FILE: Make upload-writes unbuffered by not using FILE streams
+
+Kamil Dudka (13 Nov 2012)
+- tool_metalink: fix error detection of hash alg initialization
+  
+  The {MD5,SHA1,SHA256}_Init functions from OpenSSL are called directly
+  without any wrappers and they return 1 for success, 0 otherwise.  Hence,
+  we have to use the same approach in all the wrapper functions that are
+  used for the other crypto libraries.
+  
+  This commit fixes a regression introduced in commit dca8ae5f.
+
+Daniel Stenberg (13 Nov 2012)
+- RELEASE-NOTES: synced with 7c0cbcf2f617b
+
+- [Sergei Nikulov brought this change]
+
+  fixed Visual Studio 2010 compilation
+
+- [Anton Malov brought this change]
+
+  ftp: EPSV-disable fix over SOCKS
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3586338
+
+Patrick Monnerat (12 Nov 2012)
+- Merge branch 'master' of github.com:bagder/curl
+
+- OS400: upgrade wrappers for the 7.28.1 release.
+
+Daniel Stenberg (12 Nov 2012)
+- runtests: limit execessive logging/output
+
+- [Gabriel Sjoberg brought this change]
+
+  Digst: Add microseconds into nounce calculation
+  
+  When using only 1 second precision, curl doesn't create new cnonce
+  values quickly enough for all uses.
+  
+  For example, issuing the following command multiple times to a recent
+  Tomcat causes authentication failures:
+  
+  curl --digest -utest:test http://tomcat.test.com:8080/manager/list
+  
+  This is because curl uses the same cnonce for several seconds, but
+  doesn't increment the nonce counter.  Tomcat correctly interprets
+  this as a replay attack and rejects the request.
+  
+  When microsecond-precision is available, this commit causes curl to
+  change cnonce values much more frequently.
+  
+  With microsecond resolution, increasing the nounce length used in the
+  headers to 32 was made to further reduce the risk of duplication.
+
+- SCP/SFTP: improve error code used for send failures
+  
+  Instead of relying on the generic CURLE error for SCP or SFTP send
+  failures, try passing back a more suitable error if possible.
+
+- Curl_write: remove unneeded typecast
+
+Kamil Dudka (9 Nov 2012)
+- tool_metalink: allow to use hash algorithms provided by NSS
+  
+  Fixes bug #3578163:
+  http://sourceforge.net/tracker/?func=detail&atid=100976&aid=3578163&group_id=976
+
+- tool_metalink: allow to handle failure of hash alg initialization
+
+- tool_metalink: introduce metalink_cleanup() in the internal API
+  
+  ... to release resources allocated at global scope
+
+Daniel Stenberg (8 Nov 2012)
+- hostcheck: only build for the actual users
+  
+  and make local function static
+
+- [Oscar Koeroo brought this change]
+
+  SSL: Several SSL-backend related fixes
+  
+  axTLS:
+  
+  This will make the axTLS backend perform the RFC2818 checks, honoring
+  the VERIFYHOST setting similar to the OpenSSL backend.
+  
+  Generic for OpenSSL and axTLS:
+  
+  Move the hostcheck and cert_hostcheck functions from the lib/ssluse.c
+  files to make them genericly available for both the OpenSSL, axTLS and
+  other SSL backends. They are now in the new lib/hostcheck.c file.
+  
+  CyaSSL:
+  
+  CyaSSL now also has the RFC2818 checks enabled by default. There is a
+  limitation that the verifyhost can not be enabled exclusively on the
+  Subject CN field comparison. This SSL backend will thus behave like the
+  NSS and the GnuTLS (meaning: RFC2818 ok, or bust). In other words:
+  setting verifyhost to 0 or 1 will disable the Subject Alt Names checks
+  too.
+  
+  Schannel:
+  
+  Updated the schannel information messages: Split the IP address usage
+  message from the verifyhost setting and changed the message about
+  disabling SNI (Server Name Indication, used in HTTP virtual hosting)
+  into a message stating that the Subject Alternative Names checks are
+  being disabled when verifyhost is set to 0 or 1. As a side effect of
+  switching off the RFC2818 related servername checks with
+  SCH_CRED_NO_SERVERNAME_CHECK
+  (http://msdn.microsoft.com/en-us/library/aa923430.aspx) the SNI feature
+  is being disabled. This effect is not documented in MSDN, but Wireshark
+  output clearly shows the effect (details on the libcurl maillist).
+  
+  PolarSSL:
+  
+  Fix the prototype change in PolarSSL of ssl_set_session() and the move
+  of the peer_cert from the ssl_context to the ssl_session. Found this
+  change in the PolarSSL SVN between r1316 and r1317 where the
+  POLARSSL_VERSION_NUMBER was at 0x01010100. But to accommodate the Ubuntu
+  PolarSSL version 1.1.4 the check is to discriminate between lower then
+  PolarSSL version 1.2.0 and 1.2.0 and higher. Note: The PolarSSL SVN
+  trunk jumped from version 1.1.1 to 1.2.0.
+  
+  Generic:
+  
+  All the SSL backends are fixed and checked to work with the
+  ssl.verifyhost as a boolean, which is an internal API change.
+
+- libcurl: VERSIONINFO update
+  
+  Since we added the curl_multi_wait function, the VERSIONINFO needed
+  updating.
+  
+  Reported by: Patrick Monnerat
+
+Guenter Knauf (8 Nov 2012)
+- Added .def file to output.
+  
+  Requested by Johnny Luong on the libcurl list.
+
+- Added deps for static metalink-aware MinGW builds.
+
+Daniel Stenberg (8 Nov 2012)
+- [Fabian Keil brought this change]
+
+  Fix compilation of lib1501
+
+- Curl_readwrite: remove debug output
+  
+  The text "additional stuff not fine" text was added for debug purposes a
+  while ago, but it isn't really helping anyone and for some reason some
+  Linux distributions provide their libcurls built with debug info still
+  present and thus (far too many) users get to read this info.
+
+- RELEASE-NOTES: synced with 487538e87a3d5e
+  
+  6 new bugfixes and 3 more contributors...
+
+- http_perhapsrewind: consider NTLM over proxy too
+  
+  The logic previously checked for a started NTLM negotiation only for
+  host and not also with proxy, leading to problems doing POSTs over a
+  proxy NTLM that are larger than 2000 bytes. Now it includes proxy in the
+  check.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3582321
+  Reported by: John Suprock
+
+- [Lars Buitinck brought this change]
+
+  Curl_connecthost: friendlier "couldn't connect" message
+
+- test1413: verify redirects to URLs with fragments
+  
+  The bug report claimed it didn't work. This problem was probably fixed
+  in 473003fbdf.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3581898
+
+- URL parser: cut off '#' fragments from URLs (better)
+  
+  The existing logic only cut off the fragment from the separate 'path'
+  buffer which is used when sending HTTP to hosts. The buffer that held
+  the full URL used for proxies were not dealt with. It is now.
+  
+  Test case 5 was updated to use a fragment on a URL over a proxy.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3579813
+
+- OpenSSL/servercert: use correct buffer size, not size of pointer
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3579286
+
+- curl: set CURLOPT_SSL_VERIFYHOST to 0 to disable
+
+- test 2027/2030: take duplicate Digest requests into account
+  
+  With the reversion of ce8311c7e49eca and the new clear logic, this flaw
+  is present and we allow it.
+
+- Curl_pretransfer: clear out unwanted auth methods
+  
+  As a handle can be re-used after having done HTTP auth in a previous
+  request, it must make sure to clear out the HTTP types that aren't
+  wanted in this new request.
+
+- test1412: verify Digest with repeated URLs
+  
+  This test case verifies that bug 3582718 is fixed.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3582718
+  Reported by: Nick Zitzmann (originally)
+
+- Revert "Zero out auth structs before transfer"
+  
+  This reverts commit ce8311c7e49eca93c136b58efa6763853541ec97.
+  
+  The commit made test 2024 work but caused a regression with repeated
+  Digest authentication. We need to fix this differently.
+
+- CURLOPT_SSL_VERIFYHOST: stop supporting the 1 value
+  
+  After a research team wrote a document[1] that found several live source
+  codes out there in the wild that misused the CURLOPT_SSL_VERIFYHOST
+  option thinking it was a boolean, this change now bans 1 as a value and
+  will make libcurl return error for it.
+  
+  1 was never a sensible value to use in production but was introduced
+  back in the days to help debugging. It was always documented clearly
+  this way.
+  
+  1 was never supported by all SSL backends in libcurl, so this cleanup
+  makes the treatment of it unified.
+  
+  The report's list of mistakes for this option were all PHP code and
+  while there's a binding layer between libcurl and PHP, the PHP team has
+  decided that they have an as thin layer as possible on top of libcurl so
+  they will not alter or specifically filter a 'TRUE' value for this
+  particular option. I sympathize with that position.
+  
+  [1] = http://daniel.haxx.se/blog/2012/10/25/libcurl-claimed-to-be-dangerous/
+
+- gnutls: fix compiler warnings
+
+- [Alessandro Ghedini brought this change]
+
+  gnutls: print alerts during handshake
+
+- [Alessandro Ghedini brought this change]
+
+  gnutls: fix the error_is_fatal logic
+
+- RELEASE-NOTES: synced with fa6d78829fd30ad
+
+- httpcustomheader.c: free the headers after use
+
+- [Dave Reisner brought this change]
+
+  uniformly use AM_CPPFLAGS, avoid deprecated INCLUDES
+  
+  Since automake 1.12.4, the warnings are issued on running automake:
+  
+    warning: 'INCLUDES' is the old name for 'AM_CPPFLAGS' (or '*_CPPFLAGS')
+  
+  Avoid INCLUDES and roll these flags into AM_CPPFLAGS.
+  
+  Compile tested on:
+    Ubuntu 10.04 (automake 1:1.11.1-1)
+    Ubuntu 12.04 (automake 1:1.11.3-1ubuntu2)
+    Arch Linux (automake 1.12.4)
+
+- libauthretry.c: shorten lines to fit within 80 cols
+
+- ftp_readresp: fix build without krb4 support
+  
+  Oops, my previous commit broke builds with krb support.
+
+- test/README: mention the 1500 test number range
+
+- FTP: prevent the multi interface from blocking
+  
+  As pointed out in Bug report #3579064, curl_multi_perform() would
+  wrongly use a blocking mechanism internally for some commands which
+  could lead to for example a very long block if the LIST response never
+  showed.
+  
+  The solution was to make sure to properly continue to use the multi
+  interface non-blocking state machine.
+  
+  The new test 1501 verifies the fix.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3579064
+  Reported by: Guido Berhoerster
+
+Marc Hoersken (1 Nov 2012)
+- winbuild: Use machine type of development environment
+  
+  This patch restores the original behavior instead of always
+  falling back to x86 if no MACHINE-type was specified.
+
+- winbuild: Additional clean up
+
+- [Sapien2 brought this change]
+
+  Even more winbuild refactoring
+
+- [Sapien2 brought this change]
+
+  Minor winbuild refactoring
+
+- [Sapien2 brought this change]
+
+  Architecture selection for winbuild and minor makefiles refactoring
+
+Daniel Stenberg (1 Nov 2012)
+- BUGS: fix the bug tracker URL
+  
+  The URL we used before is the one that goes directly to 'add' a bug
+  report, but since you can only do that after first having logged in to
+  sourceforge, the link often doesn't work for visitors.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3582408
+  Reported by: Oscar Norlander
+
+- evhiperfifo: fix the pointer passed to WRITEDATA
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3582407
+  Reported by: Oscar Norlander
+
+Guenter Knauf (1 Nov 2012)
+- Fixed MSVC libssh2 static build.
+  
+  Since libssh2 supports now agent stuff it also depends on user32.lib.
+  Posted to the list by Jan Ehrhardt.
+
+Daniel Stenberg (23 Oct 2012)
+- tlsauthtype: deal with the string case insensitively
+  
+  When given a string as 'srp' it didn't work, but required 'SRP'.
+  Starting now, the check disregards casing.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3578418
+  Reported by: Jeff Connelly
+
+- asyn-ares: restore working with c-ares < 1.6.1
+  
+  Back in those days the public ares.h header didn't include the
+  ares_version.h header so it needs to be included here.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=3577710
+
+- [Nick Zitzmann brought this change]
+
+  metalink/md5: Use CommonCrypto on Apple operating systems
+  
+  Previously the Metalink code used Apple's CommonCrypto library only if
+  curl was built using the --with-darwinssl option. Now we use CommonCrypto
+  on all Apple operating systems including Tiger or later, or iOS 5 or
+  later, so you don't need to build --with-darwinssl anymore. Also rolled
+  out this change to libcurl's md5 code.
+
+- href_extractor.c: fix the URL
+
+- [Michał Kowalczyk brought this change]
+
+  href_extractor: example code extracting href elements
+  
+  It does so in a streaming manner using the "Streaming HTML parser".
+
+- [Nick Zitzmann brought this change]
+
+  darwinssl: un-broke iOS build, fix error on server disconnect
+  
+  The iOS build was broken by a reference to a function that only existed
+  under OS X; fixed. Also fixed a hard-to-reproduce problem where, if the
+  server disconnected before libcurl got the chance to hang up first and
+  SecureTransport was in use, then we'd raise an error instead of failing
+  gracefully.
+
+- [Alessandro Ghedini brought this change]
+
+  gnutls: put reset code into else block
+  
+  Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=690551
+
+Guenter Knauf (13 Oct 2012)
+- Fix now broken libmetalink-aware OpenSSL build.
+
+- Revert c44e674; add OpenSSL includes/defines.
+  
+  The makefile is designed to build against a libmetalink devel package;
+  therefore is does not matter what will change inside libmetalink.
+  Add OpenSSL includes and defines for libmetalink-aware OpenSSL builds.
+
+Daniel Stenberg (10 Oct 2012)
+- version-bump: towards 7.28.1!
+
+- THANKS: 14 new contributors from 7.28.0
+
 Version 7.28.0 (10 Oct 2012)
 
 Daniel Stenberg (10 Oct 2012)
@@ -5039,518 +5598,3 @@ Daniel Stenberg (6 Dec 2011)
   and then run a program which uses the multi-interface.
 
 - test 815: verify POP3 dot-first-on-line unescaping
-
-- [Steve Holme brought this change]
-
-  POP3: fixed escaped dot not being striped out
-  
-  Changed the eob detection to work across the whole of the buffer so that
-  lines that begin with a dot (which the server will have escaped) are
-  passed to the client application correctly.
-
-Yang Tse (30 Nov 2011)
-- buildconf: follow-up for commit 7e02f7fd
-
-- buildconf: fix libtool 1.5.x warnings triggered with autoconf 2.6x or later
-  
-  Using libtool 1.5.x (x < 26) with autoconf 2.6x or later generates warnings
-  due to some libtool variables not following naming convention for variables
-  that will be cached.
-  
-  This is addressed renaming a couple of variables to make these follow expected
-  naming convention.
-
-Daniel Stenberg (30 Nov 2011)
-- RELEASE-NOTES: synced with 1038d0aa1
-  
-  5 bugfixes and 1 new contributor
-
-Yang Tse (29 Nov 2011)
-- pop3.c: fix compiler warning
-
-- configure: avoid usage of macro PKG_CHECK_MODULES
-  
-  libidn option adjusted in order to use pkg-config info when available
-  in a similar way as we already do for other libraries.
-
-Daniel Stenberg (29 Nov 2011)
-- POP3: detect when LIST returns no mails
-  
-  By making sure the function can detect an "end of body" sequence
-  immediately on the first line, test 811 is now enabled.
-
-- ftpserver: output CRLF in logs
-  
-  Previously the log function would just filter out all CR and LF
-  occurances from the log to make it more readable. This had the downside
-  that it made it very hard to see CR LFs when they actually matters.
-  
-  Now, they're instead converted to "[CR]" and "[LR]" in the log to become
-  apparent to readers.
-
-- POP3: fix end of body detection
-  
-  Curl_pop3_write() now has a state machine that scans for the end of a
-  POP3 body so that the CR LF '.' CR LF sequence can come in everything
-  from one up to five subsequent packets.
-  
-  Test case 810 is modified to use SLOWDOWN which makes the server pause
-  between each single byte and thus makes the POP3 body get sent to curl
-  basically one byte at a time.
-
-- test: added POP3 test with dot-prefixed line
-  
-  Test 815 is disabled for now since libcurl currently doesn't unescape
-  such lines the way it should. See mail:
-  
-  http://curl.haxx.se/mail/lib-2011-11/0324.html
-
-- configure: fix to make older pkg-config play well
-  
-  configure.ac:1349: error: possibly undefined macro: PKG_CONFIG_LIBDIR
-  
-  Obviously this is not a problem with pkg-config 0.26 but older versions
-  seem to show this.
-  
-  Fix suggested by: Kamil Dudka
-  Reported by: Guenter
-  Bug: http://curl.haxx.se/mail/lib-2011-11/0298.html
-
-- test 1211: FTP test to repeat bug #3429299
-  
-  "Active FTP hangs if server does not open data connection"
-  
-  The server first sends a 150 and then when libcurl waits for the data
-  transfer, the server sends a 425.
-
-- [Mark Brand brought this change]
-
-  configure: add support for pkg-config detection of libidn
-
-- FTP tests 1206 - 1209: don't expect QUIT
-  
-  The protocol parts for these tests do not include QUIT simply because
-  the error is CURLE_OPERATION_TIMEDOUT (28) which is a generic timeout
-  error without specificly saying for which connection it concerns, and
-  for timeouts libcurl marks the control channel as "invalid". As this
-  test case times out for the data connection it could still use the
-  control channel.
-
-Yang Tse (25 Nov 2011)
-- CyaSSL 2.0+ library initialization adjustment
-
-Daniel Stenberg (25 Nov 2011)
-- [Jonas Schnelli brought this change]
-
-  rectify comment
-
-- SSLSESSION_SHARED: new macro to check if session is shared
-  
-  Added convenience macro to use to check if a handle is using a shared
-  SSL session, and fixed so that Curl_ssl_close_all() doesn't lock when
-  the session isn't shared.
-
-Yang Tse (25 Nov 2011)
-- telnet.c: fix MSVC compiler warning
-
-- tvdiff_secs(): sub-zero time difference adjustment
-  
-  Skip a floating point addition operation when integral part of time difference
-  is zero. This avoids potential floating point addition rounding problems while
-  preserving decimal part value.
-
-Daniel Stenberg (25 Nov 2011)
-- telnet: fix macros to allow proper semicolon use
-  
-  Macros that look like function calls need to be made so that we can use
-  semicolons properly for indentation and for reducing the risk for
-  mistakes when using them.
-
-- [Laurent Rabret brought this change]
-
-  TELNET: improved treatment of options
-  
-  1) enables the Window Size option
-  2) allows the server to enable the echo mode
-  3) allows an app using libcurl to disable the default binary mode
-  
-  Signed-off-by: Laurent Rabret
-
-- RELEASE-NOTES: synced with 2c905fd1f82
-
-- [Jonas Schnelli brought this change]
-
-  query-part: ignore the URI part for given protocols
-  
-  By setting PROTOPT_NOURLQUERY in the protocol handler struct, the
-  protocol will get the "query part" of the URL cut off before the data is
-  handled by the protocol-specific code. This makes libcurl adhere to
-  RFC3986 section 2.2.
-  
-  Test 1220 is added to verify a file:// URL with query-part.
-
-- symbols.pl: provide LIBCURL_HAS macro for apps
-  
-  Experience has shown that the symbols-in-versions file is very useful to
-  applications that want to build with a wide range of libcurl versions.
-  It is however easy to get it wrong and the source gets a bit messy with
-  all the fixed numerical comparisions.
-  
-  The point of this script is to provide an easy-to-use macro for libcurl-
-  using applications to do preprocessor checks for specific libcurl
-  defines, and yet make the code clearly show what the macro is used for.
-
-Yang Tse (24 Nov 2011)
-- lib573.c: fix double data type variable comparison with zero
-
-- getinfo.c: reset app connect time when clearing session-info time variables
-
-- Fix unreleased regression when using windows gnutls versions older than 2.8
-
-Daniel Stenberg (23 Nov 2011)
-- [Mark Brand brought this change]
-
-  gnutls: only translate winsock errors for old versions
-  
-  Bugfix: https handshake fails using gnutls 3 on windows
-  http://sourceforge.net/tracker/index.php?func=detail&aid=3441084&group_id=976&atid=100976
-  
-  New gnutls versions have an error handler that knows about Winsock
-  errors, which is why gnutls_transport_set_global_errno() was deprecated
-  and then removed.
-  
-  This is a correction of commit f5bb370 (blame me) which meant to
-  reimplement gnutls_transport_set_global_errno(), which is not necessary.
-
-- protocol_connect: show verbose connect and set connect time
-  
-  Regression: commit b998d95b (shipped first in release 7.22.0) made the
-  condition always equal false that should reset the TIMER_CONNECT timer
-  and call the Curl_verboseconnect() function.
-  
-  Reported by: "Captain Basil"
-  Bug: http://curl.haxx.se/mail/archive-2011-11/0035.html
-
-- -J -O: use -O name if no Content-Disposition header comes!
-  
-  A regression between 7.22.0 and 7.23.0 -- downloading a file with the
-  flags -O and -J results in the content being written to stdout if and
-  only if there was no Content-Disposition header in the http response. If
-  there is a C-D header with a filename attribute, the output is correctly
-  written.
-  
-  Reported by: Dave Reisner
-  Bug: http://curl.haxx.se/mail/archive-2011-11/0030.html
-
-- [Martin Storsjo brought this change]
-
-  Add support for using nettle instead of gcrypt as gnutls backend
-
-- [Jonas Schnelli brought this change]
-
-  test: SFTP quote commands with * prefix
-  
-  Related to the f64812ca63 commit
-
-- CURLOPT_QUOTE: SFTP supports the '*'-prefix now
-
-- [Jonas Schnelli brought this change]
-
-  SFTP: support '*' prefix for quote operations
-  
-  prefixing a command with '*' means it is allowed to fail without
-  aborting the chain actions
-
-- getsessionid: don't ever return while locked
-  
-  Also, check for the session sharing bit instead of comparing pointers
-
-- Curl_ssl_getsessionid: increase the value, not the pointer
-
-- THANKS: one new contributor in 7.23.1
-
-- [Alejandro Alvarez Ayllon brought this change]
-
-  SSL session share: move the age counter to the share object
-  
-  Previously the age counter would be counted individually in each easy
-  handle that shared SSL sessions!
-
-- [Alejandro Alvarez Ayllon brought this change]
-
-  libtest build: add the missing lib586
-
-- [Jason Glasgow brought this change]
-
-  CURLOPT_DNS_SERVERS: set name servers if possible
-
-- RELEASE-NOTES: correct the release and contributor numbers
-
-Version 7.23.1 (17 Nov 2011)
-
-Daniel Stenberg (17 Nov 2011)
-- FindWin32CACert: return OK even if CA cert isn't found
-  
-  Bug: http://curl.haxx.se/mail/lib-2011-11/0180.html
-  Reported by: Mark Brand
-
-Dan Fandrich (16 Nov 2011)
-- curl has been built on many Android versions
-
-Daniel Stenberg (15 Nov 2011)
-- 7.24.0: start the work
-
-- THANKS: added 18 new contributors from 7.23.0
-
-Version 7.23.0 (14 Nov 2011)
-
-Dan Fandrich (14 Nov 2011)
-- curl_easy_setopt arguments should be of type long in the examples
-
-Daniel Stenberg (12 Nov 2011)
-- RELEASE-NOTES: synced with 10120e6a
-  
-  one more bug fix and contributor
-
-- progress_cb: avoid buffer overflow
-  
-  The progress bar output function would blindly use the terminal width
-  without bounds checking. When using a very wide terminal that caused a
-  buffer overflow and segfault.
-  
-  We now limit the max bar with to 255 columns, and I simplified the code
-  to avoid an extra snprintf and buffer.
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=3435710
-  Reported by: Alexey Zakhlestin
-
-Yang Tse (11 Nov 2011)
-- Active mode FTP test cases with server not establishing data connection
-  
-  591 -> FTP multi PORT and 425 on upload
-  592 -> FTP multi PORT and 421 on upload
-  593 -> FTP multi PORT upload, no data conn and no transient neg. reply
-  594 -> FTP multi PORT upload, no data conn and no positive prelim. reply
-  
-  1206 -> FTP PORT and 425 on download
-  1207 -> FTP PORT and 421 on download
-  1208 -> FTP PORT download, no data conn and no transient negative reply
-  1209 -> FTP PORT download, no data conn and no positive preliminary reply
-
-Guenter Knauf (8 Nov 2011)
-- Fix to skip untrusted certs.
-
-Daniel Stenberg (6 Nov 2011)
-- RELEASE-NOTES: synced with e3166df1bb3
-  
-  4 new bugfixes, 2 more contributors
-
-- ftp PORT: don't hang if bind() fails
-  
-  When the user requests PORT with a specific port or port range, the code
-  could lock up in an endless loop. There's now an extra conditional that
-  makes sure to special treat the error and try the local address only
-  once so a second failure will abort the loop correctly.
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=3433968
-  Reported by: Gokhan Sengun
-
-- pingpong: change two comments wrongly referring "FTP"
-  
-  Just a sign of where the code originally was ripped out from. Now it is
-  generic "pingpong".
-
-- test 590: verify the bug fix in 4851dafcf1
-  
-  This test is created to verify Rene Bernhardt's patch which makes sure
-  libcurl properly _not_ deals with Negotiate if not asked to even if the
-  proxy says it can serve it.
-
-- [Rene Bernhardt brought this change]
-
-  HTTP auth: fix proxy Negotiate bug
-  
-  If a proxy offers several Authentication schemes where NTLM and
-  Negotiate are offered by the proxy and you tell libcurl not to use the
-  Negotiate scheme then the request never returns when the proxy answers
-  with its HTTP 407 reply.
-  
-  It is reproducible by the following steps:
-  
-  - Use a proxy that offers NTLM and Negotiate ( CURLOPT_PROXY and
-  CURLOPT_PROXYPORT )
-  
-  - Tell libcurl NOT to use Negotiate CURL_EASY_SETOPT(CURLOPT_PROXYAUTH,
-  CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM )
-  
-  - Start the request
-  
-  The call to CURL_EASY_PERFORM never returns. If you switch on debug
-  logging you can see that libcurl issues a new request As soon as it
-  received the 407 reply. Instead it should return and set the response
-  code to 407.
-  
-  Bug: http://curl.haxx.se/mail/lib-2011-10/0323.html
-
-Yang Tse (4 Nov 2011)
-- ssluse.c: fix calling of OpenSSL's ERR_remove_state(0)
-  
-  Move calling of ERR_remove_state(0) a.k.a ERR_remove_thread_state(NULL)
-  from Curl_ossl_close_all() to Curl_ossl_cleanup().
-  
-  In this way ERR_remove_state(0) is now only called in libcurl by
-  curl_global_cleanup(). Previously it would get called by functions
-  curl_easy_cleanup(), curl_multi_cleanup and potentially each time a
-  connection was removed from a connection cache leading to premature
-  destruction of OpenSSL's thread local state hash.
-  
-  Multi-threaded apps using OpenSSL enabled libcurl should still call
-  function ERR_remove_state(0) or ERR_remove_thread_state(NULL) at the
-  very end end of threads that do not call curl_global_cleanup().
-
-- tool_cb_wrt.c: disambiguate warning message
-
-- tool_cfgable.c: pending check done
-
-- url.c and file.c: fix OOM triggered segfault
-
-Daniel Stenberg (3 Nov 2011)
-- rename ftp_ssl: the struct field is used for many protocols
-  
-  Now called 'use_ssl' instead, which better matches the current CURLOPT
-  name and since the option is used for all pingpong protocols (at least)
-  it makes sense to not use 'ftp' in the name.
-
-Yang Tse (2 Nov 2011)
-- [Daniel Stenberg brought this change]
-
-  gtls_connect_step1: remove use of deprecated functions
-  
-  Use gnutls_priority_set_direct() instead of gnutls_protocol_set_priority().
-  
-  Remove the gnutls_certificate_type_set_priority() use since x509 is the
-  default certificate type anyway.
-  
-  Reported by: Vincent Torri
-
-- url.c and transfer.c: nullify connection pointer when free()'ed
-
-- FTP test server: NODATACONN commands follow-up
-  
-  Make NODATACONN425 and NODATACONN421 return a 150 positive preliminary reply
-  before 425 or 421.
-  
-  New NODATACONN150 returns 150 without further positive nor negative reply
-  
-  Now NODATACONN doesn't reply anything at all.
-
-- multi.c: OOM handling fix
-
-- FTP test server: NODATACONN commands follow-up
-  
-  Make NODATACONN custom commands apply to both active and passive FTP,
-  and ensure 425 and 421 are not returned unless data channel usage is
-  attempted.
-
-- tool_cb_see.h: fix compiler warning
-
-- setup.h: fix compiler warning
-
-- FTP test server: NODATACONN commands commit c761fcb0 follow-up
-  
-  Adjustments that make NODATACONN custom commands fully usable.
-
-Daniel Stenberg (30 Oct 2011)
-- [Dave Reisner brought this change]
-
-  doc/curl.1: fix sentence with ending for -# option
-  
-  Try to be a little more descriptive about the effect of this flag,
-  rather than parroting what was said in the paragraph just above.
-
-Yang Tse (30 Oct 2011)
-- FTP test server: fix server unresponsiveness
-  
-  Some torture tests left FTP test server in an unresponsive state, resulting
-  in torture tests that actually completed following unexpected code paths.
-  
-  Changes in this commit solely address this issue and some adjustments for
-  ftpserver.pl logging relative to data channel establishment and tear down.
-  Pending NODATACONN relative adjustments reserved for a further commit.
-
-- runtests.pl: running server checks - commit 4464583a follow-up
-  
-  Ensure verification takes place with no server commands file.
-  Ignore verbose setting for running server precheck.
-  Tweak unresponsive server message, to allow detection by haxx.se scripts.
-
-- gtls.c: gnutls_transport_set_global_errno() deprecated in version 2.12.3
-
-- runtests.pl: running server checks - commit 3676ec96 follow-up
-  
-  Fix called sub when checking TFTP server, and adjust message.
-
-- runtests.pl: running server checks - commit 4464583a follow-up
-  
-  Extended server checks to others in addition to pingpong when torture testing.
-
-- lib589.c: add CURLOPT_READDATA missing stuff
-
-- ftpserver.pl: three new custom FTP server commands to disable data channel
-  
-  NODATACONN421: applies only to active FTP mode, instructs server to not
-  establish data connection back to client and reply with FTP 421.
-  
-  NODATACONN425: applies only to active FTP mode, instructs server to not
-  establish data connection back to client and reply with FTP 425.
-  
-  NODATACONN: applies to both active and passive FTP modes, instructs server
-  to not establish nor accept a data channel and fool client into believing
-  that the data channel connection is possible.
-  
-  Some polishing probably required.
-
-- multi.c: OOM handling fix
-  
-  Fix curl_multi_cleanup() segfault when using weird cleanup sequence.
-
-Daniel Stenberg (27 Oct 2011)
-- multi: start ftp state machine when switching to DO_MORE
-  
-  This extends the fix from commit d7934b8bd491
-  
-  When the multi state is changed within the multi_runsingle from DOING to
-  DO_MORE, we didn't immediately start the FTP state machine again. That
-  then left the FTP state in FTP_STOP. When curl_multi_fdset() was
-  subsequently called, the ftp_domore_getsock() function would return the
-  wrong fd info.
-  
-  Reported by: Gokhan Sengun
-
-- libcurl-multi.3: update the list of areas still blocking
-
-Yang Tse (26 Oct 2011)
-- test 589: active FTP upload using multi timeout and EPRT disabled server
-
-- multi tests: OOM handling fixes - commit 629d2e34 follow-up
-
-Patrick Monnerat (26 Oct 2011)
-- - Prepare the ILE/RPG binding and OS400 documentation for the upcoming release
-
-Daniel Stenberg (25 Oct 2011)
-- RELEASE-NOTES: synced with 4464583a6ed
-  
-  5 more bug fixes, 4 additional contributors
-
-Yang Tse (25 Oct 2011)
-- runtests.pl: running server checks
-  
-  When running torture tests, verify before each test case that required
-  pingpong servers which are supposed to be alive are actually responsive.
-  If found not responsive then restart them.
-
-Daniel Stenberg (24 Oct 2011)
-- dist: add test 587
-  
-  I created test 587 in commit 840eff44f2b but forgot to add the file to
-  the tarball. Added now.

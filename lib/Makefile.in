@@ -130,7 +130,7 @@ am__objects_1 = libcurl_la-file.lo libcurl_la-timeval.lo \
 	libcurl_la-curl_ntlm_wb.lo libcurl_la-curl_ntlm_core.lo \
 	libcurl_la-curl_ntlm_msgs.lo libcurl_la-curl_sasl.lo \
 	libcurl_la-curl_schannel.lo libcurl_la-curl_multibyte.lo \
-	libcurl_la-curl_darwinssl.lo
+	libcurl_la-curl_darwinssl.lo libcurl_la-hostcheck.lo
 am__objects_2 =
 am_libcurl_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libcurl_la_OBJECTS = $(am_libcurl_la_OBJECTS)
@@ -185,7 +185,7 @@ am__objects_3 = libcurlu_la-file.lo libcurlu_la-timeval.lo \
 	libcurlu_la-curl_ntlm_wb.lo libcurlu_la-curl_ntlm_core.lo \
 	libcurlu_la-curl_ntlm_msgs.lo libcurlu_la-curl_sasl.lo \
 	libcurlu_la-curl_schannel.lo libcurlu_la-curl_multibyte.lo \
-	libcurlu_la-curl_darwinssl.lo
+	libcurlu_la-curl_darwinssl.lo libcurlu_la-hostcheck.lo
 am_libcurlu_la_OBJECTS = $(am__objects_3) $(am__objects_2)
 libcurlu_la_OBJECTS = $(am_libcurlu_la_OBJECTS)
 @BUILD_UNITTESTS_TRUE@am_libcurlu_la_rpath =
@@ -456,12 +456,12 @@ EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 $(DSP)              \
 
 CLEANFILES = $(DSP) $(VCPROJ)
 lib_LTLIBRARIES = libcurl.la
-@USE_EMBEDDED_ARES_FALSE@INCLUDES = -I$(top_builddir)/include/curl \
-@USE_EMBEDDED_ARES_FALSE@           -I$(top_builddir)/include      \
-@USE_EMBEDDED_ARES_FALSE@           -I$(top_srcdir)/include        \
-@USE_EMBEDDED_ARES_FALSE@           -I$(top_builddir)/lib          \
-@USE_EMBEDDED_ARES_FALSE@           -I$(top_srcdir)/lib
-
+@USE_EMBEDDED_ARES_FALSE@AM_CPPFLAGS = -I$(top_builddir)/include/curl \
+@USE_EMBEDDED_ARES_FALSE@	-I$(top_builddir)/include \
+@USE_EMBEDDED_ARES_FALSE@	-I$(top_srcdir)/include \
+@USE_EMBEDDED_ARES_FALSE@	-I$(top_builddir)/lib \
+@USE_EMBEDDED_ARES_FALSE@	-I$(top_srcdir)/lib $(am__append_1) \
+@USE_EMBEDDED_ARES_FALSE@	$(am__append_2)
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
@@ -475,16 +475,15 @@ lib_LTLIBRARIES = libcurl.la
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "private" files
 # $(top_builddir)/ares is for in-tree c-ares's generated ares_build.h file
 # $(top_srcdir)/ares is for in-tree c-ares's external include files
-@USE_EMBEDDED_ARES_TRUE@INCLUDES = -I$(top_builddir)/include/curl \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_builddir)/include      \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_srcdir)/include        \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_builddir)/lib          \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_srcdir)/lib            \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_builddir)/ares         \
-@USE_EMBEDDED_ARES_TRUE@           -I$(top_srcdir)/ares
-
-AM_CPPFLAGS = $(am__append_1) $(am__append_2)
-@SONAME_BUMP_FALSE@VERSIONINFO = -version-info 6:0:2
+@USE_EMBEDDED_ARES_TRUE@AM_CPPFLAGS = -I$(top_builddir)/include/curl \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_builddir)/include \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_srcdir)/include \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_builddir)/lib \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_srcdir)/lib \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_builddir)/ares \
+@USE_EMBEDDED_ARES_TRUE@	-I$(top_srcdir)/ares $(am__append_1) \
+@USE_EMBEDDED_ARES_TRUE@	$(am__append_2)
+@SONAME_BUMP_FALSE@VERSIONINFO = -version-info 7:0:3
 
 #
 # Bumping of SONAME conditionally may seem like a weird thing to do, and yeah
@@ -495,7 +494,7 @@ AM_CPPFLAGS = $(am__append_1) $(am__append_2)
 #
 # This conditional soname bump SHOULD be removed at next "proper" bump.
 #
-@SONAME_BUMP_TRUE@VERSIONINFO = -version-info 7:0:2
+@SONAME_BUMP_TRUE@VERSIONINFO = -version-info 8:0:3
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
@@ -546,7 +545,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   idn_win32.c http_negotiate_sspi.c cyassl.c http_proxy.c non-ascii.c	\
   asyn-ares.c asyn-thread.c curl_gssapi.c curl_ntlm.c curl_ntlm_wb.c	\
   curl_ntlm_core.c curl_ntlm_msgs.c curl_sasl.c curl_schannel.c	\
-  curl_multibyte.c curl_darwinssl.c
+  curl_multibyte.c curl_darwinssl.c hostcheck.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -563,7 +562,8 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h qssl.h hostip.h	\
   warnless.h curl_hmac.h polarssl.h curl_rtmp.h curl_gethostname.h	\
   gopher.h axtls.h cyassl.h http_proxy.h non-ascii.h asyn.h curl_ntlm.h	\
   curl_gssapi.h curl_ntlm_wb.h curl_ntlm_core.h curl_ntlm_msgs.h	\
-  curl_sasl.h curl_schannel.h curl_multibyte.h curl_darwinssl.h
+  curl_sasl.h curl_schannel.h curl_multibyte.h curl_darwinssl.h	\
+  hostcheck.h
 
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
@@ -714,6 +714,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hmac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hostasyn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hostcheck.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hostip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hostip4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurl_la-hostip6.Plo@am__quote@
@@ -819,6 +820,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hash.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hmac.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hostasyn.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hostcheck.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hostip.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hostip4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libcurlu_la-hostip6.Plo@am__quote@
@@ -1640,6 +1642,13 @@ libcurl_la-curl_darwinssl.lo: curl_darwinssl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c
 
+libcurl_la-hostcheck.lo: hostcheck.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -MT libcurl_la-hostcheck.lo -MD -MP -MF "$(DEPDIR)/libcurl_la-hostcheck.Tpo" -c -o libcurl_la-hostcheck.lo `test -f 'hostcheck.c' || echo '$(srcdir)/'`hostcheck.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurl_la-hostcheck.Tpo" "$(DEPDIR)/libcurl_la-hostcheck.Plo"; else rm -f "$(DEPDIR)/libcurl_la-hostcheck.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hostcheck.c' object='libcurl_la-hostcheck.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurl_la_CPPFLAGS) $(CPPFLAGS) $(libcurl_la_CFLAGS) $(CFLAGS) -c -o libcurl_la-hostcheck.lo `test -f 'hostcheck.c' || echo '$(srcdir)/'`hostcheck.c
+
 libcurlu_la-file.lo: file.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-file.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-file.Tpo" -c -o libcurlu_la-file.lo `test -f 'file.c' || echo '$(srcdir)/'`file.c; \
 @am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-file.Tpo" "$(DEPDIR)/libcurlu_la-file.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-file.Tpo"; exit 1; fi
@@ -2374,6 +2383,13 @@ libcurlu_la-curl_darwinssl.lo: curl_darwinssl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='curl_darwinssl.c' object='libcurlu_la-curl_darwinssl.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-curl_darwinssl.lo `test -f 'curl_darwinssl.c' || echo '$(srcdir)/'`curl_darwinssl.c
+
+libcurlu_la-hostcheck.lo: hostcheck.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -MT libcurlu_la-hostcheck.lo -MD -MP -MF "$(DEPDIR)/libcurlu_la-hostcheck.Tpo" -c -o libcurlu_la-hostcheck.lo `test -f 'hostcheck.c' || echo '$(srcdir)/'`hostcheck.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libcurlu_la-hostcheck.Tpo" "$(DEPDIR)/libcurlu_la-hostcheck.Plo"; else rm -f "$(DEPDIR)/libcurlu_la-hostcheck.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='hostcheck.c' object='libcurlu_la-hostcheck.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libcurlu_la_CPPFLAGS) $(CPPFLAGS) $(libcurlu_la_CFLAGS) $(CFLAGS) -c -o libcurlu_la-hostcheck.lo `test -f 'hostcheck.c' || echo '$(srcdir)/'`hostcheck.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

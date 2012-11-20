@@ -46,6 +46,9 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = curl$(EXEEXT)
+
+# Mostly for Windows build targets, when using static libcurl
+@USE_CPPFLAG_CURL_STATICLIB_TRUE@am__append_1 = -DCURL_STATICLIB
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.inc
 subdir = src
@@ -358,17 +361,10 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_builddir)/src is for curl's generated src/curl_config.h file
 # $(top_srcdir)/lib is for libcurl's lib/setup.h and other "borrowed" files
 # $(top_srcdir)/src is for curl's src/tool_setup.h and "curl-private" files
-INCLUDES = -I$(top_builddir)/include/curl \
-           -I$(top_builddir)/include      \
-           -I$(top_srcdir)/include        \
-           -I$(top_builddir)/lib          \
-           -I$(top_builddir)/src          \
-           -I$(top_srcdir)/lib            \
-           -I$(top_srcdir)/src
-
-
-# Mostly for Windows build targets, when using static libcurl
-@USE_CPPFLAG_CURL_STATICLIB_TRUE@AM_CPPFLAGS = -DCURL_STATICLIB
+AM_CPPFLAGS = -I$(top_builddir)/include/curl -I$(top_builddir)/include \
+	-I$(top_srcdir)/include -I$(top_builddir)/lib \
+	-I$(top_builddir)/src -I$(top_srcdir)/lib -I$(top_srcdir)/src \
+	$(am__append_1)
 
 # libcurl has sources that provide functions named curlx_* that aren't part of
 # the official API, but we re-use the code here to avoid duplication.
