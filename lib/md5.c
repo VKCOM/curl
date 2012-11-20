@@ -28,9 +28,13 @@
 #include "curl_hmac.h"
 #include "warnless.h"
 
+#include "curl_memory.h"
+
 #if defined(USE_GNUTLS_NETTLE)
 
 #include <nettle/md5.h>
+/* The last #include file should be: */
+#include "memdebug.h"
 
 typedef struct md5_ctx MD5_CTX;
 
@@ -54,6 +58,8 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #elif defined(USE_GNUTLS)
 
 #include <gcrypt.h>
+/* The last #include file should be: */
+#include "memdebug.h"
 
 typedef gcry_md_hd_t MD5_CTX;
 
@@ -83,6 +89,17 @@ static void MD5_Final(unsigned char digest[16], MD5_CTX * ctx)
 #  else
 #    include <md5.h>
 #  endif
+
+#elif defined(__MAC_10_4) || defined(__IPHONE_5_0)
+
+/* For Apple operating systems: CommonCrypto has the functions we need.
+   The library's headers are even backward-compatible with OpenSSL's
+   headers as long as we define COMMON_DIGEST_FOR_OPENSSL first.
+
+   These functions are available on Tiger and later, as well as iOS 5.0
+   and later. If you're building for an older cat, well, sorry. */
+#  define COMMON_DIGEST_FOR_OPENSSL
+#  include <CommonCrypto/CommonDigest.h>
 
 #elif defined(_WIN32)
 
@@ -424,6 +441,9 @@ static void Decode (UINT4 *output,
 }
 
 #endif /* CRYPTO LIBS */
+
+/* The last #include file should be: */
+#include "memdebug.h"
 
 const HMAC_params Curl_HMAC_MD5[] = {
   {

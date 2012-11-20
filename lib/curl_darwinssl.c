@@ -266,6 +266,44 @@ CF_INLINE const char *SSLCipherNameForNumber(SSLCipherSuite cipher) {
     case SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA:
       return "SSL_FORTEZZA_DMS_WITH_FORTEZZA_CBC_SHA";
       break;
+    /* TLS 1.0 with AES (RFC 3268)
+       (Apparently these are used in SSLv3 implementations as well.) */
+    case TLS_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_DSS_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_DSS_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DHE_DSS_WITH_AES_128_CBC_SHA:
+      return "TLS_DHE_DSS_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DHE_RSA_WITH_AES_128_CBC_SHA:
+      return "TLS_DHE_RSA_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_DH_anon_WITH_AES_128_CBC_SHA:
+      return "TLS_DH_anon_WITH_AES_128_CBC_SHA";
+      break;
+    case TLS_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_DSS_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_DSS_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DHE_DSS_WITH_AES_256_CBC_SHA:
+      return "TLS_DHE_DSS_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DHE_RSA_WITH_AES_256_CBC_SHA:
+      return "TLS_DHE_RSA_WITH_AES_256_CBC_SHA";
+      break;
+    case TLS_DH_anon_WITH_AES_256_CBC_SHA:
+      return "TLS_DH_anon_WITH_AES_256_CBC_SHA";
+      break;
     /* SSL version 2.0 */
     case SSL_RSA_WITH_RC2_CBC_MD5:
       return "SSL_RSA_WITH_RC2_CBC_MD5";
@@ -594,7 +632,6 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  bool sni = true;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
@@ -614,7 +651,8 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if TARGET_OS_EMBEDDED == 0 /* the older API does not exist on iOS */
+  /* The old ST API does not exist under iOS, so don't compile it: */
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
     if(connssl->ssl_ctx)
       (void)SSLDisposeContext(connssl->ssl_ctx);
     err = SSLNewContext(false, &(connssl->ssl_ctx));
@@ -622,7 +660,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
       failf(data, "SSL: couldn't create a context: OSStatus %d", err);
       return CURLE_OUT_OF_MEMORY;
     }
-#endif /* TARGET_OS_EMBEDDED == 0 */
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
   }
 #else
   if(connssl->ssl_ctx)
@@ -656,7 +694,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if TARGET_OS_EMBEDDED == 0
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
     (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx,
                                        kSSLProtocolAll,
                                        false);
@@ -697,7 +735,7 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                            true);
         break;
     }
-#endif  /* TARGET_OS_EMBEDDED == 0 */
+#endif  /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
   }
 #else
   (void)SSLSetProtocolVersionEnabled(connssl->ssl_ctx, kSSLProtocolAll, false);
@@ -747,14 +785,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
     }
   }
   else {
-#if TARGET_OS_EMBEDDED == 0
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
     err = SSLSetEnableCertVerify(connssl->ssl_ctx,
                                  data->set.ssl.verifypeer?true:false);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
     }
-#endif /* TARGET_OS_EMBEDDED == 0 */
+#endif /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
   }
 #else
   err = SSLSetEnableCertVerify(connssl->ssl_ctx,
@@ -765,12 +803,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
   }
 #endif /* defined(__MAC_10_6) || defined(__IPHONE_5_0) */
 
+  /* If this is a domain name and not an IP address, then configure SNI.
+   * Also: the verifyhost setting influences SNI usage */
   /* If this is a domain name and not an IP address, then configure SNI: */
   if((0 == Curl_inet_pton(AF_INET, conn->host.name, &addr)) &&
 #ifdef ENABLE_IPV6
      (0 == Curl_inet_pton(AF_INET6, conn->host.name, &addr)) &&
 #endif
-     sni) {
+     data->set.ssl.verifyhost) {
     err = SSLSetPeerDomainName(connssl->ssl_ctx, conn->host.name,
                                strlen(conn->host.name));
     if(err != noErr) {
@@ -824,7 +864,6 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
         connssl->connecting_state = connssl->ssl_direction ?
             ssl_connect_2_writing : ssl_connect_2_reading;
         return CURLE_OK;
-        break;
 
       case errSSLServerAuthCompleted:
         /* the documentation says we need to call SSLHandshake() again */
@@ -836,13 +875,16 @@ darwinssl_connect_step2(struct connectdata *conn, int sockindex)
       case errSSLCertExpired:
         failf(data, "SSL certificate problem: OSStatus %d", err);
         return CURLE_SSL_CACERT;
-        break;
+
+      case errSSLHostNameMismatch:
+        failf(data, "SSL certificate peer verification failed, the "
+              "certificate did not match \"%s\"\n", conn->host.dispname);
+        return CURLE_PEER_FAILED_VERIFICATION;
 
       default:
         failf(data, "Unknown SSL protocol error in connection to %s:%d",
               conn->host.name, err);
         return CURLE_SSL_CONNECT_ERROR;
-        break;
     }
   }
   else {
@@ -902,6 +944,32 @@ darwinssl_connect_step3(struct connectdata *conn,
    * Well, okay, if verbose mode is on, let's print the details of the
    * server certificates. */
 #if defined(__MAC_10_7) || defined(__IPHONE_5_0)
+#if (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)
+#pragma unused(server_certs)
+  err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
+  if(err == noErr) {
+    count = SecTrustGetCertificateCount(trust);
+    for(i = 0L ; i < count ; i++) {
+      server_cert = SecTrustGetCertificateAtIndex(trust, i);
+      server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+      memset(server_cert_summary_c, 0, 128);
+      if(CFStringGetCString(server_cert_summary,
+                            server_cert_summary_c,
+                            128,
+                            kCFStringEncodingUTF8)) {
+        infof(data, "Server certificate: %s\n", server_cert_summary_c);
+      }
+      CFRelease(server_cert_summary);
+    }
+    CFRelease(trust);
+  }
+#else
+  /* SSLCopyPeerCertificates() is deprecated as of Mountain Lion.
+     The function SecTrustGetCertificateAtIndex() is officially present
+     in Lion, but it is unfortunately also present in Snow Leopard as
+     private API and doesn't work as expected. So we have to look for
+     a different symbol to make sure this code is only executed under
+     Lion or later. */
   if(SecTrustEvaluateAsync != NULL) {
 #pragma unused(server_certs)
     err = SSLCopyPeerTrust(connssl->ssl_ctx, &trust);
@@ -909,7 +977,8 @@ darwinssl_connect_step3(struct connectdata *conn,
       count = SecTrustGetCertificateCount(trust);
       for(i = 0L ; i < count ; i++) {
         server_cert = SecTrustGetCertificateAtIndex(trust, i);
-        server_cert_summary = SecCertificateCopySubjectSummary(server_cert);
+        server_cert_summary =
+          SecCertificateCopyLongDescription(NULL, server_cert, NULL);
         memset(server_cert_summary_c, 0, 128);
         if(CFStringGetCString(server_cert_summary,
                               server_cert_summary_c,
@@ -923,7 +992,6 @@ darwinssl_connect_step3(struct connectdata *conn,
     }
   }
   else {
-#if TARGET_OS_EMBEDDED == 0
     err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
     if(err == noErr) {
       count = CFArrayGetCount(server_certs);
@@ -943,8 +1011,8 @@ darwinssl_connect_step3(struct connectdata *conn,
       }
       CFRelease(server_certs);
     }
-#endif /* TARGET_OS_EMBEDDED == 0 */
   }
+#endif /* (TARGET_OS_EMBEDDED || TARGET_OS_IPHONE) */
 #else
 #pragma unused(trust)
   err = SSLCopyPeerCertificates(connssl->ssl_ctx, &server_certs);
@@ -1120,10 +1188,10 @@ void Curl_darwinssl_close(struct connectdata *conn, int sockindex)
 #if defined(__MAC_10_8) || defined(__IPHONE_5_0)
     if(SSLCreateContext != NULL)
       CFRelease(connssl->ssl_ctx);
-#if TARGET_OS_EMBEDDED == 0
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
     else
       (void)SSLDisposeContext(connssl->ssl_ctx);
-#endif  /* TARGET_OS_EMBEDDED == 0 */
+#endif  /* (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE)) */
 #else
     (void)SSLDisposeContext(connssl->ssl_ctx);
 #endif /* defined(__MAC_10_8) || defined(__IPHONE_5_0) */
@@ -1308,6 +1376,11 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
     switch (err) {
       case errSSLWouldBlock:  /* we're not done yet; keep reading */
         *curlcode = CURLE_AGAIN;
+        return -1;
+        break;
+
+      case errSSLClosedGraceful: /* they're done; fail gracefully */
+        *curlcode = CURLE_OK;
         return -1;
         break;
 

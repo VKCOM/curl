@@ -845,7 +845,7 @@ p.roffit {
 <p class="level1">When negotiating a SSL connection, the server sends a certificate indicating its identity. 
 <p class="level1">When <a class="emphasis" href="#CURLOPTSSLVERIFYHOST">CURLOPT_SSL_VERIFYHOST</a> is 2, that certificate must indicate that the server is the server to which you meant to connect, or the connection fails. 
 <p class="level1">Curl considers the server the intended one when the Common Name field or a Subject Alternate Name field in the certificate matches the host name in the URL to which you told Curl to connect. 
-<p class="level1">When the value is 1, the certificate must contain a Common Name field, but it doesn't matter what name it says.  (This is not ordinarily a useful setting). 
+<p class="level1">When the value is 1, libcurl will return a failure. It was previously (in 7.28.0 and earlier) a debug option of some sorts, but it is no longer supported due to frequently leading to programmer mistakes. 
 <p class="level1">When the value is 0, the connection succeeds regardless of the names in the certificate. 
 <p class="level1">The default value for this option is 2. 
 <p class="level1">This option controls checking the server's certificate's claimed identity. The server could be lying.  To control lying, see <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a>.  If libcurl is built against NSS and <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is zero, <a class="emphasis" href="#CURLOPTSSLVERIFYHOST">CURLOPT_SSL_VERIFYHOST</a> is ignored. 

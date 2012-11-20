@@ -144,6 +144,7 @@
 <File RelativePath="hash.c"></File>
 <File RelativePath="hmac.c"></File>
 <File RelativePath="hostasyn.c"></File>
+<File RelativePath="hostcheck.c"></File>
 <File RelativePath="hostip4.c"></File>
 <File RelativePath="hostip6.c"></File>
 <File RelativePath="hostip.c"></File>
@@ -254,6 +255,7 @@
 <File RelativePath="gopher.h"></File>
 <File RelativePath="gtls.h"></File>
 <File RelativePath="hash.h"></File>
+<File RelativePath="hostcheck.h"></File>
 <File RelativePath="hostip.h"></File>
 <File RelativePath="http_chunks.h"></File>
 <File RelativePath="http_digest.h"></File>
