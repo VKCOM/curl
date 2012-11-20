@@ -4,9 +4,9 @@ Bug-Debian: http://bugs.debian.org/690968
 Forwarded: not-needed
 Last-Update: 2012-10-22
 
---- curl-7.28.0.orig/tests/Makefile.am
-+++ curl-7.28.0/tests/Makefile.am
-@@ -59,7 +59,7 @@ TEST_Q =
+--- a/tests/Makefile.am
++++ b/tests/Makefile.am
+@@ -59,7 +59,7 @@
  TEST_F =
  TEST_T =
  else # if not cross-compiling:

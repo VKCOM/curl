@@ -18,7 +18,7 @@ Last-Update: 2012-03-22
           CPPFLAGS="$CPPFLAGS $addcflags"
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
-@@ -48,7 +48,7 @@
+@@ -47,7 +47,7 @@
  endif
  
  # Dependencies
@@ -38,7 +38,7 @@ Last-Update: 2012-03-22
  LIBCURL_LIBS = @LIBCURL_LIBS@
  
  # This might hold -Werror
-@@ -134,7 +134,7 @@
+@@ -132,7 +132,7 @@
  VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
  endif
  
@@ -47,7 +47,7 @@ Last-Update: 2012-03-22
  
  if DOING_CURL_SYMBOL_HIDING
  libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-@@ -158,7 +158,7 @@
+@@ -156,7 +156,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
