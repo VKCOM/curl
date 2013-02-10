@@ -2,6 +2,7 @@
 02_art_http_scripting.patch
 03_keep_symbols_compat.patch
 04_workaround_as_needed_bug.patch
+05_curl-sasl-CVE-2013-0249.patch
 
 90_gnutls.patch
 99_nss.patch
