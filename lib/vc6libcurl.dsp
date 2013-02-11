@@ -55,8 +55,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
-# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
+# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
+# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /incremental:no /map /debug /machine:I386 /out:"DLL-Debug/libcurld.dll" /implib:"DLL-Debug/libcurld_imp.lib" /pdbtype:sept
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 DLL Release"
 
@@ -84,8 +84,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
-# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
+# ADD BASE LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
+# ADD LINK32 kernel32.lib ws2_32.lib wldap32.lib advapi32.lib /nologo /dll /pdb:none /machine:I386 /out:"DLL-Release/libcurl.dll" /implib:"DLL-Release/libcurl_imp.lib"
 
 !ELSEIF  "$(CFG)" == "libcurl - Win32 LIB Debug"
 
@@ -167,6 +167,14 @@ SOURCE=.\axtls.c
 # Begin Source File
 
 SOURCE=.\base64.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\bundles.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\conncache.c
 # End Source File
 # Begin Source File
 
@@ -594,7 +602,15 @@ SOURCE=.\axtls.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\bundles.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\config-win32.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\conncache.h
 # End Source File
 # Begin Source File
 
@@ -691,6 +707,14 @@ SOURCE=.\curl_sasl.h
 # Begin Source File
 
 SOURCE=.\curl_schannel.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_setup.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\curl_setup_once.h
 # End Source File
 # Begin Source File
 
@@ -814,6 +838,10 @@ SOURCE=.\memdebug.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\multihandle.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\multiif.h
 # End Source File
 # Begin Source File
@@ -874,11 +902,7 @@ SOURCE=.\sendf.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\setup.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\setup_once.h
+SOURCE=.\setup-vms.h
 # End Source File
 # Begin Source File
 

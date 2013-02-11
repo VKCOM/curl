@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -56,7 +56,8 @@
 # These should be the only variables that might be needed to get edited:
 
 BEGIN {
-    @INC=(@INC, $ENV{'srcdir'}, ".");
+    push(@INC, $ENV{'srcdir'}) if(defined $ENV{'srcdir'});
+    push(@INC, ".");
     # run time statistics needs Time::HiRes
     eval {
         no warnings "all";
@@ -262,6 +263,7 @@ my %oldenv;
 #
 
 my $short;
+my $automakestyle;
 my $verbose;
 my $debugprotocol;
 my $anyway;
@@ -1362,8 +1364,8 @@ sub runhttptlsserver {
     $flags .= "--http ";
     $flags .= "--debug 1 " if($debugprotocol);
     $flags .= "--port $port ";
-    $flags .= "--srppasswd certs/srp-verifier-db ";
-    $flags .= "--srppasswdconf certs/srp-verifier-conf";
+    $flags .= "--srppasswd $srcdir/certs/srp-verifier-db ";
+    $flags .= "--srppasswdconf $srcdir/certs/srp-verifier-conf";
 
     my $cmd = "$httptlssrv $flags > $logfile 2>&1";
     my ($httptlspid, $pid2) = startnew($cmd, $pidfile, 10, 1); # fake pidfile
@@ -2148,17 +2150,24 @@ sub filteroff {
 #
 sub compare {
     # filter off patterns _before_ this comparison!
-    my ($subject, $firstref, $secondref)=@_;
+    my ($testnum, $testname, $subject, $firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
 
     if($result) {
+        # timestamp test result verification end
+        $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
+
         if(!$short) {
-            logmsg "\n $subject FAILED:\n";
+            logmsg "\n $testnum: $subject FAILED:\n";
             logmsg showdiff($LOGDIR, $firstref, $secondref);
         }
-        else {
+        elsif(!$automakestyle) {
             logmsg "FAILED\n";
+        }
+        else {
+            # automakestyle
+            logmsg "FAIL: $testnum - $testname - $subject\n";
         }
     }
     return $result;
@@ -2874,7 +2883,7 @@ sub singletest {
         timestampskippedevents($testnum);
         return -1;
     }
-    logmsg sprintf("test %03d...", $testnum);
+    logmsg sprintf("test %03d...", $testnum) if(!$automakestyle);
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -2916,12 +2925,9 @@ sub singletest {
 
     # name of the test
     my @testname= getpart("client", "name");
-
-    if(!$short) {
-        my $name = $testname[0];
-        $name =~ s/\n//g;
-        logmsg "[$name]\n";
-    }
+    my $testname = $testname[0];
+    $testname =~ s/\n//g;
+    logmsg "[$testname]\n" if(!$short);
 
     if($listonly) {
         timestampskippedevents($testnum);
@@ -3020,6 +3026,13 @@ sub singletest {
         $tool=$CMDLINE;
         $disablevalgrind=1;
     }
+    elsif($cmdtype eq "shell") {
+        # run the command line prepended with "/bin/sh"
+        $cmdargs ="$cmd";
+        $CMDLINE = "/bin/sh ";
+        $tool=$CMDLINE;
+        $disablevalgrind=1;
+    }
     elsif(!$tool) {
         # run curl, add --verbose for debug information output
         $cmd = "-1 ".$cmd if(exists $feature{"SSL"} && ($has_axtls));
@@ -3071,6 +3084,7 @@ sub singletest {
             my $valgrindcmd = "$valgrind ";
             $valgrindcmd .= "$valgrind_tool " if($valgrind_tool);
             $valgrindcmd .= "--leak-check=yes ";
+            $valgrindcmd .= "--suppressions=$srcdir/valgrind.supp ";
             $valgrindcmd .= "--num-callers=16 ";
             $valgrindcmd .= "${valgrind_logfile}=$LOGDIR/valgrind$testnum";
             $CMDLINE = "$valgrindcmd $CMDLINE";
@@ -3333,10 +3347,8 @@ sub singletest {
             chomp($validstdout[$#validstdout]);
         }
 
-        $res = compare("stdout", \@actual, \@validstdout);
+        $res = compare($testnum, $testname, "stdout", \@actual, \@validstdout);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "s";
@@ -3357,10 +3369,8 @@ sub singletest {
             map s/\r\n/\n/g, @out;
         }
 
-        $res = compare("data", \@out, \@reply);
+        $res = compare($testnum, $testname, "data", \@out, \@reply);
         if ($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "d";
@@ -3372,10 +3382,8 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
-        $res = compare("upload", \@out, \@upload);
+        $res = compare($testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
         $ok .= "u";
@@ -3419,10 +3427,8 @@ sub singletest {
             }
         }
 
-        $res = compare("protocol", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "protocol", \@out, \@protstrip);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -3469,10 +3475,8 @@ sub singletest {
             }
         }
 
-        $res = compare("proxy", \@out, \@protstrip);
+        $res = compare($testnum, $testname, "proxy", \@out, \@protstrip);
         if($res) {
-            # timestamp test result verification end
-            $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
             return 1;
         }
 
@@ -3521,10 +3525,9 @@ sub singletest {
 
             @outfile = fixarray(@outfile);
 
-            $res = compare("output ($filename)", \@generated, \@outfile);
+            $res = compare($testnum, $testname, "output ($filename)",
+                           \@generated, \@outfile);
             if($res) {
-                # timestamp test result verification end
-                $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
             }
 
@@ -3614,8 +3617,13 @@ sub singletest {
             }
             my @e = valgrindparse($srcdir, $feature{'SSL'}, "$LOGDIR/$vgfile");
             if(@e && $e[0]) {
-                logmsg " valgrind ERROR ";
-                logmsg @e;
+                if($automakestyle) {
+                    logmsg "FAIL: $testnum - $testname - valgrind\n";
+                }
+                else {
+                    logmsg " valgrind ERROR ";
+                    logmsg @e;
+                }
                 # timestamp test result verification end
                 $timevrfyend{$testnum} = Time::HiRes::time() if($timestats);
                 return 1;
@@ -3641,7 +3649,13 @@ sub singletest {
     my $left=sprintf("remaining: %02d:%02d",
                      $estleft/60,
                      $estleft%60);
-    logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+
+    if(!$automakestyle) {
+        logmsg sprintf("OK (%-3d out of %-3d, %s)\n", $count, $total, $left);
+    }
+    else {
+        logmsg "PASS: $testnum - $testname\n";
+    }
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
@@ -4284,6 +4298,11 @@ while(@ARGV) {
         # short output
         $short=1;
     }
+    elsif($ARGV[0] eq "-am") {
+        # automake-style output
+        $short=1;
+        $automakestyle=1;
+    }
     elsif($ARGV[0] eq "-n") {
         # no valgrind
         undef $valgrind;
@@ -4360,6 +4379,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -r       run time statistics
   -rf      full run time statistics
   -s       short output
+  -am      automake style output PASS/FAIL: [number] [name]
   -t[N]    torture (simulate memory alloc failures); N means fail Nth alloc
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only

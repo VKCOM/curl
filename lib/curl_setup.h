@@ -230,6 +230,14 @@
 #endif
 
 /*
+ * VMS setup file includes some system headers.
+ */
+
+#ifdef __VMS
+#  include "setup-vms.h"
+#endif
+
+/*
  * Include header files for windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
  * winsock2.h, ws2tcpip.h or winsock.h. Any other windows thing belongs
@@ -645,8 +653,8 @@ int netware_init(void);
  * Include macros and defines that should only be processed once.
  */
 
-#ifndef __SETUP_ONCE_H
-#include "setup_once.h"
+#ifndef HEADER_CURL_SETUP_ONCE_H
+#include "curl_setup_once.h"
 #endif
 
 /*
