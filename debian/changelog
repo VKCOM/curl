@@ -1,12 +1,17 @@
-curl (7.29.0-1) UNRELEASED; urgency=high
+curl (7.29.0-1) unstable; urgency=high
 
   * New upstream release
     - Fix buffer overflow when negotiating SASL DIGEST-MD5 authentication
       as per CVE-2013-0249 (Closes: #700002)
       http://curl.haxx.se/docs/adv_20130206.html
     - Set urgency=high accordingly
+  * Install all the examples
+  * Update 90_gnutls.patch and 99_nss.patch
+  * Refresh patches
+  * Correctly pass CPPFLAGS to ./configure
+  * Upload to unstable
 
- -- Alessandro Ghedini <ghedo@debian.org>  Mon, 11 Feb 2013 13:29:20 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 11 Feb 2013 14:48:03 +0100
 
 curl (7.28.1-1) experimental; urgency=low
 
