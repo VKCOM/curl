@@ -3,30 +3,22 @@ Origin: vendor
 Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
-Last-Update: 2012-03-22
+Last-Update: 2013-02-11
 
---- a/configure.ac
-+++ b/configure.ac
-@@ -1851,7 +1851,7 @@
-       CLEANCPPFLAGS="$CPPFLAGS"
-       CLEANLDFLAGS="$LDFLAGS"
- 
--      LIBS="$LIBS $addlib -lgcrypt"
-+      LIBS="$LIBS $addlib"
-       LDFLAGS="$LDFLAGS $addld"
-       if test "$addcflags" != "-I/usr/include"; then
-          CPPFLAGS="$CPPFLAGS $addcflags"
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
-@@ -47,7 +47,7 @@
- endif
+@@ -53,9 +53,9 @@
  
  # Dependencies
+ if USE_EXPLICIT_LIB_DEPS
+-LDADD = $(LIBDIR)/libcurl-gnutls.la @LIBCURL_LIBS@
++LDADD = $(LIBDIR)/libcurl-nss.la @LIBCURL_LIBS@
+ else
 -LDADD = $(LIBDIR)/libcurl-gnutls.la
 +LDADD = $(LIBDIR)/libcurl-nss.la
+ endif
  
  # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
- include Makefile.inc
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
 @@ -42,7 +42,7 @@
@@ -38,16 +30,27 @@ Last-Update: 2012-03-22
  LIBCURL_LIBS = @LIBCURL_LIBS@
  
  # This might hold -Werror
-@@ -132,7 +132,7 @@
- VERSIONED_SYMBOLS = -Wl,--version-script=libcurl.vers
- endif
+@@ -135,14 +135,14 @@
+ # Prevent LIBS from being used for all link targets
+ LIBS = $(BLANK_AT_MAKETIME)
  
 -libcurl_gnutls_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
 +libcurl_nss_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
  
  if DOING_CURL_SYMBOL_HIDING
- libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-@@ -156,7 +156,7 @@
+-libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
+-libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
++libcurl_nss_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
++libcurl_nss_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
+ else
+-libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS)
+-libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS)
++libcurl_nss_la_CPPFLAGS = $(AM_CPPFLAGS)
++libcurl_nss_la_CFLAGS = $(AM_CFLAGS)
+ endif
+ 
+ # unit testing static library built only along with unit tests
+@@ -159,7 +159,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
@@ -58,27 +61,44 @@ Last-Update: 2012-03-22
  WIN32SOURCES = $(CSOURCES)
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -54,9 +54,9 @@
- # This might hold -Werror
- CFLAGS += @CURL_CFLAG_EXTRAS@ @LIBMETALINK_CFLAGS@
+@@ -58,14 +58,14 @@
+ LIBS = $(BLANK_AT_MAKETIME)
  
--curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@ @LIBMETALINK_LIBS@
-+curl_LDADD = $(top_builddir)/lib/libcurl-nss.la @CURL_LIBS@ @LIBMETALINK_LIBS@
+ if USE_EXPLICIT_LIB_DEPS
+-curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-nss.la @LIBMETALINK_LIBS@ @LIBCURL_LIBS@
+ else
+-curl_LDADD = $(top_builddir)/lib/libcurl-gnutls.la @LIBMETALINK_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
++curl_LDADD = $(top_builddir)/lib/libcurl-nss.la @LIBMETALINK_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
+ endif
+ 
  curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
+ curl_CPPFLAGS = $(AM_CPPFLAGS) $(LIBMETALINK_CPPFLAGS)
 -curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
 +curl_DEPENDENCIES = $(top_builddir)/lib/libcurl-nss.la
- BUILT_SOURCES = hugehelp.c
- CLEANFILES = hugehelp.c
- # Use the C locale to ensure that only ASCII characters appear in the
+ 
+ BUILT_SOURCES = tool_hugehelp.c
+ CLEANFILES = tool_hugehelp.c
 --- a/tests/libtest/Makefile.am
 +++ b/tests/libtest/Makefile.am
-@@ -56,8 +56,8 @@
- CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
+@@ -59,16 +59,16 @@
+ LIBS = $(BLANK_AT_MAKETIME)
+ 
+ if USE_EXPLICIT_LIB_DEPS
+-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @LIBCURL_LIBS@
+-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @LIBCURL_LIBS@
++SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-nss.la @LIBCURL_LIBS@
++TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-nss.la @LIBCURL_LIBS@
+ else
+-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @CURL_NETWORK_LIBS@
+-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-gnutls.la @CURL_NETWORK_AND_TIME_LIBS@
++SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl-nss.la @CURL_NETWORK_LIBS@
++TESTUTIL_LIBS = $(top_builddir)/lib/libcurl-nss.la @CURL_NETWORK_AND_TIME_LIBS@
+ endif
  
  # Dependencies (may need to be overriden)
--LDADD = $(top_builddir)/lib/libcurl-gnutls.la @CURL_LIBS@
+ LDADD = $(SUPPORTFILES_LIBS)
 -DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
-+LDADD = $(top_builddir)/lib/libcurl-nss.la @CURL_LIBS@
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-nss.la
  
  # Mostly for Windows build targets, when using static libcurl
