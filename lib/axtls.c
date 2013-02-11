@@ -26,15 +26,11 @@
  * but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_AXTLS
 #include <axTLS/ssl.h>
 #include "axtls.h"
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 #include "sendf.h"
 #include "inet_pton.h"

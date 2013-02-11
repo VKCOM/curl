@@ -754,8 +754,8 @@ p.roffit {
 <p class="level2">Resolve to IPv6 addresses. 
 <p class="level1">
 <p class="level0"><a name="CURLOPTCONNECTONLY"></a><span class="nroffip">CURLOPT_CONNECT_ONLY</span> 
-<p class="level1">Pass a long. If the parameter equals 1, it tells the library to perform all the required proxy authentication and connection setup, but no data transfer. This option is useful only on HTTP URLs. 
-<p class="level1">This option is useful with the <span Class="emphasis">CURLINFO_LASTSOCKET</span> option to <a class="emphasis" href="./curl_easy_getinfo.html">curl_easy_getinfo(3)</a>. The library can set up the connection and then the application can obtain the most recently used socket for special data transfers. (Added in 7.15.2) 
+<p class="level1">Pass a long. If the parameter equals 1, it tells the library to perform all the required proxy authentication and connection setup, but no data transfer. This option is implemented for HTTP, SMTP and POP3. 
+<p class="level1">The option can be used to simply test a connection to a server, but is more useful when used with the <span Class="emphasis">CURLINFO_LASTSOCKET</span> option to <a class="emphasis" href="./curl_easy_getinfo.html">curl_easy_getinfo(3)</a> as the library can set up the connection and then the application can obtain the most recently used socket for special data transfers. (Added in 7.15.2) 
 <p class="level0"><a name="CURLOPTUSESSL"></a><span class="nroffip">CURLOPT_USE_SSL</span> 
 <p class="level1">Pass a long using one of the values from below, to make libcurl use your desired level of SSL for the transfer. (Added in 7.11.0) 
 <p class="level1">This is for enabling SSL/TLS when you use FTP, SMTP, POP3, IMAP etc. 
@@ -827,7 +827,7 @@ p.roffit {
 <p class="level0"><a name="CURLOPTCAINFO"></a><span class="nroffip">CURLOPT_CAINFO</span> 
 <p class="level1">Pass a char * to a zero terminated string naming a file holding one or more certificates to verify the peer with.  This makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option.  If <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> is zero, <a class="emphasis" href="#CURLOPTCAINFO">CURLOPT_CAINFO</a> need not even indicate an accessible file. 
 <p class="level1">This option is by default set to the system path where libcurl's cacert bundle is assumed to be stored, as established at build time. 
-<p class="level1">When built against NSS, this is the directory that the NSS certificate database resides in. 
+<p class="level1">If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module (libnsspem.so) needs to be available for this option to work properly. 
 <p class="level0"><a name="CURLOPTISSUERCERT"></a><span class="nroffip">CURLOPT_ISSUERCERT</span> 
 <p class="level1">Pass a char * to a zero terminated string naming a file holding a CA certificate in PEM format. If the option is set, an additional check against the peer certificate is performed to verify the issuer is indeed the one associated with the certificate provided by the option. This additional check is useful in multi-level PKI where one needs to enforce that the peer certificate is from a specific branch of the tree. 
 <p class="level1">This option makes sense only when used in combination with the <a class="emphasis" href="#CURLOPTSSLVERIFYPEER">CURLOPT_SSL_VERIFYPEER</a> option. Otherwise, the result of the check is not considered as failure. 

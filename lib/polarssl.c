@@ -27,13 +27,9 @@
  *
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_POLARSSL
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 #include <polarssl/net.h>
 #include <polarssl/ssl.h>

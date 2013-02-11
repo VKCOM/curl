@@ -25,13 +25,9 @@
  * but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_NSS
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -757,6 +753,8 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
     static const char pem_slotname[] = "PEM Token #1";
     SECItem cert_der = { 0, NULL, 0 };
     void *proto_win = SSL_RevealPinArg(sock);
+    struct CERTCertificateStr *cert;
+    struct SECKEYPrivateKeyStr *key;
 
     PK11SlotInfo *slot = PK11_FindSlotByName(pem_slotname);
     if(NULL == slot) {
@@ -771,24 +769,27 @@ static SECStatus SelectClientCert(void *arg, PRFileDesc *sock,
       return SECFailure;
     }
 
-    *pRetCert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
+    cert = PK11_FindCertFromDERCertItem(slot, &cert_der, proto_win);
     SECITEM_FreeItem(&cert_der, PR_FALSE);
-    if(NULL == *pRetCert) {
+    if(NULL == cert) {
       failf(data, "NSS: client certificate from file not found");
       PK11_FreeSlot(slot);
       return SECFailure;
     }
 
-    *pRetKey = PK11_FindPrivateKeyFromCert(slot, *pRetCert, NULL);
+    key = PK11_FindPrivateKeyFromCert(slot, cert, NULL);
     PK11_FreeSlot(slot);
-    if(NULL == *pRetKey) {
+    if(NULL == key) {
       failf(data, "NSS: private key from file not found");
-      CERT_DestroyCertificate(*pRetCert);
+      CERT_DestroyCertificate(cert);
       return SECFailure;
     }
 
     infof(data, "NSS: client certificate from file\n");
-    display_cert_info(data, *pRetCert);
+    display_cert_info(data, cert);
+
+    *pRetCert = cert;
+    *pRetKey = key;
     return SECSuccess;
   }
 
@@ -1053,13 +1054,17 @@ void Curl_nss_close(struct connectdata *conn, int sockindex)
        as closed to avoid double close */
     fake_sclose(conn->sock[sockindex]);
     conn->sock[sockindex] = CURL_SOCKET_BAD;
+
+    if((connssl->client_nickname != NULL) || (connssl->obj_clicert != NULL))
+      /* A server might require different authentication based on the
+       * particular path being requested by the client.  To support this
+       * scenario, we must ensure that a connection will never reuse the
+       * authentication data from a previous connection. */
+      SSL_InvalidateSession(connssl->handle);
+
     if(connssl->client_nickname != NULL) {
       free(connssl->client_nickname);
       connssl->client_nickname = NULL;
-
-      /* force NSS to ask again for a client cert when connecting
-       * next time to the same server */
-      SSL_InvalidateSession(connssl->handle);
     }
     /* destroy all NSS objects in order to avoid failure of NSS shutdown */
     Curl_llist_destroy(connssl->obj_list, NULL);
@@ -1088,10 +1093,8 @@ static bool is_nss_error(CURLcode err)
   switch(err) {
   case CURLE_PEER_FAILED_VERIFICATION:
   case CURLE_SSL_CACERT:
-  case CURLE_SSL_CACERT_BADFILE:
   case CURLE_SSL_CERTPROBLEM:
   case CURLE_SSL_CONNECT_ERROR:
-  case CURLE_SSL_CRL_BADFILE:
   case CURLE_SSL_ISSUER_ERROR:
     return true;
 

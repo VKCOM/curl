@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012, Nick Zitzmann, <nickzman@gmail.com>.
- * Copyright (C) 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012-2013, Nick Zitzmann, <nickzman@gmail.com>.
+ * Copyright (C) 2012-2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,21 +26,21 @@
  * TLS/SSL layer. No code but sslgen.c should ever call or use these functions.
  */
 
-#include "setup.h"
+#include "curl_setup.h"
 
 #ifdef USE_DARWINSSL
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 
 #include <Security/Security.h>
 #include <Security/SecureTransport.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <CommonCrypto/CommonDigest.h>
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+#include <sys/sysctl.h>
+#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -78,15 +78,15 @@ static OSStatus SocketRead(SSLConnectionRef connection,
                                                  * RETURNED */
                            size_t *dataLength)  /* IN/OUT */
 {
-  UInt32 bytesToGo = *dataLength;
-  UInt32 initLen = bytesToGo;
+  size_t bytesToGo = *dataLength;
+  size_t initLen = bytesToGo;
   UInt8 *currData = (UInt8 *)data;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   int sock = connssl->ssl_sockfd;
   OSStatus rtn = noErr;
-  UInt32 bytesRead;
-  int rrtn;
+  size_t bytesRead;
+  ssize_t rrtn;
   int theErr;
 
   *dataLength = 0;
@@ -140,12 +140,12 @@ static OSStatus SocketWrite(SSLConnectionRef connection,
                             const void *data,
                             size_t *dataLength)  /* IN/OUT */
 {
-  UInt32 bytesSent = 0;
+  size_t bytesSent = 0;
   /*int sock = *(int *)connection;*/
   struct ssl_connect_data *connssl = (struct ssl_connect_data *)connection;
   int sock = connssl->ssl_sockfd;
-  int length;
-  UInt32 dataLen = *dataLength;
+  ssize_t length;
+  size_t dataLen = *dataLength;
   const UInt8 *dataPtr = (UInt8 *)data;
   OSStatus ortn;
   int theErr;
@@ -626,6 +626,41 @@ CF_INLINE const char *TLSCipherNameForNumber(SSLCipherSuite cipher) {
   return "TLS_NULL_WITH_NULL_NULL";
 }
 
+CF_INLINE bool IsRunningMountainLionOrLater(void)
+{
+#if (TARGET_OS_MAC && !(TARGET_OS_EMBEDDED || TARGET_OS_IPHONE))
+  int mib[2];
+  char *os_version;
+  size_t os_version_len;
+  char *os_version_major/*, *os_version_minor, *os_version_point*/;
+  int os_version_major_int;
+
+  /* Get the Darwin kernel version from the kernel using sysctl(): */
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_OSRELEASE;
+  if(sysctl(mib, 2, NULL, &os_version_len, NULL, 0) == -1)
+    return false;
+  os_version = malloc(os_version_len*sizeof(char));
+  if(!os_version)
+    return false;
+  if(sysctl(mib, 2, os_version, &os_version_len, NULL, 0) == -1) {
+    free(os_version);
+    return false;
+  }
+
+  /* Parse the version. If it's version 12.0.0 or later, then this user is
+     using Mountain Lion. */
+  os_version_major = strtok(os_version, ".");
+  /*os_version_minor = strtok(NULL, ".");
+  os_version_point = strtok(NULL, ".");*/
+  os_version_major_int = atoi(os_version_major);
+  free(os_version);
+  return os_version_major_int >= 12;
+#else
+  return true;  /* iOS users: this doesn't concern you */
+#endif
+}
+
 static CURLcode darwinssl_connect_step1(struct connectdata *conn,
                                         int sockindex)
 {
@@ -775,7 +810,14 @@ static CURLcode darwinssl_connect_step1(struct connectdata *conn,
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
 #if defined(__MAC_10_6) || defined(__IPHONE_5_0)
-  if(SSLSetSessionOption != NULL) {
+  /* Snow Leopard introduced the SSLSetSessionOption() function, but due to
+     a library bug with the way the kSSLSessionOptionBreakOnServerAuth flag
+     works, it doesn't work as expected under Snow Leopard or Lion.
+     So we need to call SSLSetEnableCertVerify() on those older cats in order
+     to disable certificate validation if the user turned that off.
+     (SecureTransport will always validate the certificate chain by
+     default.) */
+  if(SSLSetSessionOption != NULL && IsRunningMountainLionOrLater()) {
     err = SSLSetSessionOption(connssl->ssl_ctx,
                               kSSLSessionOptionBreakOnServerAuth,
                               data->set.ssl.verifypeer?false:true);
@@ -1330,7 +1372,7 @@ void Curl_darwinssl_md5sum(unsigned char *tmp, /* input */
                            size_t md5len)
 {
   (void)md5len;
-  (void)CC_MD5(tmp, tmplen, md5sum);
+  (void)CC_MD5(tmp, (CC_LONG)tmplen, md5sum);
 }
 
 static ssize_t darwinssl_send(struct connectdata *conn,
@@ -1341,12 +1383,14 @@ static ssize_t darwinssl_send(struct connectdata *conn,
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-  size_t processed;
+  size_t processed = 0UL;
   OSStatus err = SSLWrite(connssl->ssl_ctx, mem, len, &processed);
 
   if(err != noErr) {
     switch (err) {
-      case errSSLWouldBlock:  /* we're not done yet; keep sending */
+      case errSSLWouldBlock:  /* return how much we sent (if anything) */
+        if(processed)
+          return (ssize_t)processed;
         *curlcode = CURLE_AGAIN;
         return -1;
         break;
@@ -1369,12 +1413,14 @@ static ssize_t darwinssl_recv(struct connectdata *conn,
 {
   /*struct SessionHandle *data = conn->data;*/
   struct ssl_connect_data *connssl = &conn->ssl[num];
-  size_t processed;
+  size_t processed = 0UL;
   OSStatus err = SSLRead(connssl->ssl_ctx, buf, buffersize, &processed);
 
   if(err != noErr) {
     switch (err) {
-      case errSSLWouldBlock:  /* we're not done yet; keep reading */
+      case errSSLWouldBlock:  /* return how much we read (if anything) */
+        if(processed)
+          return (ssize_t)processed;
         *curlcode = CURLE_AGAIN;
         return -1;
         break;
