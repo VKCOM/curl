@@ -33,12 +33,11 @@ Package: curl
 Architecture: any
 Replaces: curl-ssl
 Provides: curl-ssl
-Depends: ${shlibs:Depends}, ${misc:Depends},
- libcurl3 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl3 (= ${binary:Version})
 Description: command line tool for transferring data with URL syntax
  curl is a command line tool for transferring data with URL syntax, supporting
- DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S,
- RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
+ POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  curl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP form
  based upload, proxies, cookies, user+password authentication (Basic, Digest,
@@ -56,8 +55,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (OpenSSL flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -81,8 +80,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (GnuTLS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -106,8 +105,8 @@ Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (NSS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -147,8 +146,8 @@ Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}),
  zlib1g-dev
 Description: development files and documentation for libcurl (OpenSSL flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -191,8 +190,8 @@ Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version}),
  zlib1g-dev
 Description: development files and documentation for libcurl (GnuTLS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -235,8 +234,8 @@ Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
  zlib1g-dev
 Description: development files and documentation for libcurl (NSS flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
@@ -265,8 +264,8 @@ Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}) | libcurl3-gnutls (= ${
 Multi-Arch: same
 Description: debugging symbols for libcurl (OpenSSL, GnuTLS and NSS flavours)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
- FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, POP3, POP3S, RTMP,
- RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
  .
  libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
  form based upload, proxies, cookies, user+password authentication (Basic,
