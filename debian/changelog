@@ -1,3 +1,13 @@
+curl (7.29.0-3) UNRELEASED; urgency=low
+
+  * Add libcurl4-doc package:
+    - Move *.pdf and *.html files to the libcurl4-doc package
+    - Add Replaces, Breaks and Suggests to/for -doc package
+    - Move examples to the -doc package
+  * Do not compress *.pdf files (Closes: #704093)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 28 Mar 2013 12:02:23 +0100
+
 curl (7.29.0-2) unstable; urgency=low
 
   * Fix a segfault when closing an unused multi handle (Closes: #701713)
