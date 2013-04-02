@@ -2,7 +2,7 @@ curl (7.29.0-3) UNRELEASED; urgency=low
 
   * Add libcurl4-doc package:
     - Move *.pdf and *.html files to the libcurl4-doc package
-    - Add Replaces, Breaks and Suggests to/for -doc package
+    - Add Suggests for -doc package to -dev packages
     - Move examples to the -doc package
   * Do not compress *.pdf files (Closes: #704093)
 

@@ -280,12 +280,6 @@ Description: debugging symbols for libcurl (OpenSSL, GnuTLS and NSS flavours)
 Package: libcurl4-doc
 Section: doc
 Architecture: all
-Replaces: libcurl4-openssl-dev (<< 7.29.0-3),
- libcurl4-gnutls-dev (<< 7.29.0-3),
- libcurl4-nss-dev (<< 7.29.0-3)
-Breaks: libcurl4-openssl-dev (<< 7.29.0-3),
- libcurl4-gnutls-dev (<< 7.29.0-3),
- libcurl4-nss-dev (<< 7.29.0-3)
 Depends: ${misc:Depends}
 Description: documentation for libcurl
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
