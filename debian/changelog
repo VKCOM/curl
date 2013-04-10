@@ -1,3 +1,15 @@
+curl (7.26.0-1+wheezy2) wheezy-proposed-updates; urgency=high
+
+  [ Alessandro Ghedini ]
+  * Fix cookie domain tailmatch as per CVE-2013-1944
+    http://curl.haxx.se/docs/adv_20130412.html (Closes: #705274)
+  * Set urgency=high accordingly
+
+  [ Salvatore Bonaccorso ]
+  * Add testcase for CVE-2013-1944
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 10 Apr 2013 22:56:48 +0200
+
 curl (7.26.0-1+wheezy1) testing-proposed-updates; urgency=high
 
   * Fix buffer overflow when negotiating SMTP DIGEST-MD5 authentication

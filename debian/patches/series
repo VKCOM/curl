@@ -3,6 +3,8 @@
 03_keep_symbols_compat.patch
 04_workaround_as_needed_bug.patch
 05_curl-sasl-CVE-2013-0249.patch
+06_curl-tailmatch-CVE-2013-1944.patch
+07_test1218-another-cookie-tailmatch-test.patch
 
 90_gnutls.patch
 99_nss.patch

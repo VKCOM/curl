@@ -1,0 +1,101 @@
+From 5c5e1a1cd206ad8feadaa83a37d0326ba45cf45d Mon Sep 17 00:00:00 2001
+From: Daniel Stenberg <daniel@haxx.se>
+Date: Wed, 10 Apr 2013 13:40:36 +0200
+Subject: [PATCH] test1218: another cookie tailmatch test
+
+... and make 1216 also verify it with a file input
+
+These tests verify commit 3604fde3d3c9b0d, the fix for the "cookie
+domain tailmatch" vulnerability. See
+http://curl.haxx.se/docs/adv_20130412.html
+---
+ tests/data/Makefile.am |    2 +-
+ tests/data/test1216    |    3 ++-
+ tests/data/test1218    |   61 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 64 insertions(+), 2 deletions(-)
+ create mode 100644 tests/data/test1218
+
+--- /dev/null
++++ b/tests/data/test1218
+@@ -0,0 +1,61 @@
++<testcase>
++<info>
++<keywords>
++HTTP
++HTTP GET
++HTTP proxy
++cookies
++</keywords>
++</info>
++
++# This test is very similar to 1216, only that it sets the cookies from the
++# first site instead of reading from a file
++<reply>
++<data>
++HTTP/1.1 200 OK
++Date: Tue, 25 Sep 2001 19:37:44 GMT
++Set-Cookie: domain=.example.fake; bug=fixed;
++Content-Length: 21
++
++This server says moo
++</data>
++</reply>
++
++# Client-side
++<client>
++<server>
++http
++</server>
++ <name>
++HTTP cookies and domains with same prefix
++ </name>
++ <command>
++http://example.fake/c/1218 http://example.fake/c/1218 http://bexample.fake/c/1218 -b nonexisting -x %HOSTIP:%HTTPPORT
++</command>
++</client>
++
++# Verify data after the test has been "shot"
++<verify>
++<strip>
++^User-Agent:.*
++</strip>
++<protocol>
++GET http://example.fake/c/1218 HTTP/1.1
++Host: example.fake
++Accept: */*
++Proxy-Connection: Keep-Alive
++
++GET http://example.fake/c/1218 HTTP/1.1
++Host: example.fake
++Accept: */*
++Proxy-Connection: Keep-Alive
++Cookie: bug=fixed
++
++GET http://bexample.fake/c/1218 HTTP/1.1
++Host: bexample.fake
++Accept: */*
++Proxy-Connection: Keep-Alive
++
++</protocol>
++</verify>
++</testcase>
+--- a/tests/data/Makefile.am
++++ b/tests/data/Makefile.am
+@@ -78,6 +78,7 @@
+ test1126 test1127 test1128 test1129 test1130 test1131 \
+ test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
+ test1208 test1209 test1210 test1211 \
++test1218 \
+ test1220 \
+ test1300 test1301 test1302 test1303 test1304 test1305	\
+ test1306 test1307 test1308 test1309 test1310 test1311 test1312 test1313 \
+--- a/tests/data/Makefile.in
++++ b/tests/data/Makefile.in
+@@ -337,6 +337,7 @@
+ test1126 test1127 test1128 test1129 test1130 test1131 \
+ test1200 test1201 test1202 test1203 test1204 test1205 test1206 test1207 \
+ test1208 test1209 test1210 test1211 \
++test1218 \
+ test1220 \
+ test1300 test1301 test1302 test1303 test1304 test1305	\
+ test1306 test1307 test1308 test1309 test1310 test1311 test1312 test1313 \
