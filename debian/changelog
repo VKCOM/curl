@@ -1,3 +1,9 @@
+curl (7.29.0-3) UNRELEASED; urgency=low
+
+  * Do not compress *.pdf files (Closes: #704093)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 11 Apr 2013 00:19:28 +0200
+
 curl (7.29.0-2) unstable; urgency=low
 
   * Fix a segfault when closing an unused multi handle (Closes: #701713)
