@@ -5,6 +5,7 @@
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
 08_NULL-pointer-dereference-on-close.patch
+09_CVE-213-1944.patch
 
 90_gnutls.patch
 99_nss.patch
