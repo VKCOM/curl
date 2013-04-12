@@ -1,8 +1,19 @@
-curl (7.29.0-3) UNRELEASED; urgency=low
+curl (7.29.0-2.1) unstable; urgency=high
 
+  * Non-maintainer upload.
+
+  [ Alessandro Ghedini ]
   * Do not compress *.pdf files (Closes: #704093)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 11 Apr 2013 00:19:28 +0200
+  [ Salvatore Bonaccorso ]
+  * Add 09_CVE-213-1944.patch.
+    Fix CVE-2013-1944: fix tailmatching to prevent cross-domain leakage.
+    Cookies set for 'example.com' could accidentaly also be sent by libcurl
+    to the 'bexample.com' (ie with a prefix to the first domain name).
+    (Closes: #705274)
+  * Add testcase for CVE-2013-1944.
+
+ -- Salvatore Bonaccorso <carnil@debian.org>  Fri, 12 Apr 2013 13:55:34 +0200
 
 curl (7.29.0-2) unstable; urgency=low
 
