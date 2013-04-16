@@ -1,3 +1,9 @@
+curl (7.30.0-1) UNRELEASED; urgency=low
+
+  * New upstream release
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 16 Apr 2013 20:16:23 +0200
+
 curl (7.29.0-2.1) unstable; urgency=high
 
   * Non-maintainer upload.
