@@ -3,7 +3,7 @@ Upstream-Name: curl
 Source: http://curl.haxx.se
 
 Files: *
-Copyright: 1996-2012, Daniel Stenberg <daniel@haxx.se>
+Copyright: 1996-2013, Daniel Stenberg <daniel@haxx.se>
 License: curl
 
 Files: lib/axtls.*
