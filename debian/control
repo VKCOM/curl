@@ -122,7 +122,7 @@ Description: easy-to-use client-side URL transfer library (NSS flavour)
 Package: libcurl4-openssl-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl3-dbg
+Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-openssl-dev,
@@ -159,15 +159,14 @@ Description: development files and documentation for libcurl (OpenSSL flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl. HTML and PDF
- versions of all the manual pages are also provided.
+ manual pages) that allow to build software which uses libcurl.
  .
  SSL support is provided by OpenSSL.
 
 Package: libcurl4-gnutls-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl3-dbg
+Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-gnutls-dev,
@@ -203,15 +202,14 @@ Description: development files and documentation for libcurl (GnuTLS flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl. HTML and PDF
- versions of all the manual pages are also provided.
+ manual pages) that allow to build software which uses libcurl.
  .
  SSL support is provided by GnuTLS.
 
 Package: libcurl4-nss-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl3-dbg
+Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-nss-dev,
@@ -247,8 +245,7 @@ Description: development files and documentation for libcurl (NSS flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl. HTML and PDF
- versions of all the manual pages are also provided.
+ manual pages) that allow to build software which uses libcurl.
  .
  SSL support is provided by NSS.
 
@@ -279,3 +276,23 @@ Description: debugging symbols for libcurl (OpenSSL, GnuTLS and NSS flavours)
  This package provides the debugging symbols of the OpenSSL, GnuTLS and NSS
  versions of libcurl3. It might be useful in debug sessions of software which
  uses libcurl.
+
+Package: libcurl4-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: documentation for libcurl
+ libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
+ FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S,
+ RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP.
+ .
+ libcurl supports SSL certificates, HTTP POST, HTTP PUT, FTP uploading, HTTP
+ form based upload, proxies, cookies, user+password authentication (Basic,
+ Digest, NTLM, Negotiate, Kerberos), file transfer resume, http proxy tunneling
+ and more!
+ .
+ libcurl is free, thread-safe, IPv6 compatible, feature rich, well supported,
+ fast, thoroughly documented and is already used by many known, big and
+ successful companies and numerous applications.
+ .
+ This package provides the documentation files for libcurl.

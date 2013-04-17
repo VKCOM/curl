@@ -10,6 +10,10 @@ curl (7.30.0-1) UNRELEASED; urgency=low
     - 03_keep_symbols_compat.patch
     - 90_gnutls.patch
     - 99_nss.patch
+  * Add libcurl4-doc package:
+    - Move *.pdf and *.html files to the libcurl4-doc package
+    - Add Suggests for -doc package to -dev packages
+    - Move examples to the -doc package
 
  -- Alessandro Ghedini <ghedo@debian.org>  Wed, 17 Apr 2013 20:10:17 +0200
 
