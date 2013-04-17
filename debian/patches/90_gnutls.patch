@@ -3,11 +3,11 @@ Origin: vendor
 Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
-Last-Update: 2013-02-11
+Last-Update: 2013-04-17
 
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
-@@ -53,9 +53,9 @@
+@@ -52,9 +52,9 @@
  
  # Dependencies
  if USE_EXPLICIT_LIB_DEPS
@@ -21,36 +21,68 @@ Last-Update: 2013-02-11
  # Makefile.inc provides the check_PROGRAMS and COMPLICATED_EXAMPLES defines
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
-@@ -42,7 +42,7 @@
- 
- CLEANFILES = $(DSP) $(VCPROJ)
+@@ -36,7 +36,7 @@
+  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
+  objnames-test08.sh objnames-test10.sh objnames.inc
  
 -lib_LTLIBRARIES = libcurl.la
 +lib_LTLIBRARIES = libcurl-gnutls.la
- LIBCURL_LIBS = @LIBCURL_LIBS@
  
- # This might hold -Werror
-@@ -135,14 +135,14 @@
- # Prevent LIBS from being used for all link targets
- LIBS = $(BLANK_AT_MAKETIME)
+ if BUILD_UNITTESTS
+ noinst_LTLIBRARIES = libcurlu.la
+@@ -111,38 +111,38 @@
+ AM_LDFLAGS =
+ AM_CFLAGS =
  
--libcurl_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
-+libcurl_gnutls_la_LDFLAGS = $(UNDEF) $(VERSIONINFO) $(MIMPURE) $(VERSIONED_SYMBOLS) $(LIBCURL_LIBS)
+-libcurl_la_CPPFLAGS_EXTRA =
+-libcurl_la_LDFLAGS_EXTRA =
+-libcurl_la_CFLAGS_EXTRA =
++libcurl_gnutls_la_CPPFLAGS_EXTRA =
++libcurl_gnutls_la_LDFLAGS_EXTRA =
++libcurl_gnutls_la_CFLAGS_EXTRA =
  
- if DOING_CURL_SYMBOL_HIDING
--libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
--libcurl_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
-+libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_HIDDEN_SYMBOLS
-+libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS) $(CFLAG_CURL_SYMBOL_HIDING)
- else
--libcurl_la_CPPFLAGS = $(AM_CPPFLAGS)
--libcurl_la_CFLAGS = $(AM_CFLAGS)
-+libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS)
-+libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS)
+ if CURL_LT_SHLIB_USE_VERSION_INFO
+-libcurl_la_LDFLAGS_EXTRA += $(VERSIONINFO)
++libcurl_gnutls_la_LDFLAGS_EXTRA += $(VERSIONINFO)
  endif
  
- # unit testing static library built only along with unit tests
-@@ -159,7 +159,7 @@
+ if CURL_LT_SHLIB_USE_NO_UNDEFINED
+-libcurl_la_LDFLAGS_EXTRA += -no-undefined
++libcurl_gnutls_la_LDFLAGS_EXTRA += -no-undefined
+ endif
+ 
+ if CURL_LT_SHLIB_USE_MIMPURE_TEXT
+-libcurl_la_LDFLAGS_EXTRA += -mimpure-text
++libcurl_gnutls_la_LDFLAGS_EXTRA += -mimpure-text
+ endif
+ 
+ if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
+-libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
++libcurl_gnutls_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+ endif
+ 
+ if USE_CPPFLAG_CURL_STATICLIB
+-libcurl_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
++libcurl_gnutls_la_CPPFLAGS_EXTRA += -DCURL_STATICLIB
+ endif
+ 
+ if DOING_CURL_SYMBOL_HIDING
+-libcurl_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
+-libcurl_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
++libcurl_gnutls_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
++libcurl_gnutls_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
+ endif
+ 
+-libcurl_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_la_CPPFLAGS_EXTRA)
+-libcurl_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_la_LDFLAGS_EXTRA) $(LIBCURL_LIBS)
+-libcurl_la_CFLAGS = $(AM_CFLAGS) $(libcurl_la_CFLAGS_EXTRA)
++libcurl_gnutls_la_CPPFLAGS = $(AM_CPPFLAGS) $(libcurl_gnutls_la_CPPFLAGS_EXTRA)
++libcurl_gnutls_la_LDFLAGS = $(AM_LDFLAGS) $(libcurl_gnutls_la_LDFLAGS_EXTRA) $(LIBCURL_LIBS)
++libcurl_gnutls_la_CFLAGS = $(AM_CFLAGS) $(libcurl_gnutls_la_CFLAGS_EXTRA)
+ 
+ libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
+ libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
+@@ -151,7 +151,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
@@ -58,10 +90,10 @@ Last-Update: 2013-02-11
 +libcurl_gnutls_la_SOURCES = $(CSOURCES) $(HHEADERS)
  libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
  
- WIN32SOURCES = $(CSOURCES)
+ checksrc:
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -58,14 +58,14 @@
+@@ -57,14 +57,14 @@
  LIBS = $(BLANK_AT_MAKETIME)
  
  if USE_EXPLICIT_LIB_DEPS
@@ -101,5 +133,5 @@ Last-Update: 2013-02-11
 -DEPENDENCIES = $(top_builddir)/lib/libcurl.la
 +DEPENDENCIES = $(top_builddir)/lib/libcurl-gnutls.la
  
- # Mostly for Windows build targets, when using static libcurl
- if USE_CPPFLAG_CURL_STATICLIB
+ # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
+ # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
