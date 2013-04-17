@@ -20,6 +20,7 @@ Build-Depends: debhelper (>= 9),
  libssl-dev,
  libtool,
  openssh-server,
+ python,
  quilt,
  stunnel4,
  zlib1g-dev
