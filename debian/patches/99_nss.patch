@@ -2,7 +2,7 @@ Description: Build with NSS.
 Origin: vendor
 Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
-Reviewed-by: Alessandro Ghedini <al3xbio@gmail.com>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
 Last-Update: 2013-02-11
 
 --- a/docs/examples/Makefile.am
