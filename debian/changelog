@@ -1,3 +1,12 @@
+curl (7.30.0-2) UNRELEASED; urgency=low
+
+  * Move textual docs to the -doc package too
+  * Move manpages from -dev packages to -doc as well
+    - Add Breaks+Replaces accordingly
+  * Remove out-dated Replaces/Conflicts
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 18 Apr 2013 16:50:45 +0200
+
 curl (7.30.0-1) unstable; urgency=low
 
   * New upstream release
