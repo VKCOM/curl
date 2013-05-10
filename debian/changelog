@@ -1,12 +1,13 @@
-curl (7.30.0-2) UNRELEASED; urgency=low
+curl (7.30.0-2) unstable; urgency=low
 
   * Move textual docs to the -doc package too
   * Move manpages from -dev packages to -doc as well
     - Add Breaks+Replaces accordingly
-  * Remove out-dated Replaces/Conflicts
+  * Remove outdated Replaces/Conflicts
   * Update watch file version to 3
+  * Add 08_reset-timecond.patch (Closes: #705783)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 09 May 2013 15:27:45 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 10 May 2013 17:46:46 +0200
 
 curl (7.30.0-1) unstable; urgency=low
 
