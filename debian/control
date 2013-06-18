@@ -33,6 +33,7 @@ Homepage: http://curl.haxx.se
 Package: curl
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl3 (= ${binary:Version})
+Multi-Arch: foreign
 Description: command line tool for transferring data with URL syntax
  curl is a command line tool for transferring data with URL syntax, supporting
  DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3,
