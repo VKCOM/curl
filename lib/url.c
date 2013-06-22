@@ -141,9 +141,12 @@ find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
 static CURLcode do_init(struct connectdata *conn);
-static CURLcode parse_url_userpass(struct SessionHandle *data,
-                                   struct connectdata *conn,
-                                   char *user, char *passwd);
+static CURLcode parse_url_login(struct SessionHandle *data,
+                                struct connectdata *conn,
+                                char *user, char *passwd, char *options);
+static CURLcode parse_login_details(const char *login, const size_t len,
+                                    char **userptr, char **passwdptr,
+                                    char **optionsptr);
 /*
  * Protocol table.
  */
@@ -261,7 +264,7 @@ static const struct Curl_handler Curl_handler_dummy = {
   PROTOPT_NONE                          /* flags */
 };
 
-void Curl_freeset(struct SessionHandle * data)
+void Curl_freeset(struct SessionHandle *data)
 {
   /* Free all dynamic strings stored in the data->set substructure. */
   enum dupstring i;
@@ -275,7 +278,7 @@ void Curl_freeset(struct SessionHandle * data)
   data->change.referer = NULL;
 }
 
-static CURLcode setstropt(char **charp, char * s)
+static CURLcode setstropt(char **charp, char *s)
 {
   /* Release the previous storage at `charp' and replace by a dynamic storage
      copy of `s'. Return CURLE_OK or CURLE_OUT_OF_MEMORY. */
@@ -294,48 +297,47 @@ static CURLcode setstropt(char **charp, char * s)
   return CURLE_OK;
 }
 
-static CURLcode setstropt_userpwd(char *option, char **user_storage,
-                                  char **pwd_storage)
+static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
+                                  char **optionsp)
 {
-  char* separator;
   CURLcode result = CURLE_OK;
+  char *user = NULL;
+  char *passwd = NULL;
+  char *options = NULL;
 
-  if(!option) {
-    /* we treat a NULL passed in as a hint to clear existing info */
-    Curl_safefree(*user_storage);
-    *user_storage = (char *) NULL;
-    Curl_safefree(*pwd_storage);
-    *pwd_storage = (char *) NULL;
-    return CURLE_OK;
+  /* Parse the login details if specified. It not then we treat NULL as a hint
+     to clear the existing data */
+  if(option) {
+    result = parse_login_details(option, strlen(option),
+                                 (userp ? &user : NULL),
+                                 (passwdp ? &passwd : NULL),
+                                 (optionsp ? &options : NULL));
   }
 
-  separator = strchr(option, ':');
-  if(separator != NULL) {
-
-    /* store username part of option */
-    char * p;
-    size_t username_len = (size_t)(separator-option);
-    p = malloc(username_len+1);
-    if(!p)
-      result = CURLE_OUT_OF_MEMORY;
-    else {
-      memcpy(p, option, username_len);
-      p[username_len] = '\0';
-      Curl_safefree(*user_storage);
-      *user_storage = p;
+  if(!result) {
+    /* Store the username part of option if required */
+    if(userp) {
+      Curl_safefree(*userp);
+      *userp = user;
     }
 
-    /* store password part of option */
-    if(result == CURLE_OK)
-      result = setstropt(pwd_storage, separator+1);
+    /* Store the password part of option if required */
+    if(passwdp) {
+      Curl_safefree(*passwdp);
+      *passwdp = passwd;
+    }
+
+    /* Store the options part of option if required */
+    if(optionsp) {
+      Curl_safefree(*optionsp);
+      *optionsp = options;
+    }
   }
-  else {
-    result = setstropt(user_storage, option);
-  }
+
   return result;
 }
 
-CURLcode Curl_dupset(struct SessionHandle * dst, struct SessionHandle * src)
+CURLcode Curl_dupset(struct SessionHandle *dst, struct SessionHandle *src)
 {
   CURLcode r = CURLE_OK;
   enum dupstring i;
@@ -1135,41 +1137,44 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     if(argptr == NULL)
       break;
 
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+
     if(Curl_raw_equal(argptr, "ALL")) {
       /* clear all cookies */
       Curl_cookie_clearall(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "SESS")) {
       /* clear session cookies */
       Curl_cookie_clearsess(data->cookies);
-      break;
     }
     else if(Curl_raw_equal(argptr, "FLUSH")) {
       /* flush cookies to file */
       Curl_flush_cookies(data, 0);
-      break;
     }
+    else {
+      if(!data->cookies)
+        /* if cookie engine was not running, activate it */
+        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
 
-    if(!data->cookies)
-      /* if cookie engine was not running, activate it */
-      data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE);
+      argptr = strdup(argptr);
+      if(!argptr) {
+        result = CURLE_OUT_OF_MEMORY;
+      }
+      else {
 
-    argptr = strdup(argptr);
-    if(!argptr) {
-      result = CURLE_OUT_OF_MEMORY;
-      break;
+        if(checkprefix("Set-Cookie:", argptr))
+          /* HTTP Header format line */
+          Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
+
+        else
+          /* Netscape format line */
+          Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
+
+        free(argptr);
+      }
     }
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 
-    if(checkprefix("Set-Cookie:", argptr))
-      /* HTTP Header format line */
-      Curl_cookie_add(data, data->cookies, TRUE, argptr + 11, NULL, NULL);
-
-    else
-      /* Netscape format line */
-      Curl_cookie_add(data, data->cookies, FALSE, argptr, NULL, NULL);
-
-    free(argptr);
     break;
 #endif /* CURL_DISABLE_COOKIES */
 
@@ -1534,11 +1539,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_USERPWD:
     /*
-     * user:password to use in the operation
+     * user:password;options to use in the operation
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_USERNAME],
-                               &data->set.str[STRING_PASSWORD]);
+                               &data->set.str[STRING_PASSWORD],
+                               &data->set.str[STRING_OPTIONS]);
     break;
   case CURLOPT_USERNAME:
     /*
@@ -1611,7 +1617,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     result = setstropt_userpwd(va_arg(param, char *),
                                &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD]);
+                               &data->set.str[STRING_PROXYPASSWORD], NULL);
     break;
   case CURLOPT_PROXYUSERNAME:
     /*
@@ -2243,18 +2249,25 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
     break;
 
   case CURLOPT_MAIL_FROM:
+    /* Set the SMTP mail originator */
     result = setstropt(&data->set.str[STRING_MAIL_FROM],
                        va_arg(param, char *));
     break;
 
   case CURLOPT_MAIL_AUTH:
+    /* Set the SMTP auth originator */
     result = setstropt(&data->set.str[STRING_MAIL_AUTH],
                        va_arg(param, char *));
     break;
 
   case CURLOPT_MAIL_RCPT:
-    /* get a list of mail recipients */
+    /* Set the list of mail recipients */
     data->set.mail_rcpt = va_arg(param, struct curl_slist *);
+    break;
+
+  case CURLOPT_SASL_IR:
+    /* Enable/disable SASL initial response */
+    data->set.sasl_ir = (0 != va_arg(param, long)) ? TRUE : FALSE;
     break;
 
   case CURLOPT_RTSP_REQUEST:
@@ -2452,6 +2465,7 @@ static void conn_free(struct connectdata *conn)
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
+  Curl_safefree(conn->options);
   Curl_safefree(conn->proxyuser);
   Curl_safefree(conn->proxypasswd);
   Curl_safefree(conn->allocptr.proxyuserpwd);
@@ -3650,8 +3664,7 @@ static CURLcode findprotocol(struct SessionHandle *data,
 static CURLcode parseurlandfillconn(struct SessionHandle *data,
                                     struct connectdata *conn,
                                     bool *prot_missing,
-                                    char *user,
-                                    char *passwd)
+                                    char *user, char *passwd, char *options)
 {
   char *at;
   char *fragment;
@@ -3768,6 +3781,10 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
         protop = "LDAP";
       else if(checkprefix("IMAP.", conn->host.name))
         protop = "IMAP";
+      else if(checkprefix("SMTP.", conn->host.name))
+        protop = "smtp";
+      else if(checkprefix("POP3.", conn->host.name))
+        protop = "pop3";
       else {
         protop = "http";
       }
@@ -3865,11 +3882,11 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     data->change.url_alloc = TRUE; /* free this later */
   }
 
-  /*************************************************************
-   * Parse a user name and password in the URL and strip it out
-   * of the host name
-   *************************************************************/
-  result = parse_url_userpass(data, conn, user, passwd);
+  /*
+   * Parse the login details from the URL and strip them out of
+   * the host name
+   */
+  result = parse_url_login(data, conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 
@@ -4193,34 +4210,37 @@ static CURLcode parse_proxy(struct SessionHandle *data,
   /* Is there a username and password given in this proxy url? */
   atsign = strchr(proxyptr, '@');
   if(atsign) {
-    char proxyuser[MAX_CURL_USER_LENGTH];
-    char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
-    proxypasswd[0] = 0;
+    CURLcode res = CURLE_OK;
+    char *proxyuser = NULL;
+    char *proxypasswd = NULL;
 
-    if(1 <= sscanf(proxyptr,
-                   "%" MAX_CURL_USER_LENGTH_TXT"[^:@]:"
-                   "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-                   proxyuser, proxypasswd)) {
-      CURLcode res = CURLE_OK;
-
+    res = parse_login_details(proxyptr, atsign - proxyptr,
+                              &proxyuser, &proxypasswd, NULL);
+    if(!res) {
       /* found user and password, rip them out.  note that we are
          unescaping them, as there is otherwise no way to have a
          username or password with reserved characters like ':' in
          them. */
       Curl_safefree(conn->proxyuser);
-      conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
+      if(proxyuser && strlen(proxyuser) < MAX_CURL_USER_LENGTH)
+        conn->proxyuser = curl_easy_unescape(data, proxyuser, 0, NULL);
+      else
+        conn->proxyuser = strdup("");
 
       if(!conn->proxyuser)
         res = CURLE_OUT_OF_MEMORY;
       else {
         Curl_safefree(conn->proxypasswd);
-        conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
+        if(proxypasswd && strlen(proxypasswd) < MAX_CURL_PASSWORD_LENGTH)
+          conn->proxypasswd = curl_easy_unescape(data, proxypasswd, 0, NULL);
+        else
+          conn->proxypasswd = strdup("");
 
         if(!conn->proxypasswd)
           res = CURLE_OUT_OF_MEMORY;
       }
 
-      if(CURLE_OK == res) {
+      if(!res) {
         conn->bits.proxy_user_passwd = TRUE; /* enable it */
         atsign++; /* the right side of the @-letter */
 
@@ -4229,10 +4249,13 @@ static CURLcode parse_proxy(struct SessionHandle *data,
         else
           res = CURLE_OUT_OF_MEMORY;
       }
-
-      if(res)
-        return res;
     }
+
+    Curl_safefree(proxyuser);
+    Curl_safefree(proxypasswd);
+
+    if(res)
+      return res;
   }
 
   /* start scanning for port number at this point */
@@ -4326,8 +4349,10 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
 #endif /* CURL_DISABLE_PROXY */
 
 /*
+ * parse_url_login()
  *
- * Parse a user name and password in the URL and strip it out of the host name
+ * Parse the login details (user name, password and options) from the URL and
+ * strip them out of the host name
  *
  * Inputs: data->set.use_netrc (CURLOPT_NETRC)
  *         conn->host.name
@@ -4335,31 +4360,38 @@ static CURLcode parse_proxy_auth(struct SessionHandle *data,
  * Outputs: (almost :- all currently undefined)
  *          conn->bits.user_passwd  - non-zero if non-default passwords exist
  *          user                    - non-zero length if defined
- *          passwd                  -   ditto
+ *          passwd                  - non-zero length if defined
+ *          options                 - non-zero length if defined
  *          conn->host.name         - remove user name and password
  */
-static CURLcode parse_url_userpass(struct SessionHandle *data,
-                                   struct connectdata *conn,
-                                   char *user, char *passwd)
+static CURLcode parse_url_login(struct SessionHandle *data,
+                                struct connectdata *conn,
+                                char *user, char *passwd, char *options)
 {
+  CURLcode result = CURLE_OK;
+  char *userp = NULL;
+  char *passwdp = NULL;
+  char *optionsp = NULL;
+
   /* At this point, we're hoping all the other special cases have
    * been taken care of, so conn->host.name is at most
-   *    [user[:password]]@]hostname
+   *    [user[:password][;options]]@]hostname
    *
    * We need somewhere to put the embedded details, so do that first.
    */
 
-  char *ptr=strchr(conn->host.name, '@');
-  char *userpass = conn->host.name;
+  char *ptr = strchr(conn->host.name, '@');
+  char *login = conn->host.name;
 
-  user[0] =0;   /* to make everything well-defined */
-  passwd[0]=0;
+  user[0] = 0;   /* to make everything well-defined */
+  passwd[0] = 0;
+  options[0] = 0;
 
   /* We will now try to extract the
-   * possible user+password pair in a string like:
+   * possible login information in a string like:
    * ftp://user:password@ftp.my.site:8021/README */
-  if(ptr != NULL) {
-    /* there's a user+password given here, to the left of the @ */
+  if(ptr) {
+    /* There's login information to the left of the @ */
 
     conn->host.name = ++ptr;
 
@@ -4369,46 +4401,183 @@ static CURLcode parse_url_userpass(struct SessionHandle *data,
      * set user/passwd, but doing that first adds more cases here :-(
      */
 
-    conn->bits.userpwd_in_url = TRUE;
     if(data->set.use_netrc != CURL_NETRC_REQUIRED) {
-      /* We could use the one in the URL */
+      /* We could use the login information in the URL so extract it */
+      result = parse_login_details(login, ptr - login - 1,
+                                   &userp, &passwdp, &optionsp);
+      if(!result) {
+        if(userp) {
+          char *newname;
 
-      conn->bits.user_passwd = TRUE; /* enable user+password */
+          /* We have a user in the URL */
+          conn->bits.userpwd_in_url = TRUE;
+          conn->bits.user_passwd = TRUE; /* enable user+password */
 
-      if(*userpass != ':') {
-        /* the name is given, get user+password */
-        sscanf(userpass, "%" MAX_CURL_USER_LENGTH_TXT "[^:@]:"
-               "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-               user, passwd);
+          /* Decode the user */
+          newname = curl_easy_unescape(data, userp, 0, NULL);
+          if(!newname)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newname) < MAX_CURL_USER_LENGTH)
+            strcpy(user, newname);
+
+          free(newname);
+        }
+
+        if(passwdp) {
+          /* We have a password in the URL so decode it */
+          char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
+          if(!newpasswd)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
+            strcpy(passwd, newpasswd);
+
+          free(newpasswd);
+        }
+
+        if(optionsp) {
+          /* We have an options list in the URL so decode it */
+          char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
+          if(!newoptions)
+            return CURLE_OUT_OF_MEMORY;
+
+          if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
+            strcpy(options, newoptions);
+
+          free(newoptions);
+        }
       }
-      else
-        /* no name given, get the password only */
-        sscanf(userpass, ":%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]", passwd);
 
-      if(user[0]) {
-        char *newname=curl_easy_unescape(data, user, 0, NULL);
-        if(!newname)
-          return CURLE_OUT_OF_MEMORY;
-        if(strlen(newname) < MAX_CURL_USER_LENGTH)
-          strcpy(user, newname);
-
-        /* if the new name is longer than accepted, then just use
-           the unconverted name, it'll be wrong but what the heck */
-        free(newname);
-      }
-      if(passwd[0]) {
-        /* we have a password found in the URL, decode it! */
-        char *newpasswd=curl_easy_unescape(data, passwd, 0, NULL);
-        if(!newpasswd)
-          return CURLE_OUT_OF_MEMORY;
-        if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
-          strcpy(passwd, newpasswd);
-
-        free(newpasswd);
-      }
+      Curl_safefree(userp);
+      Curl_safefree(passwdp);
+      Curl_safefree(optionsp);
     }
   }
-  return CURLE_OK;
+
+  return result;
+}
+
+/*
+ * parse_login_details()
+ *
+ * This is used to parse a login string for user name, password and options in
+ * the following formats:
+ *
+ *   user
+ *   user:password
+ *   user:password;options
+ *   user;options
+ *   user;options:password
+ *   :password
+ *   :password;options
+ *   ;options
+ *   ;options:password
+ *
+ * Parameters:
+ *
+ * login    [in]     - The login string.
+ * len      [in]     - The length of the login string.
+ * userp    [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the user will be stored upon completion.
+ * passdwp  [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the password will be stored upon completion.
+ * optionsp [in/out] - The address where a pointer to newly allocated memory
+ *                     holding the options will be stored upon completion.
+ *
+ * Returns CURLE_OK on success.
+ */
+static CURLcode parse_login_details(const char *login, const size_t len,
+                                    char **userp, char **passwdp,
+                                    char **optionsp)
+{
+  CURLcode result = CURLE_OK;
+  char *ubuf = NULL;
+  char *pbuf = NULL;
+  char *obuf = NULL;
+  const char *psep = NULL;
+  const char *osep = NULL;
+  size_t ulen;
+  size_t plen;
+  size_t olen;
+
+  /* Attempt to find the password separator */
+  if(passwdp) {
+    psep = strchr(login, ':');
+
+    /* Within the constraint of the login string */
+    if(psep >= login + len)
+      psep = NULL;
+  }
+
+  /* Attempt to find the options separator */
+  if(optionsp) {
+    osep = strchr(login, ';');
+
+    /* Within the constraint of the login string */
+    if(osep >= login + len)
+      osep = NULL;
+  }
+
+  /* Calculate the portion lengths */
+  ulen = (psep ?
+          (size_t)(osep && psep > osep ? osep - login : psep - login) :
+          (osep ? (size_t)(osep - login) : len));
+  plen = (psep ?
+          (osep && osep > psep ? (size_t)(osep - psep) :
+                                 (size_t)(login + len - psep)) - 1 : 0);
+  olen = (osep ?
+          (psep && psep > osep ? (size_t)(psep - osep) :
+                                 (size_t)(login + len - osep)) - 1 : 0);
+
+  /* Allocate the user portion buffer */
+  if(userp && ulen) {
+    ubuf = malloc(ulen + 1);
+    if(!ubuf)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Allocate the password portion buffer */
+  if(!result && passwdp && plen) {
+    pbuf = malloc(plen + 1);
+    if(!pbuf)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  /* Allocate the options portion buffer */
+  if(!result && optionsp && olen) {
+    obuf = malloc(olen + 1);
+    if(!obuf)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  if(!result) {
+    /* Store the user portion if necessary */
+    if(ubuf) {
+      memcpy(ubuf, login, ulen);
+      ubuf[ulen] = '\0';
+      Curl_safefree(*userp);
+      *userp = ubuf;
+    }
+
+    /* Store the password portion if necessary */
+    if(pbuf) {
+      memcpy(pbuf, psep + 1, plen);
+      pbuf[plen] = '\0';
+      Curl_safefree(*passwdp);
+      *passwdp = pbuf;
+    }
+
+    /* Store the options portion if necessary */
+    if(obuf) {
+      memcpy(obuf, osep + 1, olen);
+      obuf[olen] = '\0';
+      Curl_safefree(*optionsp);
+      *optionsp = obuf;
+    }
+  }
+
+  return result;
 }
 
 /*************************************************************
@@ -4531,20 +4700,26 @@ static CURLcode parse_remote_port(struct SessionHandle *data,
 }
 
 /*
- * Override a user name and password from the URL with that in the
- * CURLOPT_USERPWD option or a .netrc file, if applicable.
+ * Override the login details from the URL with that in the CURLOPT_USERPWD
+ * option or a .netrc file, if applicable.
  */
-static void override_userpass(struct SessionHandle *data,
-                              struct connectdata *conn,
-                              char *user, char *passwd)
+static void override_login(struct SessionHandle *data,
+                           struct connectdata *conn,
+                           char *user, char *passwd, char *options)
 {
-  if(data->set.str[STRING_USERNAME] != NULL) {
+  if(data->set.str[STRING_USERNAME]) {
     strncpy(user, data->set.str[STRING_USERNAME], MAX_CURL_USER_LENGTH);
-    user[MAX_CURL_USER_LENGTH-1] = '\0';   /*To be on safe side*/
+    user[MAX_CURL_USER_LENGTH - 1] = '\0';   /* To be on safe side */
   }
-  if(data->set.str[STRING_PASSWORD] != NULL) {
+
+  if(data->set.str[STRING_PASSWORD]) {
     strncpy(passwd, data->set.str[STRING_PASSWORD], MAX_CURL_PASSWORD_LENGTH);
-    passwd[MAX_CURL_PASSWORD_LENGTH-1] = '\0'; /*To be on safe side*/
+    passwd[MAX_CURL_PASSWORD_LENGTH - 1] = '\0'; /* To be on safe side */
+  }
+
+  if(data->set.str[STRING_OPTIONS]) {
+    strncpy(options, data->set.str[STRING_OPTIONS], MAX_CURL_OPTIONS_LENGTH);
+    options[MAX_CURL_OPTIONS_LENGTH - 1] = '\0'; /* To be on safe side */
   }
 
   conn->bits.netrc = FALSE;
@@ -4570,32 +4745,48 @@ static void override_userpass(struct SessionHandle *data,
 /*
  * Set password so it's available in the connection.
  */
-static CURLcode set_userpass(struct connectdata *conn,
-                             const char *user, const char *passwd)
+static CURLcode set_login(struct connectdata *conn,
+                          const char *user, const char *passwd,
+                          const char *options)
 {
-  /* If our protocol needs a password and we have none, use the defaults */
-  if((conn->handler->flags & PROTOPT_NEEDSPWD) &&
-     !conn->bits.user_passwd) {
+  CURLcode result = CURLE_OK;
 
+  /* If our protocol needs a password and we have none, use the defaults */
+  if((conn->handler->flags & PROTOPT_NEEDSPWD) && !conn->bits.user_passwd) {
+    /* Store the default user */
     conn->user = strdup(CURL_DEFAULT_USER);
+
+    /* Store the default password */
     if(conn->user)
       conn->passwd = strdup(CURL_DEFAULT_PASSWORD);
     else
       conn->passwd = NULL;
+
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
   else {
-    /* store user + password, zero-length if not set */
+    /* Store the user, zero-length if not set */
     conn->user = strdup(user);
+
+    /* Store the password (only if user is present), zero-length if not set */
     if(conn->user)
       conn->passwd = strdup(passwd);
     else
       conn->passwd = NULL;
   }
-  if(!conn->user || !conn->passwd)
-    return CURLE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  if(!conn->user || !conn->passwd)
+    result = CURLE_OUT_OF_MEMORY;
+
+  /* Store the options, null if not set */
+  if(!result && options[0]) {
+    conn->options = strdup(options);
+
+    if(!conn->options)
+      result = CURLE_OUT_OF_MEMORY;
+  }
+
+  return result;
 }
 
 /*************************************************************
@@ -4761,12 +4952,13 @@ static CURLcode create_conn(struct SessionHandle *data,
                             struct connectdata **in_connect,
                             bool *async)
 {
-  CURLcode result=CURLE_OK;
+  CURLcode result = CURLE_OK;
   struct connectdata *conn;
   struct connectdata *conn_temp = NULL;
   size_t urllen;
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
+  char options[MAX_CURL_OPTIONS_LENGTH];
   bool reuse;
   char *proxy = NULL;
   bool prot_missing = FALSE;
@@ -4835,7 +5027,8 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->host.name = conn->host.rawalloc;
   conn->host.name[0] = 0;
 
-  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd);
+  result = parseurlandfillconn(data, conn, &prot_missing, user, passwd,
+                               options);
   if(result != CURLE_OK)
     return result;
 
@@ -5010,6 +5203,9 @@ static CURLcode create_conn(struct SessionHandle *data,
                           -1, NULL); /* no upload */
     }
 
+    /* since we skip do_init() */
+    Curl_speedinit(data);
+
     return result;
   }
 #endif
@@ -5028,12 +5224,9 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(result != CURLE_OK)
     return result;
 
-  /*************************************************************
-   * Check for an overridden user name and password, then set it
-   * for use
-   *************************************************************/
-  override_userpass(data, conn, user, passwd);
-  result = set_userpass(conn, user, passwd);
+  /* Check for overridden login details and set them accordingly */
+  override_login(data, conn, user, passwd, options);
+  result = set_login(conn, user, passwd, options);
   if(result != CURLE_OK)
     return result;
 

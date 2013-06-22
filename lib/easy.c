@@ -73,6 +73,7 @@
 #include "non-ascii.h"
 #include "warnless.h"
 #include "conncache.h"
+#include "multiif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -197,9 +198,6 @@ curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
 curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)system_strdup;
 curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
-#ifdef WIN32
-curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
-#endif
 #else
 /*
  * Symbian OS doesn't support initialization to code in writeable static data.
@@ -231,9 +229,6 @@ CURLcode curl_global_init(long flags)
   Curl_crealloc = (curl_realloc_callback)realloc;
   Curl_cstrdup = (curl_strdup_callback)system_strdup;
   Curl_ccalloc = (curl_calloc_callback)calloc;
-#ifdef WIN32
-  Curl_cwcsdup = (curl_wcsdup_callback)wcsdup;
-#endif
 
   if(flags & CURL_GLOBAL_SSL)
     if(!Curl_ssl_init()) {
@@ -425,6 +420,9 @@ CURLcode curl_easy_perform(CURL *easy)
   bool done = FALSE;
   int rc;
   struct SessionHandle *data = easy;
+  int without_fds = 0;  /* count number of consecutive returns from
+                           curl_multi_wait() without any filedescriptors */
+  struct timeval before;
 
   if(!easy)
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -437,7 +435,9 @@ CURLcode curl_easy_perform(CURL *easy)
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-    multi = curl_multi_init();
+    /* this multi handle will only ever have a single easy handled attached
+       to it, so make it use minimal hashes */
+    multi = Curl_multi_handle(1, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
     data->multi_easy = multi;
@@ -463,6 +463,7 @@ CURLcode curl_easy_perform(CURL *easy)
     int still_running;
     int ret;
 
+    before = curlx_tvnow();
     mcode = curl_multi_wait(multi, NULL, 0, 1000, &ret);
 
     if(mcode == CURLM_OK) {
@@ -471,6 +472,27 @@ CURLcode curl_easy_perform(CURL *easy)
         code = CURLE_RECV_ERROR;
         break;
       }
+      else if(ret == 0) {
+        struct timeval after = curlx_tvnow();
+        /* If it returns without any filedescriptor instantly, we need to
+           avoid busy-looping during periods where it has nothing particular
+           to wait for */
+        if(curlx_tvdiff(after, before) <= 10) {
+          without_fds++;
+          if(without_fds > 2) {
+            int sleep_ms = without_fds * 50;
+            if(sleep_ms > 1000)
+              sleep_ms = 1000;
+            Curl_wait_ms(sleep_ms);
+          }
+        }
+        else
+          /* it wasn't "instant", restart counter */
+          without_fds = 0;
+      }
+      else
+        /* got file descriptor, restart counter */
+        without_fds = 0;
 
       mcode = curl_multi_perform(multi, &still_running);
     }

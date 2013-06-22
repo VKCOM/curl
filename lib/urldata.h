@@ -243,6 +243,7 @@ struct curl_schannel_cred {
   CredHandle cred_handle;
   TimeStamp time_stamp;
   int refcount;
+  bool cached;
 };
 
 struct curl_schannel_ctxt {
@@ -324,6 +325,7 @@ struct ssl_connect_data {
 #ifdef USE_AXTLS
   SSL_CTX* ssl_ctx;
   SSL*     ssl;
+  ssl_connect_state connecting_state;
 #endif /* USE_AXTLS */
 #ifdef USE_SCHANNEL
   struct curl_schannel_cred *cred;
@@ -859,6 +861,7 @@ struct connectdata {
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */
+  char *options; /* options string, allocated */
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
@@ -1136,8 +1139,7 @@ typedef enum {
  * Session-data MUST be put in the connectdata struct and here.  */
 #define MAX_CURL_USER_LENGTH 256
 #define MAX_CURL_PASSWORD_LENGTH 256
-#define MAX_CURL_USER_LENGTH_TXT "255"
-#define MAX_CURL_PASSWORD_LENGTH_TXT "255"
+#define MAX_CURL_OPTIONS_LENGTH 256
 
 struct auth {
   unsigned long want;  /* Bitmask set to the authentication methods wanted by
@@ -1352,6 +1354,7 @@ enum dupstring {
   STRING_SSL_ISSUERCERT,  /* issuer cert file to check certificate */
   STRING_USERNAME,        /* <username>, if used */
   STRING_PASSWORD,        /* <password>, if used */
+  STRING_OPTIONS,         /* <options>, if used */
   STRING_PROXYUSERNAME,   /* Proxy <username>, if used */
   STRING_PROXYPASSWORD,   /* Proxy <password>, if used */
   STRING_NOPROXY,         /* List of hosts which should not use the proxy, if
@@ -1562,6 +1565,7 @@ struct UserDefined {
   long socks5_gssapi_nec; /* flag to support nec socks5 server */
 #endif
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+  bool sasl_ir;         /* Enable/disable SASL initial response */
   /* Common RTSP header options */
   Curl_RtspReq rtspreq; /* RTSP request type */
   long rtspversion; /* like httpversion, for RTSP */

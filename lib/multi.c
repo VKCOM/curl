@@ -58,6 +58,7 @@
 #define CURL_SOCKET_HASH_TABLE_SIZE 911
 #endif
 
+#define CURL_CONNECTION_HASH_SIZE 97
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
@@ -75,6 +76,8 @@ static bool isHandleAtHead(struct SessionHandle *handle,
 static CURLMcode add_next_timeout(struct timeval now,
                                   struct Curl_multi *multi,
                                   struct SessionHandle *d);
+static CURLMcode multi_timeout(struct Curl_multi *multi,
+                               long *timeout_ms);
 
 #ifdef DEBUGBUILD
 static const char * const statename[]={
@@ -246,9 +249,9 @@ static size_t hash_fd(void *key, size_t key_length, size_t slots_num)
  * per call."
  *
  */
-static struct curl_hash *sh_init(void)
+static struct curl_hash *sh_init(int hashsize)
 {
-  return Curl_hash_alloc(CURL_SOCKET_HASH_TABLE_SIZE, hash_fd, fd_key_compare,
+  return Curl_hash_alloc(hashsize, hash_fd, fd_key_compare,
                          sh_freeentry);
 }
 
@@ -278,7 +281,8 @@ static void multi_freeamsg(void *a, void *b)
   (void)b;
 }
 
-CURLM *curl_multi_init(void)
+struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
+                                     int chashsize) /* connection hash */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
@@ -291,11 +295,11 @@ CURLM *curl_multi_init(void)
   if(!multi->hostcache)
     goto error;
 
-  multi->sockhash = sh_init();
+  multi->sockhash = sh_init(hashsize);
   if(!multi->sockhash)
     goto error;
 
-  multi->conn_cache = Curl_conncache_init();
+  multi->conn_cache = Curl_conncache_init(chashsize);
   if(!multi->conn_cache)
     goto error;
 
@@ -324,6 +328,13 @@ CURLM *curl_multi_init(void)
   free(multi);
   return NULL;
 }
+
+CURLM *curl_multi_init(void)
+{
+  return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
+                           CURL_CONNECTION_HASH_SIZE);
+}
+
 
 CURLMcode curl_multi_add_handle(CURLM *multi_handle,
                                 CURL *easy_handle)
@@ -801,9 +812,17 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   unsigned int nfds = 0;
   unsigned int curlfds;
   struct pollfd *ufds = NULL;
+  long timeout_internal;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
+
+  /* If the internally desired timeout is actually shorter than requested from
+     the outside, then use the shorter time! But only if the internal timer
+     is actually larger than 0! */
+  (void)multi_timeout(multi, &timeout_internal);
+  if((timeout_internal > 0) && (timeout_internal < (long)timeout_ms))
+    timeout_ms = (int)timeout_internal;
 
   /* Count up how many fds we have from the multi handle */
   easy=multi->easy.next;
@@ -1520,14 +1539,15 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           else
             follow = FOLLOW_RETRY;
           easy->result = Curl_done(&easy->easy_conn, CURLE_OK, FALSE);
-          if(easy->result == CURLE_OK)
-            easy->result = Curl_follow(data, newurl, follow);
           if(CURLE_OK == easy->result) {
-            multistate(easy, CURLM_STATE_CONNECT);
-            result = CURLM_CALL_MULTI_PERFORM;
-            newurl = NULL; /* handed over the memory ownership to
-                              Curl_follow(), make sure we don't free() it
-                              here */
+            easy->result = Curl_follow(data, newurl, follow);
+            if(CURLE_OK == easy->result) {
+              multistate(easy, CURLM_STATE_CONNECT);
+              result = CURLM_CALL_MULTI_PERFORM;
+              newurl = NULL; /* handed over the memory ownership to
+                                Curl_follow(), make sure we don't free() it
+                                here */
+            }
           }
         }
         else {
@@ -2032,6 +2052,39 @@ static void singlesocket(struct Curl_multi *multi,
 }
 
 /*
+ * Curl_multi_closed()
+ *
+ * Used by the connect code to tell the multi_socket code that one of the
+ * sockets we were using have just been closed.  This function will then
+ * remove it from the sockethash for this handle to make the multi_socket API
+ * behave properly, especially for the case when libcurl will create another
+ * socket again and it gets the same file descriptor number.
+ */
+
+void Curl_multi_closed(struct connectdata *conn, curl_socket_t s)
+{
+  struct Curl_multi *multi = conn->data->multi;
+  if(multi) {
+    /* this is set if this connection is part of a handle that is added to
+       a multi handle, and only then this is necessary */
+    struct Curl_sh_entry *entry =
+      Curl_hash_pick(multi->sockhash, (char *)&s, sizeof(s));
+
+    if(entry) {
+      if(multi->socket_cb)
+        multi->socket_cb(conn->data, s, CURL_POLL_REMOVE,
+                         multi->socket_userp,
+                         entry->socketp);
+
+      /* now remove it from the socket hash */
+      sh_delentry(multi->sockhash, s);
+    }
+  }
+}
+
+
+
+/*
  * add_next_timeout()
  *
  * Each SessionHandle has a list of timeouts. The add_next_timeout() is called
@@ -2086,6 +2139,11 @@ static CURLMcode add_next_timeout(struct timeval now,
   return CURLM_OK;
 }
 
+#ifdef WIN32
+#define TIMEOUT_INACCURACY 40000
+#else
+#define TIMEOUT_INACCURACY 3000
+#endif
 
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
@@ -2175,8 +2233,25 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
     }
   }
 
-  now.tv_usec += 40000; /* compensate for bad precision timers that might've
-                           triggered too early */
+  /* Compensate for bad precision timers that might've triggered too early.
+
+     This precaution was added in commit 2c72732ebf3da5e as a result of bad
+     resolution in the windows function use(d).
+
+     The problematic case here is when using the multi_socket API and libcurl
+     has told the application about a timeout, and that timeout is what fires
+     off a bit early. As we don't have any IDs associated with the timeout we
+     can't tell which timeout that fired off but we only have the times to use
+     to check what to do. If it fires off too early, we don't run the correct
+     actions and we don't tell the application again about the same timeout as
+     was already first in the queue...
+
+     Originally we made the timeouts run 40 milliseconds early on all systems,
+     but now we have an #ifdef setup to provide a decent precaution inaccuracy
+     margin.
+  */
+
+  now.tv_usec += TIMEOUT_INACCURACY;
   if(now.tv_usec >= 1000000) {
     now.tv_sec++;
     now.tv_usec -= 1000000;
