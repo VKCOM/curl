@@ -1,0 +1,34 @@
+From 7881b13bdef543e7056d9f82bc7893ac90faf7ba Mon Sep 17 00:00:00 2001
+From: Alessandro Ghedini <alessandro@ghedini.me>
+Date: Sat, 22 Jun 2013 15:21:19 +0200
+Subject: [PATCH] docs: fix typo in curl_easy_getinfo manpage
+
+---
+ docs/libcurl/curl_easy_getinfo.3 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/docs/libcurl/curl_easy_getinfo.3 b/docs/libcurl/curl_easy_getinfo.3
+index 44e377b..62d8ae4 100644
+--- a/docs/libcurl/curl_easy_getinfo.3
++++ b/docs/libcurl/curl_easy_getinfo.3
+@@ -232,7 +232,7 @@ Pass a pointer to a char pointer to receive a pointer to a string holding the
+ most recent RTSP Session ID.
+ 
+ Applications wishing to resume an RTSP session on another connection should
+-retreive this info before closing the active connection.
++retrieve this info before closing the active connection.
+ .IP CURLINFO_RTSP_CLIENT_CSEQ
+ Pass a pointer to a long to receive the next CSeq that will be used by the
+ application.
+@@ -244,7 +244,7 @@ by the application.
+ unimplemented).\fP
+ 
+ Applications wishing to resume an RTSP session on another connection should
+-retreive this info before closing the active connection.
++retrieve this info before closing the active connection.
+ .IP CURLINFO_RTSP_CSEQ_RECV
+ Pass a pointer to a long to receive the most recently received CSeq from the
+ server. If your application encounters a \fICURLE_RTSP_CSEQ_ERROR\fP then you
+-- 
+1.8.3.1
+
