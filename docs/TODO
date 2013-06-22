@@ -38,6 +38,7 @@
  5.1 Better persistency for HTTP 1.0
  5.2 support FF3 sqlite cookie files
  5.3 Rearrange request header order
+ 5.4 HTTP2/SPDY
 
  6. TELNET
  6.1 ditch stdin
@@ -46,19 +47,18 @@
  6.4 send data in chunks
 
  7. SMTP
- 7.1 Specify the preferred authentication mechanism
- 7.2 Initial response
- 7.3 Pipelining
- 7.4 Graceful base64 decoding failure
+ 7.1 Pipelining
+ 7.2 Graceful base64 decoding failure
+ 7.3 Enhanced capability support
  
  8. POP3
- 8.1 auth= in URLs
- 8.2 Initial response
- 8.3 Graceful base64 decoding failure
+ 8.1 Pipelining
+ 8.2 Graceful base64 decoding failure
+ 8.3 Enhanced capability support
  
  9. IMAP
- 9.1 auth= in URLs
- 9.2 Graceful base64 decoding failure
+ 9.1 Graceful base64 decoding failure
+ 9.2 Enhanced capability support
  
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -269,6 +269,25 @@
  headers use a default value so only headers that need to be moved have to be
  specified.
 
+5.4 HTTP2/SPDY
+
+ The first drafts for HTTP2 have been published
+ (http://tools.ietf.org/html/draft-ietf-httpbis-http2-03) and is so far based
+ on SPDY (http://www.chromium.org/spdy) designs and experiences. Chances are
+ it will end up in that style. Chrome and Firefox already support SPDY and
+ lots of web services do.
+
+ It would make sense to implement SPDY support now and later transition into
+ or add HTTP2 support as well.
+
+ We should base or HTTP2/SPDY work on a 3rd party library for the protocol
+ fiddling. The Spindy library (http://spindly.haxx.se/) was an attempt to make
+ such a library with an API suitable for use by libcurl but that effort has
+ more or less stalled.  spdylay (https://github.com/tatsuhiro-t/spdylay) may
+ be a better option, either used directly or wrapped with a more spindly-like
+ API.
+
+
 6. TELNET
 
 6.1 ditch stdin
@@ -295,64 +314,53 @@ to provide the data to send.
 
 7. SMTP
 
-7.1 Specify the preferred authentication mechanism
-
- Add the ability to specify the preferred authentication mechanism or a list
- of mechanisms that should be used. Not only that, but the order that is
- returned by the server during the EHLO response should be honored by curl.
-
-7.2 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command. Some email servers, such as Microsoft
- Exchange, can work with either whilst others need to have the initial
- response sent separately:
-
- http://curl.haxx.se/mail/lib-2012-03/0114.html
-
-7.3 Pipelining
+7.1 Pipelining
 
  Add support for pipelining emails.
 
-7.4 Graceful base64 decoding failure
+7.2 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC4954.
 
+7.3 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the EHLO command.
+
 8. POP3
 
-8.1 auth= in URLs
+8.1 Pipelining
 
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC2384.
+ Add support for pipelining commands.
 
-8.2 Initial response
-
- Add the ability for the user to specify whether the initial response is
- included in the AUTH command as per RFC5034.
-
-8.3 Graceful base64 decoding failure
+8.2 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC5034.
+ 
+8.3 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the CAPA command.
 
 9. IMAP
 
-9.1 auth= in URLs
-
- Being able to specify the preferred authentication mechanism in the URL as
- per RFC5092.
-
-9.2 Graceful base64 decoding failure
+9.1 Graceful base64 decoding failure
 
  Rather than shutting down the session and returning an error when the
  decoding of a base64 encoded authentication response fails, we should
  gracefully shutdown the authentication process by sending a * response to the
  server as per RFC3501.
+
+9.2 Enhanced capability support
+
+ Add the ability, for an application that uses libcurl, to obtain the list of
+ capabilities returned from the CAPABILITY command.
 
 10. LDAP
 
@@ -428,6 +436,12 @@ to provide the data to send.
  DNS-Based Authentication of Named Entities (DANE) is a way to provide SSL
  keys and certs over DNS using DNSSEC as an alternative to the CA model.
  http://www.rfc-editor.org/rfc/rfc6698.txt
+
+ An initial patch was posted by Suresh Krishnaswamy on March 7th 2013
+ (http://curl.haxx.se/mail/lib-2013-03/0075.html) but it was a too simple
+ approach. See Daniel's comments:
+ http://curl.haxx.se/mail/lib-2013-03/0103.html . libunbound may be the
+ correct library to base this development on.
 
 13. GnuTLS
 

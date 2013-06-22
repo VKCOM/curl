@@ -143,9 +143,19 @@ p.roffit {
 <p class="level1">Applications wishing to resume an RTSP session on another connection should retreive this info before closing the active connection. 
 <p class="level0"><a name="CURLINFORTSPCSEQRECV"></a><span class="nroffip">CURLINFO_RTSP_CSEQ_RECV</span> 
 <p class="level1">Pass a pointer to a long to receive the most recently received CSeq from the server. If your application encounters a <span Class="emphasis">CURLE_RTSP_CSEQ_ERROR</span> then you may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this value. <a name="TIMES"></a><h2 class="nroffsh">TIMES</h2>
-<p class="level0">
-<p class="level0">An overview of the six time values available from curl_easy_getinfo() 
-<p class="level0">curl_easy_perform() &nbsp;   | &nbsp;   |--NAMELOOKUP &nbsp;   |--|--CONNECT &nbsp;   |--|--|--APPCONNECT &nbsp;   |--|--|--|--PRETRANSFER &nbsp;   |--|--|--|--|--STARTTRANSFER &nbsp;   |--|--|--|--|--|--TOTAL &nbsp;   |--|--|--|--|--|--REDIRECT 
+<p class="level0"><pre>
+<p class="level0">An overview of the six time values available from curl_easy_getinfo()
+ <p class="level0">curl_easy_perform()
+ &nbsp;   |
+ &nbsp;   |--NAMELOOKUP
+ &nbsp;   |--|--CONNECT
+ &nbsp;   |--|--|--APPCONNECT
+ &nbsp;   |--|--|--|--PRETRANSFER
+ &nbsp;   |--|--|--|--|--STARTTRANSFER
+ &nbsp;   |--|--|--|--|--|--TOTAL
+ &nbsp;   |--|--|--|--|--|--REDIRECT
+ </pre>
+
 <p class="level0">
 <p class="level0"><a name="NAMELOOKUP"></a><span class="nroffip">NAMELOOKUP</span> 
 <p class="level1"><a class="emphasis" href="#CURLINFONAMELOOKUPTIME">CURLINFO_NAMELOOKUP_TIME</a>. The time it took from the start until the name resolving was completed. 

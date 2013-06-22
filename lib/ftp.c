@@ -1951,13 +1951,11 @@ static CURLcode ftp_state_pasv_resp(struct connectdata *conn,
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
-  if(data->set.str[STRING_PROXY] && *data->set.str[STRING_PROXY]) {
+  if(conn->bits.proxy) {
     /*
-     * This is a tunnel through a http proxy and we need to connect to the
-     * proxy again here.
-     *
-     * We don't want to rely on a former host lookup that might've expired
-     * now, instead we remake the lookup here and now!
+     * This connection uses a proxy and we need to connect to the proxy again
+     * here. We don't want to rely on a former host lookup that might've
+     * expired now, instead we remake the lookup here and now!
      */
     rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
@@ -2711,7 +2709,10 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
     /* we have now received a full FTP server response */
     switch(ftpc->state) {
     case FTP_WAIT220:
-      if(ftpcode != 220) {
+      if(ftpcode == 230)
+        /* 230 User logged in - already! */
+        return ftp_state_user_resp(conn, ftpcode, ftpc->state);
+      else if(ftpcode != 220) {
         failf(data, "Got a %03d ftp-server response when 220 was expected",
               ftpcode);
         return CURLE_FTP_WEIRD_SERVER_REPLY;
@@ -4316,13 +4317,17 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     }
     slash_pos=strrchr(cur_pos, '/');
     if(slash_pos || !*cur_pos) {
+      size_t dirlen = slash_pos-cur_pos;
+
       ftpc->dirs = calloc(1, sizeof(ftpc->dirs[0]));
       if(!ftpc->dirs)
         return CURLE_OUT_OF_MEMORY;
 
+      if(!dirlen)
+        dirlen++;
+
       ftpc->dirs[0] = curl_easy_unescape(conn->data, slash_pos ? cur_pos : "/",
-                                         slash_pos ?
-                                         curlx_sztosi(slash_pos-cur_pos) : 1,
+                                         slash_pos ? curlx_sztosi(dirlen) : 1,
                                          NULL);
       if(!ftpc->dirs[0]) {
         freedirs(ftpc);
@@ -4377,6 +4382,15 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         }
         else {
           cur_pos = slash_pos + 1; /* jump to the rest of the string */
+          if(!ftpc->dirdepth) {
+            /* path starts with a slash, add that as a directory */
+            ftpc->dirs[ftpc->dirdepth] = strdup("/");
+            if(!ftpc->dirs[ftpc->dirdepth++]) { /* run out of memory ... */
+              failf(data, "no memory");
+              freedirs(ftpc);
+              return CURLE_OUT_OF_MEMORY;
+            }
+          }
           continue;
         }
 
