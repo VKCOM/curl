@@ -1,8 +1,11 @@
-curl (7.30.0-3) UNRELEASED; urgency=low
+curl (7.31.0-1) UNRELEASED; urgency=low
 
+  * New upstream release
+    - Fix URL decode buffer boundary flaw as per CVE-2013-2174
+      http://curl.haxx.se/docs/adv_20130622.html
   * Maake curl Multi-Arch: foreign (Closes: #712585)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Tue, 18 Jun 2013 22:38:23 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 22 Jun 2013 14:42:47 +0200
 
 curl (7.30.0-2) unstable; urgency=low
 
