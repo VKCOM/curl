@@ -1,3 +1,10 @@
+curl (7.31.0-2) unstable; urgency=high
+
+  * Add 09_openssl-recv.patch to fix incorrect OpenSSL usage (Closes: #714050)
+  * Set urgency=high because of the security fix in the previous upload
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 26 Jun 2013 11:47:00 +0200
+
 curl (7.31.0-1) unstable; urgency=low
 
   * New upstream release
