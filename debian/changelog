@@ -10,7 +10,7 @@ curl (7.31.0-1) unstable; urgency=low
   * New upstream release
     - Fix URL decode buffer boundary flaw as per CVE-2013-2174
       http://curl.haxx.se/docs/adv_20130622.html
-  * Maake curl Multi-Arch: foreign (Closes: #712585)
+  * Make curl Multi-Arch: foreign (Closes: #712585)
   * Drop 08_reset-timecond.patch (merged upstream)
   * Refresh patches
   * Add 08_typo.patch to fix a couple of typos in one of the manpages
