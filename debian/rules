@@ -8,7 +8,7 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
 CONFIGURE_ARGS = -- --disable-dependency-tracking		\
 	--disable-symbol-hiding --enable-versioned-symbols	\
-	--with-lber-lib=lber --with-gssapi=/usr
+	--enable-threaded-resolver --with-lber-lib=lber --with-gssapi=/usr
 
 %:
 	dh $@
