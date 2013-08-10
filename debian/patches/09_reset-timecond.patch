@@ -1,0 +1,20 @@
+From b4e6a3a974c24ca2aee77150a633ac85e807a3e7 Mon Sep 17 00:00:00 2001
+From: Alessandro Ghedini <alessandro@ghedini.me>
+Date: Sat, 20 Apr 2013 12:09:55 +0200
+Subject: [PATCH] getinfo.c: reset timecond when clearing session-info
+ variables
+
+Bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=705783
+Reported-by: Ludovico Cavedon <cavedon@debian.org>
+Origin: upstream, https://github.com/bagder/curl/commit/c49ed0b
+
+--- a/lib/getinfo.c
++++ b/lib/getinfo.c
+@@ -55,6 +55,7 @@
+   info->httpcode = 0;
+   info->httpversion=0;
+   info->filetime=-1; /* -1 is an illegal time and thus means unknown */
++  info->timecond=0;
+
+   if(info->contenttype)
+     free(info->contenttype);

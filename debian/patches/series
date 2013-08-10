@@ -6,6 +6,7 @@
 06_curl-tailmatch-CVE-2013-1944.patch
 07_test1218-another-cookie-tailmatch-test.patch
 08_CVE-2013-2174.patch
+09_reset-timecond.patch
 
 90_gnutls.patch
 99_nss.patch

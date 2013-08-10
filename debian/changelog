@@ -1,3 +1,9 @@
+curl (7.26.0-1+wheezy4) stable-proposed-updates; urgency=low
+
+  * Add 09_reset-timecond.patch (Closes: #705783, #719300)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 10 Aug 2013 16:45:38 +0200
+
 curl (7.26.0-1+wheezy3) stable-security; urgency=high
 
   * Fix URL decode buffer boundary flaw as per CVE-2013-2174
