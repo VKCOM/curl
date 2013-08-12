@@ -1,8 +1,9 @@
-curl (7.31.0-3) UNRELEASED; urgency=low
+curl (7.32.0-1) UNRELEASED; urgency=low
 
+  * New upstream release
   * Fix typo in changelog entry for 7.31.0-1 (Closes: #714502)
 
- -- Alessandro Ghedini <alessandro@ghedini.me>  Sun, 30 Jun 2013 19:50:57 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 12 Aug 2013 10:00:41 +0200
 
 curl (7.31.0-2) unstable; urgency=high
 
