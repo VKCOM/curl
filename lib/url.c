@@ -124,6 +124,7 @@ int curl_win32_idn_to_ascii(const char *in, char **out);
 #include "conncache.h"
 #include "multihandle.h"
 #include "pipeline.h"
+#include "dotdot.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -317,6 +318,13 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp,
   if(!result) {
     /* Store the username part of option if required */
     if(userp) {
+      if(!user && option && option[0] == ':') {
+        /* Allocate an empty string instead of returning NULL as user name */
+        user = strdup("");
+        if(!user)
+          result = CURLE_OUT_OF_MEMORY;
+      }
+
       Curl_safefree(*userp);
       *userp = user;
     }
@@ -1601,8 +1609,20 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
       data->progress.callback = TRUE; /* no longer internal */
     else
       data->progress.callback = FALSE; /* NULL enforces internal */
+    break;
+
+  case CURLOPT_XFERINFOFUNCTION:
+    /*
+     * Transfer info callback function
+     */
+    data->set.fxferinfo = va_arg(param, curl_xferinfo_callback);
+    if(data->set.fxferinfo)
+      data->progress.callback = TRUE; /* no longer internal */
+    else
+      data->progress.callback = FALSE; /* NULL enforces internal */
 
     break;
+
   case CURLOPT_PROGRESSDATA:
     /*
      * Custom client data to pass to the progress callback
@@ -1892,6 +1912,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
      */
     data->set.ssl.fsslctxp = va_arg(param, void *);
     break;
+#endif
+#if defined(USE_SSLEAY) || defined(USE_QSOSSL) || defined(USE_GSKIT)
   case CURLOPT_CERTINFO:
     data->set.ssl.certinfo = (0 != va_arg(param, long))?TRUE:FALSE;
     break;
@@ -2552,7 +2574,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
     conn->handler->disconnect(conn, dead_connection);
 
     /* unlink ourselves! */
-  infof(data, "Closing connection %d\n", conn->connection_id);
+  infof(data, "Closing connection %ld\n", conn->connection_id);
   Curl_conncache_remove_conn(data->state.conn_cache, conn);
 
 #if defined(USE_LIBIDN)
@@ -2583,7 +2605,7 @@ CURLcode Curl_disconnect(struct connectdata *conn, bool dead_connection)
   }
 
   conn_free(conn);
-  data->state.current_conn = NULL;
+
   Curl_speedinit(data);
 
   return CURLE_OK;
@@ -2853,7 +2875,8 @@ ConnectionExists(struct SessionHandle *data,
     size_t best_pipe_len = max_pipe_len;
     struct curl_llist_element *curr;
 
-    infof(data, "Found bundle for host %s: %p\n", needle->host.name, bundle);
+    infof(data, "Found bundle for host %s: %p\n",
+          needle->host.name, (void *)bundle);
 
     /* We can't pipe if we don't know anything about the server */
     if(canPipeline && !bundle->server_supports_pipelining) {
@@ -2889,7 +2912,7 @@ ConnectionExists(struct SessionHandle *data,
 
         if(dead) {
           check->data = data;
-          infof(data, "Connection %d seems to be dead!\n",
+          infof(data, "Connection %ld seems to be dead!\n",
                 check->connection_id);
 
           /* disconnect resources */
@@ -3674,7 +3697,7 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
   char protobuf[16];
   const char *protop;
   CURLcode result;
-  bool fix_slash = FALSE;
+  bool rebuild_url = FALSE;
 
   *prot_missing = FALSE;
 
@@ -3825,14 +3848,14 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
     memcpy(path+1, query, hostlen);
 
     path[0]='/'; /* prepend the missing slash */
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
 
     *query=0; /* now cut off the hostname at the ? */
   }
   else if(!path[0]) {
     /* if there's no path set, use a single slash */
     strcpy(path, "/");
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we
@@ -3845,38 +3868,60 @@ static CURLcode parseurlandfillconn(struct SessionHandle *data,
        is bigger than the path. Use +1 to move the zero byte too. */
     memmove(&path[1], path, strlen(path)+1);
     path[0] = '/';
-    fix_slash = TRUE;
+    rebuild_url = TRUE;
+  }
+  else {
+    /* sanitise paths and remove ../ and ./ sequences according to RFC3986 */
+    char *newp = Curl_dedotdotify(path);
+    if(!newp)
+      return CURLE_OUT_OF_MEMORY;
+
+    if(strcmp(newp, path)) {
+      rebuild_url = TRUE;
+      free(data->state.pathbuffer);
+      data->state.pathbuffer = newp;
+      data->state.path = newp;
+      path = newp;
+    }
+    else
+      free(newp);
   }
 
-
   /*
-   * "fix_slash" means that the URL was malformatted so we need to generate an
-   * updated version with the new slash inserted at the right place!  We need
-   * the corrected URL when communicating over HTTP proxy and we don't know at
-   * this point if we're using a proxy or not.
+   * "rebuild_url" means that one or more URL components have been modified so
+   * we need to generate an updated full version.  We need the corrected URL
+   * when communicating over HTTP proxy and we don't know at this point if
+   * we're using a proxy or not.
    */
-  if(fix_slash) {
+  if(rebuild_url) {
     char *reurl;
 
     size_t plen = strlen(path); /* new path, should be 1 byte longer than
                                    the original */
     size_t urllen = strlen(data->change.url); /* original URL length */
 
+    size_t prefixlen = strlen(conn->host.name);
+
+    if(!*prot_missing)
+      prefixlen += strlen(protop) + strlen("://");
+
     reurl = malloc(urllen + 2); /* 2 for zerobyte + slash */
     if(!reurl)
       return CURLE_OUT_OF_MEMORY;
 
     /* copy the prefix */
-    memcpy(reurl, data->change.url, urllen - (plen-1));
+    memcpy(reurl, data->change.url, prefixlen);
 
     /* append the trailing piece + zerobyte */
-    memcpy(&reurl[urllen - (plen-1)], path, plen + 1);
+    memcpy(&reurl[prefixlen], path, plen + 1);
 
     /* possible free the old one */
     if(data->change.url_alloc) {
       Curl_safefree(data->change.url);
       data->change.url_alloc = FALSE;
     }
+
+    infof(data, "Rebuilt URL to: %s\n", reurl);
 
     data->change.url = reurl;
     data->change.url_alloc = TRUE; /* free this later */
@@ -4415,8 +4460,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
 
           /* Decode the user */
           newname = curl_easy_unescape(data, userp, 0, NULL);
-          if(!newname)
+          if(!newname) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newname) < MAX_CURL_USER_LENGTH)
             strcpy(user, newname);
@@ -4427,8 +4476,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
         if(passwdp) {
           /* We have a password in the URL so decode it */
           char *newpasswd = curl_easy_unescape(data, passwdp, 0, NULL);
-          if(!newpasswd)
+          if(!newpasswd) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newpasswd) < MAX_CURL_PASSWORD_LENGTH)
             strcpy(passwd, newpasswd);
@@ -4439,8 +4492,12 @@ static CURLcode parse_url_login(struct SessionHandle *data,
         if(optionsp) {
           /* We have an options list in the URL so decode it */
           char *newoptions = curl_easy_unescape(data, optionsp, 0, NULL);
-          if(!newoptions)
+          if(!newoptions) {
+            Curl_safefree(userp);
+            Curl_safefree(passwdp);
+            Curl_safefree(optionsp);
             return CURLE_OUT_OF_MEMORY;
+          }
 
           if(strlen(newoptions) < MAX_CURL_OPTIONS_LENGTH)
             strcpy(options, newoptions);
@@ -4540,15 +4597,20 @@ static CURLcode parse_login_details(const char *login, const size_t len,
   /* Allocate the password portion buffer */
   if(!result && passwdp && plen) {
     pbuf = malloc(plen + 1);
-    if(!pbuf)
+    if(!pbuf) {
+      Curl_safefree(ubuf);
       result = CURLE_OUT_OF_MEMORY;
+    }
   }
 
   /* Allocate the options portion buffer */
   if(!result && optionsp && olen) {
     obuf = malloc(olen + 1);
-    if(!obuf)
+    if(!obuf) {
+      Curl_safefree(pbuf);
+      Curl_safefree(ubuf);
       result = CURLE_OUT_OF_MEMORY;
+    }
   }
 
   if(!result) {
@@ -5274,7 +5336,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   if(reuse && !force_reuse && IsPipeliningPossible(data, conn_temp)) {
     size_t pipelen = conn_temp->send_pipe->size + conn_temp->recv_pipe->size;
     if(pipelen > 0) {
-      infof(data, "Found connection %d, with requests in the pipe (%d)\n",
+      infof(data, "Found connection %ld, with requests in the pipe (%zu)\n",
             conn_temp->connection_id, pipelen);
 
       if(conn_temp->bundle->num_connections < max_host_connections &&
@@ -5779,18 +5841,20 @@ CURLcode Curl_do(struct connectdata **connp, bool *done)
  *
  * TODO: A future libcurl should be able to work away this state.
  *
+ * 'complete' can return 0 for incomplete, 1 for done and -1 for go back to
+ * DOING state there's more work to do!
  */
 
-CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
+CURLcode Curl_do_more(struct connectdata *conn, int *complete)
 {
   CURLcode result=CURLE_OK;
 
-  *completed = FALSE;
+  *complete = 0;
 
   if(conn->handler->do_more)
-    result = conn->handler->do_more(conn, completed);
+    result = conn->handler->do_more(conn, complete);
 
-  if(!result && *completed)
+  if(!result && (*complete == 1))
     /* do_complete must be called after the protocol-specific DO function */
     do_complete(conn);
 
@@ -5803,9 +5867,7 @@ CURLcode Curl_do_more(struct connectdata *conn, bool *completed)
 void Curl_reset_reqproto(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  if(data->state.proto.generic && data->state.current_conn != conn) {
-    free(data->state.proto.generic);
-    data->state.proto.generic = NULL;
-  }
-  data->state.current_conn = conn;
+
+  Curl_safefree(data->state.proto.generic);
+  data->state.proto.generic = NULL;
 }

@@ -234,10 +234,6 @@ SOURCE=..\..\..\lib\curl_ntlm_wb.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\curl_rand.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\lib\curl_rtmp.c
 # End Source File
 # Begin Source File
@@ -263,6 +259,10 @@ SOURCE=..\..\..\lib\cyassl.c
 # Begin Source File
 
 SOURCE=..\..\..\lib\dict.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\dotdot.c
 # End Source File
 # Begin Source File
 
@@ -303,6 +303,10 @@ SOURCE=..\..\..\lib\getinfo.c
 # Begin Source File
 
 SOURCE=..\..\..\lib\gopher.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\gskit.c
 # End Source File
 # Begin Source File
 
@@ -588,6 +592,10 @@ SOURCE=..\..\..\lib\warnless.c
 
 SOURCE=..\..\..\lib\wildcard.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\x509asn1.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -702,10 +710,6 @@ SOURCE=..\..\..\lib\curl_ntlm_wb.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\lib\curl_rand.h
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\..\lib\curl_rtmp.h
 # End Source File
 # Begin Source File
@@ -746,6 +750,10 @@ SOURCE=..\..\..\lib\dict.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\dotdot.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\easyif.h
 # End Source File
 # Begin Source File
@@ -779,6 +787,10 @@ SOURCE=..\..\..\lib\getinfo.h
 # Begin Source File
 
 SOURCE=..\..\..\lib\gopher.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\gskit.h
 # End Source File
 # Begin Source File
 
@@ -1011,6 +1023,10 @@ SOURCE=..\..\..\lib\warnless.h
 # Begin Source File
 
 SOURCE=..\..\..\lib\wildcard.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\lib\x509asn1.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

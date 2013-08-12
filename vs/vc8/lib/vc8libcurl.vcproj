@@ -121,7 +121,6 @@
 			<File RelativePath="..\..\..\lib\curl_ntlm_core.c"></File>
 			<File RelativePath="..\..\..\lib\curl_ntlm_msgs.c"></File>
 			<File RelativePath="..\..\..\lib\curl_ntlm_wb.c"></File>
-			<File RelativePath="..\..\..\lib\curl_rand.c"></File>
 			<File RelativePath="..\..\..\lib\curl_rtmp.c"></File>
 			<File RelativePath="..\..\..\lib\curl_sasl.c"></File>
 			<File RelativePath="..\..\..\lib\curl_schannel.c"></File>
@@ -129,6 +128,7 @@
 			<File RelativePath="..\..\..\lib\curl_threads.c"></File>
 			<File RelativePath="..\..\..\lib\cyassl.c"></File>
 			<File RelativePath="..\..\..\lib\dict.c"></File>
+			<File RelativePath="..\..\..\lib\dotdot.c"></File>
 			<File RelativePath="..\..\..\lib\easy.c"></File>
 			<File RelativePath="..\..\..\lib\escape.c"></File>
 			<File RelativePath="..\..\..\lib\file.c"></File>
@@ -139,6 +139,7 @@
 			<File RelativePath="..\..\..\lib\getenv.c"></File>
 			<File RelativePath="..\..\..\lib\getinfo.c"></File>
 			<File RelativePath="..\..\..\lib\gopher.c"></File>
+			<File RelativePath="..\..\..\lib\gskit.c"></File>
 			<File RelativePath="..\..\..\lib\gtls.c"></File>
 			<File RelativePath="..\..\..\lib\hash.c"></File>
 			<File RelativePath="..\..\..\lib\hmac.c"></File>
@@ -210,6 +211,7 @@
 			<File RelativePath="..\..\..\lib\version.c"></File>
 			<File RelativePath="..\..\..\lib\warnless.c"></File>
 			<File RelativePath="..\..\..\lib\wildcard.c"></File>
+			<File RelativePath="..\..\..\lib\x509asn1.c"></File>
 		</Filter>
 		<Filter Name="Header Files">
 			<File RelativePath="..\..\..\lib\amigaos.h"></File>
@@ -239,7 +241,6 @@
 			<File RelativePath="..\..\..\lib\curl_ntlm.h"></File>
 			<File RelativePath="..\..\..\lib\curl_ntlm_msgs.h"></File>
 			<File RelativePath="..\..\..\lib\curl_ntlm_wb.h"></File>
-			<File RelativePath="..\..\..\lib\curl_rand.h"></File>
 			<File RelativePath="..\..\..\lib\curl_rtmp.h"></File>
 			<File RelativePath="..\..\..\lib\curl_sasl.h"></File>
 			<File RelativePath="..\..\..\lib\curl_schannel.h"></File>
@@ -250,6 +251,7 @@
 			<File RelativePath="..\..\..\lib\curlx.h"></File>
 			<File RelativePath="..\..\..\lib\cyassl.h"></File>
 			<File RelativePath="..\..\..\lib\dict.h"></File>
+			<File RelativePath="..\..\..\lib\dotdot.h"></File>
 			<File RelativePath="..\..\..\lib\easyif.h"></File>
 			<File RelativePath="..\..\..\lib\escape.h"></File>
 			<File RelativePath="..\..\..\lib\file.h"></File>
@@ -259,6 +261,7 @@
 			<File RelativePath="..\..\..\lib\ftplistparser.h"></File>
 			<File RelativePath="..\..\..\lib\getinfo.h"></File>
 			<File RelativePath="..\..\..\lib\gopher.h"></File>
+			<File RelativePath="..\..\..\lib\gskit.h"></File>
 			<File RelativePath="..\..\..\lib\gtls.h"></File>
 			<File RelativePath="..\..\..\lib\hash.h"></File>
 			<File RelativePath="..\..\..\lib\hostcheck.h"></File>
@@ -317,6 +320,7 @@
 			<File RelativePath="..\..\..\lib\url.h"></File>
 			<File RelativePath="..\..\..\lib\warnless.h"></File>
 			<File RelativePath="..\..\..\lib\wildcard.h"></File>
+			<File RelativePath="..\..\..\lib\x509asn1.h"></File>
 		</Filter>
 		<Filter Name="Resource Files">
 			<File RelativePath="..\..\..\lib\libcurl.rc"></File>

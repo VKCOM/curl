@@ -77,6 +77,7 @@
 #include "url.h"
 #include "rawstr.h"
 #include "curl_sasl.h"
+#include "warnless.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -398,7 +399,7 @@ static void state(struct connectdata *conn, imapstate newstate)
 
   if(imapc->state != newstate)
     infof(conn->data, "IMAP %p state change from %s to %s\n",
-          imapc, names[imapc->state], names[newstate]);
+          (void *)imapc, names[imapc->state], names[newstate]);
 #endif
 
   imapc->state = newstate;
@@ -1152,7 +1153,7 @@ static CURLcode imap_state_auth_digest_resp_resp(struct connectdata *conn,
   }
   else {
     /* Send an empty response */
-    result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+    result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", "");
 
     if(!result)
       state(conn, IMAP_AUTHENTICATE_FINAL);
@@ -1694,8 +1695,7 @@ static int imap_getsock(struct connectdata *conn, curl_socket_t *socks,
  * connection phase.
  *
  * The variable 'done' points to will be TRUE if the protocol-layer connect
- * phase is done when this function returns, or FALSE is not. When called as
- * a part of the easy interface, it will always be TRUE.
+ * phase is done when this function returns, or FALSE if not.
  */
 static CURLcode imap_connect(struct connectdata *conn, bool *done)
 {
@@ -1781,7 +1781,7 @@ static CURLcode imap_done(struct connectdata *conn, CURLcode status,
       state(conn, IMAP_FETCH_FINAL);
     else {
       /* End the APPEND command first by sending an empty line */
-      result = Curl_pp_sendf(&conn->proto.imapc.pp, "");
+      result = Curl_pp_sendf(&conn->proto.imapc.pp, "%s", "");
       if(!result)
         state(conn, IMAP_APPEND_FINAL);
     }
@@ -2062,14 +2062,15 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
   struct imap_conn *imapc = &conn->proto.imapc;
   char *taggedfmt;
   va_list ap;
-  va_start(ap, fmt);
+
+  DEBUGASSERT(fmt);
 
   /* Calculate the next command ID wrapping at 3 digits */
   imapc->cmdid = (imapc->cmdid + 1) % 1000;
 
   /* Calculate the tag based on the connection ID and command ID */
   snprintf(imapc->resptag, sizeof(imapc->resptag), "%c%03d",
-           'A' + (conn->connection_id % 26), imapc->cmdid);
+           'A' + curlx_sltosi(conn->connection_id % 26), imapc->cmdid);
 
   /* Prefix the format with the tag */
   taggedfmt = aprintf("%s %s", imapc->resptag, fmt);
@@ -2077,10 +2078,11 @@ static CURLcode imap_sendf(struct connectdata *conn, const char *fmt, ...)
     return CURLE_OUT_OF_MEMORY;
 
   /* Send the data with the tag */
+  va_start(ap, fmt);
   result = Curl_pp_vsendf(&imapc->pp, taggedfmt, ap);
+  va_end(ap);
 
   Curl_safefree(taggedfmt);
-  va_end(ap);
 
   return result;
 }

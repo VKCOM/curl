@@ -134,13 +134,13 @@ p.roffit {
 <p class="level1">Pass a pointer to a long to receive the number 1 if the condition provided in the previous request didn't match (see <span Class="emphasis">CURLOPT_TIMECONDITION</span>). Alas, if this returns a 1 you know that the reason you didn't get data in return is because it didn't fulfill the condition. The long ths argument points to will get a zero stored if the condition instead was met. (Added in 7.19.4) 
 <p class="level0"><a name="CURLINFORTSPSESSIONID"></a><span class="nroffip">CURLINFO_RTSP_SESSION_ID</span> 
 <p class="level1">Pass a pointer to a char pointer to receive a pointer to a string holding the most recent RTSP Session ID. 
-<p class="level1">Applications wishing to resume an RTSP session on another connection should retreive this info before closing the active connection. 
+<p class="level1">Applications wishing to resume an RTSP session on another connection should retrieve this info before closing the active connection. 
 <p class="level0"><a name="CURLINFORTSPCLIENTCSEQ"></a><span class="nroffip">CURLINFO_RTSP_CLIENT_CSEQ</span> 
 <p class="level1">Pass a pointer to a long to receive the next CSeq that will be used by the application. 
 <p class="level0"><a name="CURLINFORTSPSERVERCSEQ"></a><span class="nroffip">CURLINFO_RTSP_SERVER_CSEQ</span> 
 <p class="level1">Pass a pointer to a long to receive the next server CSeq that will be expected by the application. 
 <p class="level1"><span class="emphasis">(NOTE: listening for server initiated requests is currently unimplemented).</span> 
-<p class="level1">Applications wishing to resume an RTSP session on another connection should retreive this info before closing the active connection. 
+<p class="level1">Applications wishing to resume an RTSP session on another connection should retrieve this info before closing the active connection. 
 <p class="level0"><a name="CURLINFORTSPCSEQRECV"></a><span class="nroffip">CURLINFO_RTSP_CSEQ_RECV</span> 
 <p class="level1">Pass a pointer to a long to receive the most recently received CSeq from the server. If your application encounters a <span Class="emphasis">CURLE_RTSP_CSEQ_ERROR</span> then you may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this value. <a name="TIMES"></a><h2 class="nroffsh">TIMES</h2>
 <p class="level0"><pre>

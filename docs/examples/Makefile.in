@@ -119,7 +119,7 @@ check_PROGRAMS = 10-at-a-time$(EXEEXT) anyauthput$(EXEEXT) \
 	rtsp$(EXEEXT) externalsocket$(EXEEXT) resolve$(EXEEXT) \
 	progressfunc$(EXEEXT) pop3s$(EXEEXT) pop3slist$(EXEEXT) \
 	imap$(EXEEXT) url2file$(EXEEXT) sftpget$(EXEEXT) \
-	ftpsget$(EXEEXT) usercertinmem$(EXEEXT)
+	ftpsget$(EXEEXT)
 subdir = docs/examples
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
@@ -130,6 +130,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/curl-compilers.m4 \
 	$(top_srcdir)/m4/curl-reentrant.m4 $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/m4/xc-am-iface.m4 \
 	$(top_srcdir)/m4/xc-cc-check.m4 \
 	$(top_srcdir)/m4/xc-lt-iface.m4 \
 	$(top_srcdir)/m4/xc-translit.m4 \
@@ -456,13 +457,6 @@ url2file_LDADD = $(LDADD)
 @USE_EXPLICIT_LIB_DEPS_FALSE@	$(LIBDIR)/libcurl.la
 @USE_EXPLICIT_LIB_DEPS_TRUE@url2file_DEPENDENCIES =  \
 @USE_EXPLICIT_LIB_DEPS_TRUE@	$(LIBDIR)/libcurl.la
-usercertinmem_SOURCES = usercertinmem.c
-usercertinmem_OBJECTS = usercertinmem.$(OBJEXT)
-usercertinmem_LDADD = $(LDADD)
-@USE_EXPLICIT_LIB_DEPS_FALSE@usercertinmem_DEPENDENCIES =  \
-@USE_EXPLICIT_LIB_DEPS_FALSE@	$(LIBDIR)/libcurl.la
-@USE_EXPLICIT_LIB_DEPS_TRUE@usercertinmem_DEPENDENCIES =  \
-@USE_EXPLICIT_LIB_DEPS_TRUE@	$(LIBDIR)/libcurl.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -506,8 +500,7 @@ SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	multi-single.c persistant.c pop3s.c pop3slist.c \
 	post-callback.c postit2.c progressfunc.c resolve.c rtsp.c \
 	sendrecv.c sepheaders.c sftpget.c simple.c simplepost.c \
-	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c \
-	usercertinmem.c
+	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c
 DIST_SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	cookie_interface.c debug.c externalsocket.c fileupload.c \
 	fopen.c ftp-wildcard.c ftpget.c ftpgetinfo.c ftpgetresp.c \
@@ -517,8 +510,7 @@ DIST_SOURCES = 10-at-a-time.c anyauthput.c certinfo.c chkspeed.c \
 	multi-single.c persistant.c pop3s.c pop3slist.c \
 	post-callback.c postit2.c progressfunc.c resolve.c rtsp.c \
 	sendrecv.c sepheaders.c sftpget.c simple.c simplepost.c \
-	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c \
-	usercertinmem.c
+	simplesmtp.c simplessl.c smtp-multi.c smtp-tls.c url2file.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -759,7 +751,7 @@ COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	   \
   ftpuploadresume.c ghiper.c hiperfifo.c htmltidy.c multithread.c	   \
   opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
   smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
-  multi-uv.c xmlstream.c
+  multi-uv.c xmlstream.c usercertinmem.c
 
 all: all-am
 
@@ -986,10 +978,6 @@ url2file$(EXEEXT): $(url2file_OBJECTS) $(url2file_DEPENDENCIES) $(EXTRA_url2file
 	@rm -f url2file$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(url2file_OBJECTS) $(url2file_LDADD) $(LIBS)
 
-usercertinmem$(EXEEXT): $(usercertinmem_OBJECTS) $(usercertinmem_DEPENDENCIES) $(EXTRA_usercertinmem_DEPENDENCIES) 
-	@rm -f usercertinmem$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(usercertinmem_OBJECTS) $(usercertinmem_LDADD) $(LIBS)
-
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -1041,7 +1029,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smtp-multi.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/smtp-tls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/url2file.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usercertinmem.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

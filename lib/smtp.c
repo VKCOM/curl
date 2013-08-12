@@ -337,7 +337,7 @@ static void state(struct connectdata *conn, smtpstate newstate)
 
   if(smtpc->state != newstate)
     infof(conn->data, "SMTP %p state change from %s to %s\n",
-          smtpc, names[smtpc->state], names[newstate]);
+          (void *)smtpc, names[smtpc->state], names[newstate]);
 #endif
 
   smtpc->state = newstate;
@@ -403,7 +403,7 @@ static CURLcode smtp_perform_starttls(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the STARTTLS command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "STARTTLS");
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "STARTTLS");
 
   if(!result)
     state(conn, SMTP_STARTTLS);
@@ -664,7 +664,7 @@ static CURLcode smtp_perform_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "QUIT");
+  result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, SMTP_QUIT);
@@ -997,7 +997,7 @@ static CURLcode smtp_state_auth_digest_resp_resp(struct connectdata *conn,
   }
   else {
     /* Send an empty response */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "");
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "");
 
     if(!result)
       state(conn, SMTP_AUTH_FINAL);
@@ -1159,7 +1159,7 @@ static CURLcode smtp_state_rcpt_resp(struct connectdata *conn, int smtpcode,
     }
 
     /* Send the DATA command */
-    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "DATA");
+    result = Curl_pp_sendf(&conn->proto.smtpc.pp, "%s", "DATA");
 
     if(!result)
       state(conn, SMTP_DATA);
@@ -1387,8 +1387,7 @@ static int smtp_getsock(struct connectdata *conn, curl_socket_t *socks,
  * the connection phase.
  *
  * The variable pointed to by 'done' will be TRUE if the protocol-layer
- * connect phase is done when this function returns, or FALSE if not. When
- * called as a part of the easy interface, it will always be TRUE.
+ * connect phase is done when this function returns, or FALSE if not.
  */
 static CURLcode smtp_connect(struct connectdata *conn, bool *done)
 {

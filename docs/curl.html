@@ -117,7 +117,7 @@ p.roffit {
 <p class="level0"><a name="--compressed"></a><span class="nroffip">--compressed</span> 
 <p class="level1">(HTTP) Request a compressed response using one of the algorithms curl supports, and save the uncompressed document.  If this option is used and the server sends an unsupported encoding, curl will report an error. 
 <p class="level0"><a name="--connect-timeout"></a><span class="nroffip">--connect-timeout &lt;seconds&gt;</span> 
-<p class="level1">Maximum time in seconds that you allow the connection to the server to take. This only limits the connection phase, once curl has connected this option is of no more use. See also the <a class="emphasis" href="#-m">-m, --max-time</a> option. 
+<p class="level1">Maximum time in seconds that you allow the connection to the server to take. This only limits the connection phase, once curl has connected this option is of no more use.  Since 7.32.0, this option accepts decimal values, but the actual timeout will decrease in accuracy as the specified timeout increases in decimal precision. See also the <a class="emphasis" href="#-m">-m, --max-time</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--create-dirs"></a><span class="nroffip">--create-dirs</span> 
 <p class="level1">When used in conjunction with the <a class="emphasis" href="#-o">-o</a> option, curl will create the necessary local directory hierarchy as needed. This option creates the dirs mentioned with the <a class="emphasis" href="#-o">-o</a> option, nothing else. If the <a class="emphasis" href="#-o">-o</a> file name uses no dir or if the dirs it mentions already exist, no dir will be created. 
@@ -350,7 +350,7 @@ p.roffit {
 <p class="level0"><a name="--location-trusted"></a><span class="nroffip">--location-trusted</span> 
 <p class="level1">(HTTP/HTTPS) Like <a class="emphasis" href="#-L">-L, --location</a>, but will allow sending the name + password to all hosts that the site may redirect to. This may or may not introduce a security breach if the site redirects you to a site to which you'll send your authentication info (which is plaintext in the case of HTTP Basic authentication). 
 <p class="level0"><a name="-m"></a><span class="nroffip">-m, --max-time &lt;seconds&gt;</span> 
-<p class="level1">Maximum time in seconds that you allow the whole operation to take.  This is useful for preventing your batch jobs from hanging for hours due to slow networks or links going down.  See also the <a class="emphasis" href="#--connect-timeout">--connect-timeout</a> option. 
+<p class="level1">Maximum time in seconds that you allow the whole operation to take.  This is useful for preventing your batch jobs from hanging for hours due to slow networks or links going down.  Since 7.32.0, this option accepts decimal values, but the actual timeout will decrease in accuracy as the specified timeout increases in decimal precision.  See also the <a class="emphasis" href="#--connect-timeout">--connect-timeout</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--mail-auth"></a><span class="nroffip">--mail-auth &lt;address&gt;</span> 
 <p class="level1">(SMTP) Specify a single address. This will be used to specify the authentication address (identity) of a submitted message that is being relayed to another server. 
@@ -443,6 +443,8 @@ p.roffit {
 <p class="level1">(HTTP) Tells curl to respect <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>/10.3.2 and not convert POST requests into GET requests when following a 301 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L">-L, --location</a> (Added in 7.17.1) 
 <p class="level0"><a name="--post302"></a><span class="nroffip">--post302</span> 
 <p class="level1">(HTTP) Tells curl to respect <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>/10.3.2 and not convert POST requests into GET requests when following a 302 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L">-L, --location</a> (Added in 7.19.1) 
+<p class="level0"><a name="--post303"></a><span class="nroffip">--post303</span> 
+<p class="level1">(HTTP) Tells curl to respect <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>/10.3.2 and not convert POST requests into GET requests when following a 303 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L">-L, --location</a> (Added in 7.26.0) 
 <p class="level0"><a name="--proto"></a><span class="nroffip">--proto &lt;protocols&gt;</span> 
 <p class="level1">Tells curl to use the listed protocols for its initial retrieval. Protocols are evaluated left to right, are comma separated, and are each a protocol name or 'all', optionally prefixed by zero or more modifiers. Available modifiers are: 
 <p class="level2">
@@ -547,6 +549,8 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-s"></a><span class="nroffip">-s, --silent</span> 
 <p class="level1">Silent or quiet mode. Don't show progress meter or error messages.  Makes Curl mute. It will still output the data you ask for, potentially even to the terminal/stdout unless you redirect it. 
+<p class="level0"><a name="--sasl-ir"></a><span class="nroffip">--sasl-ir</span> 
+<p class="level1">Enable initial response in SASL authentication. (Added in 7.31.0) 
 <p class="level0"><a name="-S"></a><span class="nroffip">-S, --show-error</span> 
 <p class="level1">When used with <a class="emphasis" href="#-s">-s</a> it makes curl show an error message if it fails. 
 <p class="level0"><a name="--ssl"></a><span class="nroffip">--ssl</span> 
@@ -693,7 +697,7 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level1">
 <p class="level0"><a name="--xattr"></a><span class="nroffip">--xattr</span> 
-<p class="level1">When saving output to a file, this option tells curl to store certain file metadata in extened file attributes. Currently, the URL is stored in the xdg.origin.url attribute and, for HTTP, the content type is stored in the mime_type attribute. If the file system does not support extended attributes, a warning is issued. 
+<p class="level1">When saving output to a file, this option tells curl to store certain file metadata in extended file attributes. Currently, the URL is stored in the xdg.origin.url attribute and, for HTTP, the content type is stored in the mime_type attribute. If the file system does not support extended attributes, a warning is issued. 
 <p class="level1">
 <p class="level0"><a name="-y"></a><span class="nroffip">-y, --speed-time &lt;time&gt;</span> 
 <p class="level1">If a download is slower than speed-limit bytes per second during a speed-time period, the download gets aborted. If speed-time is used, the default speed-limit will be 1 unless set with <a class="emphasis" href="#-Y">-Y</a>. 
@@ -702,7 +706,7 @@ p.roffit {
 <p class="level0"><a name="-Y"></a><span class="nroffip">-Y, --speed-limit &lt;speed&gt;</span> 
 <p class="level1">If a download is slower than this given speed (in bytes per second) for speed-time seconds it gets aborted. speed-time is set with <a class="emphasis" href="#-y">-y</a> and is 30 if not set. 
 <p class="level1">If this option is used several times, the last one will be used. 
-<p class="level0"><a name="-z--time-cond"></a><span class="nroffip">-z/--time-cond &lt;date expression&gt;|&lt;file&gt;</span> 
+<p class="level0"><a name="-z"></a><span class="nroffip">-z, --time-cond &lt;date expression&gt;|&lt;file&gt;</span> 
 <p class="level1">(HTTP/FTP) Request a file that has been modified later than the given time and date, or one that has been modified before that time. The &lt;date expression&gt; can be all sorts of date strings or if it doesn't match any internal ones, it is taken as a filename and tries to get the modification date (mtime) from &lt;file&gt; instead. See the <span Class="emphasis">curl_getdate(3)</span> man pages for date expression details. 
 <p class="level1">Start the date expression with a dash (-) to make it request for a document that is older than the given date/time, default is a document that is newer than the specified date/time. 
 <p class="level1">If this option is used several times, the last one will be used. 
