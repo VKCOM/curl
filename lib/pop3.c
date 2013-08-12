@@ -382,7 +382,7 @@ static void state(struct connectdata *conn, pop3state newstate)
 
   if(pop3c->state != newstate)
     infof(conn->data, "POP3 %p state change from %s to %s\n",
-          pop3c, names[pop3c->state], names[newstate]);
+          (void *)pop3c, names[pop3c->state], names[newstate]);
 #endif
 
   pop3c->state = newstate;
@@ -405,7 +405,7 @@ static CURLcode pop3_perform_capa(struct connectdata *conn)
   pop3c->tls_supported = FALSE; /* Clear the TLS capability */
 
   /* Send the CAPA command */
-  result = Curl_pp_sendf(&pop3c->pp, "CAPA");
+  result = Curl_pp_sendf(&pop3c->pp, "%s", "CAPA");
 
   if(!result)
     state(conn, POP3_CAPA);
@@ -424,7 +424,7 @@ static CURLcode pop3_perform_starttls(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the STLS command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "STLS");
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "STLS");
 
   if(!result)
     state(conn, POP3_STARTTLS);
@@ -693,7 +693,7 @@ static CURLcode pop3_perform_command(struct connectdata *conn)
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command), pop3->id);
   else
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp,
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s",
                            (pop3->custom && pop3->custom[0] != '\0' ?
                             pop3->custom : command));
 
@@ -714,7 +714,7 @@ static CURLcode pop3_perform_quit(struct connectdata *conn)
   CURLcode result = CURLE_OK;
 
   /* Send the QUIT command */
-  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "QUIT");
+  result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "QUIT");
 
   if(!result)
     state(conn, POP3_QUIT);
@@ -1020,7 +1020,7 @@ static CURLcode pop3_state_auth_digest_resp_resp(struct connectdata *conn,
   }
   else {
     /* Send an empty response */
-    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "");
+    result = Curl_pp_sendf(&conn->proto.pop3c.pp, "%s", "");
 
     if(!result)
       state(conn, POP3_AUTH_FINAL);
@@ -1421,8 +1421,7 @@ static int pop3_getsock(struct connectdata *conn, curl_socket_t *socks,
  * connection phase.
  *
  * The variable 'done' points to will be TRUE if the protocol-layer connect
- * phase is done when this function returns, or FALSE is not. When called as
- * a part of the easy interface, it will always be TRUE.
+ * phase is done when this function returns, or FALSE if not.
  */
 static CURLcode pop3_connect(struct connectdata *conn, bool *done)
 {

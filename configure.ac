@@ -126,7 +126,7 @@ fi
 dnl figure out the libcurl version
 CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
 XC_CHECK_PROG_CC
-AM_INIT_AUTOMAKE
+XC_AUTOMAKE
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($CURLVERSION)
 
@@ -3530,6 +3530,8 @@ AC_CONFIG_FILES([Makefile \
 AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
+
+XC_AMEND_DISTCLEAN([lib src tests/unit tests/server tests/libtest docs/examples])
 
 AC_MSG_NOTICE([Configured to build curl/libcurl:
 

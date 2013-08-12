@@ -178,9 +178,55 @@ ParameterError str2num(long *val, const char *str)
 
 ParameterError str2unum(long *val, const char *str)
 {
-  if(str[0]=='-')
-    return PARAM_NEGATIVE_NUMERIC; /* badness */
-  return str2num(val, str);
+  ParameterError result = str2num(val, str);
+  if(result != PARAM_OK)
+    return result;
+  if(*val < 0)
+    return PARAM_NEGATIVE_NUMERIC;
+
+  return PARAM_OK;
+}
+
+/*
+ * Parse the string and write the double in the given address. Return PARAM_OK
+ * on success, otherwise a parameter specific error enum.
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+ParameterError str2double(double *val, const char *str)
+{
+  if(str) {
+    char *endptr;
+    double num = strtod(str, &endptr);
+    if((endptr != str) && (endptr == str + strlen(str))) {
+      *val = num;
+      return PARAM_OK;  /* Ok */
+    }
+  }
+  return PARAM_BAD_NUMERIC; /* badness */
+}
+
+/*
+ * Parse the string and write the double in the given address. Return PARAM_OK
+ * on success, otherwise a parameter error enum. ONLY ACCEPTS POSITIVE NUMBERS!
+ *
+ * Since this function gets called with the 'nextarg' pointer from within the
+ * getparameter a lot, we must check it for NULL before accessing the str
+ * data.
+ */
+
+ParameterError str2udouble(double *val, const char *str)
+{
+  ParameterError result = str2double(val, str);
+  if(result != PARAM_OK)
+    return result;
+  if(*val < 0)
+    return PARAM_NEGATIVE_NUMERIC;
+
+  return PARAM_OK;
 }
 
 /*

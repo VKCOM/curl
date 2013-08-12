@@ -158,8 +158,26 @@ p.roffit {
 <p class="level1">Returning a non-zero value from this callback will cause libcurl to abort the transfer and return <span Class="emphasis">CURLE_ABORTED_BY_CALLBACK</span>. 
 <p class="level1">If you transfer data with the multi interface, this function will not be called during periods of idleness unless you call the appropriate libcurl function that performs transfers. 
 <p class="level1"><a class="emphasis" href="#CURLOPTNOPROGRESS">CURLOPT_NOPROGRESS</a> must be set to 0 to make this function actually get called. 
+<p class="level0"><a name="CURLOPTXFERINFOFUNCTION"></a><span class="nroffip">CURLOPT_XFERINFOFUNCTION</span> 
+<p class="level1">Pass a pointer to a function that matches the following prototype: 
+<p class="level1"><pre>
+<p class="level1"><span class="bold">int function(void *clientp, curl_off_t dltotal, curl_off_t dlnow,
+ &nbsp;               curl_off_t ultotal, curl_off_t ulnow);</span>
+ </pre>
+
+<p class="level1">
+<p class="level1">This function gets called by libcurl instead of its internal equivalent with a frequent interval. While data is being transferred it will be called very frequently, and during slow periods like when nothing is being transferred it can slow down to about one call per second. 
+<p class="level1"><span Class="emphasis">clientp</span> is the pointer set with <a class="emphasis" href="#CURLOPTXFERINFODATA">CURLOPT_XFERINFODATA</a>, it is only passed along from the application to the callback. 
+<p class="level1">The callback gets told how much data libcurl will transfer and has transferred, in number of bytes. <span Class="emphasis">dltotal</span> is the total number of bytes libcurl expects to download in this transfer. <span Class="emphasis">dlnow</span> is the number of bytes downloaded so far. <span Class="emphasis">ultotal</span> is the total number of bytes libcurl expects to upload in this transfer. <span Class="emphasis">ulnow</span> is the number of bytes uploaded so far. 
+<p class="level1">Unknown/unused argument values passed to the callback will be set to zero (like if you only download data, the upload size will remain 0). Many times the callback will be called one or more times first, before it knows the data sizes so a program must be made to handle that. 
+<p class="level1">Returning a non-zero value from this callback will cause libcurl to abort the transfer and return <span Class="emphasis">CURLE_ABORTED_BY_CALLBACK</span>. 
+<p class="level1">If you transfer data with the multi interface, this function will not be called during periods of idleness unless you call the appropriate libcurl function that performs transfers. 
+<p class="level1"><a class="emphasis" href="#CURLOPTNOPROGRESS">CURLOPT_NOPROGRESS</a> must be set to 0 to make this function actually get called. 
+<p class="level1">(Added in 7.32.0) 
 <p class="level0"><a name="CURLOPTPROGRESSDATA"></a><span class="nroffip">CURLOPT_PROGRESSDATA</span> 
 <p class="level1">Pass a pointer that will be untouched by libcurl and passed as the first argument in the progress callback set with <a class="emphasis" href="#CURLOPTPROGRESSFUNCTION">CURLOPT_PROGRESSFUNCTION</a>. The default value of this parameter is unspecified. 
+<p class="level0"><a name="CURLOPTXFERINFODATA"></a><span class="nroffip">CURLOPT_XFERINFODATA</span> 
+<p class="level1">Pass a pointer that will be untouched by libcurl and passed as the first argument in the progress callback set with <a class="emphasis" href="#CURLOPTXFERINFOFUNCTION">CURLOPT_XFERINFOFUNCTION</a>. The default value of this parameter is unspecified. This option is an alias for CURLOPT_PROGRESSDATA. (Added in 7.32.0) 
 <p class="level0"><a name="CURLOPTHEADERFUNCTION"></a><span class="nroffip">CURLOPT_HEADERFUNCTION</span> 
 <p class="level1">Pass a pointer to a function that matches the following prototype: <span class="bold">size_t function( void *ptr, size_t size, size_t nmemb, void *userdata);</span>. This function gets called by libcurl as soon as it has received header data. The header callback will be called once for each header and only complete header lines are passed on to the callback. Parsing headers is very easy using this. The size of the data pointed to by <span Class="emphasis">ptr</span> is <span Class="emphasis">size</span> multiplied with <span Class="emphasis">nmemb</span>. Do not assume that the header line is zero terminated! The pointer named <span Class="emphasis">userdata</span> is the one you set with the <a class="emphasis" href="#CURLOPTWRITEHEADER">CURLOPT_WRITEHEADER</a> option. The callback function must return the number of bytes actually taken care of. If that amount differs from the amount passed to your function, it'll signal an error to the library. This will abort the transfer and return <span Class="emphasis">CURL_WRITE_ERROR</span>. 
 <p class="level1">A complete HTTP header that is passed to this function can be up to <span Class="emphasis">CURL_MAX_HTTP_HEADER</span> (100K) bytes. 

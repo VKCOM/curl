@@ -3537,8 +3537,8 @@ CURLVERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/inclu
   if test $xc_bad_var_libs = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LIBS: $LIBS" >&5
 $as_echo "$as_me: using LIBS: $LIBS" >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS error: LIBS may only be used to specify libraries (-lname)." >&5
-$as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname)." >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS note: LIBS should only be used to specify libraries (-lname)." >&5
+$as_echo "$as_me: LIBS note: LIBS should only be used to specify libraries (-lname)." >&6;}
   fi
 
 
@@ -3562,7 +3562,7 @@ $as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname
   if test $xc_bad_var_ldflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LDFLAGS: $LDFLAGS" >&5
 $as_echo "$as_me: using LDFLAGS: $LDFLAGS" >&6;}
-    xc_bad_var_msg="LDFLAGS error: LDFLAGS may only be used to specify linker flags, not"
+    xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
       case "$xc_word" in
         -D*)
@@ -3603,7 +3603,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cppflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CPPFLAGS: $CPPFLAGS" >&5
 $as_echo "$as_me: using CPPFLAGS: $CPPFLAGS" >&6;}
-    xc_bad_var_msg="CPPFLAGS error: CPPFLAGS may only be used to specify C preprocessor flags, not"
+    xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
       case "$xc_word" in
         -rpath*)
@@ -3649,7 +3649,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CFLAGS: $CFLAGS" >&5
 $as_echo "$as_me: using CFLAGS: $CFLAGS" >&6;}
-    xc_bad_var_msg="CFLAGS error: CFLAGS may only be used to specify C compiler flags, not"
+    xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
       case "$xc_word" in
         -D*)
@@ -3684,7 +3684,8 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
      test $xc_bad_var_cflags = yes ||
      test $xc_bad_var_ldflags = yes ||
      test $xc_bad_var_cppflags = yes; then
-     as_fn_error $? "Can not continue. Fix errors mentioned immediately above this line." "$LINENO" 5
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Continuing even with errors mentioned immediately above this line." >&5
+$as_echo "$as_me: WARNING: Continuing even with errors mentioned immediately above this line." >&2;}
   fi
 
 ac_aux_dir=
@@ -5290,6 +5291,10 @@ else
 fi
 AM_BACKSLASH='\'
 
+## --------------------------------------- ##
+##  Start of automake initialization code  ##
+## --------------------------------------- ##
+
 if test "`cd $srcdir && pwd`" != "`pwd`"; then
   # Use -I$(srcdir) only when $(srcdir) != ., so that make's output
   # is not polluted with repeated "-I."
@@ -5489,6 +5494,11 @@ else
   am__fastdepCC_FALSE=
 fi
 
+
+
+## ------------------------------------- ##
+##  End of automake initialization code  ##
+## ------------------------------------- ##
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking curl version" >&5
@@ -39167,8 +39177,8 @@ squeeze SUPPORT_PROTOCOLS
   if test $xc_bad_var_libs = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LIBS: $LIBS" >&5
 $as_echo "$as_me: using LIBS: $LIBS" >&6;}
-    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS error: LIBS may only be used to specify libraries (-lname)." >&5
-$as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname)." >&6;}
+    { $as_echo "$as_me:${as_lineno-$LINENO}: LIBS note: LIBS should only be used to specify libraries (-lname)." >&5
+$as_echo "$as_me: LIBS note: LIBS should only be used to specify libraries (-lname)." >&6;}
   fi
 
 
@@ -39192,7 +39202,7 @@ $as_echo "$as_me: LIBS error: LIBS may only be used to specify libraries (-lname
   if test $xc_bad_var_ldflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using LDFLAGS: $LDFLAGS" >&5
 $as_echo "$as_me: using LDFLAGS: $LDFLAGS" >&6;}
-    xc_bad_var_msg="LDFLAGS error: LDFLAGS may only be used to specify linker flags, not"
+    xc_bad_var_msg="LDFLAGS note: LDFLAGS should only be used to specify linker flags, not"
     for xc_word in $LDFLAGS; do
       case "$xc_word" in
         -D*)
@@ -39233,7 +39243,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cppflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CPPFLAGS: $CPPFLAGS" >&5
 $as_echo "$as_me: using CPPFLAGS: $CPPFLAGS" >&6;}
-    xc_bad_var_msg="CPPFLAGS error: CPPFLAGS may only be used to specify C preprocessor flags, not"
+    xc_bad_var_msg="CPPFLAGS note: CPPFLAGS should only be used to specify C preprocessor flags, not"
     for xc_word in $CPPFLAGS; do
       case "$xc_word" in
         -rpath*)
@@ -39279,7 +39289,7 @@ $as_echo "$as_me: $xc_bad_var_msg libraries. Use LIBS for: $xc_word" >&6;}
   if test $xc_bad_var_cflags = yes; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: using CFLAGS: $CFLAGS" >&5
 $as_echo "$as_me: using CFLAGS: $CFLAGS" >&6;}
-    xc_bad_var_msg="CFLAGS error: CFLAGS may only be used to specify C compiler flags, not"
+    xc_bad_var_msg="CFLAGS note: CFLAGS should only be used to specify C compiler flags, not"
     for xc_word in $CFLAGS; do
       case "$xc_word" in
         -D*)
@@ -41961,6 +41971,8 @@ use vars qw(
 
 1;
 _EOF
+
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Configured to build curl/libcurl:
