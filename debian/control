@@ -5,7 +5,7 @@ Maintainer: Alessandro Ghedini <ghedo@debian.org>
 Uploaders: Ian Jackson <ijackson@chiark.greenend.org.uk>
 Build-Depends: debhelper (>= 9),
  autoconf,
- automake1.9,
+ automake,
  ca-certificates,
  groff-base,
  libgcrypt11-dev,
