@@ -1,3 +1,11 @@
+curl (7.32.0-2) UNRELEASED; urgency=low
+
+  * Remove Luk from Uploaders as per his request (Closes: #723603)
+  * Do not Build-Depends on specific automake version (Closes: #724361)
+  * Fix lintian vcs-field-not-canonical
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 06 Oct 2013 14:21:10 +0200
+
 curl (7.32.0-1) unstable; urgency=low
 
   * New upstream release
