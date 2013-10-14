@@ -6,6 +6,1456 @@
 
                                   Changelog
 
+Version 7.33.0 (13 Oct 2013)
+
+Daniel Stenberg (13 Oct 2013)
+- RELEASE-NOTES: synced with 92cf6141ed0de
+
+- curl: fix --oauth2-bearer in the --help output
+  
+  After the option rename in 5df04bfafd1
+
+- OpenSSL: improve the grammar of the language in 39beaa5ffbcc
+  
+  Reported-by: Petr Pisar
+
+- [Andrej E Baranov brought this change]
+
+  OpenSSL: use failf() when subjectAltName mismatches
+  
+  Write to CURLOPT_ERRORBUFFER information about mismatch alternative
+  certificate subject names.
+  
+  Signed-off-by: Andrej E Baranov <admin@andrej-andb.ru>
+
+- curl: rename --bearer to --oauth2-bearer
+  
+  The option '--bearer' might be slightly ambiguous in name. It doesn't
+  create any conflict that I am aware of at the moment, however, OAUTH v2
+  is not the only authentication mechanism which uses "bearer" tokens.
+  
+  Reported-by: Kyle L. Huff
+  URL: http://curl.haxx.se/mail/lib-2013-10/0064.html
+
+- [Kamil Dudka brought this change]
+
+  ssh: improve the logic for detecting blocking direction
+  
+  This fixes a regression introduced by commit 0feeab78 limiting the speed
+  of SCP upload to 16384 B/s on a fast connection (such as localhost).
+
+Dan Fandrich (12 Oct 2013)
+- Fixed typo in Makefile.inc that left http2.h out of the tar ball
+
+Daniel Stenberg (11 Oct 2013)
+- [Heinrich Schaefer brought this change]
+
+  minor fix in doc
+
+- [Gisle Vanem brought this change]
+
+  curl_setup_once: fix errno access for lwip on Windows
+  
+  lib/curl_setup_once.h assumed lwIP on Windows uses 'SetLastError()' to
+  set network errors. It doesn't; it uses 'errno'.
+
+- test1239: verify 4cd444e01ad and the simulated 304 response
+
+- [Derek Higgins brought this change]
+
+  HTTP: Output http response 304 when modified time is too old
+  
+  When using the -w '%{http_code}' flag and simulating a Not Modified then
+  304 should be output.
+
+- contributors: helper script to dig out contributors from git
+
+- RELEASE-NOTES: add twos refs to bug reports
+
+- RELEASE-NOTES: synced with 173160c0d068
+
+Nick Zitzmann (2 Oct 2013)
+- darwinssl: block TLS_RSA_WITH_NULL_SHA256 cipher
+  
+  Credit (for catching a cipher I forgot to add to the blocked ciphers list):
+  https://www.ssllabs.com/ssltest/viewMyClient.html
+
+Daniel Stenberg (2 Oct 2013)
+- OpenSSL: acknowledge CURLOPT_SSL_VERIFYHOST without VERIFYPEER
+  
+  Setting only CURLOPT_SSL_VERIFYHOST without CURLOPT_SSL_VERIFYPEER set
+  should still verify that the host name fields in the server certificate
+  is fine or return failure.
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-10/0002.html
+  Reported-by: Ishan SinghLevett
+
+- KNOWN_BUGS: #84: CURLINFO_SSL_VERIFYRESULT
+  
+  CURLINFO_SSL_VERIFYRESULT is only implemented for the OpenSSL and NSS
+  backends and not for any other!
+
+- [François Charlier brought this change]
+
+  xattr: add support for FreeBSD xattr API
+
+- curl_easy_setopt.3: slight clarification of SEEKFUNCTION
+
+Steve Holme (29 Sep 2013)
+- tests: Fixed typos from commit 25a0c96a494297
+
+- tests: Updated email addresses in SMTP tests following recent changes
+
+- test909: Removed custom EHLO response after recent changes
+  
+  ...as it is no longer required following capability and authentication
+  changes and is now causing problems following commit 49341628b50007 as
+  the test number is obtained from the client address in the EHLO.
+
+- ftpserver.pl: Fixed compilation error from commit 49341628b50007
+
+- ftpserver.pl: Moved specifying the test number from the RCPT address
+  
+  ...to the client address as this frees the RCPT strings to contain
+  just an email address and by passing the test number into curl as the
+  client address remains consistent with POP3 and IMAP tests as they are
+  specified in the URL.
+
+- ftpserver.pl: Added unwanted argument check to SMTP DATA command handler
+
+Daniel Stenberg (29 Sep 2013)
+- getinmemory: remove a comment
+  
+  The comment mentioned the need to free the data, but the example already
+  does that free
+
+- postinmemory: new example
+  
+  This is similar to getinmemory.c but with an initial POST.
+  
+  Combined-by: Ulf Samuelsson
+
+- win32: fix Visual Studio 2010 build with WINVER >= 0x600
+  
+  If no WINVER and/or _WIN32_IWNNT define was set, the Windows platform
+  SDK often defaults to high value, e.g. 0x601 (whoch may probably depend
+  on the Windows version being used, in my case Windows 7).
+  
+  If WINVER >= 0x600 then winsock2.h includes some defines for WSAPoll(),
+  e.g. POLLIN, POLLPRI, POLLOUT etc. These defines clash with cURL's
+  lib/select.h.
+  
+  Make sure HAVE_STRUCT_POLLFD is defined then.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1282
+  Reported-by: "kdekker"
+  Patch-by: Marcel Raad
+
+Steve Holme (28 Sep 2013)
+- ssluse.c: Fixed compilation warnings when ENGINE not supported
+  
+  The function "ssl_ui_reader" was declared but never referenced
+  The function "ssl_ui_writer" was declared but never referenced
+
+Daniel Stenberg (27 Sep 2013)
+- configure: use icc options without space
+  
+  The latest version(s) of the icc compiler no longer accept the extra
+  space in the -we (warning enable), -wd (warning disable), etc.
+  
+  Reported-by: Elmira A Semenova
+  Bug: http://curl.haxx.se/mail/lib-2013-09/0182.html
+
+Steve Holme (25 Sep 2013)
+- imap: Added clarification to the code about odd continuation responses
+
+- ftp.c: Fixed compilation warning
+  
+  There is an implicit conversion from "unsigned long" to "long"
+
+- sasl: Centralised the authentication mechanism strings
+  
+  Moved the standard SASL mechanism strings into curl_sasl.h rather than
+  hard coding the same values over and over again in the protocols that
+  use SASL authentication.
+  
+  For more information about the mechanism strings see:
+  
+  http://www.iana.org/assignments/sasl-mechanisms
+
+Daniel Stenberg (23 Sep 2013)
+- RELEASE-NOTES: added recent contributors missing
+
+Steve Holme (23 Sep 2013)
+- test906: Fixed type-2 response
+
+- test915: Corrected test number from commit 22bccb0edaf041
+
+- test906: Fixed type-1 message not handled error
+  
+  ...from commit f81d1e16664976 due to copy paste error.
+
+- tests: Added SMTP AUTH NTLM test
+
+- tests: Added SMTP multiple and invalid --mail-rcpt test
+
+- tests: Added SMTP multiple --mail-rcpt test
+
+- tests: Added SMTP invalid --mail-rcpt test
+
+- tests: Regrouping of SMTP tests
+
+Daniel Stenberg (22 Sep 2013)
+- [Benoit Sigoure brought this change]
+
+  test1112: Increase the timeout from 7s to 16s
+  
+  As someone reported on the mailing list a while back, the hard-coded
+  arbitrary timeout of 7s in test 1112 is not sufficient in some build
+  environments. At Arista Networks we build and test curl as part of our
+  automated build system, and we've run into this timeout 170 times so
+  far. Our build servers are typically quite busy building and testing a
+  lot of code in parallel, so despite being beefy machines with 32 cores
+  and 128GB of RAM we still hit this 7s timeout regularly.
+  
+  URL: http://curl.haxx.se/mail/lib-2010-02/0200.html
+
+Steve Holme (22 Sep 2013)
+- tests: Fixed smtp rcpt to addresses
+
+- ftpserver.pl: Expanded the SMTP RCPT handler to validate TO addresses
+  
+  RCPT_smtp() will now check for a correctly formatted TO address which
+  allows for invalid recipient addresses to be added.
+
+- ftpserver.pl: Added cURL SMTP server detection to HELO command handler
+  
+  As curl will send a HELO command after an negative EHLO response, added
+  the same detection from commit b07709f7417c3e to the HELO handler to
+  ensure the test server is identified correctly and an upload isn't
+  performed.
+
+- ftpserver.pl: Corrected response code for successful RCPT command
+
+- ftpserver.pl: Moved invalid RCPT TO: address detection to RCPT handler
+  
+  Rather than detecting the TO address as missing in the DATA handler,
+  moved the detection to the RCPT command handler where an error response
+  can be generated.
+
+- RELEASE-NOTES: Corrected missed addition
+  
+  Somehow commit 60a20461629fda missed the last item in the sync list
+  even though I'm sure I added it during editing.
+
+- RELEASE-NOTES: Synced with 6dd8bd8d2f9729
+
+- curl.1: Added information about optional login options to --user in manpage
+  
+  Added missing information, from curl 7.31.0, regarding the use of the
+  optional login options that may be specified as part of --user.
+  
+  For example:
+  
+  --user 'user:password;auth=NTLM' in IMAP, POP3 and SMTP protocols.
+
+- ftpserver.pl: Moved cURL SMTP server detection into EHLO command handler
+  
+  Moved the special SMTP server detection code from the DATA command
+  handler, which happens further down the operation chain after EHLO,
+  MAIL and RCPT commands, to the EHLO command as it is the first command
+  to be generated by a SMTP operation as well as containing the special
+  "verifiedserver" string from the URL.
+  
+  This not only makes it easier and quicker to detect but also means that
+  cURL doesn't need to specify "verifiedserver" as --mail-from and
+  --mail-rcpt arguments.
+  
+  More importantly, this also makes the upcoming verification changes to
+  the RCPT handler easier to implement.
+
+Daniel Stenberg (21 Sep 2013)
+- openssl: use correct port number in error message
+  
+  In ossl_connect_step2() when the "Unknown SSL protocol error" occurs, it
+  would output the local port number instead of the remote one which
+  showed when doing SSL over a proxy (but with the correct remote host
+  name). As libcurl only speaks SSL to the remote we know it is the remote
+  port.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1281
+  Reported-by: Gordon Marler
+
+- test1415: adjusted to work for 32bit time_t
+  
+  The libcurl date parser returns INT_MAX for all dates > 2037 so this
+  test is now made to use 2037 instead of 2038 to work the same for both
+  32bit and 64bit time_t systems.
+
+Steve Holme (21 Sep 2013)
+- tests: Reworked existing SMTP tests to be single recipient based
+  
+  ...in preparation of upcoming multiple recipient tests.
+
+- ftpserver.pl: Corrected SMTP QUIT response to be more realistic
+
+Daniel Stenberg (20 Sep 2013)
+- curl_easy_setopt.3: clarify that TIMEOUT and TIMEOUT_MS set the same value
+
+- [Kim Vandry brought this change]
+
+  Documented --dns-* options in curl manpage
+
+Steve Holme (20 Sep 2013)
+- pop3: Added basic SASL XOAUTH2 support
+  
+  Added the ability to use an XOAUTH2 bearer token [RFC6750] with POP3 for
+  authentication using RFC6749 "OAuth 2.0 Authorization Framework".
+  
+  The bearer token is expected to be valid for the user specified in
+  conn->user. If CURLOPT_XOAUTH2_BEARER is defined and the connection has
+  an advertised auth mechanism of "XOAUTH2", the user and access token are
+  formatted as a base64 encoded string and sent to the server as
+  "AUTH XOAUTH2 <bearer token>".
+
+- curl: Added clarification to the --mail options in the --help output
+  
+  ... that these options apply to SMTP only.
+
+- ftpserver.pl: Moved SMTP RCPT response text into command handler
+
+- tests: Added SMTP invalid --mail-from test
+
+Nick Zitzmann (19 Sep 2013)
+- darwinssl: enable BEAST workaround on iOS 7 & later
+  
+  iOS 7 finally added the option to enable 1/n-1 when using TLS 1.0
+  and a CBC cipher, so we now always turn that on unless the user
+  manually turns it off using CURLSSLOPT_ALLOW_BEAST.
+  
+  It appears Apple also added some new PSK ciphers, but no interface to
+  use them yet, so we at least support printing them if we find them.
+
+Steve Holme (19 Sep 2013)
+- tests: Updated SMTP AUTH tests to use the new AUTH directive
+  
+  ...rather than specify a customised EHLO response.
+
+- tests: Corrected test913 as the QUIT response is received
+
+- tests: Added SMTP large message SIZE test
+
+- ftpserver.pl: Updated email regex from commit 98f7ca7e971006
+  
+  ...to not be as strict as it was rejecting valid numeric email
+  addresses.
+
+- tests: Fixed smtp mail from addresses
+
+- ftpserver.pl: Standardised CAPA and AUTH responses
+
+- ftpserver.pl: Corrected POP3 QUIT reply to be more realistic
+
+- runtests.pl: Fixed syntax error in commit c873375123343e
+  
+  Possible unintended interpolation in string at line 796
+
+- runtests.pl: Fixed smtp mail from address
+  
+  Following changes to ftpserver.pl fixed the mail from address to be a
+  correctly formatted address otherwise the server response will be 501
+  Invalid address.
+
+- ftpserver.pl: Fixed syntax error in commit 98f7ca7e971006
+  
+  Can't modify constant item in scalar assignment line 779, near "0;"
+
+- ftpserver.pl: Expanded the SMTP MAIL handler to validate messages
+  
+  MAIl_smtp() will now check for a correctly formatted FROM address as
+  well as the optional SIZE parameter comparing it against the server
+  capability when specified.
+
+Daniel Stenberg (17 Sep 2013)
+- [YAMADA Yasuharu brought this change]
+
+  cookies: add expiration
+  
+  Implement: Expired Cookies These following situation, curl removes
+  cookie(s) from struct CookieInfo if the cookie expired.
+   - Curl_cookie_add()
+   - Curl_cookie_getlist()
+   - cookie_output()
+
+Steve Holme (17 Sep 2013)
+- ftpserver.pl: Corrected response code for successful MAIL command
+
+- ftpserver.pl: Moved SMTP MAIL handler into own function
+
+- dns: fix compilation with MinGW from commit df69440d05f113
+  
+  Avoid 'interface' literal that some MinGW versions define as a macro
+  
+  Additionally, corrected some very, very minor coding style errors.
+
+- tests: Fixed test 1406 following recent changes in ftpserver.pl
+  
+  By default the mail server doesn't send the SIZE capability but instead
+  it has to be specified as a supported capability.
+
+- tests: Added test for SMTP SIZE capability
+
+- ftpserver.pl: Added the ability to include spaces in capabilities
+  
+  For example:
+  
+  CAPA "SIZE 1048576" 8BITMIME BINARYMIME
+  
+  will populate the capabilities list with the following in:
+  
+  SIZE 1048576
+  8BITMIME
+  BINARYMIME
+
+- ftpserver.pl: Corrected response code for successful SMTP QUIT command
+
+- ftpserver.pl: Fixed syntax error in commit 33c1f2876b9029
+  
+  Can't modify constant item in postincrement line 727, near "i++"
+
+- ftpserver.pl: Added CAPA & AUTH directive support to the SMTP EHLO handler
+
+- ftpserver.pl: Fixed SMTP QUIT handler from dadc495540946e
+
+- ftpserver.pl: Moved SMTP EHLO and QUIT handlers in own functions
+
+- ftpserver.pl: Added support for SMTP HELO command
+  
+  ...and updated test902 as explicit HELO response is no longer required.
+
+- ftpserver.pl: Added mailbox check to IMAP SELECT handler
+
+- ftpserver.pl: Corrected invalid user details check
+  
+  ...in both the IMAP LOGIN and POP3 PASS handlers introduced in commit
+  187ac693744949 and 84ad1569e5fc93 respectively.
+
+- ftpserver.pl: Moved IMAP LOGIN handler into own function
+
+- ftpserver.pl: Moved POP3 USER and PASS handlers into own functions
+
+- ftpserver.pl: Corrected invalid argument check in POP3 TOP handler
+  
+  ...which was accidentally introduced in commit 4d6ef6297ae9b6.
+
+- ftpserver.pl: Added capability prerequisite for extended POP3 commands
+
+- tests: Updated descriptions to be more meaningful
+
+- ftpserver.pl: Added support for IMAP NOOP command
+
+- imap: Fixed response check for NOOP command
+
+- tests: Updated descriptions to be more meaningful
+
+Daniel Stenberg (13 Sep 2013)
+- curl.1: detail how short/long options work
+  
+  URL: http://curl.haxx.se/bug/view.cgi?id=1279
+  Suggested-by: Jerry Krinock
+
+Steve Holme (13 Sep 2013)
+- curl: Fixed usage of DNS options when not using c-ares resolver
+  
+  Commit 32352ed6adddcb introduced various DNS options, however, these
+  would cause curl to exit with CURLE_NOT_BUILT_IN when c-ares wasn't
+  being used as the backend resolver even if the options weren't set
+  by the user.
+  
+  Additionally corrected some minor coding style errors from the same
+  commit.
+
+Daniel Stenberg (13 Sep 2013)
+- curl_easy_setopt.3: mention RTMP URL quirks
+  
+  URL: http://curl.haxx.se/bug/view.cgi?id=1278
+  Reported-by: Gorilla Maguila
+
+- [Ben Greear brought this change]
+
+  curl: Add support for various DNS binding options.
+  
+  (Passed on to c-ares.)
+  
+  Allows something like this:
+  
+  curl --dns-interface sta8 --dns-ipv4-addr 8.8.1.111 --interface sta8 \
+  --localaddr 8.8.1.111 --dns-servers 8.8.8.1 www.google.com
+  
+  Signed-off-by: Ben Greear <greearb@candelatech.com>
+
+- [Kim Vandry brought this change]
+
+  libcurl: New options to bind DNS to local interfaces or IP addresses
+
+- libcurl.3: for multi interface connections are held in the multi handle
+  
+  ... and a few more cleanups/clarifications
+
+Steve Holme (12 Sep 2013)
+- ftpserver.pl: Fixed missing comma from 7fd84b14d219b1
+
+- ftpserver.pl: Fixed variable error introduced in 7fd84b14d219b1
+  
+  Global symbol "$mailbox" requires explicit package name
+
+- ftpserver.pl: Added support for UID command
+
+- ftpserver.pl: Added support for LSUB command
+
+- imap: Fixed response check for LSUB and UID commands
+
+- ftpserver.pl: Added support for IMAP COPY command
+
+- ftpserver.pl: Added support for IMAP CLOSE and EXPUNGE commands
+
+- ftpserver.pl: Added support for POP3 RSET command
+
+- ftpserver.pl: Added the ability to remember what messages are deleted
+  
+  ...as this will be required for IMAP CLOSE and EXPUNGE commands as well
+  as the POP3 RSET command.
+
+Daniel Stenberg (10 Sep 2013)
+- NI_MAXSERV: remove all use of it
+  
+  Solaris with the SunStudio Compiler is reportedly missing this define,
+  but as we're using it without any good reason on all the places it was
+  used I've now instead switched to just use sensible buffer sizes that
+  fit a 32 bit decimal number. Which also happens to be smaller than the
+  common NI_MAXSERV value which is 32 on most machines.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1277
+  Reported-by: D.Flinkmann
+
+- http2: use the support HTTP2 draft version in the upgrade header
+  
+  ... instead of HTTP/2.0 to work fine with the nghttpx proxy/server.
+
+Steve Holme (10 Sep 2013)
+- ldap.c: Fix compilation warning
+  
+  warning: comparison between signed and unsigned integer expressions
+
+- [Jiri Hruska brought this change]
+
+  imap/pop3/smtp: Speed up SSL connection initialization
+  
+  Don't wait for the next callback call (usually 1 second) before
+  continuing with protocol specific connection initialization.
+
+- ldap.c: Corrected build error from commit 857f999353f333
+
+- RELEASE-NOTES: Corrected duplicate in bfefe2400a16b8
+
+- RELEASE-NOTES: Corrected typo from bfefe2400a16b8
+
+- RELEASE-NOTES: synced with 25c68903756d6b
+
+Daniel Stenberg (10 Sep 2013)
+- README.http2: explain nghttp2 a little
+
+Steve Holme (9 Sep 2013)
+- tests: Added test for POP3 TOP command
+
+- ftpserver.pl: Added support for POP3 TOP command
+
+- tests: Added test for POP3 UIDL command
+
+- ftpserver.pl: Added support for POP3 UIDL command
+
+Daniel Stenberg (9 Sep 2013)
+- http2: adjust to new nghttp2_pack_settings_payload proto
+  
+  This function was modified in nghttp2 git commit a1c3f89c72e51
+
+Kamil Dudka (9 Sep 2013)
+- url: handle abortion by read/write callbacks, too
+  
+  Otherwise, the FTP protocol would unnecessarily hang 60 seconds if
+  aborted in the CURLOPT_HEADERFUNCTION callback.
+  
+  Reported by: Tomas Mlcoch
+  Bug: https://bugzilla.redhat.com/1005686
+
+Daniel Stenberg (9 Sep 2013)
+- ldap: fix the build for systems with ldap_url_parse()
+  
+  Make sure that the custom struct fields are only used by code that
+  doesn't use a struct defintion from the outside.
+  
+  Attempts to fix the problem introduced in 3dc6fc42bfc61b
+
+Steve Holme (9 Sep 2013)
+- [Jiri Hruska brought this change]
+
+  pingpong: Check SSL library buffers for already read data
+  
+  Otherwise the connection can get stuck during various phases, waiting
+  for new data on the socket using select() etc., but it will never be
+  received as the data has already been read into SSL library.
+
+- imap: Fixed calculation of transfer when partial FETCH received
+  
+  The transfer size would be calculated incorrectly if the email contained
+  within the FETCH response, had been partially received by the pingpong
+  layer. As such the following, example output, would be seen if the
+  amount remaining was smaller than the amount received:
+  
+  * Excess found in a non pipelined read: excess = 1394, size = 262,
+    maxdownload = 262, bytecount = 1374
+  * transfer closed with -1112 bytes remaining to read
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-08/0170.html
+  Reported-by: John Dunn
+
+- ftpserver.pl: Fixed empty array checks
+  
+  ...from commits 28427b408326a1 and e8313697b6554b.
+
+- ftpserver: Reworked AUTH support to allow for specifying the mechanisms
+  
+  Renamed SUPPORTAUTH to AUTH and added support for specifying a list of
+  supported SASL mechanisms to return to the client.
+  
+  Additionally added the directive to the FILEFORMAT document.
+
+- ftpserver: Reworked CAPA support to allow for specifying the capabilities
+  
+  Renamed SUPPORTCAPA to CAPA and added support for specifying a list of
+  supported capabilities to return to the client.
+  
+  Additionally added the directive to the FILEFORMAT document.
+
+- ftpserver.pl: Corrected POP3 LIST as message numbers should be contiguous
+  
+  The message numbers given in the LIST response are an index into the
+  list, which are only valid for the current session, rather than being a
+  unique message identifier. An index would only be missing from the LIST
+  response if a DELE command had been issued within the same session and
+  had not been committed by the end of session QUIT command. Once
+  committed the POP3 server will regenerate the message numbers in the
+  next session to be contiguous again. As such our LIST response should
+  list message numbers contiguously until we support a DELE command in the
+  same session.
+  
+  Should a POP3 user require the unique message ID for any or all
+  messages then they should use the extended UIDL command. This command
+  will be supported by the test ftpserver in an upcoming commit.
+
+Daniel Stenberg (8 Sep 2013)
+- [Clemens Gruber brought this change]
+
+  curl_easy_pause: suggest one way to unpause
+
+Steve Holme (8 Sep 2013)
+- tests: Updated descriptions to be more meaningful
+
+- tests: Added test for POP3 NOOP command
+
+- ftpserver.pl: Added support for POP3 NOOP command
+
+- ftpserver.pl: Fixed 'Use of uninitialized value $args in string ne'
+
+- tests: Added test for POP3 STAT command
+
+- ftpserver.pl: Added support for POP STAT command
+
+- ftpserver.pl: Moved POP3 QUIT handler into own function
+
+- ftpserver.pl: Reordered the POP3 handlers to be alphabetical
+  
+  In preparation for additional POP3 tests, re-ordered the command
+  function defintions to be sorted alphabetically.
+
+- ftpserver.pl: Corrected misaligned indentation in POP3 handlers
+  
+  Fixed incorrect indentation used in both the RETR_pop3 and LIST_pop3
+  functions which was 5 and 9 characters rather than 4 and 8.
+
+- tests: Added test for POP3 DELE command
+
+unknown (7 Sep 2013)
+- [Steve Holme brought this change]
+
+  ftpserver.pl: Added support for POP3 DELE command
+
+Daniel Stenberg (7 Sep 2013)
+- http2: include curl_memory.h
+  
+  Detected by test 1132
+
+Nick Zitzmann (7 Sep 2013)
+- http: fix build warning under LLVM
+  
+  When building the code using LLVM Clang without NGHTTP2, I was getting
+  this warning:
+  ../lib/http.h:155:1: warning: empty struct is a GNU extension [-Wgnu]
+  Placing a dummy variable into the data structure silenced the warning.
+
+Daniel Stenberg (7 Sep 2013)
+- http2: actually init nghttp2 and send HTTP2-Settings properly
+
+- README.http2: how to use it best with the multi API?
+
+- http2: first embryo toward Upgrade:
+
+- http: rename use_http_1_1 to use_http_1_1plus
+  
+  Since it now actually says if 1.1 or a later version should be used.
+
+- configure: improve CURL_CHECK_COMPILER_PROTOTYPE_MISMATCH
+  
+  The compiler test used a variable before it was assigned when it tried
+  to see how it acts on a mismatching prototype, which could cause a false
+  positive.
+
+- [Petr Písař brought this change]
+
+  Pass password to OpenSSL engine by user interface
+  
+  Recent OpenSSL uses user interface abstraction to negotiate access to
+  private keys in the cryprographical engines. An OpenSSL application is
+  expected to implement the user interface. Otherwise a default one
+  provided by OpenSSL (interactive standard I/O) will be used and the
+  aplication will have no way how to pass a password to the engine.
+  
+  Longer-desc: http://curl.haxx.se/mail/lib-2013-08/0265.html
+
+- urlglob: improved error messages and column number on bad use
+  
+  Introduce a convenience macro and keep of the column better so that it
+  can point out the offending column better.
+  
+  Updated test 75 accordingly.
+
+- urlglob: avoid error code translation
+  
+  By using the correct values from the start we don't have to translate
+  them!
+
+- urlglob: avoid NULL pointer dereference
+  
+  Thanks to clang-analyzer
+
+- [Gisle Vanem brought this change]
+
+  http2: use correct include for snprintf
+  
+  Using the first little merge of nghttp2 into libcurl, I stumbeled on the
+  missing 'snprintf' in MSVCRT. Isn't this how we do it for other libcurl
+  files?  I.e. use 'curl_msnprintf' and not 'snprintf' directly:
+
+- --data: mention CRLF treatment when reading from file
+
+- [Geoff Beier brought this change]
+
+  LDAP: fix bad free() when URL parsing failed
+  
+  When an error occurs parsing an LDAP URL, The ludp->lud_attrs[i] entries
+  could be freed even though they sometimes point to data within an
+  allocated area.
+  
+  This change introduces a lud_attrs_dup[] array for the duplicated string
+  pointers, and it removes the unused lud_exts array.
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-08/0209.html
+
+Nick Zitzmann (5 Sep 2013)
+- darwinssl: add support for PKCS#12 files for client authentication
+  
+  I also documented the fact that the OpenSSL engine also supports them.
+
+Daniel Stenberg (5 Sep 2013)
+- symbols: added HTTP2 symbols and sorted list
+  
+  CURL_HTTP_VERSION_2_0 and CURL_VERSION_HTTP2 are new
+
+- configure: add HTTP2 as a curl-config --feature output
+  
+  Fixes the test 1014 failure
+
+- curl: unbreak --http1.0 again
+  
+  I broke it in 2eabb7d590
+
+- SASL: fix compiler warnings
+  
+  comparison between signed and unsigned integer expressions
+  
+  suggest parentheses around '&&' within '||' (twice)
+
+- curl: add --http1.1 and --http2.0 options
+
+- Curl_setopt: refuse CURL_HTTP_VERSION_2_0 if built without support
+
+- http2: add http2.[ch] and add nghttp2 version output
+
+- curl -V: output HTTP2 as a feature if present
+
+- curl.h: add CURL_VERSION_HTTP2 as a feature
+  
+  It isn't added as a separate protocol as HTTP2 will be done over HTTP://
+  URLs that can be upgraded to HTTP2 if the server supports it as well.
+
+Steve Holme (4 Sep 2013)
+- imap/smtp: Fixed incorrect SASL mechanism selection with XOAUTH2 servers
+  
+  XOAUTH2 would be selected in preference to LOGIN and PLAIN if the IMAP
+  or SMTP server advertised support for it even though a user's password
+  was supplied but bearer token wasn't.
+  
+  Modified the selection logic so that XOAUTH2 will only be selected if
+  the server supports it and A) The curl user/libcurl programmer has
+  specifically asked for XOAUTH via the ;AUTH=XOAUTH login option or 2)
+  The bearer token is specified. Obviously if XOAUTH is asked for via
+  the login option but no token is specified the user will receive a
+  authentication failure which makes more sense than no known
+  authentication mechanisms supported!
+
+Daniel Stenberg (4 Sep 2013)
+- curl.h: added CURL_HTTP_VERSION_2_0
+  
+  Initial library considerations documented in lib/README.http2
+
+- configure: added --with-nghttp2
+
+- acinclude: fix --without-ca-path when cross-compiling
+  
+  The commit 7b074a460b64811 to CURL_CHECK_CA_BUNDLE in 7.31 (don't check
+  for paths when cross-compiling) causes --without-ca-path to no longer
+  works when cross-compiling, since ca and capath only ever get set to
+  "no" when not cross-compiling, I attach a patch that works for me. Also
+  in the cross-compilation case, no ca-path seems to be a better default
+  (IMVHO) than empty ca-path.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1273
+  Patch-by: Stefan Neis
+
+Steve Holme (2 Sep 2013)
+- lib1512.c: Fixed compilation warning
+  
+  An enumerated type is mixed with another type.
+  
+  ...as well as a small coding style error.
+
+Guenter Knauf (1 Sep 2013)
+- Killed warning 'res' might be used uninitialized.
+
+Steve Holme (1 Sep 2013)
+- url.c: Fixed compilation warning
+  
+  An enumerated type is mixed with another type
+
+- easy.c: Fixed compilation warning
+  
+  warning: `code' might be used uninitialized in this function
+
+Daniel Stenberg (31 Aug 2013)
+- -x: rephrased the --proxy section somewhat
+
+Steve Holme (31 Aug 2013)
+- tests: Added test for IMAP CHECK command
+
+- ftpserver.pl: Added support for the IMAP CHECK command
+
+Guenter Knauf (31 Aug 2013)
+- Removed reference to krb4.c.
+
+Steve Holme (31 Aug 2013)
+- ftpserver.pl: Corrected flawed logic in commit 1ca6ed7b75cad0
+
+- imap: Fixed response check for EXPUNGE command
+
+- ftpserver.pl: Added argument check to IMAP command handlers
+  
+  Added BAD argument check to the following IMAP command handlers:
+  
+  APPEND, STORE, LIST, EXAMINE, STATUS and SEARCH
+
+- ftpserver.pl: More whitespace corrections
+  
+  LIST_imap() had a second level of indentation at 9 characters and not 8.
+
+- ftpserver.pl: Small correction tidy up
+  
+  Corrected some IMAP variable names and whitespace issues.
+
+- [Kyle L. Huff brought this change]
+
+  docs: Added documentation for CURLOPT_BEARER
+
+- [Kyle L. Huff brought this change]
+
+  curl.1: Add usage of '--bearer' option
+
+- tests: Added tests for IMAP CREATE, DELETE and RENAME commands
+
+Daniel Stenberg (30 Aug 2013)
+- ftpserver: Bareword "to_mailbox" not allowed
+  
+  Added missing $
+
+Steve Holme (30 Aug 2013)
+- ftpserver.pl: Added support for IMAP CREATE, DELETE and RENAME commands
+
+Daniel Stenberg (29 Aug 2013)
+- FTP: fix getsock during DO_MORE state
+  
+  ... when doing upload it would return the wrong values at times. This
+  commit attempts to cleanup the mess.
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-08/0109.html
+  Reported-by: Mike Mio
+
+- curl_multi_remove_handle: allow multiple removes
+  
+  When removing an already removed handle, avoid that to ruin the
+  internals and just return OK instead.
+
+Steve Holme (29 Aug 2013)
+- ftpserver.pl: Updated IMAP EXAMINE handler to use dynamic test data
+
+Daniel Stenberg (29 Aug 2013)
+- unit1304: include memdebug and free everything correctly
+
+- Curl_parsenetrc: document that the arguments must be allocated
+
+- easy: rename struct monitor to socketmonitor
+  
+  'struct monitor', introduced in 6cf8413e, already exists in an IRIX
+  header file (sys/mon.h) which gets included via various standard headers
+  by lib/easy.c
+  
+  cc-1101 cc: ERROR File = ../../curl/lib/easy.c, Line = 458
+  "monitor" has already been declared in the current scope.
+  
+  Reported-by: Tor Arntsen
+
+Steve Holme (29 Aug 2013)
+- ftpserver.pl: Added SELECT check to IMAP FETCH and STORE handlers
+
+- ftpserver.pl: Corrected accidental move of logmsg() call
+  
+  Corrected the call to logmsg() in the IMAP SEARCH handler from commit
+  4ae7b7ea691497 as it should have been outputting the what argument and
+  not the test number.
+
+Daniel Stenberg (28 Aug 2013)
+- ftpserver: add missing '}' from 4ae7b7ea69149
+
+Steve Holme (28 Aug 2013)
+- ftpserver.pl: Added SELECT check to IMAP SEARCH command
+
+- ftpserver.pl: Fixed IMAP SEARCH command
+
+Daniel Stenberg (28 Aug 2013)
+- bump: next release is 7.33.0 due to added features
+
+- symbols-in-versions: add CURLOPT_XOAUTH2_BEARER
+
+Steve Holme (28 Aug 2013)
+- tests: Added test for IMAP SEARCH command
+
+Daniel Stenberg (28 Aug 2013)
+- valgrind.supp: fix for regular curl_easy_perform too
+  
+  When we introduced curl_easy_perform_ev, this got a slightly modified
+  call trace. Without this, test 165 causes a false positive valgrind
+  error.
+
+- valgrind.supp: add the event-based call stack-trace too
+  
+  Without this, test 165 triggers a valgrind error when ran with
+  curl_easy_perform_ev
+
+- multi_socket: improved 100-continue timeout handling
+  
+  When waiting for a 100-continue response from the server, the
+  Curl_readwrite() will refuse to run if called until the timeout has been
+  reached.
+  
+  We timeout code in multi_socket() allows code to run slightly before the
+  actual timeout time, so for test 154 it could lead to the function being
+  executed but refused in Curl_readwrite() and then the application would
+  just sit idling forever.
+  
+  This was detected with runtests.pl -e on test 154.
+
+Steve Holme (27 Aug 2013)
+- ftpserver.pl: Added support for IMAP SEARCH command
+
+- tool_operate.c: Fixed compilation warning
+  
+  warning: implicit declaration of function 'checkpasswd'
+
+- curl: Moved check for password out of get parameter loop
+  
+  Moved the calls to checkpasswd() out of the getparameter() function
+  which allows for any related arguments to be specified on the command
+  line before or after --user (and --proxy-user).
+  
+  For example: --bearer doesn't need to be specified before --user to
+  prevent curl from asking for an unnecessary password as is the case
+  with commit e7dcc454c67a2f.
+
+- RELEASE-NOTES: synced with acf59be7f09a7
+
+- [Kyle L. Huff brought this change]
+
+  curl: added --bearer option to help
+  
+  Added the --bearer option to the help output
+
+- [Kyle L. Huff brought this change]
+
+  curl: added basic SASL XOAUTH2 support
+  
+  Added the ability to specify an XOAUTH2 bearer token [RFC6750] via the
+  --bearer option.
+  
+  Example usage:
+    curl --url "imaps://imap.gmail.com:993/INBOX/;UID=1" --ssl-reqd
+    --bearer ya29.AHES6Z...OMfsHYI --user username@example.com
+
+- tool_urlglob.c: Fixed compiler warnings
+  
+  warning: 'variable' may be used uninitialized in this function
+
+Daniel Stenberg (26 Aug 2013)
+- security.h: rename to curl_sec.h to avoid name collision
+  
+  I brought back security.h in commit bb5529331334e. As we actually
+  already found out back in 2005 in commit 62970da675249, the file name
+  security.h causes problems so I renamed it curl_sec.h instead.
+
+- runtests.pl: allow -vc point to a separate curl binary to verify with
+  
+  The specified curl binary will then be used to verify the running
+  server(s) instead of the development version. This is very useful in
+  some cases when the development version fails to verify correctly as
+  then the test case may not run at all.
+  
+  The actual test will still be run with the "normal" curl executable
+  (unless the test case specifies something differently).
+
+Steve Holme (26 Aug 2013)
+- [Kyle L. Huff brought this change]
+
+  smtp: added basic SASL XOAUTH2 support
+  
+  Added the ability to use an XOAUTH2 bearer token [RFC6750] with SMTP for
+  authentication using RFC6749 "OAuth 2.0 Authorization Framework".
+  
+  The bearer token is expected to be valid for the user specified in
+  conn->user. If CURLOPT_XOAUTH2_BEARER is defined and the connection has
+  an advertised auth mechanism of "XOAUTH2", the user and access token are
+  formatted as a base64 encoded string and sent to the server as
+  "AUTH XOAUTH2 <bearer token>".
+
+- [Kyle L. Huff brought this change]
+
+  imap: added basic SASL XOAUTH2 support
+  
+  Added the ability to use an XOAUTH2 bearer token [RFC6750] with IMAP for
+  authentication using RFC6749 "OAuth 2.0 Authorization Framework".
+  
+  The bearer token is expected to be valid for the user specified in
+  conn->user. If CURLOPT_XOAUTH2_BEARER is defined and the connection has
+  an advertised auth mechanism of "XOAUTH2", the user and access token are
+  formatted as a base64 encoded string and sent to the server as
+  "A001 AUTHENTICATE XOAUTH2 <bearer token>".
+
+- security.h: Fixed compilation warning
+  
+  ISO C forbids forward references to 'enum' types
+
+Daniel Stenberg (26 Aug 2013)
+- KNOWN_BUGS: refer to bug numbers with the existing number series
+  
+  The old numbers would still redirect but who knows for how long...
+
+Steve Holme (25 Aug 2013)
+- [Kyle L. Huff brought this change]
+
+  options: added basic SASL XOAUTH2 support
+  
+  Added the ability to specify an XOAUTH2 bearer token [RFC6750] via the
+  option CURLOPT_XOAUTH2_BEARER for authentication using RFC6749 "OAuth
+  2.0 Authorization Framework".
+
+- [Kyle L. Huff brought this change]
+
+  sasl: added basic SASL XOAUTH2 support
+  
+  Added the ability to generated a base64 encoded XOAUTH2 token
+  containing: "user=<username>^Aauth=Bearer <bearer token>^A^A"
+  as per RFC6749 "OAuth 2.0 Authorization Framework".
+
+Daniel Stenberg (25 Aug 2013)
+- FTP: remove krb4 support
+  
+  We've announced this pending removal for a long time and we've
+  repeatedly asked if anyone would care or if anyone objects. Nobody has
+  objected. It has probably not even been working for a good while since
+  nobody has tested/used this code recently.
+  
+  The stuff in krb4.h that was generic enough to be used by other sources
+  is now present in security.h
+
+- easy: define away easy_events() for non-debug builds
+
+- FAQ: editorial updates
+  
+  Several language fixes. Several reformats that should make the HTML
+  generation of this document look better.
+  
+  Reported-by: Dave Thompson
+
+- RELEASE-NOTES: synced with 22adb46a32bee
+
+- multi: move on from STATE_DONE faster
+  
+  Make sure we always return CURLM_CALL_MULTI_PERFORM when we reach
+  CURLM_STATE_DONE since the state is transient and it can very well
+  continue executing as there is nothing to wait for.
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-08/0211.html
+  Reported-by: Yi Huang
+
+- curl.h: name space pollution by "enum type"
+  
+  Renamed to "enum curl_khtype" now. Will break compilation for programs
+  that rely on the enum name.
+  
+  Bug: https://github.com/bagder/curl/pull/76
+  Reported-by: Shawn Landden
+
+- TFTP: make the CURLOPT_LOW_SPEED* options work
+  
+  ... this also makes sure that the progess callback gets called more
+  often during TFTP transfers.
+  
+  Added test 1238 to verify.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1269
+  Reported-by: Jo3
+
+- tftpd: support "writedelay" within <servercmd>
+
+- tftpd: convert 6 global variables into local ones
+
+- [Gisle Vanem brought this change]
+
+  curl_easy_perform_ev: make it CURL_EXTERN
+  
+  I build curl.exe (using MingW) with '-DCURLDEBUG' and by importing from
+  libcurl.dll.  Which means the new curl_easy_perform_ev() must be
+  exported from libcurl.dll.
+
+- CURLM_ADDED_ALREADY: new error code
+  
+  Doing curl_multi_add_handle() on an easy handle that is already added to
+  a multi handle now returns this error code. It previously returned
+  CURLM_BAD_EASY_HANDLE for this condition.
+
+- multi_init: moved init code here from add_handle
+  
+  The closure_handle is "owned" by the multi handle and it is
+  unconditional so the setting up of it should be in the Curl_multi_handle
+  function rather than curl_multi_add_handle.
+
+- multi: remove dns cache creation code from *add_handle
+  
+  As it is done unconditionally in multi_init() this code will never run!
+
+- curl_easy_perform_ev: debug/test function
+  
+  This function is meant to work *exactly* as curl_easy_perform() but will
+  use the event-based libcurl API internally instead of
+  curl_multi_perform(). To avoid relying on an actual event-based library
+  and to not use non-portable functions (like epoll or similar), there's a
+  rather inefficient emulation layer implemented on top of Curl_poll()
+  instead.
+  
+  There's currently some convenience logging done in curl_easy_perform_ev
+  which helps when tracking down problems. They may be suitable to remove
+  or change once things seem to be fine enough.
+  
+  curl has a new --test-event option when built with debug enabled that
+  then uses curl_easy_perform_ev() instead of curl_easy_perform(). If
+  built without debug, using --test-event will only output a warning
+  message.
+  
+  NOTE: curl_easy_perform_ev() is not part if the public API on purpose.
+  It is only present in debug builds of libcurl and MUST NOT be considered
+  stable even then. Use it for libcurl-testing purposes only.
+  
+  runtests.pl now features an -e command line option that makes it use
+  --test-event for all curl command line tests. The man page is updated.
+
+- [Gisle Vanem brought this change]
+
+  transfer: the recent sessionhandle change broke CURL_DOES_CONVERSIONS
+
+- test1237: verify 1000+ letter user name + passwords
+
+- [Jonathan Nieder brought this change]
+
+  url: handle arbitrary-length username and password before '@'
+  
+  libcurl quietly truncates usernames, passwords, and options from
+  before an '@' sign in a URL to 255 (= MAX_CURL_PASSWORD_LENGTH - 1)
+  characters to fit in fixed-size buffers on the stack.  Allocate a
+  buffer large enough to fit the parsed fields on the fly instead to
+  support longer passwords.
+  
+  After this change, there are no more uses of MAX_CURL_OPTIONS_LENGTH
+  left, so stop defining that constant while at it.  The hardcoded max
+  username and password length constants, on the other hand, are still
+  used in HTTP proxy credential handling (which this patch doesn't
+  touch).
+  
+  Reported-by: Colby Ranger
+
+- [Jonathan Nieder brought this change]
+
+  url: handle exceptional cases first in parse_url_login()
+  
+  Instead of nesting "if(success)" blocks and leaving the reader in
+  suspense about what happens in the !success case, deal with failure
+  cases early, usually with a simple goto to clean up and return from
+  the function.
+  
+  No functional change intended.  The main effect is to decrease the
+  indentation of this function slightly.
+
+- [Jonathan Nieder brought this change]
+
+  Curl_setopt: handle arbitrary-length username and password
+  
+  libcurl truncates usernames, passwords, and options set with
+  curl_easy_setopt to 255 (= MAX_CURL_PASSWORD_LENGTH - 1) characters.
+  This doesn't affect the return value from curl_easy_setopt(), so from
+  the caller's point of view, there is no sign anything strange has
+  happened, except that authentication fails.
+  
+  For example:
+  
+    # Prepare a long (300-char) password.
+    s=0123456789; s=$s$s$s$s$s$s$s$s$s$s; s=$s$s$s;
+    # Start a server.
+    nc -l -p 8888 | tee out & pid=$!
+    # Tell curl to pass the password to the server.
+    curl --user me:$s http://localhost:8888 & sleep 1; kill $pid
+    # Extract the password.
+    userpass=$(
+  	awk '/Authorization: Basic/ {print $3}' <out |
+  	tr -d '\r' |
+  	base64 -d
+    )
+    password=${userpass#me:}
+    echo ${#password}
+  
+  Expected result: 300
+  Actual result: 255
+  
+  The fix is simple: allocate appropriately sized buffers on the heap
+  instead of trying to squeeze the provided values into fixed-size
+  on-stack buffers.
+  
+  Bug: http://bugs.debian.org/719856
+  Reported-by: Colby Ranger
+
+- [Jonathan Nieder brought this change]
+
+  netrc: handle longer username and password
+  
+  libcurl truncates usernames and passwords it reads from .netrc to
+  LOGINSIZE and PASSWORDSIZE (64) characters without any indication to
+  the user, to ensure the values returned from Curl_parsenetrc fit in a
+  caller-provided buffer.
+  
+  Fix the interface by passing back dynamically allocated buffers
+  allocated to fit the user's input.  The parser still relies on a
+  256-character buffer to read each line, though.
+  
+  So now you can include an ~246-character password in your .netrc,
+  instead of the previous limit of 63 characters.
+  
+  Reported-by: Colby Ranger
+
+- [Jonathan Nieder brought this change]
+
+  url: allocate username, password, and options on the heap
+  
+  This makes it possible to increase the size of the buffers when needed
+  in later patches.  No functional change yet.
+
+- [Jonathan Nieder brought this change]
+
+  url: use goto in create_conn() for exception handling
+  
+  Instead of remembering before each "return" statement which temporary
+  allocations, if any, need to be freed, take care to set pointers to
+  NULL when no longer needed and use a goto to a common block to exit
+  the function and free all temporaries.
+  
+  No functional change intended.  Currently the only temporary buffer in
+  this function is "proxy" which is already correctly freed when
+  appropriate, but there will be more soon.
+
+- [Jonathan Nieder brought this change]
+
+  sasl: allow arbitrarily long username and password
+  
+  Use appropriately sized buffers on the heap instead of fixed-size
+  buffers on the stack, to allow for longer usernames and passwords.
+  
+  Callers never pass anything longer than MAX_CURL_USER_LENGTH (resp.
+  MAX_CURL_PASSWORD_LENGTH), so no functional change inteded yet.
+
+Steve Holme (19 Aug 2013)
+- [Alex McLellan brought this change]
+
+  imap: Fixed response check for SEARCH command
+  
+  Adding this line allows libcurl to return the server response when
+  performing a search command via a custom request.
+
+Daniel Stenberg (16 Aug 2013)
+- glob: error out on range overflow
+  
+  The new multiply() function detects range value overflows. 32bit
+  machines will overflow on a 32bit boundary while 64bit hosts support
+  ranges up to the full 64 bit range.
+  
+  Added test 1236 to verify.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1267
+  Reported-by: Will Dietz
+
+- urlglob: better detect unclosed braces, empty lists and overflows
+  
+  A rather big overhaul and cleanup.
+  
+  1 - curl wouldn't properly detect and reject globbing that ended with an
+  open brace if there were brackets or braces before it. Like "{}{" or
+  "[0-1]{"
+  
+  2 - curl wouldn't properly reject empty lists so that "{}{}" would
+  result in curl getting (nil) strings in the output.
+  
+  3 - By using strtoul() instead of sscanf() the code will now detected
+  over and underflows. It now also better parses the step argument to only
+  accept positive numbers and only step counters that is smaller than the
+  delta between the maximum and minimum numbers.
+  
+  4 - By switching to unsigned longs instead of signed ints for the
+  counters, the max values for []-ranges are now very large (on 64bit
+  machines).
+  
+  5 - Bumped the maximum number of globs in a single URL to 100 (from 10)
+  
+  6 - Simplified the code somewhat and now it stores fixed strings as
+  single- entry lists. That's also one of the reasons why I did (5) as now
+  all strings between "globs" will take a slot in the array.
+  
+  Added test 1234 and 1235 to verify. Updated test 87.
+  
+  This commit fixes three separate bug reports.
+  
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1264
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1265
+  Bug: http://curl.haxx.se/bug/view.cgi?id=1266
+  Reported-by: Will Dietz
+
+- [John Malmberg brought this change]
+
+  VMS: Add RELEASE-NOTES to vms document
+  
+  Add the curl release notes to the release note document generated for
+  VMS packages.
+  
+  Add the different filenames generated by a daily build to the
+  cleanup procedures.
+
+- [Tor Arntsen brought this change]
+
+  tests 2032, 2033: Don't hardcode port in expected output
+
+- ftp: convert state names to a global array
+  
+  ... just to make them easier to print in debug ouputs while debugging.
+  They are still within #ifdef [debugbuild].
+
+- --help: fix the --sasl-ir in the help output
+
+- ftp_domore_getsock: when passive mode, the second conn is already there
+  
+  This makes the socket callback get called with the proper bitmask as
+  otherwise the application could be left hanging waiting for reading on
+  an upload connection!
+  
+  Bug: http://curl.haxx.se/mail/lib-2013-08/0043.html
+  Reported-by: Bill Doyle
+
+- curl: make --no-[option] work properly for several options
+  
+  --create-dirs, --crlf, --socks5-gssapi-nec and --sasl-ir
+
+Kamil Dudka (12 Aug 2013)
+- nss: make sure that NSS is initialized
+  
+  ... prior to calling PK11_GenerateRandom()
+
+Daniel Stenberg (12 Aug 2013)
+- multi: s/easy/data
+  
+  With everything being struct SessionHandle pointers now, this rename
+  makes multi.c use the library-wide practise of calling that pointer
+  'data' instead of the previously used 'easy'.
+
+- cleanup: removed one function, made one static
+  
+  Moved Curl_easy_addmulti() from easy.c to multi.c, renamed it to
+  easy_addmulti and made it static.
+  
+  Removed Curl_easy_initHandleData() and uses of it since it was emptied
+  in commit cdda92ab67b47d74a.
+
+- SessionHandle: the protocol specific pointer is now a void *
+  
+  All protocol handler structs are now opaque (void *) in the
+  SessionHandle struct and moved in the request-specific sub-struct
+  'SingleRequest'. The intension is to keep the protocol specific
+  knowledge in their own dedicated source files [protocol].c etc.
+  
+  There's some "leakage" where this policy is violated, to be addressed at
+  a later point in time.
+
+- urldata: clean up the use of the protocol specific structs
+  
+  1 - always allocate the struct in protocol->setup_connection. Some
+  protocol handlers had to get this function added.
+  
+  2 - always free at the end of a request. This is also an attempt to keep
+  less memory in the handle after it is completed.
+
+- version number: bump to 7.32.1 for now
+  
+  Start working on the next version and up some counters.
+
 Version 7.32.0 (11 Aug 2013)
 
 Daniel Stenberg (11 Aug 2013)
@@ -4123,1771 +5573,3 @@ Steve Holme (10 Feb 2013)
   
   Introduced detection of the STARTTLS capability, in order to add support
   for TLS upgrades without unconditionally sending the STARTTLS command.
-
-- RELEASE-NOTES: synced with 92f7606f29b704
-
-- smtp: Fixed an issue when processing EHLO failure responses (Part 3)
-  
-  Follow up fix to commit 62bd21746443 to cater for servers that don't
-  respond with a 250 in their EHLO responses. Additionally updated the
-  SMTP tests to respond with a 250 response code as per RFC5321.
-
-- pop3: Fixed SASL authentication capability detection
-  
-  Fixed the SASL capability detection to include the space character
-  before the authentication mechanism list. Otherwise a capability such
-  as SASLSOMETHING would be interpreted as enabling SASL and potentially
-  trying to identify SOMETHING as a mechanism.
-
-- pop3: Fixed incorrect return value from pop3_endofresp()
-  
-  Corrected an incorrect return value when -ERR is received from the
-  server - introduced in commit b5bb61ee697b (June 2012).
-
-- smtp: Fixed an issue when processing EHLO failure responses (Part 2)
-  
-  Follow up fix to commit 23d17190ee32 as EHLO capabilities can exist
-  within a positive response line.
-
-- smtp: Fixed an issue with missing capabilities after the AUTH line
-  
-  Follow up to commit 40f9bb787f05 to fix missing capabilities after an
-  AUTH line.
-
-Nick Zitzmann (8 Feb 2013)
-- darwinssl: Make certificate errors less techy
-  
-  Previously if a problem was found with one of the server's certificates,
-  we'd log an OSStatus for the end user to look up. Now we explain what
-  was wrong with the site's certificate chain. Also un-did part of the
-  previous commit where the code wouldn't catch errSSLServerAuthCompleted
-  if built under Leopard.
-
-Guenter Knauf (9 Feb 2013)
-- Updated dependency libs.
-
-Steve Holme (9 Feb 2013)
-- imap: Corrected some comments
-
-- smtp: Fixed an issue when processing EHLO failure responses
-  
-  Fixed a small issue where smtp_endofresp() would look for capabilities
-  in the description part of a failure response. In theory a server
-  shouldn't respond with SIZE or AUTH in an EHLO command's failure
-  response but if it did then capabilities would be unnecessarily set
-  before eventually failing.
-
-- pop3: Reworked pop3_endofresp() to simplify it little
-  
-  Reworked pop3_endofresp() to simplify it and provide consistency between
-  imap and smtp.
-
-- imap: Renamed state variables in imap_authenticate()
-  
-  Renamed the authstate1 and authstate2 variables in imap_authenticate()
-  as the old name was a left over from when there was only one state
-  variable which was named due to a clash with the state() function.
-  
-  Additionally this provides consistency with the smtp module.
-
-- smtp: Reworked smtp_endofresp() to allow for extra capability detection
-
-- smtp: Renamed smtp_state_auth_passwd_resp() function
-  
-  Renamed the login password response function to better describe it's
-  purpose as well as for consistency with the imap and pop3 modules.
-
-Daniel Stenberg (8 Feb 2013)
-- [Gisle Vanem brought this change]
-
-  ntlm: fix memory leak
-  
-  Running tests\libtest\libntlmconnect.exe reveals a 1 byte (!) leak in
-  ./lib/curl_ntlm_msgs.c:
-  
-  perl ..\memanalyze.pl c:memdebug.curl
-  Leak detected: memory still allocated: 1 bytes
-  At 9771e8, there's 1 bytes.
-  allocated by curl_ntlm_msgs.c:399
-  
-  Snippet from curl_ntlm_msgs.c:
-     /* setup ntlm identity's domain and length */
-     dup_domain.tchar_ptr = malloc(sizeof(TCHAR) * (domlen + 1));
-  
-  (my domlen == 0).
-  
-  'dup_domain.tbyte_ptr' looks to be freed in Curl_ntlm_sspi_cleanup() via
-  'ntlm->identity.Domain'. But I see no freeing of 'dup_domain.tchar_ptr'.
-
-- DONE: consider callback-aborted transfers premature
-  
-  This bug report properly identified that when doing SMTP and aborting
-  the transfer with a callback, it must be considered aborted prematurely
-  by the code to avoid QUIT etc to be attempted as that would cause a
-  hang.
-  
-  The new test case 1507 verifies this behavior.
-  
-  Reported by: Patricia Muscalu
-  Bug: http://curl.haxx.se/bug/view.cgi?id=1184
-
-- FAQ: refreshed some phrases
-
-Nick Zitzmann (7 Feb 2013)
-- darwinssl: Fix build under Leopard
-  
-  It turns out that Leopard (OS X 10.5) doesn't have constants for the ECDH
-  ciphers in its headers, so the cases for them have been taken out of the
-  build when building under Leopard. Also added a standard function for
-  getting a string description of a SecCertificateRef.
-
-Steve Holme (7 Feb 2013)
-- RELEASE-NOTES: Added new imap features
-
-- imap: Added support for SASL-IR extension (Part 2)
-  
-  Modified imap_authenticate() to add support for sending the initial
-  response with the AUTHENTICATE command, as per RFC4959.
-
-- smtp: Updated SMTP_AUTH_PASSWD state constant
-  
-  Changed the SMTP_AUTH_PASSWD state constant to SMTP_AUTH_LOGIN_PASSWD to
-  better describe the state as the second part of an AUTH LOGIN command,
-  as well as for consistency with the imap and pop3 modules.
-
-- imap: Added support for SASL-IR extension (Part 1)
-  
-  Introduced detection of the SASL-IR capability, in order to add support
-  for sending the initial response with the AUTHENTICATE command, as per
-  RFC4959.
-
-Daniel Stenberg (7 Feb 2013)
-- Revert "vc: remove explicit MSVC6 IDE project file and documentation"
-  
-  This reverts commit 0e66d5878edc3d7ffc445116d194b58bbc7504b9.
-
-Steve Holme (7 Feb 2013)
-- imap: Changed response tag generation to be completely unique
-  
-  Updated the automatic response tag generation to follow the examples
-  given in RC3501, which list a 4 character string such as A001, A002,
-  etc.
-  
-  As a unique identifier should be generated for each command the string
-  generation is based on the connection id and the incrementing command
-  id.
-
-Dan Fandrich (6 Feb 2013)
-- Tweak the Android.mk file for its new location
-  
-  This is untested, but ought to be enough to still allow it
-  to work automatically when the entire curl source tree is
-  dropped into a full Android source tree.
-
-Daniel Stenberg (6 Feb 2013)
-- vc: remove explicit MSVC6 IDE project file and documentation
-  
-  VC6 is _very_ old and we provide working makefiles even for that
-  compiler. Users who build with the IDE never use that method and project
-  file anyway and it was just lingering in the root dir.
-
-Steve Holme (6 Feb 2013)
-- imap: Small variable rename in preparation for upcoming change
-  
-  Renamed a couple of variables and updated some comments in
-  preparation for upcoming command id / response tag change.
-
-Daniel Stenberg (6 Feb 2013)
-- msvc: move Makefile.msvc.names into winbuild/
-  
-  In an attempt to clear up misc files from the root dir
-
-- build: move Android.mk to packages/Android/
-
-- emacs files: remove from git and dist
-  
-  We don't need them and I doubt many people used them. We also don't have
-  any configs for other editors and we wouldn't want that.
-
-Steve Holme (6 Feb 2013)
-- email: Moved starttls code in separate functions
-  
-  To help maintain the readability of the code in imap.c, pop3.c and
-  smtp.c moved the starttls code into state_starttls() functions.
-
-- [Nick Zitzmann brought this change]
-
-  FEATURES: More NTLM and SSL changes, added two others, fixed typo
-  
-  Added IDN and HTTP data compression as they were left out of the
-  document until now.
-  
-  Added notes for qssl, schannel and Secure Transport supporting SSLv2,
-  Secure Transport supports NTLM, and axTLS does not support SSLv3.
-  
-  There was also a typo; "AUTH TSL" should be "AUTH TLS".
-
-Kamil Dudka (6 Feb 2013)
-- curl-config.in: do not randomly mix tabs and spaces
-
-Daniel Stenberg (6 Feb 2013)
-- 7.29.1: onwards!
-
-- THANKS: 12 contributors from 7.29.0
-
-Version 7.29.0 (6 Feb 2013)
-
-Daniel Stenberg (6 Feb 2013)
-- vms: config-vms.h is removed, no use trying to distribute it
-
-- RELEASE-NOTES: mention the SASL buffer overflow
-
-- [Eldar Zaitov brought this change]
-
-  Curl_sasl_create_digest_md5_message: fix buffer overflow
-  
-  When negotiating SASL DIGEST-MD5 authentication, the function
-  Curl_sasl_create_digest_md5_message() uses the data provided from the
-  server without doing the proper length checks and that data is then
-  appended to a local fixed-size buffer on the stack.
-  
-  This vulnerability can be exploited by someone who is in control of a
-  server that a libcurl based program is accessing with POP3, SMTP or
-  IMAP. For applications that accept user provided URLs, it is also
-  thinkable that a malicious user would feed an application with a URL to
-  a server hosting code targetting this flaw.
-  
-  Bug: http://curl.haxx.se/docs/adv_20130206.html
-
-Steve Holme (6 Feb 2013)
-- FEATURES: Removed erroneous whitespace
-  
-  Removed whitespace introduced in commit 5f8f20f5e65b that caused
-  formatting issues when generating the website docs.
-
-Yang Tse (6 Feb 2013)
-- setup-vms.h: post VMS patch cleanup - III
-  
-  - rename post-config-vms.h to setup-vms.h
-  - move its inclusion into proper location in curl_setup.h
-
-- vms_show: post VMS patch cleanup - II
-  
-  - remove multiple declarations of vms_show and add comments
-
-- tool_main.c: post VMS patch cleanup - I
-  
-  - remove header inclusion already done in curl_setup_once.h
-
-Steve Holme (6 Feb 2013)
-- FEATURES: Added SSPI to list of NTLM libraries
-
-- FEATURES: Added Secure Transport and qssl to list of SSL libraries
-
-- FEATURES: Added email feature set
-  
-  Added SMTP, SMTPS, POP3, POP3S, IMAP and IMAPS features.
-
-- imap.h: Corrected incorrect comment clarification
-  
-  Corrected comment clarification made in commit 167717b8069a.
-
-- COPYING: Updated copyright year to include 2013
-
-Daniel Stenberg (5 Feb 2013)
-- RELEASE-NOTES: synced with 25f351424b3538
-  
-  8 more bug fixes mentioned
-
-- [John E. Malmberg brought this change]
-
-  VMS: fix and generate the VMS build config
-  
-  config_h.com is a new file that generates a config.h file based on the
-  curl_config.h.in file and a quick scan of the configure script.  This is
-  actually a generic procedure that is shared with other VMS packages.
-  
-  The existing pre-built config-vms.h had over 100 entries that were not
-  correct and in some cases conflicted with the build options available in
-  the build_vms.com.
-  
-  generate_config_vms_h_curl.com is a helper procedure to the
-  config_h.com.  It covers the cases that the generic config_h.com is not
-  able to figure out, and accepts input from the build_vms.com procedure.
-  
-  build_curlbuild_h.com is a new file to generate the curlbuild.h file
-  that Curl is now using when it is using a curl_config.h file.
-  
-  post-config-vms.h is a new file that is needed to provide VMS specific
-  definitions, and most of them need to be set before the system header
-  files are included.
-  
-  The VMS build procedure is fixed:
-  
-     1. Fixed to link in the correct HP ssl library.
-     2. Fixed to detect if HP Kerberos is installed.
-     3. Fixed to detect if HP LDAP is installed.
-     4. Fixed to detect if gnv$libzshr is installed.
-     5. Simplified the input parameter parsing to not use a loop.
-     6. Warn that 64 bit pointer option support is not complete
-        in comments.
-     7. Default to IEEE floating if platform supports it so
-        resulting libcurl will be compatible with other
-        open source projects on VMS.
-     8. Default to LARGEFILE if platform supports it.
-     9. Default to enable SSL, LDAP, Kerberos, libz
-        if the libraries are present.
-     10. Build with exact case global symbols for libcurl.
-     11. Generate linker option file needed.
-     12. Compiler list option only commonly needed items.
-     13. fulllist option for those who really want it.
-     14. Create debug symbol file on Alpha, IA64.
-
-- Curl_proxyCONNECT: return once CONNECT is sent
-  
-  By doing this unconditionally, we infer a simpler and more defined
-  behavior. This also has the upside that test 1021 no longer fails for me
-  even if I run with valgrind.
-  
-  Also fixed some wrong comments.
-
-Steve Holme (5 Feb 2013)
-- email: Reworked comments in the endofresp() functions
-  
-  Tidied up the comments in the endofresp() functions to be more
-  meaningful prior to release.
-
-Marc Hoersken (5 Feb 2013)
-- schannel: Removed extended error connection setup flag
-  
-  According KB975858 this flag may cause problems on Windows 7 and
-  Windows Server 2008 R2 systems. Extended error information is not
-  currently used by libcurl and therefore not a requirement.
-  
-  The flag may improve the SSL-connection shutdown in case of an
-  error. This means it might be a good improvement in the future.
-  
-  Fixes bug/issue #1187 - thanks for the report
-
-Daniel Stenberg (5 Feb 2013)
-- [Tor Arntsen brought this change]
-
-  singleipconnect: Update *sockp for all CURLE_OK
-  
-  The 56b7c87c7 change left a case where a good sockfd was not copied to
-  *sockp before returning with CURLE_OK
-
-- curl_easy_perform: Value stored to 'mcode' is never read
-  
-  pointed out by clang-analyzer
-
-- singleipconnect: remove dead assignment
-  
-  pointed out by clang-analyzer
-
-Linus Nielsen Feltzing (5 Feb 2013)
-- CURLMOPT_MAXCONNECTS: restore functionality
-  
-  When a connection is no longer used, it is kept in the cache. If the
-  cache is full, the oldest idle connection is closed. If no connection is
-  idle, the current one is closed instead.
-
-Steve Holme (5 Feb 2013)
-- RELEASE-NOTES: Updated following recent changes to the email protocols
-  
-  Added recent additions and fixes following the changes to imap, pop3
-  and smtp. Additionally added another contributor that helped to test
-  the imap sasl changes.
-
-- email: Provided extra comments following recent pop3/imap fixes
-  
-  Provided additional clarification about the logic of the authenticate()
-  functions following commit 6b6bdc83bd36 and b4270a9af1d0.
-
-Daniel Stenberg (5 Feb 2013)
-- [Andrei Kurushin brought this change]
-
-  winbuild: include version info for .dll .exe
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=1186
-
-- FAQ: clarify 5.13 How do I stop an ongoing transfer
-  
-  Rich Gray provided good feedback and we now clarify that you can in fact
-  stop a multi transfer at any point you like by removing the easy handle.
-
-- [Matt Arsenault brought this change]
-
-  cmake: Fix mingw build
-
-- [Sergei Nikulov brought this change]
-
-  cmake: updated OpenSSL build
-
-Steve Holme (4 Feb 2013)
-- pop3.c: Updated variable names to use shorter / more readable variant
-  
-  Tidied up code from commit 6b6bdc83bdUpdated where a few instances of
-  the pop3c struct variable used the longer conndata struct rather than
-  matching what other code in pop3_authenticate() used.
-
-Guenter Knauf (4 Feb 2013)
-- updated copyright years.
-
-- configure: update the copyright years for the output.
-
-Steve Holme (3 Feb 2013)
-- imap: Fixed no known authentication mechanism when fallback is required
-  
-  Fixed an issue where (lib)curl is compiled without support for a
-  supported challenge-response based SASL authentication mechanism, such
-  as CRAM-MD5 or NTLM, the server doesn't support the LOGIN or PLAIN
-  mechanisms and (lib)curl doesn't fallback to Clear Text authentication.
-  
-  Note: In order to fallback to Clear Text authentication properly this
-  fix adds support for the LOGINDISABLED server capability.
-  imap: Fixed no known authentication mechanism when fallback is required
-  
-  Fixed an issue where (lib)curl is compiled without support for a
-  supported challenge-response based SASL authentication mechanism, such
-  as CRAM-MD5 or NTLM, the server doesn't support the LOGIN or PLAIN
-  mechanisms and (lib)curl doesn't fallback to Clear Text authentication.
-  
-  Note: In order to fallback to Clear Text authentication properly this
-  fix adds support for the LOGINDISABLED server capability.
-  
-  Related bug: http://curl.haxx.se/mail/lib-2013-02/0004.html
-  Reported by: Stanislav Ivochkin
-
-- pop3: Fixed no known authentication mechanism when fallback is required
-  
-  Fixed an issue where (lib)curl is compiled without support for a
-  supported challenge-response based SASL authentication mechanism, such
-  as CRAM-MD5 or NTLM, the server doesn't support the LOGIN or PLAIN
-  mechanisms and (lib)curl doesn't fallback to APOP or Clear Text
-  authentication.
-  
-  Bug: http://curl.haxx.se/mail/lib-2013-02/0004.html
-  Reported by: Stanislav Ivochkin
-
-Daniel Stenberg (1 Feb 2013)
-- singleipconnect: simplify and clean up
-  
-  Remove timeout argument that's never used.
-  
-  Make the actual connection get detected on a single spot to reduce code
-  duplication.
-  
-  Store the IPv6 state already when the connection is attempted.
-
-- Curl_perfom: removed
-  
-  Curl_perfom is no longer used anywhere since the always-multi commit
-  c43127414d89ccb9, and some related functions were used only from within
-  Curl_perfom.
-
-Guenter Knauf (30 Jan 2013)
-- Updated date.
-
-Yang Tse (30 Jan 2013)
-- zz40-xc-ovr.m4: fix 'wc' detection - follow-up 2
-  
-  - Fix a pair of single quotes to double quotes.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0355.html
-  Reported by: Tor Arntsen
-
-- zz40-xc-ovr.m4: fix 'wc' detection - follow-up
-  
-  - Take into account that 'wc' may return leading spaces and/or tabs.
-  
-  - Set initial IFS to space, tab and newline.
-
-- zz40-xc-ovr.m4: fix 'wc' detection
-  
-  - Take into account that 'wc' may return leading spaces.
-  
-  - Set internationalization behavior variables.
-  
-  Tor Arntsen analyzed and reported the issue.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0351.html
-
-- zz40-xc-ovr.m4: check another three basic utilities
-
-Guenter Knauf (29 Jan 2013)
-- Fixed debug.c to work again unchanged.
-  
-  Added CURLOPT_FOLLOWLOCATION since example.com is now redirected.
-
-Daniel Stenberg (29 Jan 2013)
-- [Nick Zitzmann brought this change]
-
-  darwinssl: Fix bug where packets were sometimes transmitted twice
-  
-  There was a bug where, if SSLWrite() returned errSSLWouldBlock but did
-  succeed in transmitting at least something, then we'd incorrectly
-  resend the packet. Now we never take errSSLWouldBlock as a sign that
-  nothing was transferred to/from the server.
-  
-  Bug: http://curl.haxx.se/mail/lib-2013-01/0295.html
-  Reported by: Bruno de Carvalho
-
-- [Nick Zitzmann brought this change]
-
-  FAQ: "Darwinssl" is AKA "Secure Transport" and supports NTLM
-
-- RELEASE-NOTES: only list Nick once
-  
-  Even though he's a fine dude, once is enough for this time!
-
-Yang Tse (28 Jan 2013)
-- zz40-xc-ovr.m4: 1.0 interface stabilization
-  
-  - Stabilization results in 4 public interface m4 macros:
-    XC_CONFIGURE_PREAMBLE
-    XC_CONFIGURE_PREAMBLE_VER_MAJOR
-    XC_CONFIGURE_PREAMBLE_VER_MINOR
-    XC_CHECK_PATH_SEPARATOR
-  - Avoid one level of internal indirection
-  - Update comments
-  - Drop XC_OVR_ZZ40 macro
-
-Kamil Dudka (28 Jan 2013)
-- docs: fix typos in man pages
-  
-  Reported by: Jiri Jaburek
-  Bug: https://bugzilla.redhat.com/896544
-
-- docs: update the comments about loading CA certs with NSS
-  
-  Bug: https://bugzilla.redhat.com/696783
-
-Guenter Knauf (28 Jan 2013)
-- Updated dependency libs.
-
-- Fixed simple.c to work again unchanged.
-  
-  Added CURLOPT_FOLLOWLOCATION since example.com is now redirected.
-
-Steve Holme (27 Jan 2013)
-- smtp.c: Fixed unnecessary state change if starttls fails
-  
-  The state machine should only be changed to SMTP_STARTTLS when the
-  STARTTLS command has been successfully sent to the server.
-
-- pop3.c: Fixed unnecessary state change if starttls fails
-  
-  The state machine should only be changed to POP3_STARTTLS when the
-  STLS command has been successfully sent to the server.
-
-- imap.c: Fixed unnecessary state change if starttls fails
-  
-  The state machine should only be changed to IMAP_STARTTLS when the
-  STARTTLS command has been successfully sent to the server.
-
-- email: Updated comment regarding ssldone usage
-  
-  Updated the ssldone comment as multi mode is always used internally now.
-
-Yang Tse (26 Jan 2013)
-- zz40-xc-ovr.m4: emit witness message in configure BODY
-  
-  This avoids witness message in output when running configure --help,
-  while sending the message to config.log for other configure runs.
-
-Steve Holme (25 Jan 2013)
-- smtp.c: Added comments to smtp_endofresp()
-  
-  Minor code tidy up to add comments similar to those used in the pop3
-  and imap end of resp functions, in order to assist anyone reading the
-  code and highlight the similarities between each of these protocols.
-
-Yang Tse (25 Jan 2013)
-- zz40-xc-ovr.m4: truly do version conditional overriding
-  
-  - version conditional overriding
-  - catch unexpanded XC macros
-  - fix double words in comments
-
-- zz40-xc-ovr.m4: fix variable assignment of subshell output bashism
-  
-  Tor Arntsen analyzed and reported the issue.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0306.html
-
-- zz40-xc-ovr.m4: reinstate strict AC_REQUIRE macro dependencies
-
-- zz40-xc-ovr.m4: avoid double single-quote usage
-
-- zz40-xc-ovr.m4: parentheses balancing of 'case' statements
-  
-  m4 quadrigraph shell comment technique allows proper autoconf
-  parentheses balancing in shell 'case' statements. The presence
-  of unbalanced parentheses may otherwise trigger expansion bugs.
-
-Steve Holme (24 Jan 2013)
-- smtp.c: Corrected RFC references
-  
-  The most recent version of the SMTP RFC is RFC5321 and not RFC2821 as
-  previously documented.
-  
-  Added RFC1870 and re-ordered list numerically.
-
-- smtp.c: Fixed failure detection during TLS upgrade
-  
-  smtp_state_upgrade_tls() would attempt to incorrectly complete the
-  upgrade to smtps and start the EHLO command if
-  Curl_ssl_connect_nonblocking() returned a failure code and if ssldone
-  was set to TRUE. This would only happen when a non-blocking API hadn't
-  been provided by the SSL implementation and curlssl_connect() was
-  called underneath.
-
-- pop3.c: Fixed failure detection during TLS upgrade
-  
-  pop3_state_upgrade_tls() would attempt to incorrectly complete the
-  upgrade to pop3s and start the CAPA command if
-  Curl_ssl_connect_nonblocking() returned a failure code and if ssldone
-  was set to TRUE. This would only happen when a non-blocking API hadn't
-  been provided by the SSL implementation and curlssl_connect() was
-  called underneath.
-
-- imap.c: Fixed failure detection during TLS upgrade
-  
-  imap_state_upgrade_tls() would attempt to incorrectly complete the
-  upgrade to imaps and start the CAPABILITY command if
-  Curl_ssl_connect_nonblocking() returned a failure code and if ssldone
-  was set to TRUE. This would only happen when a non-blocking API hadn't
-  been provided by the SSL implementation and curlssl_connect() was
-  called underneath.
-
-Yang Tse (24 Jan 2013)
-- zz40-xc-ovr.m4: internals overhauling
-  
-  - Update comments
-  - Execute commands in subshells
-  - Faster path separator check
-  - Fix missing 'test' command
-  - Rename private macros
-  - Minimize AC_REQUIRE usage
-
-Steve Holme (23 Jan 2013)
-- email: Removed unnecessary return statements
-  
-  Small tidy up to remove unnecessary return statements prior to the next
-  fix.
-
-Yang Tse (23 Jan 2013)
-- zz40-xc-ovr.m4: redirect errors and warnings to stderr
-
-- zz40-xc-ovr.m4: AC_REQUIRE also XC_CONFIGURE_PREAMBLE success message
-
-- zz60-xc-ovr.m4: tighten XC_OVR_ZZ60 macro placement requirements
-
-- configure: use XC_CONFIGURE_PREAMBLE early checks
-  
-  Some basic checks we make were placed early enough in generated
-  configure script when using autoconf 2.5X versions. Newer autoconf
-  versions expand these checks much further into the configure script,
-  rendering them useless. Using XC_CONFIGURE_PREAMBLE fixes placement
-  of early intended checks across all our autoconf supported versions.
-
-- zz40-xc-ovr.m4: provide XC_CONFIGURE_PREAMBLE macro
-
-Daniel Stenberg (23 Jan 2013)
-- FAQ: update the SSL lib list and wording in question 2.2
-
-Steve Holme (22 Jan 2013)
-- curl_sasl.c: Corrected references to RFC
-  
-  The most recent version of the RFC is RFC4422 and not RFC2222 as
-  previously documented.
-
-- email: Corrected references to SASL RFC
-  
-  The most recent version of the SASL RFC is RFC4422 and not RFC2222 as
-  previously documented.
-
-Daniel Stenberg (22 Jan 2013)
-- [Ulion brought this change]
-
-  formpost: support quotes, commas and semicolon in file names
-  
-  - document the double-quote and backslash need be escaped if quoting.
-  - libcurl formdata escape double-quote in filename by backslash.
-  - curl formparse can parse filename both contains '"' and ',' or ';'.
-  - curl now can uploading file with ',' or ';' in filename.
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=1171
-
-- memanalyze.pl: handle fopen() of file names with quotes
-
-Yang Tse (21 Jan 2013)
-- xc-cc-check.m4: re-evaluate exporting and AC_SUBST'ing vars
-  
-  Notes:
-  
-  When running a configure script that has nested packages (for example
-  libcurl's configure with --enable-ares and c-ares sources embedded in
-  curl tree) and AC_CONFIG_SUBDIRS([nested-subdir]) machinery is used to
-  automatically run the nested configure script from within the parent
-  configure script, it happens that the nested _shell_ script will
-  inherit shell variables exported from the parent _shell_ script.
-  
-  If for example parent configure script sets and exports LDFLAGS and LIBS
-  variables with proper values in order to link either a parent library or
-  program with a library which will be configured and built by a nested
-  package; It will happen that when the nested configure script runs, the
-  nested library does not exist yet and _any_ link-test done in the nested
-  configure will fail, such as those that autoconf macros perform in order
-  to detect existing compiler and its characteristics, the result is that
-  the nested configure script will fail with errors such as:
-  
-  configure: error: C compiler cannot create executables
-  
-  For now, we no longer export variables previously exported here.
-  
-  On the other hand, AC_SUBST'ing them is appropriate and even with nested
-  packages each package's config.status gets its own package values.
-  
-  So we reinstate AC_SUBST'ing previously AC_SUBST'ed variables.
-
-Daniel Stenberg (21 Jan 2013)
-- FAQ: 3.22 curl -X gives me HTTP problems
-
-Yang Tse (21 Jan 2013)
-- xc-cc-check.m4: avoid recursive package automake'ing breakage
-
-- xc-cc-check.m4: mark earlier variables that are to be exported
-
-- configure: autotools compatibility fixes - step I
-  
-  Fix proper macro expansion order across autotools versions for
-  C compiler and preprocessor program checks.
-
-Steve Holme (20 Jan 2013)
-- pop3.c: Fixed conditional compilation of the apop response function
-  
-  Extended the fix from commit 8b15c84ea91e to additionally exclude
-  pop3_state_apop_resp() if the CURL_DISABLE_CRYPTO_AUTH flag is
-  defined.
-
-Yang Tse (20 Jan 2013)
-- Makefile.inc: fix $(top_srcdir) not allowed in _SOURCES variables
-
-Daniel Stenberg (19 Jan 2013)
-- formadd: reject trying to read a directory where a file is expected
-  
-  Bug: http://curl.haxx.se/mail/archive-2013-01/0017.html
-  Reported by: Ulrich Doehner
-
-- curl_easy_send.3: document return codes
-  
-  Reported by: Craig Davison
-  Bug: http://curl.haxx.se/mail/lib-2013-01/0234.html
-
-- curl_easy_recv.3: document return codes
-  
-  Reported by: Craig Davison
-  Bug: http://curl.haxx.se/mail/lib-2013-01/0234.html
-
-Steve Holme (19 Jan 2013)
-- email: General code tidy up
-  
-  Corrected some function argument definitions to maximize the 80
-  character line length limit and be in keeping with the curl
-  coding style.
-
-- pop3.c: Fixed a problem with pop3s connections not connecting properly
-  
-  Fixed an issue where Curl_ssl_connect_nonblocking() wouldn't complete
-  correctly and the ssldone flag wouldn't be set to true for pop3s based
-  connections.
-  
-  Bug introduced in commit: 4ffb8a6398ed.
-
-Daniel Stenberg (18 Jan 2013)
-- RELEASE-NOTES: add references to several bugfixes+changes
-
-Steve Holme (18 Jan 2013)
-- RELEASE-NOTES: Added missing imap fix
-  
-  Added missing imap fix as per commit 709b3506cd9b.
-
-Yang Tse (18 Jan 2013)
-- runtests.pl: make VPATH builds find valgrind.supp
-
-Daniel Stenberg (18 Jan 2013)
-- RELEASE-NOTES: synced with c43127414d89
-
-- always-multi: always use non-blocking internals
-  
-  Remove internal separated behavior of the easy vs multi intercace.
-  curl_easy_perform() is now using the multi interface itself.
-  
-  Several minor multi interface quirks and bugs have been fixed in the
-  process.
-  
-  Much help with debugging this has been provided by: Yang Tse
-
-Yang Tse (17 Jan 2013)
-- url.c: fix HTTP CONNECT tunnel establishment upon delayed response
-  
-  Fixes initial proxy response being processed by the tunneled protocol
-  handler instead of the HTTP wrapper handler. This issue would trigger
-  upon delayed CONNECT response from the proxy.
-  
-  Additionally fixes a multi interface code-path in which connections
-  would not time out properly.
-  
-  This does not fix known bug #39.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0191.html
-
-Daniel Stenberg (16 Jan 2013)
-- [Yves Arrouye brought this change]
-
-  --libcurl: fix for non-zero default options
-  
-  If the default value for an option taking a long as its value is non
-  zero, and it is set by zero by a command line option, then that command
-  line option is not reflected in --libcurl's output. This is because line
-  520-521 of tool_setopt.c look like:
-  
-  if(!lval)
-      skip = TRUE;
-  
-  An example of a command-line option doing so is the -k option that sets
-  CURLOPT_SLL_VERIFYPEER and CURLOPT_SSL_VERIFYHOST to 0L, when the
-  defaults are non-zero.
-
-- FTP: reject illegal port numbers in EPSV 229 responses
-
-Yang Tse (15 Jan 2013)
-- commit bc682cbd follow-up
-
-- build: use per-target '_CPPFLAGS' for those currently using default
-  
-  Automake documents that doing this will make it choose a different name
-  for intermediate object files even when sharing source files across
-  targets of same Makefile.am.
-  
-  Up to automake 1.13.1 target's intermediate object files were placed
-  in the build subdirectory of the target. We depended on this, probably
-  undocumented behavior, to achieve same behavior as if a per-target flag
-  had been specified when building targets that actually belong to
-  different Makefile.am files.
-  
-  It seems automake 1.13.2 is going to break behavior mentioned above.
-  
-  So, lets use a documented behavior in order to achieve same purpose,
-  across automake versions, no matter where automake wishes to place
-  intermediate object files.
-  
-  Our build targets that already were using a per-target '_CFLAGS' or
-  '_CPPFLAGS' need no 'fixing', these were already 'fixed'. The only
-  Makefile.am or Makefile.in files in libcurl's source tree touched by
-  this 'fix' are tests/libtest/Makefile.inc and tests/unit/Makefile.inc.
-
-- tests/libtest/Makefile.inc: sort build targets
-
-- tests/Makefile.am: remove wildcard usage in EXTRA_DIST
-
-Kamil Dudka (15 Jan 2013)
-- nss: fix error messages for CURLE_SSL_{CACERT,CRL}_BADFILE
-  
-  Do not use the error messages from NSS for errors not occurring in NSS.
-
-Steve Holme (14 Jan 2013)
-- TODO: Updated following IMAP SASL additions
-
-Yang Tse (14 Jan 2013)
-- configure: fix automake 1.13 compatibility
-  
-  Tested with:
-  
-  buildconf: autoconf version 2.69
-  buildconf: autom4te version 2.69
-  buildconf: autoheader version 2.69
-  buildconf: automake version 1.13.1
-  buildconf: aclocal version 1.13.1
-  buildconf: libtool version 2.4
-  buildconf: GNU m4 version 1.4.16
-
-Daniel Stenberg (13 Jan 2013)
-- BUGS: update bug tracker URL
-  
-  ... and refresh number of lines of code
-
-- Curl_resolver_getsock: fix the function description comment
-  
-  It referred to it by the wrong name and said it returned the wrong value.
-  
-  Reported by: Gisle Vanem
-
-Kamil Dudka (11 Jan 2013)
-- nss: clear session cache if a client cert from file is used
-  
-  This commit fixes a regression introduced in 052a08ff.
-  
-  NSS caches certs/keys returned by the SSL_GetClientAuthDataHook callback
-  and if we connect second time to the same server, the cached cert/key
-  pair is used.  If we use multiple client certificates for different
-  paths on the same server, we need to clear the session cache to force
-  NSS to call the hook again.  The commit 052a08ff prevented the session
-  cache from being cleared if a client certificate from file was used.
-  
-  The condition is now fixed to cover both cases: consssl->client_nickname
-  is not NULL if a client certificate from the NSS database is used and
-  connssl->obj_clicert is not NULL if a client certificate from file is
-  used.
-  
-  Review by: Kai Engert
-
-Yang Tse (11 Jan 2013)
-- sockfilt.c: log file descriptor number on read/write error
-
-- [Gisle Vanem brought this change]
-
-  packages/DOS/common.dj: remove COFF debug info generation
-  
-  gcc on DOS hasn't really supported COFF-debug (-gcoff) on djgpp for a
-  long time.
-  
-  "Sounds like the COFF debug info generation has bit-rotted in GCC.
-   Nothing new here, no other platform uses COFF AFAIK."
-  
-  So lets drop it too.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0130.html
-
-- curl: ignore SIGPIPE - compilation fix - follow-up
-
-- test servers: handle W32/W64 SIGBREAK with exit_signal_handler
-
-- test servers: fix errno, ERRNO and SOCKERRNO usage for W32/W64
-
-- sockfilt.c: fix some W64 compiler warnings
-
-Daniel Stenberg (9 Jan 2013)
-- [Nick Zitzmann brought this change]
-
-  docs: the --with-darwinssl option is available on Apple OSes
-
-Yang Tse (9 Jan 2013)
-- curl: ignore SIGPIPE - compilation fix
-
-- build: fix circular header inclusion with other packages
-  
-  This commit renames lib/setup.h to lib/curl_setup.h and
-  renames lib/setup_once.h to lib/curl_setup_once.h.
-  
-  Removes the need and usage of a header inclusion guard foreign
-  to libcurl. [1]
-  
-  Removes the need and presence of an alarming notice we carried
-  in old setup_once.h [2]
-  
-  ----------------------------------------
-  
-  1 - lib/setup_once.h used __SETUP_ONCE_H macro as header inclusion guard
-      up to commit ec691ca3 which changed this to HEADER_CURL_SETUP_ONCE_H,
-      this single inclusion guard is enough to ensure that inclusion of
-      lib/setup_once.h done from lib/setup.h is only done once.
-  
-      Additionally lib/setup.h has always used __SETUP_ONCE_H macro to
-      protect inclusion of setup_once.h even after commit ec691ca3, this
-      was to avoid a circular header inclusion triggered when building a
-      c-ares enabled version with c-ares sources available which also has
-      a setup_once.h header. Commit ec691ca3 exposes the real nature of
-      __SETUP_ONCE_H usage in lib/setup.h, it is a header inclusion guard
-      foreign to libcurl belonging to c-ares's setup_once.h
-  
-      The renaming this commit does, fixes the circular header inclusion,
-      and as such removes the need and usage of a header inclusion guard
-      foreign to libcurl. Macro __SETUP_ONCE_H no longer used in libcurl.
-  
-  2 - Due to the circular interdependency of old lib/setup_once.h and the
-      c-ares setup_once.h header, old file lib/setup_once.h has carried
-      back from 2006 up to now days an alarming and prominent notice about
-      the need of keeping libcurl's and c-ares's setup_once.h in sync.
-  
-      Given that this commit fixes the circular interdependency, the need
-      and presence of mentioned notice is removed.
-  
-      All mentioned interdependencies come back from now old days when
-      the c-ares project lived inside a curl subdirectory. This commit
-      removes last traces of such fact.
-
-Daniel Stenberg (8 Jan 2013)
-- curl: ignore SIGPIPE
-  
-  This is a work-around for bug #1180 which is really libcurl's inability
-  to ignore SIGPIPE in a few cases. With this work-around at least curl
-  won't suffer from it!
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=1180
-  Reported by: Lluís Batlle i Rossell
-
-Yang Tse (8 Jan 2013)
-- sockfilt.c: fix some compiler warnings
-
-Daniel Stenberg (8 Jan 2013)
-- Revert "configure: update req to 2.59"
-  
-  This reverts commit 7a6d8b1b1a8fcc184c36d6b6e741e32250b4bacb.
-  
-  URL: http://curl.haxx.se/mail/lib-2013-01/0103.html
-
-Steve Holme (8 Jan 2013)
-- pop3: Added support for non-blocking SSL upgrade
-  
-  Added support for asynchronous SSL upgrade when using the
-  multi-interface.
-
-Daniel Stenberg (8 Jan 2013)
-- configure: update req to 2.59
-  
-  I ran the 2.59 version of autoupdate that updates obsoleted configure.ac
-  constructs to the 2.59 standard. With a little hands-on fiddling I
-  prevented it from ruining the quoting in AS_HELP_STRING() uses.
-  
-  I subsequently also bumped the required autoconf version to 2.59
-  (released in December 2003) as I don't have an older autoconf version
-  around to test with and I can't be bothered to install one either...
-  
-  Inspired by: Björn Stenberg
-  Related blog post: http://cazfi.livejournal.com/195108.html
-
-Steve Holme (7 Jan 2013)
-- imap.c: Small tidy up to add missing comment
-
-- imap: Added support for sasl digest-md5 authentication
-
-- imap: Added support for sasl cram-md5 authentication
-
-Marc Hoersken (7 Jan 2013)
-- tests/server/sockfilt.c: Fixed integer comparison warning
-
-- tests/server/sockfilt.c: Include required Win32 headers
-
-Steve Holme (7 Jan 2013)
-- imap: Added support for sasl ntlm authentication
-
-- imap: Added support for sasl login authentication
-
-- pop3.c: Fixed default authentication detection
-  
-  Fixed an issue where a server may positively respond to the CAPA command
-  but not list clear text as a valid authentication type.
-
-- curl_sasl.c: Small code tidy up following imap changes
-
-- smtp.c: Small code tidy up following imap changes
-
-- pop3.c: Small code tidy up following imap changes
-
-- imap: Added support for sasl plain text authentication
-
-Marc Hoersken (6 Jan 2013)
-- tests/server/sockfilt.c: Fixed support for listening sockets
-  
-  This commit fixes support for sockets that are ready to accept
-  a new connection and have previously been put into listening mode.
-  
-  It also includes changes which are the result of investigation
-  regarding Windows STDIN. These changes are the preparation for further
-  improvements regarding support for reading data from STDIN on Windows.
-  
-  Open issue: WaitForMultipleObjectsEx does not support PIPE handles
-  which are returned by GetStdHandle while running without a GUI.
-
-- tests/server/sockfilt.c: Set Windows Console to binary mode
-
-- tests/server/sockfilt.c: Improved log error messages
-  
-  Include error code and parameters in error messages.
-
-Steve Holme (6 Jan 2013)
-- imap: Introduced the continue response in imap_endofresp()
-
-- imap: Added support for SASL based authentication mechanism detection
-  
-  Added support for detecting the supported SASL authentication mechanisms
-  via the CAPABILITY command.
-
-Yang Tse (6 Jan 2013)
-- Revert changes relative to lib/*.[ch] recent renaming
-  
-  This reverts renaming and usage of lib/*.h header files done
-  28-12-2012, reverting 2 commits:
-  
-    f871de0... build: make use of 76 lib/*.h renamed files
-    ffd8e12... build: rename 76 lib/*.h files
-  
-  This also reverts removal of redundant include guard (redundant thanks
-  to changes in above commits) done 2-12-2013, reverting 1 commit:
-  
-    c087374... curl_setup.h: remove redundant include guard
-  
-  This also reverts renaming and usage of lib/*.c source files done
-  3-12-2013, reverting 3 commits:
-  
-    13606bb... build: make use of 93 lib/*.c renamed files
-    5b6e792... build: rename 93 lib/*.c files
-    7d83dff... build: commit 13606bbfde follow-up 1
-  
-  Start of related discussion thread:
-  
-    http://curl.haxx.se/mail/lib-2013-01/0012.html
-  
-  Asking for confirmation on pushing this revertion commit:
-  
-    http://curl.haxx.se/mail/lib-2013-01/0048.html
-  
-  Confirmation summary:
-  
-    http://curl.haxx.se/mail/lib-2013-01/0079.html
-  
-  NOTICE: The list of 2 files that have been modified by other
-  intermixed commits, while renamed, and also by at least one
-  of the 6 commits this one reverts follows below. These 2 files
-  will exhibit a hole in history unless git's '--follow' option
-  is used when viewing logs.
-  
-    lib/curl_imap.h
-    lib/curl_smtp.h
-
-Daniel Stenberg (6 Jan 2013)
-- mk-ca-bundle.1: convert syntax to what's used elsewhere
-  
-  ... mostly to make sure roffit works better on it, but also to make our
-  man pages use a more unified style.
-
-- mk-ca-bundle.1: mention new -f, fix outputfile output
-  
-  also edited a few sentences to become more verbose
-
-- mk-ca-bundle: add -f, support passing to stdout and more
-  
-  1. When the downloaded data file from Mozilla is current, but the output
-  bundle does not exist: continue processing to create the bundle.  The
-  goal is to have the output file - not just download the latest input.
-  
-  2. added -f option to force re-processing the file.  Useful for
-  debugging/testing the process.
-  
-  3. added support for output to '-' (stdout), allowing the output to be
-  piped.
-  
-  4. All progress and error messages go to STDERR rather than STDOUT (3)
-  
-  5. The script opened and closed the output file many times
-  unnecessarily.  It now opens it once, does the output and closes it.
-  
-  6. Backup of the input files happens after successful processing, not
-  before.
-  
-  7. The output is written to a temporary file, and renamed to the
-  requested name after backup - this greatly reduces the window where the
-  file can be seen partially written.
-  
-  8. all die calls have a \n at the end to suppress perl's traceback - the
-  traceback isn't useful to end users.
-  
-  Patch: http://curl.haxx.se/mail/lib-2013-01/0045.html
-
-Yang Tse (5 Jan 2013)
-- imap test server: fix typo in name of SELECT_imap() sub definition
-  
-  IMAP test server breaking typo introduced with commit b708a522a1
-
-Steve Holme (4 Jan 2013)
-- imap test server: Added support for the CAPABILITY command
-  
-  Added support for the CAPABILITY command in preparation of upcoming
-  changes.
-
-Daniel Stenberg (3 Jan 2013)
-- writeout: -w now supports remote_ip/port and local_ip/port
-  
-  Added mention to the curl.1 man page.
-  
-  Test case 1223 verifies remote_ip/port.
-
-Yang Tse (3 Jan 2013)
-- test 1222: 8 chars object name generation  &&  test 1221: adjustments
-
-Daniel Stenberg (3 Jan 2013)
-- INTERNALS: remove "footnote" never used
-
-Yang Tse (3 Jan 2013)
-- build: commit 13606bbfde follow-up 1
-
-Daniel Stenberg (3 Jan 2013)
-- FAQ: Can I write a server with libcurl?
-
-Yang Tse (3 Jan 2013)
-- build: rename 93 lib/*.c files
-  
-  93 lib/*.c source files renamed to use our standard naming scheme.
-  
-  This commit only does the file renaming.
-  
-  ----------------------------------------
-  
-    renamed:    lib/amigaos.c -> lib/curl_amigaos.c
-    renamed:    lib/asyn-ares.c -> lib/curl_asyn_ares.c
-    renamed:    lib/asyn-thread.c -> lib/curl_asyn_thread.c
-    renamed:    lib/axtls.c -> lib/curl_axtls.c
-    renamed:    lib/base64.c -> lib/curl_base64.c
-    renamed:    lib/bundles.c -> lib/curl_bundles.c
-    renamed:    lib/conncache.c -> lib/curl_conncache.c
-    renamed:    lib/connect.c -> lib/curl_connect.c
-    renamed:    lib/content_encoding.c -> lib/curl_content_encoding.c
-    renamed:    lib/cookie.c -> lib/curl_cookie.c
-    renamed:    lib/cyassl.c -> lib/curl_cyassl.c
-    renamed:    lib/dict.c -> lib/curl_dict.c
-    renamed:    lib/easy.c -> lib/curl_easy.c
-    renamed:    lib/escape.c -> lib/curl_escape.c
-    renamed:    lib/file.c -> lib/curl_file.c
-    renamed:    lib/fileinfo.c -> lib/curl_fileinfo.c
-    renamed:    lib/formdata.c -> lib/curl_formdata.c
-    renamed:    lib/ftp.c -> lib/curl_ftp.c
-    renamed:    lib/ftplistparser.c -> lib/curl_ftplistparser.c
-    renamed:    lib/getenv.c -> lib/curl_getenv.c
-    renamed:    lib/getinfo.c -> lib/curl_getinfo.c
-    renamed:    lib/gopher.c -> lib/curl_gopher.c
-    renamed:    lib/gtls.c -> lib/curl_gtls.c
-    renamed:    lib/hash.c -> lib/curl_hash.c
-    renamed:    lib/hmac.c -> lib/curl_hmac.c
-    renamed:    lib/hostasyn.c -> lib/curl_hostasyn.c
-    renamed:    lib/hostcheck.c -> lib/curl_hostcheck.c
-    renamed:    lib/hostip.c -> lib/curl_hostip.c
-    renamed:    lib/hostip4.c -> lib/curl_hostip4.c
-    renamed:    lib/hostip6.c -> lib/curl_hostip6.c
-    renamed:    lib/hostsyn.c -> lib/curl_hostsyn.c
-    renamed:    lib/http.c -> lib/curl_http.c
-    renamed:    lib/http_chunks.c -> lib/curl_http_chunks.c
-    renamed:    lib/http_digest.c -> lib/curl_http_digest.c
-    renamed:    lib/http_negotiate.c -> lib/curl_http_negotiate.c
-    renamed:    lib/http_negotiate_sspi.c -> lib/curl_http_negotiate_sspi.c
-    renamed:    lib/http_proxy.c -> lib/curl_http_proxy.c
-    renamed:    lib/idn_win32.c -> lib/curl_idn_win32.c
-    renamed:    lib/if2ip.c -> lib/curl_if2ip.c
-    renamed:    lib/imap.c -> lib/curl_imap.c
-    renamed:    lib/inet_ntop.c -> lib/curl_inet_ntop.c
-    renamed:    lib/inet_pton.c -> lib/curl_inet_pton.c
-    renamed:    lib/krb4.c -> lib/curl_krb4.c
-    renamed:    lib/krb5.c -> lib/curl_krb5.c
-    renamed:    lib/ldap.c -> lib/curl_ldap.c
-    renamed:    lib/llist.c -> lib/curl_llist.c
-    renamed:    lib/md4.c -> lib/curl_md4.c
-    renamed:    lib/md5.c -> lib/curl_md5.c
-    renamed:    lib/memdebug.c -> lib/curl_memdebug.c
-    renamed:    lib/mprintf.c -> lib/curl_mprintf.c
-    renamed:    lib/multi.c -> lib/curl_multi.c
-    renamed:    lib/netrc.c -> lib/curl_netrc.c
-    renamed:    lib/non-ascii.c -> lib/curl_non_ascii.c
-    renamed:    lib/curl_non-ascii.h -> lib/curl_non_ascii.h
-    renamed:    lib/nonblock.c -> lib/curl_nonblock.c
-    renamed:    lib/nss.c -> lib/curl_nss.c
-    renamed:    lib/nwlib.c -> lib/curl_nwlib.c
-    renamed:    lib/nwos.c -> lib/curl_nwos.c
-    renamed:    lib/openldap.c -> lib/curl_openldap.c
-    renamed:    lib/parsedate.c -> lib/curl_parsedate.c
-    renamed:    lib/pingpong.c -> lib/curl_pingpong.c
-    renamed:    lib/polarssl.c -> lib/curl_polarssl.c
-    renamed:    lib/pop3.c -> lib/curl_pop3.c
-    renamed:    lib/progress.c -> lib/curl_progress.c
-    renamed:    lib/qssl.c -> lib/curl_qssl.c
-    renamed:    lib/rawstr.c -> lib/curl_rawstr.c
-    renamed:    lib/rtsp.c -> lib/curl_rtsp.c
-    renamed:    lib/security.c -> lib/curl_security.c
-    renamed:    lib/select.c -> lib/curl_select.c
-    renamed:    lib/sendf.c -> lib/curl_sendf.c
-    renamed:    lib/share.c -> lib/curl_share.c
-    renamed:    lib/slist.c -> lib/curl_slist.c
-    renamed:    lib/smtp.c -> lib/curl_smtp.c
-    renamed:    lib/socks.c -> lib/curl_socks.c
-    renamed:    lib/socks_gssapi.c -> lib/curl_socks_gssapi.c
-    renamed:    lib/socks_sspi.c -> lib/curl_socks_sspi.c
-    renamed:    lib/speedcheck.c -> lib/curl_speedcheck.c
-    renamed:    lib/splay.c -> lib/curl_splay.c
-    renamed:    lib/ssh.c -> lib/curl_ssh.c
-    renamed:    lib/sslgen.c -> lib/curl_sslgen.c
-    renamed:    lib/ssluse.c -> lib/curl_ssluse.c
-    renamed:    lib/strdup.c -> lib/curl_strdup.c
-    renamed:    lib/strequal.c -> lib/curl_strequal.c
-    renamed:    lib/strerror.c -> lib/curl_strerror.c
-    renamed:    lib/strtok.c -> lib/curl_strtok.c
-    renamed:    lib/strtoofft.c -> lib/curl_strtoofft.c
-    renamed:    lib/telnet.c -> lib/curl_telnet.c
-    renamed:    lib/tftp.c -> lib/curl_tftp.c
-    renamed:    lib/timeval.c -> lib/curl_timeval.c
-    renamed:    lib/transfer.c -> lib/curl_transfer.c
-    renamed:    lib/url.c -> lib/curl_url.c
-    renamed:    lib/version.c -> lib/curl_version.c
-    renamed:    lib/warnless.c -> lib/curl_warnless.c
-    renamed:    lib/wildcard.c -> lib/curl_wildcard.c
-  
-  ----------------------------------------
-
-- build: make use of 93 lib/*.c renamed files
-  
-  93 *.c source files renamed to use our standard naming scheme.
-  
-  This change affects 77 files in libcurl's source tree.
-
-Daniel Stenberg (3 Jan 2013)
-- INSTALL: unify the SSL library texts
-  
-  Make them smaller and more similar for each separate SSL library
-  supported by the configure build
-
-Yang Tse (2 Jan 2013)
-- curl_setup.h: remove redundant include guard
-
-- build and tests: curl_10char_object_name() shell function
-  
-  lib/objnames.inc provides definition of curl_10char_object_name() shell
-  function. The intended purpose of this function is to transliterate a
-  (*.c) source file name that may be longer than 10 characters, or not,
-  into a string with at most 10 characters which may be used as an OS/400
-  object name.
-  
-  Test case 1221 does unit testng of this function and also verifies
-  that it is possible to generate distinct short object names for all
-  curl and libcurl *.c source file names.
-  
-  lib/objnames-test.sh is the shell script used for test case 1221.
-  
-  tests/runtests.pl modified to accept shell script test cases.
-  
-  More details inside lib/objnames.inc and lib/objnames-test.sh
-
-- configure.ac: replace AM_CONFIG_HEADER with AC_CONFIG_HEADERS
-  
-  automake 1.13 errors if AM_CONFIG_HEADER is used in configure script.
-  automake 1.13 no longer autoupdates AM_CONFIG_HEADER to
-  AC_CONFIG_HEADERS, thing which automake has been doing since automake
-  version 1.7
-  
-  Given that our first automake supported version is automake 1.7,
-  simply replacing AM_CONFIG_HEADER usage with AC_CONFIG_HEADERS seems
-  enough to yet support same automake versions.
-  
-  Dave Reisner reported issue with 1.13 and provided patch.
-  
-  http://curl.haxx.se/mail/lib-2012-12/0246.html
-
-- curl-override.m4: provide AC_CONFIG_MACRO_DIR definition conditionally
-  
-  Provide a 'traceable' AC_CONFIG_MACRO_DIR definition only when using
-  an autoconf version that does not provide it, instead of what we were
-  doing up to now of providing and overriding AC_CONFIG_MACRO_DIR for
-  all autoconf versions.
-
-Steve Holme (30 Dec 2012)
-- imap.c: Minor follow up tidy up
-
-- imap: Code tidy up prior to adding support for the CAPABILITY command
-  
-  * Changing the order of the state machine to represent the order in
-    which commands are sent to the server.
-  
-  * Reworking the imap_endofresp() function as the FETCH response doesn't
-    include the command id and shouldn't be part of the length comparison
-    that takes into account the id string.
-
-- pop3_doing: Applied debug info message when function fails
-  
-  Applied the same debug message as used in smtp_doing() and imap_doing()
-  when pop3_multi_statemach() fails.
-
-- imap_doing: don't call imap_dophase_done() if already failed
-  
-  Applied the POP3 fix from commit 2897ce7dc2e1 so imap_dophase_done()
-  isn't called if imap_multi_statemach() fails.
-
-- smtp_doing: don't call smtp_dophase_done() if already failed
-  
-  Applied the POP3 fix from commit 2897ce7dc2e1 so smtp_dophase_done()
-  isn't called if smtp_multi_statemach() fails.
-
-Yang Tse (29 Dec 2012)
-- examples/certinfo.c: fix compiler warning
-
-Steve Holme (29 Dec 2012)
-- pop3.c: Removed unnecessary POP3_STOP state changes
-  
-  Removed unnecessary state changes in pop3_state_starttls_resp()
-  following previous fix in IMAP module.
-
-- smtp.c: Added extra comments around SMTP_STOP state change
-  
-  Provided extra comments in the SMTP module following previous IMAP fix.
-
-- imap.c: Fixed bad state error when logging in with invalid credentials
-  
-  Fixed a problem with the state machine when attempting to log in with
-  invalid credentials. The server would report login failure but libcurl
-  would not read the response due to inappropriate IMAP_STOP states being
-  set after the login was sent.
-
-Yang Tse (29 Dec 2012)
-- imap.c: remove trailing whitespace
-
-Steve Holme (28 Dec 2012)
-- imap.c: Code tidy up - Part 2
-
-- imap.c: Code tidy up - Part 1
-  
-  Applied some of the comment and layout changes that had already been
-  applied to the pop3 and smtp code over the last 6 to 9 months.
-  
-  This is in preparation of adding SASL based authentication.
-
-- pop3.c: Minor code tidy up
-  
-  Minor tidy up of comments and layout prior to next part of imap work.
-
-- smtp: Minor code tidy up
-  
-  Minor tidy up of comments and layout prior to next part of imap work.
-
-- curl_imap.h: Tidy up of comments to be more readable
-
-- imap.c: Code tidy up renaming imapsendf() to imap_sendf()
-  
-  Renamed imapsendf() to imap_sendf() to be more in keeping with the
-  other imap functions as well as Curl_pp_sendf() that it replaces.
-
-Yang Tse (28 Dec 2012)
-- build: rename 76 lib/*.h files
-  
-  76 private header files renamed to use our standard naming scheme.
-  
-  This commit only does the file renaming.
-  
-  ----------------------------------------
-  
-    renamed:    amigaos.h -> curl_amigaos.h
-    renamed:    arpa_telnet.h -> curl_arpa_telnet.h
-    renamed:    asyn.h -> curl_asyn.h
-    renamed:    axtls.h -> curl_axtls.h
-    renamed:    bundles.h -> curl_bundles.h
-    renamed:    conncache.h -> curl_conncache.h
-    renamed:    connect.h -> curl_connect.h
-    renamed:    content_encoding.h -> curl_content_encoding.h
-    renamed:    cookie.h -> curl_cookie.h
-    renamed:    cyassl.h -> curl_cyassl.h
-    renamed:    dict.h -> curl_dict.h
-    renamed:    easyif.h -> curl_easyif.h
-    renamed:    escape.h -> curl_escape.h
-    renamed:    file.h -> curl_file.h
-    renamed:    fileinfo.h -> curl_fileinfo.h
-    renamed:    formdata.h -> curl_formdata.h
-    renamed:    ftp.h -> curl_ftp.h
-    renamed:    ftplistparser.h -> curl_ftplistparser.h
-    renamed:    getinfo.h -> curl_getinfo.h
-    renamed:    gopher.h -> curl_gopher.h
-    renamed:    gtls.h -> curl_gtls.h
-    renamed:    hash.h -> curl_hash.h
-    renamed:    hostcheck.h -> curl_hostcheck.h
-    renamed:    hostip.h -> curl_hostip.h
-    renamed:    http.h -> curl_http.h
-    renamed:    http_chunks.h -> curl_http_chunks.h
-    renamed:    http_digest.h -> curl_http_digest.h
-    renamed:    http_negotiate.h -> curl_http_negotiate.h
-    renamed:    http_proxy.h -> curl_http_proxy.h
-    renamed:    if2ip.h -> curl_if2ip.h
-    renamed:    imap.h -> curl_imap.h
-    renamed:    inet_ntop.h -> curl_inet_ntop.h
-    renamed:    inet_pton.h -> curl_inet_pton.h
-    renamed:    krb4.h -> curl_krb4.h
-    renamed:    llist.h -> curl_llist.h
-    renamed:    memdebug.h -> curl_memdebug.h
-    renamed:    multiif.h -> curl_multiif.h
-    renamed:    netrc.h -> curl_netrc.h
-    renamed:    non-ascii.h -> curl_non-ascii.h
-    renamed:    nonblock.h -> curl_nonblock.h
-    renamed:    nssg.h -> curl_nssg.h
-    renamed:    parsedate.h -> curl_parsedate.h
-    renamed:    pingpong.h -> curl_pingpong.h
-    renamed:    polarssl.h -> curl_polarssl.h
-    renamed:    pop3.h -> curl_pop3.h
-    renamed:    progress.h -> curl_progress.h
-    renamed:    qssl.h -> curl_qssl.h
-    renamed:    rawstr.h -> curl_rawstr.h
-    renamed:    rtsp.h -> curl_rtsp.h
-    renamed:    select.h -> curl_select.h
-    renamed:    sendf.h -> curl_sendf.h
-    renamed:    setup.h -> curl_setup.h
-    renamed:    setup_once.h -> curl_setup_once.h
-    renamed:    share.h -> curl_share.h
-    renamed:    slist.h -> curl_slist.h
-    renamed:    smtp.h -> curl_smtp.h
-    renamed:    sockaddr.h -> curl_sockaddr.h
-    renamed:    socks.h -> curl_socks.h
-    renamed:    speedcheck.h -> curl_speedcheck.h
-    renamed:    splay.h -> curl_splay.h
-    renamed:    ssh.h -> curl_ssh.h
-    renamed:    sslgen.h -> curl_sslgen.h
-    renamed:    ssluse.h -> curl_ssluse.h
-    renamed:    strdup.h -> curl_strdup.h
-    renamed:    strequal.h -> curl_strequal.h
-    renamed:    strerror.h -> curl_strerror.h
-    renamed:    strtok.h -> curl_strtok.h
-    renamed:    strtoofft.h -> curl_strtoofft.h
-    renamed:    telnet.h -> curl_telnet.h
-    renamed:    tftp.h -> curl_tftp.h
-    renamed:    timeval.h -> curl_timeval.h
-    renamed:    transfer.h -> curl_transfer.h
-    renamed:    url.h -> curl_url.h
-    renamed:    urldata.h -> curl_urldata.h
-    renamed:    warnless.h -> curl_warnless.h
-    renamed:    wildcard.h -> curl_wildcard.h
-  
-  ----------------------------------------
-
-- build: make use of 76 lib/*.h renamed files
-  
-  76 private header files renamed to use our standard naming scheme.
-  
-  This change affects 322 files in libcurl's source tree.
-
-- lib/*.h: use our standard naming scheme for header inclusion guards
-
-Steve Holme (28 Dec 2012)
-- imsp.c: Fixed usernames and passwords that contain escape characters
-  
-  Fixed a problem with sending usernames and passwords that contain
-  backslash, quotation mark and space characters.
-
-Daniel Stenberg (27 Dec 2012)
-- curl.1: extend the -X, --request description
-
-- RELEASE-NOTES: synced with e3ed2b82e6
-
-- [Nick Zitzmann brought this change]
-
-  darwinssl: Fixed inability to disable peer verification
-  
-  ... on Snow Leopard and Lion
-  
-  Snow Leopard introduced the SSLSetSessionOption() function, but it
-  doesn't disable peer verification as expected on Snow Leopard or
-  Lion (it works as expected in Mountain Lion). So we now use sysctl()
-  to detect whether or not the user is using Snow Leopard or Lion,
-  and if that's the case, then we now use the deprecated
-  SSLSetEnableCertVerify() function instead to disable peer verification.
-
-Yang Tse (26 Dec 2012)
-- curl tool: rename hugehelp files to tool_hugehelp
-
-- curl tool: renaming hugehelp files to tool_hugehelp
-
-- sockfilt.c: commit b44da5a82a follow-up 2
-
-- sockfilt.c: commit b44da5a82a follow-up
-
-- sockfilt.c: fix some compiler warnings
-
-- curl_multi_remove_handle: commit 0aabfd9963 follow-up
-
-Daniel Stenberg (25 Dec 2012)
-- lib556: enable VERBOSE to ease debugging on failures
-
-Marc Hoersken (25 Dec 2012)
-- socklift.c: Quick fix to re-add missing code
-
-- socklift.c: Added select_ws function to support Windows
-  
-  WinSock select() does not support standard file descriptors,
-  it can only check SOCKETs. The following function is an attempt
-  to create a select() function with support for other handles.
-
-Yang Tse (25 Dec 2012)
-- Enable tests 1503, 1504 and 1505
-
-- curl_multi_remove_handle: fix memory leak triggered with CURLOPT_RESOLVE
-
-- Curl_hash_clean: OOM handling fix
-
-- test 1504 and 1505: same as 1502 but with different cleanup sequences
-
-Daniel Stenberg (24 Dec 2012)
-- Curl_conncache_foreach: allow callback to break loop
-  
-  ... and have it take a proper 'struct connectdata *' as first argument
-
-- pop3_doing: don't call pop3_dophase_done() if already failed
-  
-  ... it also clobbered the 'result' return value so that it wouldn't
-  return the error back to the parent function properly, which broke test
-  809 when run with 'multi-always'.
-
-Yang Tse (23 Dec 2012)
-- test 1503: same as 1502 but with a different cleanup sequence
-
-- test 1502: OOM handling fixes
-
-- curl_multi_wait: OOM handling fix
-
-- [Daniel Stenberg brought this change]
-
-  curl_multi_wait: avoid an unnecessary memory allocation
-
-- runtests.pl: prepend $srcdir to HTTPTLS server config files path
-
-- multi.c: OOM handling fix
-
-- lib543.c: OOM handling fixes
-
-- configure: add internal sanity check (warn only) on vars for makefiles
-
-Daniel Stenberg (21 Dec 2012)
-- SCP: relative path didn't work
-  
-  When prefixing a path with /~/ it is supposed to be used relative to the
-  user's home directory but it didn't work. Now we cut off the entire
-  three byte sequenct "/~/" which seems to be how OpenSSH does it.
-  
-  Bug: http://curl.haxx.se/bug/view.cgi?id=1173
-  Reported by: Balaji Parasuram
-
-Yang Tse (21 Dec 2012)
-- configure: LIBMETALINK_CFLAGS actually is LIBMETALINK_CPPFLAGS
-
-- configure: add minimal sanity check on user provided CFLAGS and CPPFLAGS
-
-- bundles connection caching: some out of memory handling fixes
-
-- libntlmconnect.c: fix compiler warnings and OOM handling
-
-- configure.ac: clear local test intended variables before use
-
-- VC6 IDE: link with advapi32.lib when using WIN32 crypto API (md5.c)
-
-- curl-functions.m4: improve gethostname arg 2 data type check
-
-- setup_once.h: HP-UX specific 'bool', 'false' and 'true' definitions.
-  
-  Also reverts commit f254c59dc7
-
-- configure: check if compiler halts on function prototype mismatch
-
-- warnless.c: fix compiler warnings
-
-- curl-functions.m4: add gethostname arg 2 data type check and definition
-
-Daniel Stenberg (14 Dec 2012)
-- [Nick Zitzmann brought this change]
-
-  darwinssl: Fix implicit conversion compiler warnings
-  
-  The Clang compiler found a few implicit conversion problems that have
-  now been fixed.
-
-Yang Tse (14 Dec 2012)
-- setup_once.h: HP-UX <sys/socket.h> issue workaround
-  
-  Issue: When building a 32bit target with large file support HP-UX
-  <sys/socket.h> header file may simultaneously provide two different
-  sets of declarations for sendfile and sendpath functions, one with
-  static and another with external linkage. Given that we do not use
-  mentioned functions we really don't care which linkage is the
-  appropriate one, but on the other hand, the double declaration emmits
-  warnings when using the HP-UX compiler and errors when using modern
-  gcc versions resulting in fatal compilation errors.
-  
-  Mentioned issue is now fixed as long as we don't use sendfile nor
-  sendpath functions.
-
-- setup_once.h: refactor inclusion of <unistd.h> and <sys/socket.h>
-  
-  Inclusion of top two most included header files now done in setup_once.h
-
-- setup_once.h: HP-UX specific TRUE and FALSE definitions
-  
-  Some HP-UX system headers require TRUE defined to 1 and FALSE to 0.
-
-Daniel Stenberg (12 Dec 2012)
-- gopher: #include cleanup
-  
-  Remove all system file includes from this file as they're not needed
-  
-  Reported by: Dan Fandrich
-
-Yang Tse (11 Dec 2012)
-- examples/simplessl.c: fix compiler warning
-
-- examples/externalsocket.c: fix SunPro compilation issue
-
-- examples/simplessl.c: fix compiler warning
-
-- build: add bundles and conncache files to other build systems
-
-- conncache: fix enumerated type mixed with another type
-
-- examples/anyauthput.c: fix Tru64 compilation issue
-
-Daniel Stenberg (8 Dec 2012)
-- [Colin Watson brought this change]
-
-  configure: fix cross pkg-config detection
-  
-  When cross-compiling, CURL_CHECK_PKGCONFIG was checking for the cross
-  pkg-config using ${host}-pkg-config.
-  
-  The gold standard for doing this correctly is pkg-config's own macro,
-  PKG_PROG_PKG_CONFIG.  However, on the assumption that you have a good
-  reason not to use that directly (reduced dependencies for maintainer
-  builds?), the behaviour of cURL's version should at least match.
-  PKG_PROG_PKG_CONFIG uses AC_PATH_TOOL, which ultimately ends up trying
-  ${host_alias}-pkg-config; this is not quite the same as what cURL does,
-  and may differ because ${host} has been run through config.sub.  For
-  instance, when cross-building to the armhf architecture on Ubuntu,
-  ${host_alias} is arm-linux-gnueabihf while ${host} is
-  arm-unknown-linux-gnueabihf.  This may also have been the cause of the
-  problem reported at http://curl.haxx.se/mail/lib-2012-04/0224.html.
-  
-  AC_PATH_TOOL is significantly simpler than cURL's current code, and
-  dates back to well before the current minimum of Autoconf 2.57, so let's
-  use it instead.
-
-- [Linus Nielsen Feltzing brought this change]
-
-  Introducing a new persistent connection caching system using "bundles".
-  
-  A bundle is a list of all persistent connections to the same host.
-  The connection cache consists of a hash of bundles, with the
-  hostname as the key.
-  The benefits may not be obvious, but they are two:
-  
-  1) Faster search for connections to reuse, since the hash
-     lookup only finds connections to the host in question.
-  2) It lays out the groundworks for an upcoming patch,
-     which will introduce multiple HTTP pipelines.
-  
-  This patch also removes the awkward list of "closure handles",
-  which were needed to send QUIT commands to the FTP server
-  when closing a connection.
-  Now we allocate a separate closure handle and use that
-  one to close all connections.
-  
-  This has been tested in a live system for a few weeks, and of
-  course passes the test suite.
-
-- [Fabian Keil brought this change]
-
-  runtests and friends: Do not add undefined values to @INC
-  
-  On FreeBSD this fixes the warning:
-  Use of uninitialized value $p in string eq at /usr/local/lib/perl5/5.14.2/BSDPAN/BSDPAN.pm line 36.
-
-Steve Holme (5 Dec 2012)
-- Merge pull request #52 from isn-/master
-  
-  small compilation fix
