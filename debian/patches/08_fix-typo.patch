@@ -1,0 +1,18 @@
+Description: Fix typo in manpage
+Origin: vendor
+Forwarded: http://curl.haxx.se/mail/lib-2013-10/0094.html
+Author: Alessandro Ghedini <ghedo@debian.org>
+Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
+Last-Update: 2013-10-14
+
+--- a/docs/curl.1
++++ b/docs/curl.1
+@@ -1056,7 +1056,7 @@
+ You may use this option as many times as the number of URLs you have.
+ .IP "--oauth2-bearer"
+ (IMAP/POP3/SMTP) Specify the Bearer Token for OAUTH 2.0 server authentication.
+-The Bearer Token is used in conjuction with the user name which can be
++The Bearer Token is used in conjunction with the user name which can be
+ specified as part of the \fI--url\fP or \fI-u, --user\fP options.
+ 
+ The Bearer Token and user name are formatted according to RFC 6750.
