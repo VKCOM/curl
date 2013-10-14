@@ -1,12 +1,14 @@
-curl (7.33.0-1) UNRELEASED; urgency=low
+curl (7.33.0-1) unstable; urgency=low
 
   * New upstream release
     - Handle arbitrary-length username and password (Closes: #719856)
   * Remove Luk from Uploaders as per his request (Closes: #723603)
   * Do not Build-Depends on specific automake version (Closes: #724361)
   * Fix lintian vcs-field-not-canonical
+  * Add 08_fix-typo.patch
+  * Refresh patches
 
- -- Alessandro Ghedini <ghedo@debian.org>  Mon, 14 Oct 2013 20:13:16 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 14 Oct 2013 22:11:14 +0200
 
 curl (7.32.0-1) unstable; urgency=low
 
