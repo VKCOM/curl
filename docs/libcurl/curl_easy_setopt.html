@@ -124,7 +124,7 @@ p.roffit {
 <p class="level0"><a name="CURLOPTIOCTLDATA"></a><span class="nroffip">CURLOPT_IOCTLDATA</span> 
 <p class="level1">Pass a pointer that will be untouched by libcurl and passed as the 3rd argument in the ioctl callback set with <a class="emphasis" href="#CURLOPTIOCTLFUNCTION">CURLOPT_IOCTLFUNCTION</a>. By default, the value of this parameter is unspecified.  (Option added in 7.12.3) 
 <p class="level0"><a name="CURLOPTSEEKFUNCTION"></a><span class="nroffip">CURLOPT_SEEKFUNCTION</span> 
-<p class="level1">Pass a pointer to a function that matches the following prototype: <span class="bold">int function(void *instream, curl_off_t offset, int origin);</span> This function gets called by libcurl to seek to a certain position in the input stream and can be used to fast forward a file in a resumed upload (instead of reading all uploaded bytes with the normal read function/callback). It is also called to rewind a stream when doing a HTTP PUT or POST with a multi-pass authentication method. The function shall work like "fseek" or "lseek" and accepted SEEK_SET, SEEK_CUR and SEEK_END as argument for origin, although (in 7.18.0) libcurl only passes SEEK_SET. The callback must return 0 (CURL_SEEKFUNC_OK) on success, 1 (CURL_SEEKFUNC_FAIL) to cause the upload operation to fail or 2 (CURL_SEEKFUNC_CANTSEEK) to indicate that while the seek failed, libcurl is free to work around the problem if possible. The latter can sometimes be done by instead reading from the input or similar. 
+<p class="level1">Pass a pointer to a function that matches the following prototype: <span class="bold">int function(void *instream, curl_off_t offset, int origin);</span> This function gets called by libcurl to seek to a certain position in the input stream and can be used to fast forward a file in a resumed upload (instead of reading all uploaded bytes with the normal read function/callback). It is also called to rewind a stream when doing a HTTP PUT or POST with a multi-pass authentication method. The function shall work like "fseek" or "lseek" and accepted SEEK_SET, SEEK_CUR and SEEK_END as argument for origin, although libcurl currently only passes SEEK_SET. The callback must return 0 (CURL_SEEKFUNC_OK) on success, 1 (CURL_SEEKFUNC_FAIL) to cause the upload operation to fail or 2 (CURL_SEEKFUNC_CANTSEEK) to indicate that while the seek failed, libcurl is free to work around the problem if possible. The latter can sometimes be done by instead reading from the input or similar. 
 <p class="level1">By default, this parameter is unset. 
 <p class="level1">If you forward the input arguments directly to "fseek" or "lseek", note that the data type for <span Class="emphasis">offset</span> is not the same as defined for curl_off_t on many systems! (Option added in 7.18.0) 
 <p class="level0"><a name="CURLOPTSEEKDATA"></a><span class="nroffip">CURLOPT_SEEKDATA</span> 
@@ -328,6 +328,9 @@ p.roffit {
 <p class="level1">ldap://ldap.example.com/o=My%20Organisation?postalAddress - This will perform the same search but will only return postalAddress attributes. 
 <p class="level1">ldap://ldap.example.com/?rootDomainNamingContext - This specifies an empty DN and requests information about the rootDomainNamingContext attribute for an Active Directory server. 
 <p class="level1">For more information about the individual components of a LDAP URL please see <a href="http://www.ietf.org/rfc/rfc4516.txt">RFC 4516</a>. 
+<p class="level1"><span Class="bold">RTMP</span> 
+<p class="level1">There's no official URL spec for RTMP so libcurl uses the URL syntax supported by the underlying librtmp library. It has a syntax where it wants a traditional URL, followed by a space and a series of space-separated name=value pairs. 
+<p class="level1">While space is not typically a "legal" letter, libcurl accepts them. When a user wants to pass in a '#' (hash) character it will be treated as a fragment and get cut off by libcurl if provided literally. You will instead have to escape it by providing it as backslash and its ASCII value in hexadecimal: "\23". 
 <p class="level1"><span Class="bold">NOTES</span> 
 <p class="level1">Starting with version 7.20.0, the fragment part of the URI will not be sent as part of the path, which was previously the case. 
 <p class="level1"><a class="emphasis" href="#CURLOPTURL">CURLOPT_URL</a> is the only option that <span Class="bold">must</span> be set before <a class="emphasis" href="./curl_easy_perform.html">curl_easy_perform(3)</a> is called. 
@@ -467,7 +470,10 @@ p.roffit {
 <p class="level1">Pass a long as parameter, which is set to a bitmask, to tell libcurl which authentication method(s) you want it to use for your proxy authentication.  If more than one bit is set, libcurl will first query the site to see what authentication methods it supports and then pick the best one you allow it to use. For some methods, this will induce an extra network round-trip. Set the actual name and password with the <a class="emphasis" href="#CURLOPTPROXYUSERPWD">CURLOPT_PROXYUSERPWD</a> option. The bitmask can be constructed by or'ing together the bits listed above for the <a class="emphasis" href="#CURLOPTHTTPAUTH">CURLOPT_HTTPAUTH</a> option. As of this writing, only Basic, Digest and NTLM work. (Added in 7.10.7) 
 <p class="level0"><a name="CURLOPTSASLIR"></a><span class="nroffip">CURLOPT_SASL_IR</span> 
 <p class="level1">Pass a long. If the value is 1, curl will send the initial response to the server in the first authentication packet in order to reduce the number of ping pong requests. Only applicable to supporting SASL authentication mechanisms and to the IMAP, POP3 and SMTP protocols. (Added in 7.31.0) 
-<p class="level1">Note: Whilst IMAP supports this option there is no need to explicitly set it, as libcurl can determine the feature itself when the server supports the SASL-IR CAPABILITY. <a name="HTTP"></a><h2 class="nroffsh">HTTP OPTIONS</h2>
+<p class="level1">Note: Whilst IMAP supports this option there is no need to explicitly set it, as libcurl can determine the feature itself when the server supports the SASL-IR CAPABILITY. 
+<p class="level0"><a name="CURLOPTBEARER"></a><span class="nroffip">CURLOPT_BEARER</span> 
+<p class="level1">Pass a char * as parameter, which should point to the zero terminated OAUTH 2.0 Bearer Access Token for use with IMAP. POP3 and SMTP servers that support the OAUTH 2.0 Authorization Framework. (Added in 7.33.0) 
+<p class="level1">Note: The user name used to generate the Bearer Token should be supplied via the <a class="emphasis" href="#CURLOPTUSERNAME">CURLOPT_USERNAME</a> option. <a name="HTTP"></a><h2 class="nroffsh">HTTP OPTIONS</h2>
 <p class="level0">
 <p class="level0"><a name="CURLOPTAUTOREFERER"></a><span class="nroffip">CURLOPT_AUTOREFERER</span> 
 <p class="level1">Pass a parameter set to 1 to enable this. When enabled, libcurl will automatically set the Referer: field in requests where it follows a Location: redirect. 
@@ -771,7 +777,9 @@ p.roffit {
 <p class="level1">In unix-like systems, this might cause signals to be used unless <a class="emphasis" href="#CURLOPTNOSIGNAL">CURLOPT_NOSIGNAL</a> is set. 
 <p class="level1">Default timeout is 0 (zero) which means it never times out. 
 <p class="level0"><a name="CURLOPTTIMEOUTMS"></a><span class="nroffip">CURLOPT_TIMEOUT_MS</span> 
-<p class="level1">Like <a class="emphasis" href="#CURLOPTTIMEOUT">CURLOPT_TIMEOUT</a> but takes number of milliseconds instead. If libcurl is built to use the standard system name resolver, that portion of the transfer will still use full-second resolution for timeouts with a minimum timeout allowed of one second. (Added in 7.16.2) 
+<p class="level1">An alternative to <a class="emphasis" href="#CURLOPTTIMEOUT">CURLOPT_TIMEOUT</a> but takes number of milliseconds instead. If libcurl is built to use the standard system name resolver, that portion of the transfer will still use full-second resolution for timeouts with a minimum timeout allowed of one second. 
+<p class="level1">If both <a class="emphasis" href="#CURLOPTTIMEOUT">CURLOPT_TIMEOUT</a> and <a class="emphasis" href="#CURLOPTTIMEOUTMS">CURLOPT_TIMEOUT_MS</a> are set, the value set last will be used. 
+<p class="level1">(Added in 7.16.2) 
 <p class="level0"><a name="CURLOPTLOWSPEEDLIMIT"></a><span class="nroffip">CURLOPT_LOW_SPEED_LIMIT</span> 
 <p class="level1">Pass a long as parameter. It contains the transfer speed in bytes per second that the transfer should be below during <a class="emphasis" href="#CURLOPTLOWSPEEDTIME">CURLOPT_LOW_SPEED_TIME</a> seconds for the library to consider it too slow and abort. 
 <p class="level0"><a name="CURLOPTLOWSPEEDTIME"></a><span class="nroffip">CURLOPT_LOW_SPEED_TIME</span> 
@@ -836,18 +844,29 @@ p.roffit {
 <p class="level1">192.168.1.100,192.168.1.101,3.4.5.6 
 <p class="level1">This option requires that libcurl was built with a resolver backend that supports this operation. The c-ares backend is the only such one. 
 <p class="level1">(Added in 7.24.0) 
+<p class="level0"><a name="CURLOPTDNSINTERFACE"></a><span class="nroffip">CURLOPT_DNS_INTERFACE</span> 
+<p class="level1">Pass a char * as parameter. Set the name of the network interface that the DNS resolver should bind to. This must be an interface name (not an address). Set this option to NULL to use the default setting (don't bind to a specific interface). 
+<p class="level1">This option requires that libcurl was built with a resolver backend that supports this operation. The c-ares backend is the only such one. 
+<p class="level1">(Added in 7.33.0) 
+<p class="level0"><a name="CURLOPTDNSLOCALIP4"></a><span class="nroffip">CURLOPT_DNS_LOCAL_IP4</span> 
+<p class="level1">Set the local IPv4 address that the resolver should bind to. The argument should be of type char * and contain a single IPv4 address as a string. Set this option to NULL to use the default setting (don't bind to a specific IP address). 
+<p class="level1">This option requires that libcurl was built with a resolver backend that supports this operation. The c-ares backend is the only such one. 
+<p class="level1">(Added in 7.33.0) 
+<p class="level0"><a name="CURLOPTDNSLOCALIP6"></a><span class="nroffip">CURLOPT_DNS_LOCAL_IP6</span> 
+<p class="level1">Set the local IPv6 address that the resolver should bind to. The argument should be of type char * and contain a single IPv6 address as a string. Set this option to NULL to use the default setting (don't bind to a specific IP address). 
+<p class="level1">This option requires that libcurl was built with a resolver backend that supports this operation. The c-ares backend is the only such one. 
+<p class="level1">(Added in 7.33.0) 
 <p class="level0"><a name="CURLOPTACCEPTTIMEOUTMS"></a><span class="nroffip">CURLOPT_ACCEPTTIMEOUT_MS</span> 
 <p class="level1">Pass a long telling libcurl the maximum number of milliseconds to wait for a server to connect back to libcurl when an active FTP connection is used. If no timeout is set, the internal default of 60000 will be used. (Added in 7.24.0) <a name="SSL"></a><h2 class="nroffsh">SSL and SECURITY OPTIONS</h2>
 <p class="level0">
 <p class="level0"><a name="CURLOPTSSLCERT"></a><span class="nroffip">CURLOPT_SSLCERT</span> 
-<p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the file name of your certificate. The default format is "PEM" and can be changed with <a class="emphasis" href="#CURLOPTSSLCERTTYPE">CURLOPT_SSLCERTTYPE</a>. 
-<p class="level1">With NSS this can also be the nickname of the certificate you wish to authenticate with. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname. 
-<p class="level1">(iOS and Mac OS X only) With Secure Transport, this string must match the name of a certificate that's in the system or user keychain. You should encode this string in UTF-8 format in case it contains non-ASCII characters. The private key corresponding to the certificate, and certificate chain (if any),  must also be present in the keychain. (Added in 7.31.0) 
+<p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the file name of your certificate. The default format is "P12" on Secure Transport and "PEM" on other engines, and can be changed with <a class="emphasis" href="#CURLOPTSSLCERTTYPE">CURLOPT_SSLCERTTYPE</a>. 
+<p class="level1">With NSS or Secure Transport, this can also be the nickname of the certificate you wish to authenticate with as it is named in the security database. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname. 
 <p class="level0"><a name="CURLOPTSSLCERTTYPE"></a><span class="nroffip">CURLOPT_SSLCERTTYPE</span> 
-<p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the format of your certificate. Supported formats are "PEM" and "DER".  (Added in 7.9.3) 
+<p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the format of your certificate. Supported formats are "PEM" and "DER", except with Secure Transport. OpenSSL (versions 0.9.3 and later) and Secure Transport (on iOS 5 or later, or OS X 10.6 or later) also support "P12" for PKCS#12-encoded files. (Added in 7.9.3) 
 <p class="level0"><a name="CURLOPTSSLKEY"></a><span class="nroffip">CURLOPT_SSLKEY</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the file name of your private key. The default format is "PEM" and can be changed with <a class="emphasis" href="#CURLOPTSSLKEYTYPE">CURLOPT_SSLKEYTYPE</a>. 
-<p class="level1">(iOS and Mac OS X only) This option is ignored if curl was built against Secure Transport. Secure Transport expects the private key to be already present in the keychain containing the certificate. 
+<p class="level1">(iOS and Mac OS X only) This option is ignored if curl was built against Secure Transport. Secure Transport expects the private key to be already present in the keychain or PKCS#12 file containing the certificate. 
 <p class="level0"><a name="CURLOPTSSLKEYTYPE"></a><span class="nroffip">CURLOPT_SSLKEYTYPE</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. The string should be the format of your private key. Supported formats are "PEM", "DER" and "ENG". 
 <p class="level1">The format "ENG" enables you to load the private key from a crypto engine. In this case <a class="emphasis" href="#CURLOPTSSLKEY">CURLOPT_SSLKEY</a> is used as an identifier passed to the engine. You have to set the crypto engine with <a class="emphasis" href="#CURLOPTSSLENGINE">CURLOPT_SSLENGINE</a>. "DER" format key file currently does not work because of a bug in OpenSSL. 

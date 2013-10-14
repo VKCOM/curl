@@ -346,6 +346,10 @@ SOURCE=..\..\..\lib\hostsyn.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\http2.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\http.c
 # End Source File
 # Begin Source File
@@ -387,10 +391,6 @@ SOURCE=..\..\..\lib\inet_ntop.c
 # Begin Source File
 
 SOURCE=..\..\..\lib\inet_pton.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\lib\krb4.c
 # End Source File
 # Begin Source File
 
@@ -722,6 +722,10 @@ SOURCE=..\..\..\lib\curl_schannel.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\curl_sec.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\curl_setup.h
 # End Source File
 # Begin Source File
@@ -810,6 +814,10 @@ SOURCE=..\..\..\lib\hostip.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\http2.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\http_chunks.h
 # End Source File
 # Begin Source File
@@ -843,10 +851,6 @@ SOURCE=..\..\..\lib\inet_ntop.h
 # Begin Source File
 
 SOURCE=..\..\..\lib\inet_pton.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\..\lib\krb4.h
 # End Source File
 # Begin Source File
 
