@@ -1,3 +1,12 @@
+curl (7.26.0-1+wheezy5) stable-security; urgency=high
+
+  * Fix OpenSSL checking of a certificate CN or SAN name field when the
+    digital signature verification is turned off as per CVE-2013-4545
+    http://curl.haxx.se/docs/adv_20131115.html
+  * Set urgency=high accordingly
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 16 Nov 2013 13:04:23 +0100
+
 curl (7.26.0-1+wheezy4) stable-proposed-updates; urgency=low
 
   * Add 09_reset-timecond.patch (Closes: #705783, #719300)
