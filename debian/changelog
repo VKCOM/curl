@@ -1,3 +1,10 @@
+curl (7.26.0-1+wheezy6) stable-security; urgency=low
+
+  * Disable host verification too when using the --insecure option
+    (Closes: #729965)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 19 Nov 2013 17:15:32 +0100
+
 curl (7.26.0-1+wheezy5) stable-security; urgency=high
 
   * Fix OpenSSL checking of a certificate CN or SAN name field when the

@@ -1,0 +1,21 @@
+From a1be8e7f9be2feff103f314cd8ea8a50a560e79e Mon Sep 17 00:00:00 2001
+From: Daniel Stenberg <daniel@haxx.se>
+Date: Tue, 6 Nov 2012 22:27:25 +0100
+Subject: [PATCH] curl: set CURLOPT_SSL_VERIFYHOST to 0 to disable
+Bug-Debian: http://bugs.debian.org/729965
+
+---
+ src/tool_operate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/src/tool_operate.c
++++ b/src/tool_operate.c
+@@ -982,7 +982,7 @@
+         if(curlinfo->features & CURL_VERSION_SSL) {
+           if(config->insecure_ok) {
+             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+-            my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1L);
++            my_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+           }
+           else {
+             my_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
