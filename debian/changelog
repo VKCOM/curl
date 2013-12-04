@@ -1,3 +1,9 @@
+curl (7.33.0-2) UNRELEASED; urgency=low
+
+  * Make -dev packages Multi-Arch: same too (Closes: #731309)
+
+ -- Alessandro Ghedini <alessandro@ghedini.me>  Wed, 04 Dec 2013 17:57:02 +0100
+
 curl (7.33.0-1) unstable; urgency=low
 
   * New upstream release
