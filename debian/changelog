@@ -1,3 +1,12 @@
+curl (7.26.0-1+wheezy7) stable-security; urgency=high
+
+  * Fix GnuTLS checking of a certificate CN or SAN name field when the digital
+    signature verification is turned off as per CVE-2013-6422
+    http://curl.haxx.se/docs/adv_20131217.html
+  * Set urgency=high accordingly
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 11 Dec 2013 18:00:59 +0100
+
 curl (7.26.0-1+wheezy6) stable-security; urgency=low
 
   * Disable host verification too when using the --insecure option
