@@ -942,6 +942,10 @@ SOURCE=..\..\..\lib\share.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\..\lib\sigpipe.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\..\lib\slist.h
 # End Source File
 # Begin Source File

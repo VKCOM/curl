@@ -915,7 +915,6 @@ LIBMETALINK_LIBS
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
-HAVE_NSS_INITCONTEXT
 USE_NSS
 USE_CYASSL
 USE_POLARSSL
@@ -20874,6 +20873,7 @@ else
  /* is AF_INET6 available? */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdlib.h> /* for exit() */
 main()
 {
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
@@ -23397,6 +23397,40 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: detected CyaSSL" >&5
 $as_echo "$as_me: detected CyaSSL" >&6;}
 
+            # The cast to long int works around a bug in the HP C Compiler
+# version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
+# declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
+# This bug is HP SR number 8606223364.
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking size of long long" >&5
+$as_echo_n "checking size of long long... " >&6; }
+if ${ac_cv_sizeof_long_long+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if ac_fn_c_compute_int "$LINENO" "(long int) (sizeof (long long))" "ac_cv_sizeof_long_long"        "$ac_includes_default"; then :
+
+else
+  if test "$ac_cv_type_long_long" = yes; then
+     { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
+$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
+as_fn_error 77 "cannot compute sizeof (long long)
+See \`config.log' for more details" "$LINENO" 5; }
+   else
+     ac_cv_sizeof_long_long=0
+   fi
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_sizeof_long_long" >&5
+$as_echo "$ac_cv_sizeof_long_long" >&6; }
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define SIZEOF_LONG_LONG $ac_cv_sizeof_long_long
+_ACEOF
+
+
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
@@ -23598,9 +23632,9 @@ $as_echo "found" >&6; }
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PK11_CreateGenericObject in -lnss3" >&5
-$as_echo_n "checking for PK11_CreateGenericObject in -lnss3... " >&6; }
-if ${ac_cv_lib_nss3_PK11_CreateGenericObject+:} false; then :
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for SSL_VersionRangeSet in -lnss3" >&5
+$as_echo_n "checking for SSL_VersionRangeSet in -lnss3... " >&6; }
+if ${ac_cv_lib_nss3_SSL_VersionRangeSet+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -23612,26 +23646,26 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char PK11_CreateGenericObject ();
+char SSL_VersionRangeSet ();
 int main (void)
 {
-return PK11_CreateGenericObject ();
+return SSL_VersionRangeSet ();
  ;
  return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_nss3_PK11_CreateGenericObject=yes
+  ac_cv_lib_nss3_SSL_VersionRangeSet=yes
 else
-  ac_cv_lib_nss3_PK11_CreateGenericObject=no
+  ac_cv_lib_nss3_SSL_VersionRangeSet=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_PK11_CreateGenericObject" >&5
-$as_echo "$ac_cv_lib_nss3_PK11_CreateGenericObject" >&6; }
-if test "x$ac_cv_lib_nss3_PK11_CreateGenericObject" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_nss3_SSL_VersionRangeSet" >&5
+$as_echo "$ac_cv_lib_nss3_SSL_VersionRangeSet" >&6; }
+if test "x$ac_cv_lib_nss3_SSL_VersionRangeSet" = xyes; then :
 
 
 $as_echo "#define USE_NSS 1" >>confdefs.h
@@ -23653,18 +23687,6 @@ fi
       if test "x$USE_NSS" = "xyes"; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: detected NSS version $version" >&5
 $as_echo "$as_me: detected NSS version $version" >&6;}
-
-                        ac_fn_c_check_func "$LINENO" "NSS_InitContext" "ac_cv_func_NSS_InitContext"
-if test "x$ac_cv_func_NSS_InitContext" = xyes; then :
-
-
-$as_echo "#define HAVE_NSS_INITCONTEXT 1" >>confdefs.h
-
-          HAVE_NSS_INITCONTEXT=1
-
-
-fi
-
 
                                         if test "x$cross_compiling" != "xyes"; then
           LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$nssprefix/lib$libsuff"

@@ -299,6 +299,7 @@
 			<File RelativePath="..\..\..\lib\sendf.h"></File>
 			<File RelativePath="..\..\..\lib\setup-vms.h"></File>
 			<File RelativePath="..\..\..\lib\share.h"></File>
+			<File RelativePath="..\..\..\lib\sigpipe.h"></File>
 			<File RelativePath="..\..\..\lib\slist.h"></File>
 			<File RelativePath="..\..\..\lib\smtp.h"></File>
 			<File RelativePath="..\..\..\lib\sockaddr.h"></File>

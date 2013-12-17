@@ -1065,6 +1065,7 @@ AC_HELP_STRING([--disable-ipv6],[Disable ipv6 support]),
   AC_TRY_RUN([ /* is AF_INET6 available? */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <stdlib.h> /* for exit() */
 main()
 {
  if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
@@ -1983,6 +1984,9 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test "x$USE_CYASSL" = "xyes"; then
       AC_MSG_NOTICE([detected CyaSSL])
 
+      dnl cyassl/ctaocrypt/types.h needs SIZEOF_LONG_LONG defined!
+      AC_CHECK_SIZEOF(long long)
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
@@ -2067,8 +2071,8 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
          CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
-      dnl The function PK11_CreateGenericObject is needed to load libnsspem.so
-      AC_CHECK_LIB(nss3, PK11_CreateGenericObject,
+      dnl The function SSL_VersionRangeSet() is needed to enable TLS > 1.0
+      AC_CHECK_LIB(nss3, SSL_VersionRangeSet,
        [
        AC_DEFINE(USE_NSS, 1, [if NSS is enabled])
        AC_SUBST(USE_NSS, [1])
@@ -2083,14 +2087,6 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
       if test "x$USE_NSS" = "xyes"; then
         AC_MSG_NOTICE([detected NSS version $version])
-
-        dnl NSS_InitContext() was introduced in NSS 3.12.5 and helps to prevent
-        dnl collisions on NSS initialization/shutdown with other libraries
-        AC_CHECK_FUNC(NSS_InitContext,
-        [
-          AC_DEFINE(HAVE_NSS_INITCONTEXT, 1, [if you have the NSS_InitContext function])
-          AC_SUBST(HAVE_NSS_INITCONTEXT, [1])
-        ])
 
         dnl when shared libs were found in a path that the run-time
         dnl linker doesn't search through, we need to add it to

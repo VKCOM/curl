@@ -451,9 +451,6 @@
 /* Define to 1 if NI_WITHSCOPEID exists and works. */
 #undef HAVE_NI_WITHSCOPEID
 
-/* if you have the NSS_InitContext function */
-#undef HAVE_NSS_INITCONTEXT
-
 /* if you have an old MIT gssapi library, lacking GSS_C_NT_HOSTBASED_SERVICE
    */
 #undef HAVE_OLD_GSSMIT
@@ -878,6 +875,9 @@
 
 /* The size of `long', as computed by sizeof. */
 #undef SIZEOF_LONG
+
+/* The size of `long long', as computed by sizeof. */
+#undef SIZEOF_LONG_LONG
 
 /* The size of `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T

@@ -40,7 +40,7 @@ typedef enum {
 
 void glob_cleanup(URLGlob* glob);
 
-static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount)
+static GlobCode glob_fixed(URLGlob *glob, char *fixed, size_t len)
 {
   URLPattern *pat = &glob->pattern[glob->size];
   pat->type = UPTSet;
@@ -48,16 +48,17 @@ static GlobCode glob_fixed(URLGlob *glob, unsigned long *amount)
   pat->content.Set.ptr_s = 0;
   pat->globindex = -1;
 
-  (*amount)++;
-
   pat->content.Set.elements = malloc(sizeof(char*));
 
   if(!pat->content.Set.elements)
     return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
 
-  pat->content.Set.elements[0] = strdup(glob->glob_buffer);
+  pat->content.Set.elements[0] = malloc(len+1);
   if(!pat->content.Set.elements[0])
     return GLOBERROR("out of memory", 0, GLOB_NO_MEM);
+
+  memcpy(pat->content.Set.elements[0], fixed, len);
+  pat->content.Set.elements[0][len] = 0;
 
   return GLOB_OK;
 }
@@ -211,7 +212,7 @@ static GlobCode glob_range(URLGlob *glob, char **patternp,
       }
     }
     else
-      pattern+=3;
+      pattern += 4;
 
     *posp += (pattern - *patternp);
 
@@ -307,11 +308,13 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */
-  char* buf = glob->glob_buffer;
   GlobCode res = GLOB_OK;
   int globindex = 0; /* count "actual" globs */
 
+  *amount = 1;
+
   while(*pattern && !res) {
+    char *buf = glob->glob_buffer;
     int sublen = 0;
     while(*pattern && *pattern != '{' && *pattern != '[') {
       if(*pattern == '}' || *pattern == ']')
@@ -333,12 +336,9 @@ static GlobCode glob_parse(URLGlob *glob, char *pattern,
     if(sublen) {
       /* we got a literal string, add it as a single-item list */
       *buf = '\0';
-      res = glob_fixed(glob, amount);
+      res = glob_fixed(glob, glob->glob_buffer, sublen);
     }
     else {
-      if(!*amount)
-        *amount = 1;
-
       switch (*pattern) {
       case '\0': /* done  */
         break;
