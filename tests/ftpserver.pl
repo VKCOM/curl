@@ -52,6 +52,7 @@ BEGIN {
 use strict;
 use warnings;
 use IPC::Open2;
+use Digest::MD5;
 
 require "getpart.pm";
 require "ftp.pm";
@@ -174,6 +175,7 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 #
 my $TEXT_USERNAME = "user";
 my $TEXT_PASSWORD = "secret";
+my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
 
 #**********************************************************************
 # exit_signal_handler will be triggered to indicate that the program
@@ -562,6 +564,7 @@ sub protocolsetup {
     }
     elsif($proto eq 'pop3') {
         %commandfunc = (
+            'APOP' => \&APOP_pop3,
             'AUTH' => \&AUTH_pop3,
             'CAPA' => \&CAPA_pop3,
             'DELE' => \&DELE_pop3,
@@ -583,7 +586,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ <| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK cURL POP3 server ready to serve'."\r\n")
+            '+OK cURL POP3 server ready to serve '.$POP3_TIMESTAMP."\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -624,9 +627,14 @@ sub protocolsetup {
         %commandfunc = (
             'DATA' => \&DATA_smtp,
             'EHLO' => \&EHLO_smtp,
+            'EXPN' => \&EXPN_smtp,
             'HELO' => \&HELO_smtp,
+            'HELP' => \&HELP_smtp,
             'MAIL' => \&MAIL_smtp,
+            'NOOP' => \&NOOP_smtp,
+            'RSET' => \&RSET_smtp,
             'RCPT' => \&RCPT_smtp,
+            'VRFY' => \&VRFY_smtp,
             'QUIT' => \&QUIT_smtp,
         );
         %displaytext = (
@@ -949,6 +957,113 @@ sub DATA_smtp {
         logmsg "received $ulsize bytes upload\n";
 
         sendcontrol "250 OK, data received!\r\n";
+    }
+
+    return 0;
+}
+
+sub NOOP_smtp {
+    my ($args) = @_;
+
+    if($args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        sendcontrol "250 OK\r\n";
+    }
+
+    return 0;
+}
+
+sub RSET_smtp {
+    my ($args) = @_;
+
+    if($args) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        sendcontrol "250 Resetting\r\n";
+    }
+
+    return 0;
+}
+
+sub HELP_smtp {
+    my ($args) = @_;
+
+    # One argument is optional
+    if($args) {
+        logmsg "HELP_smtp got $args\n";
+    }
+
+    sendcontrol "214-This server supports the following commands:\r\n";
+
+    if(@auth_mechs) {
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP AUTH\r\n";
+    }
+    else {
+        sendcontrol "214 HELO EHLO RCPT DATA RSET MAIL VRFY EXPN QUIT HELP\r\n";
+    }
+
+    return 0;
+}
+
+sub VRFY_smtp {
+    my ($args) = @_;
+    my ($username, $address) = split(/ /, $args, 2);
+
+    logmsg "VRFY_smtp got $args\n";
+
+    if($username eq "") {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        my $testno = $smtp_client;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
+    }
+
+    return 0;
+}
+
+sub EXPN_smtp {
+    my ($list_name) = @_;
+
+    logmsg "EXPN_smtp got $list_name\n";
+
+    if(!$list_name) {
+        sendcontrol "501 Unrecognized parameter\r\n";
+    }
+    else {
+        my $testno = $smtp_client;
+
+        $testno =~ s/^([^0-9]*)//;
+        my $testpart = "";
+        if ($testno > 10000) {
+            $testpart = $testno % 10000;
+            $testno = int($testno / 10000);
+        }
+
+        loadtest("$srcdir/data/test$testno");
+
+        my @data = getpart("reply", "data$testpart");
+
+        for my $d (@data) {
+            sendcontrol $d;
+        }
     }
 
     return 0;
@@ -1628,6 +1743,30 @@ sub CAPA_pop3 {
 
         # End with the magic 3-byte end of listing marker
         sendcontrol ".\r\n";
+    }
+
+    return 0;
+}
+
+sub APOP_pop3 {
+    my ($args) = @_;
+    my ($user, $secret) = split(/ /, $args, 2);
+
+    if (!grep /^APOP$/, @capabilities) {
+        sendcontrol "-ERR Unrecognized command\r\n";
+    }
+    elsif (($user eq "") || ($secret eq "")) {
+        sendcontrol "-ERR Protocol error\r\n";
+    }
+    else {
+        my $digest = Digest::MD5::md5_hex($POP3_TIMESTAMP, $TEXT_PASSWORD);
+
+        if (($user ne $TEXT_USERNAME) || ($secret ne $digest)) {
+            sendcontrol "-ERR Login failure\r\n";
+        }
+        else {
+            sendcontrol "+OK Login successful\r\n";
+        }
     }
 
     return 0;
@@ -2702,9 +2841,14 @@ sub customize {
     logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
     while(<CUSTOM>) {
-        if($_ =~ /REPLY ([A-Za-z0-9+\/=]+) (.*)/) {
+        if($_ =~ /REPLY ([A-Za-z0-9+\/=\*]*) (.*)/) {
             $customreply{$1}=eval "qq{$2}";
-            logmsg "FTPD: set custom reply for $1\n";
+            if($1 eq "") {
+                logmsg "FTPD: set custom reply for empty response\n";
+            }
+            else {
+                logmsg "FTPD: set custom reply for $1\n";
+            }
         }
         elsif($_ =~ /COUNT ([A-Z]+) (.*)/) {
             # we blank the customreply for this command when having
@@ -3017,26 +3161,67 @@ while(1) {
         my $FTPARG;
         if($proto eq "imap") {
             # IMAP is different with its identifier first on the command line
-            unless(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
-                   ($full =~ /^([^ ]+) ([^ ]+)/)) {
-                sendcontrol "$1 '$full': command not understood.\r\n";
+            if(($full =~ /^([^ ]+) ([^ ]+) (.*)/) ||
+               ($full =~ /^([^ ]+) ([^ ]+)/)) {
+                $cmdid=$1; # set the global variable
+                $FTPCMD=$2;
+                $FTPARG=$3;
+            }
+            # IMAP authentication cancellation
+            elsif($full =~ /^\*$/) {
+                # Command id has already been set
+                $FTPCMD="*";
+                $FTPARG="";
+            }
+            # IMAP long "commands" are base64 authentication data
+            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+                # Command id has already been set
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
+                sendcontrol "$full BAD Command\r\n";
                 last;
             }
-            $cmdid=$1; # set the global variable
-            $FTPCMD=$2;
-            $FTPARG=$3;
         }
         elsif($full =~ /^([A-Z]{3,4})(\s(.*))?$/i) {
             $FTPCMD=$1;
             $FTPARG=$3;
         }
-        elsif(($proto eq "smtp") && ($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i)) {
-            # SMTP long "commands" are base64 authentication data.
-            $FTPCMD=$full;
-            $FTPARG="";
+        elsif($proto eq "pop3") {
+            # POP3 authentication cancellation
+            if($full =~ /^\*$/) {
+                $FTPCMD="*";
+                $FTPARG="";
+            }
+            # POP3 long "commands" are base64 authentication data
+            elsif($full =~ /^[A-Z0-9+\/]*={0,2}$/i) {
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
+                sendcontrol "-ERR Unrecognized command\r\n";
+                last;
+            }
+        }
+        elsif($proto eq "smtp") {
+            # SMTP authentication cancellation
+            if($full =~ /^\*$/) {
+                $FTPCMD="*";
+                $FTPARG="";
+            }
+            # SMTP long "commands" are base64 authentication data
+            elsif($full =~ /^[A-Z0-9+\/]{0,512}={0,2}$/i) {
+                $FTPCMD=$full;
+                $FTPARG="";
+            }
+            else {
+                sendcontrol "500 Unrecognized command\r\n";
+                last;
+            }
         }
         else {
-            sendcontrol "500 '$full': command not understood.\r\n";
+            sendcontrol "500 Unrecognized command\r\n";
             last;
         }
 
@@ -3058,33 +3243,33 @@ while(1) {
             }
         }
 
-        my $text;
-        $text = $customreply{$FTPCMD};
-        my $fake = $text;
+        my $check = 1; # no response yet
 
+        # See if there is a custom reply for our command
+        my $text = $customreply{$FTPCMD};
         if($text && ($text ne "")) {
             if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
                 # used enough number of times, now blank the customreply
                 $customreply{$FTPCMD}="";
             }
-        }
-        else {
-            $text = $displaytext{$FTPCMD};
-        }
-        my $check;
-        if($text && ($text ne "")) {
-            if($cmdid && ($cmdid ne "")) {
-                sendcontrol "$cmdid$text\r\n";
-            }
-            else {
-                sendcontrol "$text\r\n";
-            }
-        }
-        else {
-            $check=1; # no response yet
-        }
 
-        unless($fake && ($fake ne "")) {
+            sendcontrol "$text\r\n";
+            $check = 0;
+        }
+        else {
+            # See if there is any display text for our command
+            $text = $displaytext{$FTPCMD};
+            if($text && ($text ne "")) {
+                if($proto eq 'imap') {
+                    sendcontrol "$cmdid $text\r\n";
+                }
+                else {
+                    sendcontrol "$text\r\n";
+                }
+
+                $check = 0;
+            }
+
             # only perform this if we're not faking a reply
             my $func = $commandfunc{$FTPCMD};
             if($func) {

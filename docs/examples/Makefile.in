@@ -601,7 +601,6 @@ GREP = @GREP@
 HAVE_GNUTLS_SRP = @HAVE_GNUTLS_SRP@
 HAVE_LDAP_SSL = @HAVE_LDAP_SSL@
 HAVE_LIBZ = @HAVE_LIBZ@
-HAVE_NSS_INITCONTEXT = @HAVE_NSS_INITCONTEXT@
 HAVE_SSLEAY_SRP = @HAVE_SSLEAY_SRP@
 IDN_ENABLED = @IDN_ENABLED@
 INSTALL = @INSTALL@
@@ -760,7 +759,7 @@ COMPLICATED_EXAMPLES = curlgtk.c curlx.c htmltitle.cpp cacertinmem.c	   \
   ftpuploadresume.c ghiper.c hiperfifo.c htmltidy.c multithread.c	   \
   opensslthreadlock.c sampleconv.c synctime.c threaded-ssl.c evhiperfifo.c \
   smooth-gtk-thread.c version-check.pl href_extractor.c asiohiper.cpp \
-  multi-uv.c xmlstream.c usercertinmem.c
+  multi-uv.c xmlstream.c usercertinmem.c sessioninfo.c
 
 all: all-am
 

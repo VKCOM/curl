@@ -184,6 +184,9 @@ static const struct LongShort aliases[]= {
   {"01",  "http1.1",                 FALSE},
   {"02",  "http2.0",                 FALSE},
   {"1",  "tlsv1",                    FALSE},
+  {"10",  "tlsv1.0",                 FALSE},
+  {"11",  "tlsv1.1",                 FALSE},
+  {"12",  "tlsv1.2",                 FALSE},
   {"2",  "sslv2",                    FALSE},
   {"3",  "sslv3",                    FALSE},
   {"4",  "ipv4",                     FALSE},
@@ -215,6 +218,7 @@ static const struct LongShort aliases[]= {
   {"El", "tlspassword",              TRUE},
   {"Em", "tlsauthtype",              TRUE},
   {"En", "ssl-allow-beast",          FALSE},
+  {"Eo", "login-options",            TRUE},
   {"f",  "fail",                     FALSE},
   {"F",  "form",                     TRUE},
   {"Fs", "form-string",              TRUE},
@@ -1023,9 +1027,25 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       }
       break;
-    case '1':
-      /* TLS version 1 */
-      config->ssl_version = CURL_SSLVERSION_TLSv1;
+    case '1': /* --tlsv1* options */
+      switch(subletter) {
+      case '\0':
+        /* TLS version 1.x */
+        config->ssl_version = CURL_SSLVERSION_TLSv1;
+        break;
+      case '0':
+        /* TLS version 1.0 */
+        config->ssl_version = CURL_SSLVERSION_TLSv1_0;
+        break;
+      case '1':
+        /* TLS version 1.1 */
+        config->ssl_version = CURL_SSLVERSION_TLSv1_1;
+        break;
+      case '2':
+        /* TLS version 1.2 */
+        config->ssl_version = CURL_SSLVERSION_TLSv1_2;
+        break;
+      }
       break;
     case '2':
       /* SSL version 2 */
@@ -1347,10 +1367,15 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
-      case 'n': /* no empty SSL fragments */
+      case 'n': /* no empty SSL fragments, --ssl-allow-beast */
         if(curlinfo->features & CURL_VERSION_SSL)
           config->ssl_allow_beast = toggle;
         break;
+
+      case 'o': /* --login-options */
+        GetStr(&config->login_options, nextarg);
+        break;
+
       default: /* certificate file */
       {
         char *certname, *passphrase;
@@ -1668,7 +1693,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
     }
     break;
     case 'u':
-      /* user:password;options  */
+      /* user:password  */
       GetStr(&config->userpwd, nextarg);
       cleanarg(nextarg);
       break;
