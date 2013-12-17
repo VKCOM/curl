@@ -1,8 +1,15 @@
-curl (7.34.0-1) UNRELEASED; urgency=medium
+curl (7.34.0-1) unstable; urgency=high
 
   * New upstream release
+    - Fix GnuTLS checking of a certificate CN or SAN name field when the
+      digital signature verification is turned off as per CVE-2013-6422
+      http://curl.haxx.se/docs/adv_20131217.html
+    - Set urgency=high accordingly
+  * Drop patches merged upstream:
+    - 08_fix-typo.patch
+    - 09_fix-urlglob.patch
 
- -- Alessandro Ghedini <ghedo@debian.org>  Tue, 17 Dec 2013 11:14:47 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 17 Dec 2013 13:16:19 +0100
 
 curl (7.33.0-2) unstable; urgency=low
 
