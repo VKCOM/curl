@@ -115,21 +115,21 @@ Description: easy-to-use client-side URL transfer library (NSS flavour)
 Package: libcurl4-openssl-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-openssl-dev,
  libcurl4-dev,
  libcurl3-dev
 Conflicts: libcurl4-gnutls-dev, libcurl4-nss-dev
-Depends: ${misc:Depends}, libcurl3 (= ${binary:Version}),
- libc6-dev | libc-dev,
+Depends: ${misc:Depends}, libcurl3 (= ${binary:Version})
+Suggests: libcurl4-doc, libcurl3-dbg,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
  libssh2-1-dev,
  libssl-dev,
+ pkg-config,
  zlib1g-dev
 Multi-Arch: same
 Description: development files and documentation for libcurl (OpenSSL flavour)
@@ -154,20 +154,20 @@ Description: development files and documentation for libcurl (OpenSSL flavour)
 Package: libcurl4-gnutls-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-gnutls-dev,
  libcurl4-dev
 Conflicts: libcurl4-openssl-dev, libcurl4-nss-dev
-Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version}),
- libc6-dev | libc-dev,
+Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version})
+Suggests: libcurl4-doc, libcurl3-dbg,
  libgnutls-dev,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
  libssh2-1-dev,
+ pkg-config,
  zlib1g-dev
 Multi-Arch: same
 Description: development files and documentation for libcurl (GnuTLS flavour)
@@ -192,20 +192,20 @@ Description: development files and documentation for libcurl (GnuTLS flavour)
 Package: libcurl4-nss-dev
 Architecture: any
 Section: libdevel
-Suggests: libcurl4-doc, libcurl3-dbg
 Provides: libcurl-dev,
  libcurl-ssl-dev,
  libcurl3-nss-dev,
  libcurl4-dev
 Conflicts: libcurl4-openssl-dev, libcurl4-gnutls-dev
-Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version}),
- libc6-dev | libc-dev,
+Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version})
+Suggests: libcurl4-doc, libcurl3-dbg,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  libnss3-dev,
  librtmp-dev,
  libssh2-1-dev,
+ pkg-config,
  zlib1g-dev
 Multi-Arch: same
 Description: development files and documentation for libcurl (NSS flavour)
