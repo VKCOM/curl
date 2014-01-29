@@ -1,3 +1,11 @@
+curl (7.26.0-1+wheezy8) wheezy-security; urgency=high
+
+  * Fix re-use of wrong HTTP NTLM connection as per CVE-2014-0015
+    http://curl.haxx.se/docs/adv_20140129.html
+  * Set urgency=high accordingly
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Jan 2014 19:01:03 +0100
+
 curl (7.26.0-1+wheezy7) stable-security; urgency=high
 
   * Fix GnuTLS checking of a certificate CN or SAN name field when the digital
