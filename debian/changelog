@@ -1,8 +1,12 @@
-curl (7.35.0-1) UNRELEASED; urgency=medium
+curl (7.35.0-1) unstable; urgency=high
 
   * New upstream release
+    - Fix re-use of wrong HTTP NTLM connection as per CVE-2014-0015
+      http://curl.haxx.se/docs/adv_20140129.html
+    - Set urgency=high accordingly
+  * Refresh patches
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Jan 2014 10:44:56 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Jan 2014 11:16:57 +0100
 
 curl (7.34.0-1) unstable; urgency=high
 
