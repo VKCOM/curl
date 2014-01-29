@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -70,7 +70,7 @@
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "http_digest.h"
 #include "curl_ntlm.h"
 #include "http_negotiate.h"
@@ -128,14 +128,24 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
     return CURLE_ABORTED_BY_CALLBACK;
   }
   else if(nread == CURL_READFUNC_PAUSE) {
-    struct SingleRequest *k = &data->req;
-    /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-    k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
-    if(data->req.upload_chunky) {
-      /* Back out the preallocation done above */
-      data->req.upload_fromhere -= (8 + 2);
+
+    if(conn->handler->flags & PROTOPT_NONETWORK) {
+      /* protocols that work without network cannot be paused. This is
+         actually only FILE:// just now, and it can't pause since the transfer
+         isn't done using the "normal" procedure. */
+      failf(data, "Read callback asked for PAUSE when not supported!");
+      return CURLE_READ_ERROR;
     }
-    *nreadp = 0;
+    else {
+      struct SingleRequest *k = &data->req;
+      /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+      k->keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
+      if(data->req.upload_chunky) {
+        /* Back out the preallocation done above */
+        data->req.upload_fromhere -= (8 + 2);
+      }
+      *nreadp = 0;
+    }
     return CURLE_OK; /* nothing was read */
   }
   else if((size_t)nread > buffersize) {
@@ -636,9 +646,9 @@ static CURLcode readwrite_data(struct SessionHandle *data,
                always will fit in a size_t */
             infof(data,
                   "Rewinding stream by : %zu"
-                  " bytes on url %s (size = %" FORMAT_OFF_T
-                  ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T ", nread = %zd)\n",
+                  " bytes on url %s (size = %" CURL_FORMAT_CURL_OFF_T
+                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T ", nread = %zd)\n",
                   excess, data->state.path,
                   k->size, k->maxdownload, k->bytecount, nread);
             read_rewind(conn, excess);
@@ -647,9 +657,9 @@ static CURLcode readwrite_data(struct SessionHandle *data,
             infof(data,
                   "Excess found in a non pipelined read:"
                   " excess = %zu"
-                  ", size = %" FORMAT_OFF_T
-                  ", maxdownload = %" FORMAT_OFF_T
-                  ", bytecount = %" FORMAT_OFF_T "\n",
+                  ", size = %" CURL_FORMAT_CURL_OFF_T
+                  ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
+                  ", bytecount = %" CURL_FORMAT_CURL_OFF_T "\n",
                   excess, k->size, k->maxdownload, k->bytecount);
           }
         }
@@ -1085,13 +1095,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(0 > Curl_timeleft(data, &k->now, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %ld milliseconds with %"
-              FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
+              CURL_FORMAT_CURL_OFF_T " out of %"
+              CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount,
               k->size);
       }
       else {
         failf(data, "Operation timed out after %ld milliseconds with %"
-              FORMAT_OFF_T " bytes received",
+              CURL_FORMAT_CURL_OFF_T " bytes received",
               Curl_tvdiff(k->now, data->progress.t_startsingle), k->bytecount);
       }
       return CURLE_OPERATION_TIMEDOUT;
@@ -1113,7 +1124,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        (k->bytecount != (k->size + data->state.crlf_conversions)) &&
 #endif /* CURL_DO_LINEEND_CONV */
        !data->req.newurl) {
-      failf(data, "transfer closed with %" FORMAT_OFF_T
+      failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
             " bytes remaining to read",
             k->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
@@ -1309,11 +1320,10 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
-      Curl_expire(data, data->set.timeout + MULTI_TIMEOUT_INACCURACY_MS);
+      Curl_expire(data, data->set.timeout);
 
     if(data->set.connecttimeout)
-      Curl_expire(data, data->set.connecttimeout +
-                  MULTI_TIMEOUT_INACCURACY_MS);
+      Curl_expire(data, data->set.connecttimeout);
 
     /* In case the handle is re-used and an authentication method was picked
        in the session we need to make sure we only use the one(s) we now
@@ -1959,8 +1969,7 @@ Curl_setup_transfer(
 
         /* Set a timeout for the multi interface. Add the inaccuracy margin so
            that we don't fire slightly too early and get denied to run. */
-        Curl_expire(data, CURL_TIMEOUT_EXPECT_100 +
-                    MULTI_TIMEOUT_INACCURACY / 1000);
+        Curl_expire(data, CURL_TIMEOUT_EXPECT_100);
       }
       else {
         if(data->state.expect100header)

@@ -2,7 +2,7 @@
 <info>
 <keywords>
 POP3
-POP3 AUTH NTLM
+POP3 AUTH NTLM SASL CANCELLATION
 RFC1734
 RFC5034
 </keywords>
@@ -27,6 +27,7 @@ pop3
 </server>
 <features>
 NTLM
+!SSPI
 </features>
  <name>
 POP3 NTLM graceful cancellation

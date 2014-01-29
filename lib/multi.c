@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -329,6 +329,7 @@ struct Curl_multi *Curl_multi_handle(int hashsize, /* socket hash */
   multi->conn_cache = NULL;
   Curl_close(multi->closure_handle);
   multi->closure_handle = NULL;
+  Curl_llist_destroy(multi->msglist, NULL);
 
   free(multi);
   return NULL;
@@ -985,10 +986,19 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
                 Curl_tvdiff(now, data->progress.t_startsingle));
         else {
           k = &data->req;
-          failf(data, "Operation timed out after %ld milliseconds with %"
-                FORMAT_OFF_T " out of %" FORMAT_OFF_T " bytes received",
-                Curl_tvdiff(now, data->progress.t_startsingle), k->bytecount,
-                k->size);
+          if(k->size != -1) {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " out of %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(k->now, data->progress.t_startsingle),
+                  k->bytecount, k->size);
+          }
+          else {
+            failf(data, "Operation timed out after %ld milliseconds with %"
+                  CURL_FORMAT_CURL_OFF_T " bytes received",
+                  Curl_tvdiff(now, data->progress.t_startsingle),
+                  k->bytecount);
+          }
         }
 
         /* Force the connection closed because the server could continue to
@@ -1381,7 +1391,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       Curl_move_handle_from_send_to_recv_pipe(data, data->easy_conn);
       /* Check if we can move pending requests to send pipe */
       Curl_multi_process_pending_handles(multi);
-      multistate(data, CURLM_STATE_WAITPERFORM);
+
+      /* Only perform the transfer if there's a good socket to work with.
+         Having both BAD is a signal to skip immediately to DONE */
+      if((data->easy_conn->sockfd != CURL_SOCKET_BAD) ||
+         (data->easy_conn->writesockfd != CURL_SOCKET_BAD))
+        multistate(data, CURLM_STATE_WAITPERFORM);
+      else
+        multistate(data, CURLM_STATE_DONE);
       result = CURLM_CALL_MULTI_PERFORM;
       break;
 
@@ -1577,13 +1594,20 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       result = CURLM_CALL_MULTI_PERFORM;
 
       if(data->easy_conn) {
+        CURLcode res;
+
         /* Remove ourselves from the receive pipeline, if we are there. */
         Curl_removeHandleFromPipeline(data, data->easy_conn->recv_pipe);
         /* Check if we can move pending requests to send pipe */
         Curl_multi_process_pending_handles(multi);
 
         /* post-transfer command */
-        data->result = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+        res = Curl_done(&data->easy_conn, CURLE_OK, FALSE);
+
+        /* allow a previously set error code take precedence */
+        if(!data->result)
+          data->result = res;
+
         /*
          * If there are other handles on the pipeline, Curl_done won't set
          * easy_conn to NULL.  In such a case, curl_multi_remove_handle() can
@@ -1672,6 +1696,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       else if(data->easy_conn && Curl_pgrsUpdate(data->easy_conn)) {
         /* aborted due to progress callback return code must close the
            connection */
+        data->result = CURLE_ABORTED_BY_CALLBACK;
         data->easy_conn->bits.close = TRUE;
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
@@ -2146,10 +2171,12 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
-    data=multi->easyp;
-    while(data) {
-      singlesocket(multi, data);
-      data = data->next;
+    if(result != CURLM_BAD_HANDLE) {
+      data=multi->easyp;
+      while(data) {
+        singlesocket(multi, data);
+        data = data->next;
+      }
     }
 
     /* or should we fall-through and do the timer-based stuff? */
@@ -2213,31 +2240,16 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 
       data = NULL; /* set data to NULL again to avoid calling
                       multi_runsingle() in case there's no need to */
+      now = Curl_tvnow(); /* get a newer time since the multi_runsingle() loop
+                             may have taken some time */
     }
   }
-
-  /* Compensate for bad precision timers that might've triggered too early.
-
-     This precaution was added in commit 2c72732ebf3da5e as a result of bad
-     resolution in the windows function use(d).
-
-     The problematic case here is when using the multi_socket API and libcurl
-     has told the application about a timeout, and that timeout is what fires
-     off a bit early. As we don't have any IDs associated with the timeout we
-     can't tell which timeout that fired off but we only have the times to use
-     to check what to do. If it fires off too early, we don't run the correct
-     actions and we don't tell the application again about the same timeout as
-     was already first in the queue...
-
-     Originally we made the timeouts run 40 milliseconds early on all systems,
-     but now we have an #ifdef setup to provide a decent precaution inaccuracy
-     margin.
-  */
-
-  now.tv_usec += MULTI_TIMEOUT_INACCURACY;
-  if(now.tv_usec >= 1000000) {
-    now.tv_sec++;
-    now.tv_usec -= 1000000;
+  else {
+    /* Asked to run due to time-out. Clear the 'lastcall' variable to force
+       update_timer() to trigger a callback to the app again even if the same
+       timeout is still the one to run after this call. That handles the case
+       when the application asks libcurl to run the timeout prematurely. */
+    memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
   }
 
   /*
