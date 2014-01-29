@@ -30,7 +30,7 @@ Last-Update: 2013-04-17
  
  if BUILD_UNITTESTS
  noinst_LTLIBRARIES = libcurlu.la
-@@ -111,38 +111,38 @@
+@@ -106,38 +106,38 @@
  AM_LDFLAGS =
  AM_CFLAGS =
  
@@ -82,7 +82,7 @@ Last-Update: 2013-04-17
  
  libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
  libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
-@@ -151,7 +151,7 @@
+@@ -146,7 +146,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
