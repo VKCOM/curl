@@ -73,7 +73,7 @@
 #include "getinfo.h"
 
 #include "strequal.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "connect.h"
 #include "strerror.h"
 #include "inet_ntop.h"
@@ -1568,9 +1568,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       if(data->set.upload)
         state(conn, SSH_SFTP_UPLOAD_INIT);
       else {
-        if(data->set.opt_no_body)
-          state(conn, SSH_STOP);
-        else if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')
+        if(sftp_scp->path[strlen(sftp_scp->path)-1] == '/')
           state(conn, SSH_SFTP_READDIR_INIT);
         else
           state(conn, SSH_SFTP_DOWNLOAD_INIT);
@@ -1602,7 +1600,7 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           else {
             curl_off_t size = attrs.filesize;
             if(size < 0) {
-              failf(data, "Bad file size (%" FORMAT_OFF_T ")", size);
+              failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
               return CURLE_BAD_DOWNLOAD_RESUME;
             }
             data->state.resume_from = attrs.filesize;
@@ -1808,6 +1806,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
       break;
 
     case SSH_SFTP_READDIR_INIT:
+      Curl_pgrsSetDownloadSize(data, -1);
+      if(data->set.opt_no_body)
+        state(conn, SSH_STOP);
+
       /*
        * This is a directory that we are trying to get, so produce a directory
        * listing
@@ -2065,12 +2067,13 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
          */
         data->req.size = -1;
         data->req.maxdownload = -1;
+        Curl_pgrsSetDownloadSize(data, -1);
       }
       else {
         curl_off_t size = attrs.filesize;
 
         if(size < 0) {
-          failf(data, "Bad file size (%" FORMAT_OFF_T ")", size);
+          failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
         if(conn->data->state.use_range) {
@@ -2092,8 +2095,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           }
           if(from >= size) {
             failf(data, "Offset (%"
-                  FORMAT_OFF_T ") was beyond file size (%" FORMAT_OFF_T ")",
-                  from, attrs.filesize);
+                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
+                  CURL_FORMAT_CURL_OFF_T ")", from, attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           if(from > to) {
@@ -2117,7 +2120,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
           /* We're supposed to download the last abs(from) bytes */
           if((curl_off_t)attrs.filesize < -data->state.resume_from) {
             failf(data, "Offset (%"
-                  FORMAT_OFF_T ") was beyond file size (%" FORMAT_OFF_T ")",
+                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
+                  CURL_FORMAT_CURL_OFF_T ")",
                   data->state.resume_from, attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
@@ -2126,8 +2130,8 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         }
         else {
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
-            failf(data, "Offset (%" FORMAT_OFF_T
-                  ") was beyond file size (%" FORMAT_OFF_T ")",
+            failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
+                  ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
                   data->state.resume_from, attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
@@ -2141,6 +2145,10 @@ static CURLcode ssh_statemach_act(struct connectdata *conn, bool *block)
         SFTP_SEEK(sshc->sftp_handle, data->state.resume_from);
       }
     }
+
+    if(data->set.opt_no_body)
+      state(conn, SSH_SFTP_CLOSE);
+
     /* Setup the actual download */
     if(data->req.size == 0) {
       /* no data to transfer */

@@ -27,7 +27,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "connect.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "ssh.h"
 #include "multiif.h"
 #include "non-ascii.h"
@@ -444,10 +444,18 @@ CURLcode Curl_client_write(struct connectdata *conn,
       wrote = len;
     }
 
-    if(CURL_WRITEFUNC_PAUSE == wrote)
-      return pausewrite(data, type, ptr, len);
-
-    if(wrote != len) {
+    if(CURL_WRITEFUNC_PAUSE == wrote) {
+      if(conn->handler->flags & PROTOPT_NONETWORK) {
+        /* Protocols that work without network cannot be paused. This is
+           actually only FILE:// just now, and it can't pause since the
+           transfer isn't done using the "normal" procedure. */
+        failf(data, "Write callback asked for PAUSE when not supported!");
+        return CURLE_WRITE_ERROR;
+      }
+      else
+        return pausewrite(data, type, ptr, len);
+    }
+    else if(wrote != len) {
       failf(data, "Failed writing body (%zu != %zu)", wrote, len);
       return CURLE_WRITE_ERROR;
     }

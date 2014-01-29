@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2012 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -34,7 +34,7 @@
 
 #include "curl_base64.h"
 #include "curl_md5.h"
-#include "sslgen.h"
+#include "vtls/vtls.h"
 #include "curl_hmac.h"
 #include "curl_ntlm_msgs.h"
 #include "curl_sasl.h"
@@ -42,7 +42,7 @@
 #include "curl_memory.h"
 
 #ifdef USE_NSS
-#include "nssg.h" /* for Curl_nss_force_init() */
+#include "vtls/nssg.h" /* for Curl_nss_force_init() */
 #endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
