@@ -1,3 +1,9 @@
+curl (7.35.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Jan 2014 10:44:56 +0100
+
 curl (7.34.0-1) unstable; urgency=high
 
   * New upstream release
