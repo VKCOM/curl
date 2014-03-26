@@ -4,6 +4,7 @@
 04_workaround_as_needed_bug.patch
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
+08_fix-imap-tests.patch
 
 90_gnutls.patch
 99_nss.patch
