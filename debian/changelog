@@ -1,4 +1,4 @@
-curl (7.36.0-1) UNRELEASED; urgency=high
+curl (7.36.0-1) unstable; urgency=high
 
   * New upstream release (Closes: #742728)
     - Fix connection re-use when using different log-in credentials
@@ -7,8 +7,9 @@ curl (7.36.0-1) UNRELEASED; urgency=high
     - Reject IP address wildcard matches as per CVE-2014-0139
       http://curl.haxx.se/docs/adv_20140326B.html
     - Set urgency=high accordingly
+  * Add 08_fix-imap-tests.patch to fix tests broken by the fix for CVE-2014-0138
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 26 Mar 2014 10:35:11 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 30 Mar 2014 15:36:35 +0200
 
 curl (7.35.0-1) unstable; urgency=high
 
