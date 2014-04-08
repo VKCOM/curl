@@ -1,3 +1,12 @@
+curl (7.36.0-2) unstable; urgency=medium
+
+  * Move Depends on -dev packages needed to use static libraries to Suggests
+  * Switch to GnuTLS 3.x (Closes: #741568)
+  * Disable RTMP support (librtmp-dev requires libgnutls-dev, which conflicts
+    with libgnutls28-dev)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 26 Apr 2014 18:49:27 +0200
+
 curl (7.36.0-1) unstable; urgency=high
 
   * New upstream release (Closes: #742728)
