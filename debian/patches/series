@@ -11,6 +11,8 @@
 11_disable-verifyhost-with-insecure.patch
 12_CVE-2013-6422.patch
 13_CVE-2014-0015.patch
+14_CVE-2014-0138.patch
+15_CVE-2014-0139.patch
 
 90_gnutls.patch
 99_nss.patch
