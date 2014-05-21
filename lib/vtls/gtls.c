@@ -735,9 +735,10 @@ gtls_connect_step3(struct connectdata *conn,
   /* initialize an X.509 certificate structure. */
   gnutls_x509_crt_init(&x509_cert);
 
-  /* convert the given DER or PEM encoded Certificate to the native
-     gnutls_x509_crt_t format */
-  gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
+  if(chainp)
+    /* convert the given DER or PEM encoded Certificate to the native
+       gnutls_x509_crt_t format */
+    gnutls_x509_crt_import(x509_cert, chainp, GNUTLS_X509_FMT_DER);
 
   if(data->set.ssl.issuercert) {
     gnutls_x509_crt_init(&x509_issuer);
@@ -883,7 +884,7 @@ gtls_connect_step3(struct connectdata *conn,
       if(proto.size == NGHTTP2_PROTO_VERSION_ID_LEN &&
         memcmp(NGHTTP2_PROTO_VERSION_ID, proto.data,
         NGHTTP2_PROTO_VERSION_ID_LEN) == 0) {
-        conn->negnpn = NPN_HTTP2_DRAFT09;
+        conn->negnpn = NPN_HTTP2;
       }
       else if(proto.size == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
           proto.data, ALPN_HTTP_1_1_LENGTH) == 0) {

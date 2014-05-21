@@ -296,9 +296,10 @@ p.roffit {
 <p class="level1">If used in combination with -I, the POST data will instead be appended to the URL with a HEAD request. 
 <p class="level1">If this option is used several times, only the first one is used. This is because undoing a GET doesn't make sense, but you should then instead enforce the alternative method you prefer. 
 <p class="level0"><a name="-H"></a><span class="nroffip">-H, --header &lt;header&gt;</span> 
-<p class="level1">(HTTP) Extra header to use when getting a web page. You may specify any number of extra headers. Note that if you should add a custom header that has the same name as one of the internal ones curl would use, your externally set header will be used instead of the internal one. This allows you to make even trickier stuff than curl would normally do. You should not replace internally set headers without knowing perfectly well what you're doing. Remove an internal header by giving a replacement without content on the right side of the colon, as in: -H "Host:". If you send the custom header with no-value then its header must be terminated with a semicolon, such as -H "X-Custom-Header;" to send "X-Custom-Header:". 
+<p class="level1">(HTTP) Extra header to include in the request when sending HTTP to a server. You may specify any number of extra headers. Note that if you should add a custom header that has the same name as one of the internal ones curl would use, your externally set header will be used instead of the internal one. This allows you to make even trickier stuff than curl would normally do. You should not replace internally set headers without knowing perfectly well what you're doing. Remove an internal header by giving a replacement without content on the right side of the colon, as in: -H "Host:". If you send the custom header with no-value then its header must be terminated with a semicolon, such as -H "X-Custom-Header;" to send "X-Custom-Header:". 
 <p class="level1">curl will make sure that each header you add/replace is sent with the proper end-of-line marker, you should thus <span Class="bold">not</span> add that as a part of the header content: do not add newlines or carriage returns, they will only mess things up for you. 
 <p class="level1">See also the <a class="emphasis" href="#-A">-A, --user-agent</a> and <a class="emphasis" href="#-e">-e, --referer</a> options. 
+<p class="level1">Starting in 7.37.0, you need <a class="emphasis" href="#--proxy-header">--proxy-header</a> to send custom headers intended for a proxy. 
 <p class="level1">This option can be used multiple times to add/replace/remove multiple headers. 
 <p class="level0"><a name="--hostpubmd5"></a><span class="nroffip">--hostpubmd5 &lt;md5&gt;</span> 
 <p class="level1">(SCP/SFTP) Pass a string containing 32 hexadecimal digits. The string should be the 128 bit MD5 checksum of the remote host's public key, curl will refuse the connection with the host unless the md5sums match. (Added in 7.17.1) 
@@ -382,6 +383,10 @@ p.roffit {
 <p class="level0"><a name="-m"></a><span class="nroffip">-m, --max-time &lt;seconds&gt;</span> 
 <p class="level1">Maximum time in seconds that you allow the whole operation to take.  This is useful for preventing your batch jobs from hanging for hours due to slow networks or links going down.  Since 7.32.0, this option accepts decimal values, but the actual timeout will decrease in accuracy as the specified timeout increases in decimal precision.  See also the <a class="emphasis" href="#--connect-timeout">--connect-timeout</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
+<p class="level0"><a name="--login-options"></a><span class="nroffip">--login-options &lt;options&gt;</span> 
+<p class="level1">Specify the login options to use during server authentication. 
+<p class="level1">You can use the login options to specify protocol specific options that may be used during authentication. At present only IMAP, POP3 and SMTP support login options. For more information about the login options please see <a href="http://www.ietf.org/rfc/rfc2384.txt">RFC 2384</a>, RFC 5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.34.0). 
+<p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--mail-auth"></a><span class="nroffip">--mail-auth &lt;address&gt;</span> 
 <p class="level1">(SMTP) Specify a single address. This will be used to specify the authentication address (identity) of a submitted message that is being relayed to another server. 
 <p class="level1">(Added in 7.25.0) 
@@ -457,6 +462,12 @@ p.roffit {
 <p class="level1">(IMAP, POP3, SMTP) Specify the Bearer Token for OAUTH 2.0 server authentication. The Bearer Token is used in conjunction with the user name which can be specified as part of the <a class="emphasis" href="#--url">--url</a> or <a class="emphasis" href="#-u">-u, --user</a> options. 
 <p class="level1">The Bearer Token and user name are formatted according to <a href="http://www.ietf.org/rfc/rfc6750.txt">RFC 6750</a>. 
 <p class="level1">If this option is used several times, the last one will be used. 
+<p class="level0"><a name="--proxy-header"></a><span class="nroffip">--proxy-header &lt;header&gt;</span> 
+<p class="level1">(HTTP) Extra header to include in the request when sending HTTP to a proxy. You may specify any number of extra headers. This is the equivalent option to <a class="emphasis" href="#-H">-H, --header</a> but is for proxy communication only like in CONNECT requests when you want a separate header sent to the proxy to what is sent to the actual remote host. 
+<p class="level1">curl will make sure that each header you add/replace is sent with the proper end-of-line marker, you should thus <span Class="bold">not</span> add that as a part of the header content: do not add newlines or carriage returns, they will only mess things up for you. 
+<p class="level1">Headers specified with this option will not be included in requests that curl knows will not be sent to a proxy. 
+<p class="level1">This option can be used multiple times to add/replace/remove multiple headers. 
+<p class="level1">(Added in 7.37.0) 
 <p class="level0"><a name="-p"></a><span class="nroffip">-p, --proxytunnel</span> 
 <p class="level1">When an HTTP proxy is used (<a class="emphasis" href="#-x">-x, --proxy</a>), this option will cause non-HTTP protocols to attempt to tunnel through the proxy instead of merely using it to do HTTP-like operations. The tunnel approach is made with the HTTP proxy CONNECT request and requires that the proxy allows direct connect to the remote port number curl wants to tunnel through to. 
 <p class="level0"><a name="-P"></a><span class="nroffip">-P, --ftp-port &lt;address&gt;</span> 
@@ -671,11 +682,10 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--trace-time"></a><span class="nroffip">--trace-time</span> 
 <p class="level1">Prepends a time stamp to each trace or verbose line that curl displays. (Added in 7.14.0) 
-<p class="level0"><a name="-u"></a><span class="nroffip">-u, --user &lt;user:password;options&gt;</span> 
-<p class="level1">Specify the user name, password and optional login options to use for server authentication. Overrides <a class="emphasis" href="#-n">-n, --netrc</a> and <a class="emphasis" href="#--netrc-optional">--netrc-optional</a>. 
-<p class="level1">If you simply specify the user name, with or without the login options, curl will prompt for a password. 
-<p class="level1">If you use an SSPI-enabled curl binary and perform NTLM authentication, you can force curl to select the user name and password from your environment by simply specifying a single colon with this option: "-u :" or by specifying the login options on their own, for example "-u ;auth=NTLM". 
-<p class="level1">You can use the optional login options part to specify protocol specific options that may be used during authentication. At present only IMAP, POP3 and SMTP support login options as part of the user login information. For more information about the login options please see <a href="http://www.ietf.org/rfc/rfc2384.txt">RFC 2384</a>, RFC 5092 and IETF draft draft-earhart-url-smtp-00.txt (Added in 7.31.0).  
+<p class="level0"><a name="-u"></a><span class="nroffip">-u, --user &lt;user:password&gt;</span> 
+<p class="level1">Specify the user name and password to use for server authentication. Overrides <a class="emphasis" href="#-n">-n, --netrc</a> and <a class="emphasis" href="#--netrc-optional">--netrc-optional</a>. 
+<p class="level1">If you simply specify the user name, curl will prompt for a password. 
+<p class="level1">If you use an SSPI-enabled curl binary and perform NTLM authentication, you can force curl to select the user name and password from your environment by specifying a single colon with this option: "-u :". 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-U"></a><span class="nroffip">-U, --proxy-user &lt;user:password&gt;</span> 
 <p class="level1">Specify the user name and password to use for proxy authentication. 

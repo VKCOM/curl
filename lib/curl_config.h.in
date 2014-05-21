@@ -138,6 +138,9 @@
 /* Define to 1 if you have the <crypto.h> header file. */
 #undef HAVE_CRYPTO_H
 
+/* Define to 1 if you have the <cyassl/error-ssl.h> header file. */
+#undef HAVE_CYASSL_ERROR_SSL_H
+
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
