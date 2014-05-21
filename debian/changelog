@@ -1,9 +1,12 @@
-curl (7.37.0-1) UNRELEASED; urgency=medium
+curl (7.37.0-1) unstable; urgency=medium
 
   * New upstream release
     - Fix NULL pointer dereference in GnuTLS code (Closes: #746349)
+  * Drop 08_fix-imap-tests.patch (merged upstream)
+  * Refresh 01_runtests_gdb.patch
+  * Remove Build-Depends on libgcrypt
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 21 May 2014 12:49:58 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 21 May 2014 15:22:38 +0200
 
 curl (7.36.0-2) unstable; urgency=medium
 
