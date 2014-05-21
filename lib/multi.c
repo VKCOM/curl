@@ -404,6 +404,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* Point to the multi's connection cache */
   data->state.conn_cache = multi->conn_cache;
 
+  data->state.infilesize = data->set.filesize;
+
   /* This adds the new entry at the 'end' of the doubly-linked circular
      list of SessionHandle structs to try and maintain a FIFO queue so
      the pipelined requests are in order. */
@@ -828,7 +830,7 @@ CURLMcode curl_multi_wait(CURLM *multi_handle,
   curlfds = nfds; /* number of internal file descriptors */
   nfds += extra_nfds; /* add the externally provided ones */
 
-  if(nfds) {
+  if(nfds || extra_nfds) {
     ufds = malloc(nfds * sizeof(struct pollfd));
     if(!ufds)
       return CURLM_OUT_OF_MEMORY;
@@ -1024,7 +1026,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(CURLE_OK == data->result) {
         /* after init, go CONNECT */
         multistate(data, CURLM_STATE_CONNECT);
-        Curl_pgrsTime(data, TIMER_STARTSINGLE);
+        Curl_pgrsTime(data, TIMER_STARTOP);
         result = CURLM_CALL_MULTI_PERFORM;
       }
       break;
@@ -1036,6 +1038,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
     case CURLM_STATE_CONNECT:
       /* Connect. We want to get a connection identifier filled in. */
+      Curl_pgrsTime(data, TIMER_STARTSINGLE);
       data->result = Curl_connect(data, &data->easy_conn,
                                   &async, &protocol_connect);
       if(CURLE_NO_CONNECTION_AVAILABLE == data->result) {
@@ -1804,10 +1807,13 @@ static void close_all_connections(struct Curl_multi *multi)
 
   conn = Curl_conncache_find_first_connection(multi->conn_cache);
   while(conn) {
+    SIGPIPE_VARIABLE(pipe_st);
     conn->data = multi->closure_handle;
 
+    sigpipe_ignore(conn->data, &pipe_st);
     /* This will remove the connection from the cache */
     (void)Curl_disconnect(conn, FALSE);
+    sigpipe_restore(&pipe_st);
 
     conn = Curl_conncache_find_first_connection(multi->conn_cache);
   }

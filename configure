@@ -7576,7 +7576,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7621,7 +7621,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7644,7 +7644,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7688,7 +7688,7 @@ else
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -7711,7 +7711,7 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
     We can't simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
     incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
+#define LARGE_OFF_T ((((off_t) 1 << 31) << 31) - 1 + (((off_t) 1 << 31) << 31))
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
 		       && LARGE_OFF_T % 2147483647 == 1)
 		      ? 1 : -1];
@@ -23454,6 +23454,19 @@ _ACEOF
 
 
 
+            for ac_header in cyassl/error-ssl.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "cyassl/error-ssl.h" "ac_cv_header_cyassl_error_ssl_h" "$ac_includes_default"
+if test "x$ac_cv_header_cyassl_error_ssl_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CYASSL_ERROR_SSL_H 1
+_ACEOF
+
+fi
+
+done
+
+
       LIBS="-lcyassl -lm $LIBS"
 
       if test -n "$cyassllib"; then
@@ -23801,11 +23814,12 @@ $as_echo "#define USE_AXTLS 1" >>confdefs.h
       USE_AXTLS="yes"
       curl_ssl_msg="enabled (axTLS)"
 
-
-      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
-      export LD_LIBRARY_PATH
-      { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
+      if test "x$cross_compiling" != "xyes"; then
+        LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$LIB_AXTLS"
+        export LD_LIBRARY_PATH
+        { $as_echo "$as_me:${as_lineno-$LINENO}: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&5
 $as_echo "$as_me: Added $LIB_AXTLS to LD_LIBRARY_PATH" >&6;}
+      fi
 
 else
 
@@ -25473,7 +25487,7 @@ done
       IDN_ENABLED=1
 
       curl_idn_msg="enabled"
-      if test -n "$IDN_DIR"; then
+      if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
         LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$IDN_DIR"
         export LD_LIBRARY_PATH
         { $as_echo "$as_me:${as_lineno-$LINENO}: Added $IDN_DIR to LD_LIBRARY_PATH" >&5
@@ -25510,13 +25524,12 @@ fi
 
 case "$OPT_H2" in
   no)
-        want_idn="no"
+        want_h2="no"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
   default)
         want_h2="no"
-    want_h2_path="default"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
     ;;
@@ -25528,19 +25541,18 @@ $as_echo "yes" >&6; }
     ;;
   *)
         want_h2="yes"
-    want_h2_path="$withval"
+    want_h2_path="$withval/lib/pkgconfig"
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes ($withval)" >&5
 $as_echo "yes ($withval)" >&6; }
     ;;
 esac
 
 curl_h2_msg="disabled (--with-nghttp2)"
-if test X"$OPT_H2" != Xno; then
+if test X"$want_h2" != Xno; then
     CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  h2pcdir=${want_h2_path}/lib/pkgconfig
 
 
     PKGCONFIG="no"
@@ -25650,8 +25662,8 @@ fi
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libnghttp2 options with pkg-config" >&5
 $as_echo_n "checking for libnghttp2 options with pkg-config... " >&6; }
             itexists=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
          $PKGCONFIG --exists libnghttp2 >/dev/null 2>&1 && echo 1`
@@ -25669,8 +25681,8 @@ $as_echo "found" >&6; }
 
   if test "$PKGCONFIG" != "no" ; then
     LIB_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -25679,8 +25691,8 @@ $as_echo "found" >&6; }
 $as_echo "$as_me: -l is $LIB_H2" >&6;}
 
     CPP_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
        $PKGCONFIG --cflags-only-I libnghttp2`
@@ -25688,8 +25700,8 @@ $as_echo "$as_me: -l is $LIB_H2" >&6;}
 $as_echo "$as_me: -I is $CPP_H2" >&6;}
 
     LD_H2=`
-    if test -n "$h2pcdir"; then
-      PKG_CONFIG_LIBDIR="$h2pcdir"
+    if test -n "$want_h2_path"; then
+      PKG_CONFIG_LIBDIR="$want_h2_path"
       export PKG_CONFIG_LIBDIR
     fi
 
@@ -34381,7 +34393,7 @@ $as_echo "no" >&6; }
   tst_allow_poll="unknown"
   #
   case $host_os in
-    darwin*|interix*)
+    darwin[123456789].*|darwin10.*|darwin11.*|darwin12.*|interix*)
                               curl_disallow_poll="yes"
       ;;
   esac
@@ -39107,6 +39119,12 @@ fi
 
 if test "x$USE_NGHTTP2" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES HTTP2"
+fi
+if test "x$curl_spnego_msg" = "xenabled"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
+fi
+if test "x$want_gss" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
 

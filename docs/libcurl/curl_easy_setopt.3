@@ -347,6 +347,8 @@ Pass a pointer to a function that matches the following prototype:
 \fBint function(void *clientp, double dltotal, double dlnow, double ultotal,
 double ulnow);\fP
 
+We encourage users to use \fICURLOPT_XFERINFOFUNCTION\fP instead, if you can.
+
 This function gets called by libcurl instead of its internal equivalent with a
 frequent interval. While data is being transferred it will be called very
 frequently, and during slow periods like when nothing is being transferred it
@@ -821,8 +823,9 @@ the user
 
 The path part of an IMAP request not only specifies the mailbox to list (Added
 in 7.30.0) or select, but can also be used to check the UIDVALIDITY of the
-mailbox and to specify the UID and SECTION of the message to fetch (Added in
-7.30.0).
+mailbox, to specify the UID, SECTION (Added in 7.30.0) and PARTIAL octets
+(Added in 7.37.0) of the message to fetch and to specify what nessages to
+search for (Added in 7.37.0).
 
 imap://user:password@mail.example.com - Performs a top level folder list
 
@@ -837,7 +840,17 @@ the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches
 message 2 if it is
 
 imap://user:password@mail.example.com/INBOX/;UID=3/;SECTION=TEXT - Selects the
-user's inbox and fetches message 3 with only the text portion of the message
+user's inbox and fetches the text portial of message 3
+
+imap://user:password@mail.example.com/INBOX/;UID=4/;PARTIAL=0.1024 - Selects
+the user's inbox and fetches the first 1024 octets of message 4
+
+imap://user:password@mail.example.com/INBOX?NEW - Selects the user's inbox and
+checks for NEW messages
+
+imap://user:password@mail.example.com/INBOX?SUBJECT%20shadows - Selects the
+user's inbox and searches for messages containing "shadows" in the subject
+line
 
 For more information about the individual components of an IMAP URL please
 see RFC5092.
@@ -1515,17 +1528,20 @@ set the User-Agent: header in the http request sent to the remote server. This
 can be used to fool servers or scripts. You can also set any custom header
 with \fICURLOPT_HTTPHEADER\fP.
 .IP CURLOPT_HTTPHEADER
-Pass a pointer to a linked list of HTTP headers to pass to the server in your
-HTTP request. The linked list should be a fully valid list of \fBstruct
-curl_slist\fP structs properly filled in. Use \fIcurl_slist_append(3)\fP to
-create the list and \fIcurl_slist_free_all(3)\fP to clean up an entire
-list. If you add a header that is otherwise generated and used by libcurl
-internally, your added one will be used instead. If you add a header with no
-content as in 'Accept:' (no data on the right side of the colon), the
-internally used header will get disabled. Thus, using this option you can add
-new headers, replace internal headers and remove internal headers. To add a
-header with no content (nothing to the right side of the colon), use the
-form 'MyHeader;' (note the ending semicolon).
+Pass a pointer to a linked list of HTTP headers to pass to the server and/or
+proxy in your HTTP request. The same list is used for both host and proxy
+requests!
+
+The linked list should be a fully valid list of \fBstruct curl_slist\fP
+structs properly filled in. Use \fIcurl_slist_append(3)\fP to create the list
+and \fIcurl_slist_free_all(3)\fP to clean up an entire list. If you add a
+header that is otherwise generated and used by libcurl internally, your added
+one will be used instead. If you add a header with no content as in 'Accept:'
+(no data on the right side of the colon), the internally used header will get
+disabled. With this option you can add new headers, replace internal headers
+and remove internal headers. To add a header with no content (nothing to the
+right side of the colon), use the form 'MyHeader;' (note the ending
+semicolon).
 
 The headers included in the linked list must not be CRLF-terminated, because
 curl adds CRLF after each header item. Failure to comply with this will result
@@ -1541,6 +1557,42 @@ Pass a NULL to this to reset back to no custom headers.
 
 The most commonly replaced headers have "shortcuts" in the options
 \fICURLOPT_COOKIE\fP, \fICURLOPT_USERAGENT\fP and \fICURLOPT_REFERER\fP.
+
+There's an alternative option that sets or replaces headers only for requests
+that are sent with CONNECT to a proxy: \fICURLOPT_PROXYHEADER\fP. Use
+\fICURLOPT_HEADEROPT\fP to control the behavior.
+.IP CURLOPT_HEADEROPT
+Pass a long that is a bitmask of options of how to deal with headers. The two
+mutually exclusive options are:
+
+CURLHEADER_UNIFIED - keep working as before. This means CURLOPT_HTTPHEADER
+headers will be used in requests both to servers and proxies. With this option
+enabled, \fICURLOPT_PROXYHEADER\fP will not have any effect.
+
+CURLHEADER_SEPARATE - makes \fICURLOPT_HTTPHEADER\fP headers only get sent to
+a server and not to a proxy. Proxy headers must be set with
+\fICURLOPT_PROXYHEADER\fP to get used. Note that if a non-CONNECT request is
+sent to a proxy, libcurl will send both server headers and proxy headers. When
+doing CONNECT, libcurl will send \fICURLOPT_PROXYHEADER\fP headers only do the
+proxy and then \fICURLOPT_HTTPHEADER\fP headers only to the server.
+
+(Added in 7.37.0)
+.IP CURLOPT_PROXYHEADER
+Pass a pointer to a linked list of HTTP headers to pass in your HTTP request
+sent to a proxy. The rules for this list is identical to the
+\fICURLOPT_HTTPHEADER\fP option's.
+
+The headers set with this option is only ever used in requests sent to a proxy
+- when there's also a request sent to a host.
+
+The first line in a request (containing the method, usually a GET or POST) is
+NOT a header and cannot be replaced using this option. Only the lines
+following the request-line are headers. Adding this method line in this list
+of headers will only cause your request to send an invalid header.
+
+Pass a NULL to this to reset back to no custom headers.
+
+This option was added in libcurl 7.37.0.
 .IP CURLOPT_HTTP200ALIASES
 Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
 responses.  Some servers respond with a custom header response line.  For
@@ -2742,6 +2794,14 @@ Pass a pointer to a curl_sshkeycallback function. It gets called when the
 known_host matching has been done, to allow the application to act and decide
 for libcurl how to proceed. The callback will only be called if
 \fICURLOPT_SSH_KNOWNHOSTS\fP is also set.
+
+.nf
+int curl_sshkeycallback (CURL *easy,     /* easy handle */
+                         const struct curl_khkey *knownkey, /* known */
+                         const struct curl_khkey *foundkey, /* found */
+                         enum curl_khmatch, /* libcurl's view on the keys */
+                         void *clientp);
+.fi
 
 The curl_sshkeycallback function gets passed the CURL handle, the key from the
 known_hosts file, the key from the remote site, info from libcurl on the

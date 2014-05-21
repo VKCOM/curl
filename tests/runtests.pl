@@ -585,7 +585,7 @@ sub torture {
         else {
             $ret = runclient($testcmd);
         }
-        #logmsg "$_ Returned " . $ret >> 8 . "\n";
+        #logmsg "$_ Returned " . ($ret >> 8) . "\n";
 
         # Now clear the variable again
         delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
@@ -599,7 +599,7 @@ sub torture {
 
         # verify that it returns a proper error code, doesn't leak memory
         # and doesn't core dump
-        if($ret & 255) {
+        if(($ret & 255) || ($ret >> 8) >= 128) {
             logmsg " system() returned $ret\n";
             $fail=1;
         }
@@ -3014,6 +3014,11 @@ sub singletest {
         my @keywords = getpart("info", "keywords");
         my $match;
         my $k;
+
+        if(!$keywords[0]) {
+            $why = "missing the <keywords> section!";
+        }
+
         for $k (@keywords) {
             chomp $k;
             if ($disabled_keywords{$k}) {
@@ -3647,40 +3652,6 @@ sub singletest {
         $ok .= "-"; # stdout not checked
     }
 
-    if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
-        # verify the received data
-        my @out = loadarray($CURLOUT);
-        # get the mode attribute
-        my $filemode=$replyattr{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            map s/\r\n/\n/g, @reply;
-            map s/\n/\r\n/g, @reply;
-        }
-
-        $res = compare($testnum, $testname, "data", \@out, \@reply);
-        if ($res) {
-            return 1;
-        }
-        $ok .= "d";
-    }
-    else {
-        $ok .= "-"; # data not checked
-    }
-
-    if(@upload) {
-        # verify uploaded data
-        my @out = loadarray("$LOGDIR/upload.$testnum");
-        $res = compare($testnum, $testname, "upload", \@out, \@upload);
-        if ($res) {
-            return 1;
-        }
-        $ok .= "u";
-    }
-    else {
-        $ok .= "-"; # upload not checked
-    }
-
     if(@protocol) {
         # Verify the sent request
         my @out = loadarray($SERVERIN);
@@ -3726,6 +3697,40 @@ sub singletest {
     }
     else {
         $ok .= "-"; # protocol not checked
+    }
+
+    if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
+        # verify the received data
+        my @out = loadarray($CURLOUT);
+        # get the mode attribute
+        my $filemode=$replyattr{'mode'};
+        if($filemode && ($filemode eq "text") && $has_textaware) {
+            # text mode when running on windows: fix line endings
+            map s/\r\n/\n/g, @reply;
+            map s/\n/\r\n/g, @reply;
+        }
+
+        $res = compare($testnum, $testname, "data", \@out, \@reply);
+        if ($res) {
+            return 1;
+        }
+        $ok .= "d";
+    }
+    else {
+        $ok .= "-"; # data not checked
+    }
+
+    if(@upload) {
+        # verify uploaded data
+        my @out = loadarray("$LOGDIR/upload.$testnum");
+        $res = compare($testnum, $testname, "upload", \@out, \@upload);
+        if ($res) {
+            return 1;
+        }
+        $ok .= "u";
+    }
+    else {
+        $ok .= "-"; # upload not checked
     }
 
     if(@proxyprot) {

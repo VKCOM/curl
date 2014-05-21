@@ -538,6 +538,7 @@ int cert_stuff(struct connectdata *conn,
 
       if(!cert_done)
         return 0; /* failure! */
+      break;
 #else
       failf(data, "file type P12 for certificate not supported");
       return 0;
@@ -1430,8 +1431,9 @@ select_next_proto_cb(SSL *ssl,
   (void)ssl;
 
   if(retval == 1) {
-    infof(conn->data, "NPN, negotiated HTTP2\n");
-    conn->negnpn = NPN_HTTP2_DRAFT09;
+    infof(conn->data, "NPN, negotiated HTTP2 (%s)\n",
+          NGHTTP2_PROTO_VERSION_ID);
+    conn->negnpn = NPN_HTTP2;
   }
   else if(retval == 0) {
     infof(conn->data, "NPN, negotiated HTTP1.1\n");
@@ -1498,6 +1500,8 @@ ossl_connect_step1(struct connectdata *conn,
 
   /* Make funny stuff to get random input */
   Curl_ossl_seed(data);
+
+  data->set.ssl.certverifyresult = !X509_V_OK;
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
 
@@ -1891,11 +1895,6 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
   struct SessionHandle *data = conn->data;
   int err;
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-#ifdef HAS_ALPN
-  char* neg_protocol;
-  int len = 0;
-#endif
-
   DEBUGASSERT(ssl_connect_2 == connssl->connecting_state
              || ssl_connect_2_reading == connssl->connecting_state
              || ssl_connect_2_writing == connssl->connecting_state);
@@ -1997,13 +1996,15 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
      * negotiated
      */
     if(data->set.ssl_enable_alpn) {
+      const unsigned char* neg_protocol;
+      unsigned int len;
       SSL_get0_alpn_selected(connssl->handle, &neg_protocol, &len);
       if(len != 0) {
         infof(data, "ALPN, server accepted to use %.*s\n", len, neg_protocol);
 
         if(len == NGHTTP2_PROTO_VERSION_ID_LEN &&
            memcmp(NGHTTP2_PROTO_VERSION_ID, neg_protocol, len) == 0) {
-             conn->negnpn = NPN_HTTP2_DRAFT09;
+             conn->negnpn = NPN_HTTP2;
         }
         else if(len == ALPN_HTTP_1_1_LENGTH && memcmp(ALPN_HTTP_1_1,
             neg_protocol, ALPN_HTTP_1_1_LENGTH) == 0) {
@@ -2119,7 +2120,7 @@ static int X509V3_ext(struct SessionHandle *data,
         sep=", ";
         j++; /* skip the newline */
       };
-      while((biomem->data[j] == ' ') && (j<(size_t)biomem->length))
+      while((j<(size_t)biomem->length) && (biomem->data[j] == ' '))
         j++;
       if(j<(size_t)biomem->length)
         ptr+=snprintf(ptr, sizeof(buf)-(ptr-buf), "%s%c", sep,
@@ -2160,8 +2161,6 @@ static void dumpcert(struct SessionHandle *data, X509 *x, int numcert)
   PEM_write_bio_X509(bio_out, x);
 
   BIO_get_mem_ptr(bio_out, &biomem);
-
-  infof(data, "%s\n", biomem->data);
 
   Curl_ssl_push_certinfo_len(data, numcert,
                              "Cert", biomem->data, biomem->length);
@@ -2365,8 +2364,6 @@ static CURLcode servercert(struct connectdata *conn,
   if(data->set.ssl.certinfo)
     /* we've been asked to gather certificate info! */
     (void)get_cert_chain(conn, connssl);
-
-  data->set.ssl.certverifyresult = !X509_V_OK;
 
   connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
   if(!connssl->server_cert) {

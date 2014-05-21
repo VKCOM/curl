@@ -151,6 +151,7 @@ p.roffit {
 <p class="level0"><a name="CURLOPTPROGRESSFUNCTION"></a><span class="nroffip">CURLOPT_PROGRESSFUNCTION</span> 
 <p class="level1">Pass a pointer to a function that matches the following prototype: 
 <p class="level1"><span class="bold">int function(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);</span> 
+<p class="level1">We encourage users to use <a class="emphasis" href="#CURLOPTXFERINFOFUNCTION">CURLOPT_XFERINFOFUNCTION</a> instead, if you can. 
 <p class="level1">This function gets called by libcurl instead of its internal equivalent with a frequent interval. While data is being transferred it will be called very frequently, and during slow periods like when nothing is being transferred it can slow down to about one call per second. 
 <p class="level1"><span Class="emphasis">clientp</span> is the pointer set with <a class="emphasis" href="#CURLOPTPROGRESSDATA">CURLOPT_PROGRESSDATA</a>, it is not actually used by libcurl but is only passed along from the application to the callback. 
 <p class="level1">The callback gets told how much data libcurl will transfer and has transferred, in number of bytes. <span Class="emphasis">dltotal</span> is the total number of bytes libcurl expects to download in this transfer. <span Class="emphasis">dlnow</span> is the number of bytes downloaded so far. <span Class="emphasis">ultotal</span> is the total number of bytes libcurl expects to upload in this transfer. <span Class="emphasis">ulnow</span> is the number of bytes uploaded so far. 
@@ -310,12 +311,15 @@ p.roffit {
 <p class="level1">pop3://user:password@mail.example.com - This lists the available messages for the user 
 <p class="level1">pop3://user:password@mail.example.com/1 - This retrieves the first message for the user 
 <p class="level1"><span Class="bold">IMAP</span> 
-<p class="level1">The path part of an IMAP request not only specifies the mailbox to list (Added in 7.30.0) or select, but can also be used to check the UIDVALIDITY of the mailbox and to specify the UID and SECTION of the message to fetch (Added in 7.30.0). 
+<p class="level1">The path part of an IMAP request not only specifies the mailbox to list (Added in 7.30.0) or select, but can also be used to check the UIDVALIDITY of the mailbox, to specify the UID, SECTION (Added in 7.30.0) and PARTIAL octets (Added in 7.37.0) of the message to fetch and to specify what nessages to search for (Added in 7.37.0). 
 <p class="level1">imap://user:password@mail.example.com - Performs a top level folder list 
 <p class="level1">imap://user:password@mail.example.com/INBOX - Performs a folder list on the user's inbox 
 <p class="level1">imap://user:password@mail.example.com/INBOX/;UID=1 - Selects the user's inbox and fetches message 1 
 <p class="level1">imap://user:password@mail.example.com/INBOX;UIDVALIDITY=50/;UID=2 - Selects the user's inbox, checks the UIDVALIDITY of the mailbox is 50 and fetches message 2 if it is 
-<p class="level1">imap://user:password@mail.example.com/INBOX/;UID=3/;SECTION=TEXT - Selects the user's inbox and fetches message 3 with only the text portion of the message 
+<p class="level1">imap://user:password@mail.example.com/INBOX/;UID=3/;SECTION=TEXT - Selects the user's inbox and fetches the text portial of message 3 
+<p class="level1">imap://user:password@mail.example.com/INBOX/;UID=4/;PARTIAL=0.1024 - Selects the user's inbox and fetches the first 1024 octets of message 4 
+<p class="level1">imap://user:password@mail.example.com/INBOX?NEW - Selects the user's inbox and checks for NEW messages 
+<p class="level1">imap://user:password@mail.example.com/INBOX?SUBJECT%20shadows - Selects the user's inbox and searches for messages containing "shadows" in the subject line 
 <p class="level1">For more information about the individual components of an IMAP URL please see <a href="http://www.ietf.org/rfc/rfc5092.txt">RFC 5092</a>. 
 <p class="level1"><span Class="bold">SCP</span> 
 <p class="level1">The path part of a SCP request specifies the file to retrieve and from what directory. The file part may not be omitted. The file is taken as an absolute path from the root directory on the server. To specify a path relative to the user's home directory on the server, prepend ~/ to the path portion. If the user name is not embedded in the URL, it can be set with the <a class="emphasis" href="#CURLOPTUSERPWD">CURLOPT_USERPWD</a> or <a class="bold" href="#CURLOPTUSERNAME">CURLOPT_USERNAME</a> option. 
@@ -539,11 +543,24 @@ p.roffit {
 <p class="level0"><a name="CURLOPTUSERAGENT"></a><span class="nroffip">CURLOPT_USERAGENT</span> 
 <p class="level1">Pass a pointer to a zero terminated string as parameter. It will be used to set the User-Agent: header in the http request sent to the remote server. This can be used to fool servers or scripts. You can also set any custom header with <a class="emphasis" href="#CURLOPTHTTPHEADER">CURLOPT_HTTPHEADER</a>. 
 <p class="level0"><a name="CURLOPTHTTPHEADER"></a><span class="nroffip">CURLOPT_HTTPHEADER</span> 
-<p class="level1">Pass a pointer to a linked list of HTTP headers to pass to the server in your HTTP request. The linked list should be a fully valid list of <span class="bold">struct curl_slist</span> structs properly filled in. Use <a class="emphasis" href="./curl_slist_append.html">curl_slist_append(3)</a> to create the list and <a class="emphasis" href="./curl_slist_free_all.html">curl_slist_free_all(3)</a> to clean up an entire list. If you add a header that is otherwise generated and used by libcurl internally, your added one will be used instead. If you add a header with no content as in 'Accept:' (no data on the right side of the colon), the internally used header will get disabled. Thus, using this option you can add new headers, replace internal headers and remove internal headers. To add a header with no content (nothing to the right side of the colon), use the form 'MyHeader;' (note the ending semicolon). 
+<p class="level1">Pass a pointer to a linked list of HTTP headers to pass to the server and/or proxy in your HTTP request. The same list is used for both host and proxy requests! 
+<p class="level1">The linked list should be a fully valid list of <span Class="bold">struct curl_slist</span> structs properly filled in. Use <a class="emphasis" href="./curl_slist_append.html">curl_slist_append(3)</a> to create the list and <a class="emphasis" href="./curl_slist_free_all.html">curl_slist_free_all(3)</a> to clean up an entire list. If you add a header that is otherwise generated and used by libcurl internally, your added one will be used instead. If you add a header with no content as in 'Accept:' (no data on the right side of the colon), the internally used header will get disabled. With this option you can add new headers, replace internal headers and remove internal headers. To add a header with no content (nothing to the right side of the colon), use the form 'MyHeader;' (note the ending semicolon). 
 <p class="level1">The headers included in the linked list must not be CRLF-terminated, because curl adds CRLF after each header item. Failure to comply with this will result in strange bugs because the server will most likely ignore part of the headers you specified. 
 <p class="level1">The first line in a request (containing the method, usually a GET or POST) is not a header and cannot be replaced using this option. Only the lines following the request-line are headers. Adding this method line in this list of headers will only cause your request to send an invalid header. 
 <p class="level1">Pass a NULL to this to reset back to no custom headers. 
 <p class="level1">The most commonly replaced headers have "shortcuts" in the options <a class="emphasis" href="#CURLOPTCOOKIE">CURLOPT_COOKIE</a>, <a class="emphasis" href="#CURLOPTUSERAGENT">CURLOPT_USERAGENT</a> and <a class="emphasis" href="#CURLOPTREFERER">CURLOPT_REFERER</a>. 
+<p class="level1">There's an alternative option that sets or replaces headers only for requests that are sent with CONNECT to a proxy: <a class="emphasis" href="#CURLOPTPROXYHEADER">CURLOPT_PROXYHEADER</a>. Use <a class="emphasis" href="#CURLOPTHEADEROPT">CURLOPT_HEADEROPT</a> to control the behavior. 
+<p class="level0"><a name="CURLOPTHEADEROPT"></a><span class="nroffip">CURLOPT_HEADEROPT</span> 
+<p class="level1">Pass a long that is a bitmask of options of how to deal with headers. The two mutually exclusive options are: 
+<p class="level1">CURLHEADER_UNIFIED - keep working as before. This means CURLOPT_HTTPHEADER headers will be used in requests both to servers and proxies. With this option enabled, <a class="emphasis" href="#CURLOPTPROXYHEADER">CURLOPT_PROXYHEADER</a> will not have any effect. 
+<p class="level1">CURLHEADER_SEPARATE - makes <a class="emphasis" href="#CURLOPTHTTPHEADER">CURLOPT_HTTPHEADER</a> headers only get sent to a server and not to a proxy. Proxy headers must be set with <a class="emphasis" href="#CURLOPTPROXYHEADER">CURLOPT_PROXYHEADER</a> to get used. Note that if a non-CONNECT request is sent to a proxy, libcurl will send both server headers and proxy headers. When doing CONNECT, libcurl will send <a class="emphasis" href="#CURLOPTPROXYHEADER">CURLOPT_PROXYHEADER</a> headers only do the proxy and then <a class="emphasis" href="#CURLOPTHTTPHEADER">CURLOPT_HTTPHEADER</a> headers only to the server. 
+<p class="level1">(Added in 7.37.0) 
+<p class="level0"><a name="CURLOPTPROXYHEADER"></a><span class="nroffip">CURLOPT_PROXYHEADER</span> 
+<p class="level1">Pass a pointer to a linked list of HTTP headers to pass in your HTTP request sent to a proxy. The rules for this list is identical to the <a class="emphasis" href="#CURLOPTHTTPHEADER">CURLOPT_HTTPHEADER</a> option's. 
+<p class="level1">The headers set with this option is only ever used in requests sent to a proxy - when there's also a request sent to a host. 
+<p class="level1">The first line in a request (containing the method, usually a GET or POST) is NOT a header and cannot be replaced using this option. Only the lines following the request-line are headers. Adding this method line in this list of headers will only cause your request to send an invalid header. 
+<p class="level1">Pass a NULL to this to reset back to no custom headers. 
+<p class="level1">This option was added in libcurl 7.37.0. 
 <p class="level0"><a name="CURLOPTHTTP200ALIASES"></a><span class="nroffip">CURLOPT_HTTP200ALIASES</span> 
 <p class="level1">Pass a pointer to a linked list of aliases to be treated as valid HTTP 200 responses.  Some servers respond with a custom header response line.  For example, IceCast servers respond with "ICY 200 OK".  By including this string in your list of aliases, the response will be treated as a valid HTTP header line such as "HTTP/1.0 200 OK". (Added in 7.10.3) 
 <p class="level1">The linked list should be a fully valid list of struct curl_slist structs, and be properly filled in.  Use <a class="emphasis" href="./curl_slist_append.html">curl_slist_append(3)</a> to create the list and <a class="emphasis" href="./curl_slist_free_all.html">curl_slist_free_all(3)</a> to clean up an entire list. 
@@ -1003,6 +1020,15 @@ p.roffit {
 <p class="level1">Pass a pointer to a zero terminated string holding the file name of the known_host file to use.  The known_hosts file should use the OpenSSH file format as supported by libssh2. If this file is specified, libcurl will only accept connections with hosts that are known and present in that file, with a matching public key. Use <a class="emphasis" href="#CURLOPTSSHKEYFUNCTION">CURLOPT_SSH_KEYFUNCTION</a> to alter the default behavior on host and key (mis)matching. (Added in 7.19.6) 
 <p class="level0"><a name="CURLOPTSSHKEYFUNCTION"></a><span class="nroffip">CURLOPT_SSH_KEYFUNCTION</span> 
 <p class="level1">Pass a pointer to a curl_sshkeycallback function. It gets called when the known_host matching has been done, to allow the application to act and decide for libcurl how to proceed. The callback will only be called if <a class="emphasis" href="#CURLOPTSSHKNOWNHOSTS">CURLOPT_SSH_KNOWNHOSTS</a> is also set. 
+<p class="level1"><pre>
+<p class="level1">int curl_sshkeycallback (CURL *easy,     /* easy handle */
+ &nbsp;                        const struct curl_khkey *knownkey, /* known */
+ &nbsp;                        const struct curl_khkey *foundkey, /* found */
+ &nbsp;                        enum curl_khmatch, /* libcurl's view on the keys */
+ &nbsp;                        void *clientp);
+ </pre>
+
+<p class="level1">
 <p class="level1">The curl_sshkeycallback function gets passed the CURL handle, the key from the known_hosts file, the key from the remote site, info from libcurl on the matching status and a custom pointer (set with <a class="emphasis" href="#CURLOPTSSHKEYDATA">CURLOPT_SSH_KEYDATA</a>). It MUST return one of the following return codes to tell libcurl how to act: 
 <p class="level2">
 <p class="level1"><a name="CURLKHSTATFINEADDTOFILE"></a><span class="nroffip">CURLKHSTAT_FINE_ADD_TO_FILE</span> 
