@@ -69,7 +69,7 @@ p.roffit {
 <p class="level0">If you want a progress meter for HTTP POST or PUT requests, you need to redirect the response output to a file, using shell redirect (&gt;), -o [file] or similar. 
 <p class="level0">It is not the same case for FTP upload as that operation does not spit out any response data to the terminal. 
 <p class="level0">If you prefer a progress "bar" instead of the regular meter, <a class="emphasis" href="#-">-#</a> is your friend. <a name="OPTIONS"></a><h2 class="nroffsh">OPTIONS</h2>
-<p class="level0">Options start with one or two dashes. Many of the options require an addition value next to it. 
+<p class="level0">Options start with one or two dashes. Many of the options require an additional value next to them. 
 <p class="level0">The short "single-dash" form of the options, -d for example, may be used with or without a space between it and its value, although a space is a recommended separator. The long "double-dash" form, --data for example, requires a space between it and its value. 
 <p class="level0">Short version options that don't need any additional values can be used immediately next to each other, like for example you can specify all the options -O, -L and -v at once as -OLv. 
 <p class="level0">In general, all boolean options are enabled with --<span Class="bold">option</span> and yet again disabled with --<span Class="bold">no-</span>option. That is, you use the exact same option name but prefix it with "no-". However, in this list we mostly only list and show the --option version of them. (This concept with --no options was added in 7.19.0. Previously most options were toggled on/off on repeated use of the same command line option.) 
@@ -685,6 +685,7 @@ p.roffit {
 <p class="level0"><a name="-u"></a><span class="nroffip">-u, --user &lt;user:password&gt;</span> 
 <p class="level1">Specify the user name and password to use for server authentication. Overrides <a class="emphasis" href="#-n">-n, --netrc</a> and <a class="emphasis" href="#--netrc-optional">--netrc-optional</a>. 
 <p class="level1">If you simply specify the user name, curl will prompt for a password. 
+<p class="level1">The user name and passwords are split up on the first colon, which makes it impossible to use a colon in the user name with this option. The password can, still. 
 <p class="level1">If you use an SSPI-enabled curl binary and perform NTLM authentication, you can force curl to select the user name and password from your environment by specifying a single colon with this option: "-u :". 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-U"></a><span class="nroffip">-U, --proxy-user &lt;user:password&gt;</span> 

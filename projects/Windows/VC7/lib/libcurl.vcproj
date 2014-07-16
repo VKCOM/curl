@@ -41,7 +41,7 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC7\DLL Release,..\..\..\..\..\libssh2\build\Win32\VC7\DLL Release"
 				SetChecksum="TRUE"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"/>
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -93,8 +93,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC7\DLL Debug"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
-				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"/>
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -145,8 +145,8 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
-				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"/>
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -279,7 +279,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				SetChecksum="TRUE"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"/>
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -453,7 +453,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				SetChecksum="TRUE"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"/>
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -504,8 +504,8 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
-				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"/>
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
@@ -598,7 +598,7 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC7\DLL Release"
 				SetChecksum="TRUE"
-				ImportLibrary="$(OutDir)\$(ProjectName).lib"/>
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="NDEBUG"
@@ -855,8 +855,8 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\..\..\..\openssl\build\Win32\VC7\DLL Debug,..\..\..\..\..\libssh2\build\Win32\VC7\DLL Debug"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="$(OutDir)\$(ProjectName)d.pdb"
-				ImportLibrary="$(OutDir)\$(ProjectName)d.lib"/>
+				ProgramDatabaseFile="$(TargetDir)$(TargetName).pdb"
+				ImportLibrary="$(TargetDir)$(TargetName).lib"/>
 			<Tool
 				Name="VCMIDLTool"
 				PreprocessorDefinitions="_DEBUG"
