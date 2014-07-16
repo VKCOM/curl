@@ -365,8 +365,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /fixed:no
-# ADD LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /fixed:no
+# ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /fixed:no
+# ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Debug LIB OpenSSL LIB LibSSH2"
 
@@ -390,8 +390,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
-# ADD LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
+# ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
+# ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurld.lib libeay32.lib ssleay32.lib libssh2d.lib /nologo /subsystem:console /incremental:no /debug /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL - LIB LibSSH2\curld.exe" /pdbtype:con /libpath:"..\..\..\..\build\Win32\VC6\LIB Debug - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Debug" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Debug" /fixed:no
 
 !ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release"
 
@@ -514,8 +514,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /fixed:no
-# ADD LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /fixed:no
+# ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /fixed:no
+# ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /fixed:no
 
 !ELSEIF  "$(CFG)" == "curlsrc - Win32 LIB Release LIB OpenSSL LIB LibSSH2"
 
@@ -539,8 +539,8 @@ BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
-# ADD BASE LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL - LIB LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Release" /fixed:no
-# ADD LINK32 advapi32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL - LIB LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Release" /fixed:no
+# ADD BASE LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL - LIB LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Release" /fixed:no
+# ADD LINK32 advapi32.lib crypt32.lib gdi32.lib user32.lib wldap32.lib ws2_32.lib libcurl.lib libeay32.lib ssleay32.lib libssh2.lib /nologo /subsystem:console /pdb:none /machine:I386 /out:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL - LIB LibSSH2\curl.exe" /libpath:"..\..\..\..\build\Win32\VC6\LIB Release - LIB OpenSSL" /libpath:"..\..\..\..\..\openssl\build\Win32\VC6\LIB Release" /libpath:"..\..\..\..\..\libssh2\build\Win32\VC6\LIB Release" /fixed:no
 
 !ENDIF 
 
@@ -576,6 +576,10 @@ SOURCE=..\..\..\..\lib\nonblock.c
 # Begin Source File
 
 SOURCE=..\..\..\..\lib\rawstr.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\lib\strdup.c
 # End Source File
 # Begin Source File
 
@@ -743,7 +747,11 @@ SOURCE=..\..\..\..\src\tool_xattr.c
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE="..\..\..\..\lib\config-win32.h"
+SOURCE=..\..\..\..\lib\config-win32.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\..\..\lib\curl_setup.h
 # End Source File
 # Begin Source File
 
@@ -755,7 +763,7 @@ SOURCE=..\..\..\..\lib\rawstr.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\..\lib\setup.h
+SOURCE=..\..\..\..\lib\strdup.h
 # End Source File
 # Begin Source File
 
