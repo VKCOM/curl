@@ -1,9 +1,12 @@
-curl (7.37.1-1) UNRELEASED; urgency=medium
+curl (7.37.1-1) unstable; urgency=medium
 
   * New upstream release
   * Re-enable RTMP support (Closes: #754222)
+  * Add 08_link-curl-to-nss.patch to fix NSS build
+  * Refresh patches
+  * Install manpages of single libcurl options too
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 16 Jul 2014 18:59:41 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 18 Jul 2014 10:18:03 +0200
 
 curl (7.37.0-1) unstable; urgency=medium
 
