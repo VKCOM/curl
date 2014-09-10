@@ -62,9 +62,9 @@ p.roffit {
 <p class="level1">HTTP Digest authentication.  Digest authentication is defined in <a href="http://www.ietf.org/rfc/rfc2617.txt">RFC 2617</a> and is a more secure way to do authentication over public networks than the regular old-fashioned Basic method. 
 <p class="level0"><a name="CURLAUTHDIGESTIE"></a><span class="nroffip">CURLAUTH_DIGEST_IE</span> 
 <p class="level1">HTTP Digest authentication with an IE flavor.  Digest authentication is defined in <a href="http://www.ietf.org/rfc/rfc2617.txt">RFC 2617</a> and is a more secure way to do authentication over public networks than the regular old-fashioned Basic method. The IE flavor is simply that libcurl will use a special "quirk" that IE is known to have used before version 7 and that some servers require the client to use. 
-<p class="level0"><a name="CURLAUTHGSSNEGOTIATE"></a><span class="nroffip">CURLAUTH_GSSNEGOTIATE</span> 
-<p class="level1">HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain "Negotiate") method was designed by Microsoft and is used in their web applications. It is primarily meant as a support for Kerberos5 authentication but may also be used along with other authentication methods. For more information see IETF draft draft-brezak-spnego-http-04.txt. 
-<p class="level1">You need to build libcurl with a suitable GSS-API library for this to work. 
+<p class="level0"><a name="CURLAUTHNEGOTIATE"></a><span class="nroffip">CURLAUTH_NEGOTIATE</span> 
+<p class="level1">HTTP Negotiate (SPNEGO) authentication. Negotiate authentication is defined in <a href="http://www.ietf.org/rfc/rfc4559.txt">RFC 4559</a> and is the most secure way to perform authentication over HTTP. 
+<p class="level1">You need to build libcurl with a suitable GSS-API library or SSPI on Windows for this to work. 
 <p class="level0"><a name="CURLAUTHNTLM"></a><span class="nroffip">CURLAUTH_NTLM</span> 
 <p class="level1">HTTP NTLM authentication. A proprietary protocol invented and used by Microsoft. It uses a challenge-response and hash concept similar to Digest, to prevent the password from being eavesdropped. 
 <p class="level1">You need to build libcurl with either OpenSSL, GnuTLS or NSS support for this option to work, or build libcurl on Windows with SSPI support. 

@@ -597,13 +597,13 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
 
       case 'l': /* --negotiate */
         if(toggle) {
-          if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
-            config->authtype |= CURLAUTH_GSSNEGOTIATE;
+          if(curlinfo->features & CURL_VERSION_SPNEGO)
+            config->authtype |= CURLAUTH_NEGOTIATE;
           else
             return PARAM_LIBCURL_DOESNT_SUPPORT;
         }
         else
-          config->authtype &= ~CURLAUTH_GSSNEGOTIATE;
+          config->authtype &= ~CURLAUTH_NEGOTIATE;
         break;
 
       case 'm': /* --ntlm */
@@ -697,8 +697,7 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
       case 'x': /* --krb */
         /* kerberos level string */
-        if(curlinfo->features & (CURL_VERSION_KERBEROS4 |
-                                 CURL_VERSION_GSSNEGOTIATE))
+        if(curlinfo->features & CURL_VERSION_KERBEROS4)
           GetStr(&config->krblevel, nextarg);
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -798,11 +797,12 @@ ParameterError getparameter(char *flag,    /* f or -long-flag */
         break;
 
       case 'k': /* --proxy-negotiate */
-        if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
+        if(curlinfo->features & CURL_VERSION_SPNEGO)
           config->proxynegotiate = toggle;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
+
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;
@@ -1811,7 +1811,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
 {
   int i;
   bool stillflags;
-  char *orig_opt;
+  char *orig_opt = NULL;
   ParameterError result = PARAM_OK;
   struct OperationConfig *operation = config->first;
 
@@ -1879,7 +1879,7 @@ ParameterError parse_args(struct GlobalConfig *config, int argc,
      result != PARAM_ENGINES_REQUESTED) {
     const char *reason = param2text(result);
 
-    if(!curlx_strequal(":", orig_opt))
+    if(orig_opt && !curlx_strequal(":", orig_opt))
       helpf(config->errors, "option %s: %s\n", orig_opt, reason);
     else
       helpf(config->errors, "%s\n", reason);

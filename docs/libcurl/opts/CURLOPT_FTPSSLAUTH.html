@@ -46,7 +46,7 @@ p.roffit {
 </head><body>
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
-<p class="level0">CURLOPT_FTPSSLAUTH - set order to attemp TSL vs SSL when using FTP <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0">CURLOPT_FTPSSLAUTH - set order in which to attempt TLS vs SSL when using FTP <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
 <p class="level0">#include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_FTPSSLAUTH, long order); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a long using one of the values from below, to alter how libcurl issues "AUTH TLS" or "AUTH SSL" when FTP over SSL is activated. This is only interesting if <a Class="emphasis" href="./CURLOPT_USE_SSL.html">CURLOPT_USE_SSL</a> is also set. 

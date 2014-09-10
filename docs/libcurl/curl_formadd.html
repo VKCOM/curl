@@ -67,6 +67,7 @@ p.roffit {
 <p class="level1">followed by a pointer to the contents of this part, the actual data to send away. libcurl will use the pointer and refer to the data in your application, so you must make sure it remains until curl no longer needs it. If the data isn't NUL-terminated, or if you'd like it to contain zero bytes, you must set its length  with <a class="bold" href="#CURLFORMCONTENTSLENGTH">CURLFORM_CONTENTSLENGTH</a>. 
 <p class="level0"><a name="CURLFORMCONTENTSLENGTH"></a><span class="nroffip">CURLFORM_CONTENTSLENGTH</span> 
 <p class="level1">followed by a long giving the length of the contents. Note that for <a class="emphasis" href="#CURLFORMSTREAM">CURLFORM_STREAM</a> contents, this option is mandatory. 
+<p class="level1">If you pass a 0 (zero) for this option, libcurl will instead do a strlen() on the contents to figure out the size. If you really want to send a zero byte content then you must make sure strlen() on the data pointer returns zero. 
 <p class="level0"><a name="CURLFORMFILECONTENT"></a><span class="nroffip">CURLFORM_FILECONTENT</span> 
 <p class="level1">followed by a filename, causes that file to be read and its contents used as data in this part. This part does <span Class="emphasis">not</span> automatically become a file upload part simply because its data was read from a file. 
 <p class="level0"><a name="CURLFORMFILE"></a><span class="nroffip">CURLFORM_FILE</span> 

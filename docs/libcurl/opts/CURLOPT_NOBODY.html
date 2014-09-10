@@ -46,10 +46,11 @@ p.roffit {
 </head><body>
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
-<p class="level0">CURLOPT_NOBODY - do the request without getting the body <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
+<p class="level0">CURLOPT_NOBODY - do the download request without getting the body <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
 <p class="level0">#include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_NOBODY, long opt); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
-<p class="level0">A long parameter set to 1 tells libcurl to not include the body-part in the output. For HTTP(S), this makes libcurl do a HEAD request. For most other protocols ie means just not asking for transferring the body data. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
+<p class="level0">A long parameter set to 1 tells libcurl to not include the body-part in the output when doing what would otherwise be a download. For HTTP(S), this makes libcurl do a HEAD request. For most other protocols it means just not asking to transfer the body data. 
+<p class="level0">Enabling this option means asking for a download but without a body. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
 <p class="level0">0, the body is transferred <a name="PROTOCOLS"></a><h2 class="nroffsh">PROTOCOLS</h2>
 <p class="level0">Most <a name="EXAMPLE"></a><h2 class="nroffsh">EXAMPLE</h2>
 <p class="level0">TODO <a name="AVAILABILITY"></a><h2 class="nroffsh">AVAILABILITY</h2>

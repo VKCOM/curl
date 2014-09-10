@@ -82,6 +82,8 @@ p.roffit {
 <p class="level1">FTP servers return a 227-line as a response to a PASV command. If libcurl fails to parse that line, this return code is passed back. 
 <p class="level0"><a name="CURLEFTPCANTGETHOST"></a><span class="nroffip">CURLE_FTP_CANT_GET_HOST (15)</span> 
 <p class="level1">An internal failure to lookup the host used for the new connection. 
+<p class="level0"><a name="CURLEHTTP2"></a><span class="nroffip">CURLE_HTTP2 (16)</span> 
+<p class="level1">A problem was detected in the HTTP2 framing layer. This is somewhat generic and can be one out of several problems, see the error buffer for details. 
 <p class="level0"><a name="CURLEFTPCOULDNTSETTYPE"></a><span class="nroffip">CURLE_FTP_COULDNT_SET_TYPE (17)</span> 
 <p class="level1">Received an error when trying to set the transfer mode to binary or ASCII. 
 <p class="level0"><a name="CURLEPARTIALFILE"></a><span class="nroffip">CURLE_PARTIAL_FILE (18)</span> 
