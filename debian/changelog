@@ -1,4 +1,4 @@
-curl (7.38.0-1) UNRELEASED; urgency=medium
+curl (7.38.0-1) unstable; urgency=medium
 
   * New upstream release
     - Only use full host matches for hosts used as IP address
@@ -6,8 +6,12 @@ curl (7.38.0-1) UNRELEASED; urgency=medium
       http://curl.haxx.se/docs/adv_20140910A.html
     - Reject incoming cookies set for TLDs as per CVE-2014-3620
       http://curl.haxx.se/docs/adv_20140910B.html
+  * Drop 08_link-curl-to-nss.patch (merged upstream)
+  * Refresh patches
+  * Fix wildcard-matches-nothing-in-dep5-copyright
+  * Add 08_fix-spelling.patch
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 10 Sep 2014 16:08:01 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 10 Sep 2014 20:11:02 +0200
 
 curl (7.37.1-1) unstable; urgency=medium
 
