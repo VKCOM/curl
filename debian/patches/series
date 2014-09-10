@@ -5,6 +5,5 @@
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
 
-08_link-curl-to-nss.patch
 90_gnutls.patch
 99_nss.patch
