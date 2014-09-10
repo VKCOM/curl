@@ -67,7 +67,7 @@ p.roffit {
 <p class="level0">Pass a pointer to your callback function, which should match the prototype shown above. 
 <p class="level0">This callback function gets called by libcurl when something special I/O-related needs to be done that the library can't do by itself. For now, rewinding the read data stream is the only action it can request. The rewinding of the read data stream may be necessary when doing a HTTP PUT or POST with a multi-pass authentication method. 
 <p class="level0">The callback MUST return <span Class="emphasis">CURLIOE_UNKNOWNCMD</span> if the input <span Class="emphasis">cmd</span> is not <span Class="emphasis">CURLIOCMD_RESTARTREAD</span>. 
-<p class="level0">The <span Class="emphasis">clientp</span> argument to the callback is set with the fUICURLOPT_IOCTLDATA(3)</span> option. 
+<p class="level0">The <span Class="emphasis">clientp</span> argument to the callback is set with the <a Class="emphasis" href="./CURLOPT_IOCTLDATA.html">CURLOPT_IOCTLDATA</a> option. 
 <p class="level0">This option is deprecated! Do not use it. Use <a Class="emphasis" href="./CURLOPT_SEEKFUNCTION.html">CURLOPT_SEEKFUNCTION</a> instead to provide seeking! If <a Class="emphasis" href="./CURLOPT_SEEKFUNCTION.html">CURLOPT_SEEKFUNCTION</a> is set, this parameter will be ignored when seeking. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
 <p class="level0">By default, this parameter is set to NULL. Not used. <a name="PROTOCOLS"></a><h2 class="nroffsh">PROTOCOLS</h2>
 <p class="level0">Used with HTTP <a name="EXAMPLE"></a><h2 class="nroffsh">EXAMPLE</h2>

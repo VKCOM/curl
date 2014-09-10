@@ -2208,37 +2208,10 @@ sub cleardir {
 }
 
 #######################################################################
-# filter out the specified pattern from the given input file and store the
-# results in the given output file
-#
-sub filteroff {
-    my $infile=$_[0];
-    my $filter=$_[1];
-    my $ofile=$_[2];
-
-    open(IN, "<$infile")
-        || return 1;
-
-    open(OUT, ">$ofile")
-        || return 1;
-
-    # logmsg "FILTER: off $filter from $infile to $ofile\n";
-
-    while(<IN>) {
-        $_ =~ s/$filter//;
-        print OUT $_;
-    }
-    close(IN);
-    close(OUT);
-    return 0;
-}
-
-#######################################################################
 # compare test results with the expected output, we might filter off
 # some pattern that is allowed to differ, output test results
 #
 sub compare {
-    # filter off patterns _before_ this comparison!
     my ($testnum, $testname, $subject, $firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
@@ -3140,14 +3113,14 @@ sub singletest {
         if(!$short) {
             if($skipped{$why} <= 3) {
                 # show only the first three skips for each reason
-                logmsg sprintf("test %03d SKIPPED: $why\n", $testnum);
+                logmsg sprintf("test %04d SKIPPED: $why\n", $testnum);
             }
         }
 
         timestampskippedevents($testnum);
         return -1;
     }
-    logmsg sprintf("test %03d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -4865,20 +4838,21 @@ if(!$listonly) {
 }
 
 #######################################################################
-# Fetch all disabled tests
+# Fetch all disabled tests, if there are any
 #
 
-open(D, "<$TESTDIR/DISABLED");
-while(<D>) {
-    if(/^ *\#/) {
-        # allow comments
-        next;
+if(open(D, "<$TESTDIR/DISABLED")) {
+    while(<D>) {
+        if(/^ *\#/) {
+            # allow comments
+            next;
+        }
+        if($_ =~ /(\d+)/) {
+            $disabled{$1}=$1; # disable this test number
+        }
     }
-    if($_ =~ /(\d+)/) {
-        $disabled{$1}=$1; # disable this test number
-    }
+    close(D);
 }
-close(D);
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers

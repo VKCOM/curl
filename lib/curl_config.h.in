@@ -590,9 +590,6 @@
 /* Define to 1 if you have the <socket.h> header file. */
 #undef HAVE_SOCKET_H
 
-/* Define this if you have the SPNEGO library fbopenssl */
-#undef HAVE_SPNEGO
-
 /* if you have the function SRP_Calc_client_key */
 #undef HAVE_SSLEAY_SRP
 

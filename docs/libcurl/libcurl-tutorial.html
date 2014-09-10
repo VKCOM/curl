@@ -185,7 +185,7 @@ p.roffit {
 <p class="level0">&nbsp;curl_easy_setopt(easyhandle, CURLOPT_KEYPASSWD, "keypassword"); 
 <p class="level0"><a name="HTTP"></a><h2 class="nroffsh">HTTP Authentication</h2>
 <p class="level0">The previous chapter showed how to set user name and password for getting URLs that require authentication. When using the HTTP protocol, there are many different ways a client can provide those credentials to the server and you can control which way libcurl will (attempt to) use them. The default HTTP authentication method is called 'Basic', which is sending the name and password in clear-text in the HTTP request, base64-encoded. This is insecure. 
-<p class="level0">At the time of this writing, libcurl can be built to use: Basic, Digest, NTLM, Negotiate, GSS-Negotiate and SPNEGO. You can tell libcurl which one to use with <span Class="emphasis">CURLOPT_HTTPAUTH(3)</span> as in: 
+<p class="level0">At the time of this writing, libcurl can be built to use: Basic, Digest, NTLM, Negotiate (SPNEGO). You can tell libcurl which one to use with <span Class="emphasis">CURLOPT_HTTPAUTH(3)</span> as in: 
 <p class="level0">&nbsp;curl_easy_setopt(easyhandle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST); 
 <p class="level0">And when you send authentication to a proxy, you can also set authentication type the same way but instead with <span Class="emphasis">CURLOPT_PROXYAUTH(3)</span>: 
 <p class="level0">&nbsp;curl_easy_setopt(easyhandle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM); 
