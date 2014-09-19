@@ -7,5 +7,6 @@
 08_fix-spelling.patch
 09_libtoolize_check.patch
 
+# do not add patches below
 90_gnutls.patch
 99_nss.patch
