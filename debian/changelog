@@ -1,3 +1,12 @@
+curl (7.38.0-2) unstable; urgency=medium
+
+  * Check for libtoolize instead of libtool during build.
+    Thanks to Helmut Grohne for the patch (Closes: #761740)
+  * Add README.source note regarding ordering of patches (Closes: #762193)
+  * Add 10_fix-resolver.patch from upstream (Closes: #762014)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 23 Sep 2014 16:41:53 +0200
+
 curl (7.38.0-1) unstable; urgency=medium
 
   * New upstream release
