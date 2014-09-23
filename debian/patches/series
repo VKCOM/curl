@@ -6,6 +6,7 @@
 07_do-not-disable-debug-symbols.patch
 08_fix-spelling.patch
 09_libtoolize_check.patch
+10_fix-resolver.patch
 
 # do not add patches below
 90_gnutls.patch
