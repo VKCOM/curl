@@ -15,6 +15,7 @@
 15_CVE-2014-0139.patch
 16_CVE-2014-3613.patch
 17_CVE-2014-3620.patch
+18_CVE-2014-3707.patch
 
 90_gnutls.patch
 99_nss.patch

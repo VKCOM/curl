@@ -1,3 +1,11 @@
+curl (7.26.0-1+wheezy11) wheezy-security; urgency=high
+
+  * Fix duphandle read out of bounds as per CVE-2014-3707
+    http://curl.haxx.se/docs/adv_20141105.html
+  * Set urgency=high accordingly
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 02 Nov 2014 16:07:47 +0100
+
 curl (7.26.0-1+wheezy10) wheezy-security; urgency=high
 
   * Fix multiple security issues:
