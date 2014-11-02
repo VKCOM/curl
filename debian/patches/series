@@ -7,6 +7,7 @@
 08_fix-spelling.patch
 09_libtoolize_check.patch
 10_fix-resolver.patch
+11_CVE-2014-3707.patch
 
 # do not add patches below
 90_gnutls.patch
