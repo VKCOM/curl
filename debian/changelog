@@ -1,3 +1,11 @@
+curl (7.26.0-1+wheezy12) wheezy-security; urgency=high
+
+  * Fix URL request injection vulnerability as per CVE-2014-8150
+    http://curl.haxx.se/docs/adv_20150108B.html
+  * Set urgency=high accordingly
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 30 Dec 2014 11:58:52 +0100
+
 curl (7.26.0-1+wheezy11) wheezy-security; urgency=high
 
   * Fix duphandle read out of bounds as per CVE-2014-3707
