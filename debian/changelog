@@ -1,3 +1,13 @@
+curl (7.26.0-1+wheezy13) wheezy-security; urgency=high
+
+  * Fix re-using authenticated connection when unauthenticated
+    as per CVE-2015-3143
+    http://curl.haxx.se/docs/adv_20150422A.html
+  * Fix Negotiate not treated as connection-oriented as per CVE-2015-3148
+    http://curl.haxx.se/docs/adv_20150422B.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 21 Apr 2015 13:51:57 +0200
+
 curl (7.26.0-1+wheezy12) wheezy-security; urgency=high
 
   * Fix URL request injection vulnerability as per CVE-2014-8150
