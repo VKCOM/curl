@@ -1,3 +1,17 @@
+curl (7.38.0-4+deb8u1) jessie-security; urgency=high
+
+  * Fix re-using authenticated connection when unauthenticated
+    as per CVE-2015-3143
+    http://curl.haxx.se/docs/adv_20150422A.html
+  * Fix host name out of boundary memory access as per CVE-2015-3144
+    http://curl.haxx.se/docs/adv_20150422D.html
+  * Fix cookie parser out of boundary memory access as per CVE-2015-3145
+    http://curl.haxx.se/docs/adv_20150422C.html
+  * Fix Negotiate not treated as connection-oriented as per CVE-2015-3148
+    http://curl.haxx.se/docs/adv_20150422B.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 21 Apr 2015 13:16:29 +0200
+
 curl (7.38.0-4) unstable; urgency=high
 
   * Fix URL request injection vulnerability as per CVE-2014-8150
