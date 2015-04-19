@@ -9,6 +9,7 @@
 10_fix-resolver.patch
 11_CVE-2014-3707.patch
 12_CVE-2014-8150.patch
+13_CVE-2015-3143.patch
 
 # do not add patches below
 90_gnutls.patch
