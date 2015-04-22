@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -75,16 +75,14 @@
 #include "curl_ntlm.h"
 #include "http_negotiate.h"
 #include "share.h"
-#include "curl_memory.h"
 #include "select.h"
 #include "multiif.h"
 #include "connect.h"
 #include "non-ascii.h"
+#include "curl_printf.h"
 
-#define _MPRINTF_REPLACE /* use our functions only */
-#include <curl/mprintf.h>
-
-/* The last #include file should be: */
+/* The last #include files should be: */
+#include "curl_memory.h"
 #include "memdebug.h"
 
 /*
@@ -203,7 +201,7 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
            strlen(endofline_network));
 
 #ifdef CURL_DOES_CONVERSIONS
-    CURLcode res;
+    CURLcode result;
     int length;
     if(data->set.prefer_ascii) {
       /* translate the protocol and data */
@@ -213,10 +211,10 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
       /* just translate the protocol portion */
       length = strlen(hexbuffer);
     }
-    res = Curl_convert_to_network(data, data->req.upload_fromhere, length);
+    result = Curl_convert_to_network(data, data->req.upload_fromhere, length);
     /* Curl_convert_to_network calls failf if unsuccessful */
-    if(res)
-      return(res);
+    if(result)
+      return result;
 #endif /* CURL_DOES_CONVERSIONS */
 
     if((nread - hexlen) == 0)
@@ -227,11 +225,11 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
   }
 #ifdef CURL_DOES_CONVERSIONS
   else if((data->set.prefer_ascii) && (!sending_http_headers)) {
-    CURLcode res;
-    res = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
+    CURLcode result;
+    result = Curl_convert_to_network(data, data->req.upload_fromhere, nread);
     /* Curl_convert_to_network calls failf if unsuccessful */
-    if(res != CURLE_OK)
-      return(res);
+    if(result)
+      return result;
   }
 #endif /* CURL_DOES_CONVERSIONS */
 
@@ -547,6 +545,18 @@ static CURLcode readwrite_data(struct SessionHandle *data,
           if(data->state.resume_from && !k->content_range &&
              (data->set.httpreq==HTTPREQ_GET) &&
              !k->ignorebody) {
+
+            if(k->size == data->state.resume_from) {
+              /* The resume point is at the end of file, consider this fine
+                 even if it doesn't allow resume from here. */
+              infof(data, "The entire document is already downloaded");
+              connclose(conn, "already downloaded");
+              /* Abort download */
+              k->keepon &= ~KEEP_RECV;
+              *done = TRUE;
+              return CURLE_OK;
+            }
+
             /* we wanted to resume a download, although the server doesn't
              * seem to support this and we did this with a GET (if it
              * wasn't a GET we did a POST or PUT resume) */
@@ -891,15 +901,6 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
       /* store number of bytes available for upload */
       data->req.upload_present = nread;
 
-#ifndef CURL_DISABLE_SMTP
-      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
-        result = Curl_smtp_escape_eob(conn, nread);
-        if(result)
-          return result;
-      }
-      else
-#endif /* CURL_DISABLE_SMTP */
-
       /* convert LF to CRLF if so asked */
       if((!sending_http_headers) && (
 #ifdef CURL_DO_LINEEND_CONV
@@ -907,12 +908,16 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
          (data->set.prefer_ascii) ||
 #endif
          (data->set.crlf))) {
-        if(data->state.scratch == NULL)
-          data->state.scratch = malloc(2*BUFSIZE);
-        if(data->state.scratch == NULL) {
-          failf (data, "Failed to alloc scratch buffer!");
-          return CURLE_OUT_OF_MEMORY;
+        /* Do we need to allocate a scratch buffer? */
+        if(!data->state.scratch) {
+          data->state.scratch = malloc(2 * BUFSIZE);
+          if(!data->state.scratch) {
+            failf(data, "Failed to alloc scratch buffer!");
+
+            return CURLE_OUT_OF_MEMORY;
+          }
         }
+
         /*
          * ASCII/EBCDIC Note: This is presumably a text (not binary)
          * transfer so the data should already be in ASCII.
@@ -932,6 +937,7 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           else
             data->state.scratch[si] = data->req.upload_fromhere[i];
         }
+
         if(si != nread) {
           /* only perform the special operation if we really did replace
              anything */
@@ -944,6 +950,14 @@ static CURLcode readwrite_upload(struct SessionHandle *data,
           data->req.upload_present = nread;
         }
       }
+
+#ifndef CURL_DISABLE_SMTP
+      if(conn->handler->protocol & PROTO_FAMILY_SMTP) {
+        result = Curl_smtp_escape_eob(conn, nread);
+        if(result)
+          return result;
+      }
+#endif /* CURL_DISABLE_SMTP */
     } /* if 0 == data->req.upload_present */
     else {
       /* We have a partial buffer left from a previous "round". Use
@@ -1202,10 +1216,10 @@ int Curl_single_getsock(const struct connectdata *conn,
   if((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) {
 
     if((conn->sockfd != conn->writesockfd) ||
-       !(data->req.keepon & KEEP_RECV)) {
-      /* only if they are not the same socket or we didn't have a readable
+       bitmap == GETSOCK_BLANK) {
+      /* only if they are not the same socket and we have a readable
          one, we increase index */
-      if(data->req.keepon & KEEP_RECV)
+      if(bitmap != GETSOCK_BLANK)
         sockindex++; /* increase index if we need two entries */
 
       DEBUGASSERT(conn->writesockfd != CURL_SOCKET_BAD);
@@ -1256,7 +1270,7 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
    * the next packet at the adjusted rate.  We should wait
    * longer when using larger packets, for instance.
    */
-  rv = ((curl_off_t)((pkt_size * 8) * 1000) / rate_bps);
+  rv = ((curl_off_t)(pkt_size * 1000) / rate_bps);
 
   /* Catch rounding errors and always slow down at least 1ms if
    * we are running too fast.
@@ -1278,7 +1292,7 @@ long Curl_sleep_time(curl_off_t rate_bps, curl_off_t cur_rate_bps,
  */
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {
-  CURLcode res;
+  CURLcode result;
   if(!data->change.url) {
     /* we can't do anything without URL */
     failf(data, "No URL set!");
@@ -1288,16 +1302,14 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   /* Init the SSL session ID cache here. We do it here since we want to do it
      after the *_setopt() calls (that could specify the size of the cache) but
      before any transfer takes place. */
-  res = Curl_ssl_initsessions(data, data->set.ssl.max_ssl_sessions);
-  if(res)
-    return res;
+  result = Curl_ssl_initsessions(data, data->set.ssl.max_ssl_sessions);
+  if(result)
+    return result;
 
   data->set.followlocation=0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
   data->state.httpversion = 0; /* don't assume any particular server version */
-
-  data->state.ssl_connect_retry = FALSE;
 
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;
@@ -1311,9 +1323,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 
   /* If there is a list of host pairs to deal with */
   if(data->change.resolve)
-    res = Curl_loadhostpairs(data);
+    result = Curl_loadhostpairs(data);
 
-  if(!res) {
+  if(!result) {
     /* Allow data->set.use_port to set which port to use. This needs to be
      * disabled for example when we follow Location: headers to URLs using
      * different ports! */
@@ -1328,6 +1340,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
 #endif
 
     Curl_initinfo(data); /* reset session-specific information "variables" */
+    Curl_pgrsResetTimesSizes(data);
     Curl_pgrsStartNow(data);
 
     if(data->set.timeout)
@@ -1343,7 +1356,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
     data->state.authproxy.picked &= data->state.authproxy.want;
   }
 
-  return res;
+  return result;
 }
 
 /*
@@ -1619,7 +1632,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   if(type == FOLLOW_REDIR) {
     if((data->set.maxredirs != -1) &&
         (data->set.followlocation >= data->set.maxredirs)) {
-      failf(data,"Maximum (%ld) redirects followed", data->set.maxredirs);
+      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
       return CURLE_TOO_MANY_REDIRECTS;
     }
 
@@ -1828,13 +1841,13 @@ Curl_reconnect_request(struct connectdata **connp)
    * (again). Slight Lack of feedback in the report, but I don't think this
    * extra check can do much harm.
    */
-  if((CURLE_OK == result) || (CURLE_SEND_ERROR == result)) {
+  if(!result || (CURLE_SEND_ERROR == result)) {
     bool async;
     bool protocol_done = TRUE;
 
     /* Now, redo the connect and get a new connection */
     result = Curl_connect(data, connp, &async, &protocol_done);
-    if(CURLE_OK == result) {
+    if(!result) {
       /* We have connected or sent away a name resolve query fine */
 
       conn = *connp; /* setup conn to again point to something nice */
@@ -1872,12 +1885,10 @@ CURLcode Curl_retry_request(struct connectdata *conn,
      !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
     return CURLE_OK;
 
-  if(/* workaround for broken TLS servers */ data->state.ssl_connect_retry ||
-      ((data->req.bytecount +
-        data->req.headerbytecount == 0) &&
-        conn->bits.reuse &&
-        !data->set.opt_no_body &&
-       data->set.rtspreq != RTSPREQ_RECEIVE)) {
+  if((data->req.bytecount + data->req.headerbytecount == 0) &&
+      conn->bits.reuse &&
+      !data->set.opt_no_body &&
+      (data->set.rtspreq != RTSPREQ_RECEIVE)) {
     /* We got no data, we attempted to re-use a connection and yet we want a
        "body". This might happen if the connection was left alive when we were
        done using it before, but that was closed when we wanted to read from

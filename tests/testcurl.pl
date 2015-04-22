@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,6 +46,7 @@
 # --extvercmd=[command]    Command to use for displaying version with cross compiles.
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
+# --notes=[notes]          More human-readable information about this configuration
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
 # --nobuildconf            Don't run buildconf
@@ -73,7 +74,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2012-11-30';
+$version='2014-11-25';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -88,25 +89,28 @@ $setupfile = 'setup';
 $configurebuild = 1;
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
-    $targetos = (split(/=/, shift @ARGV))[1];
+    $targetos = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--setup=/) {
-    $setupfile = (split(/=/, shift @ARGV))[1];
+    $setupfile = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--extvercmd=/) {
-    $extvercmd = (split(/=/, shift @ARGV))[1];
+    $extvercmd = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--mktarball=/) {
-    $mktarball = (split(/=/, shift @ARGV))[1];
+    $mktarball = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--name=/) {
-    $name = (split(/=/, shift @ARGV))[1];
+    $name = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--email=/) {
-    $email = (split(/=/, shift @ARGV))[1];
+    $email = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--desc=/) {
-    $desc = (split(/=/, shift @ARGV))[1];
+    $desc = (split(/=/, shift @ARGV, 2))[1];
+  }
+  elsif ($ARGV[0] =~ /--notes=/) {
+    $notes = (split(/=/, shift @ARGV, 2))[1];
   }
   elsif ($ARGV[0] =~ /--configure=(.*)/) {
     $confopts = $1;
@@ -258,7 +262,13 @@ sub get_host_triplet {
   return $triplet;
 }
 
-if (open(F, "$setupfile")) {
+if($name && $email && $desc) {
+  # having these fields set are enough to continue, skip reading the setup
+  # file
+  $infixed=4;
+  $fixed=4;
+}
+elsif (open(F, "$setupfile")) {
   while (<F>) {
     if (/(\w+)=(.*)/) {
       eval "\$$1=$2;";
@@ -266,7 +276,8 @@ if (open(F, "$setupfile")) {
   }
   close(F);
   $infixed=$fixed;
-} else {
+}
+else {
   $infixed=0;    # so that "additional args to configure" works properly first time...
 }
 
