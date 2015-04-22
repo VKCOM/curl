@@ -5,10 +5,6 @@
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
 08_fix-spelling.patch
-09_libtoolize_check.patch
-10_fix-resolver.patch
-11_CVE-2014-3707.patch
-12_CVE-2014-8150.patch
 
 # do not add patches below
 90_gnutls.patch
