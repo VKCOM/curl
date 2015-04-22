@@ -1,4 +1,4 @@
-curl (7.42.0-1) UNRELEASED; urgency=medium
+curl (7.42.0-1) unstable; urgency=medium
 
   * New upstream release
     - Fix re-using authenticated connection when unauthenticated
@@ -12,8 +12,11 @@ curl (7.42.0-1) UNRELEASED; urgency=medium
       http://curl.haxx.se/docs/adv_20150422B.html
     - Disable SSLv3 in the OpenSSL backend when OPENSSL_NO_SSL3_METHOD is
       defined (Closes: #768562)
+  * Drop patches merged upstream
+  * Refresh patches
+  * Bump Standards-Version to 3.9.6 (no changes needed)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 22 Apr 2015 10:25:38 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 22 Apr 2015 11:07:32 +0200
 
 curl (7.38.0-4) unstable; urgency=high
 
