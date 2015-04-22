@@ -4,15 +4,20 @@
 <title>mk-ca-bundle man page</title>
 <meta name="generator" content="roffit">
 <STYLE type="text/css">
-P.level0 {
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
  padding-left: 2em;
 }
 
-P.level1 {
+P.level1, pre.level1 {
  padding-left: 4em;
 }
 
-P.level2 {
+P.level2, pre.level2 {
  padding-left: 6em;
 }
 
@@ -81,16 +86,16 @@ p.roffit {
 <p class="level1">comma separated list of signature algorithms with which to hash/fingerprint each certificate and output when run in plain text mode. 
 <p class="level1">(Added in version 1.21, Perl only) 
 <p class="level1">Valid algorithms are: 
-<p class="level2">ALL, NONE, MD5 (default), SHA1, SHA256, SHA512 
+<p class="level2">ALL, NONE, MD5 (default), SHA1, SHA256, SHA384, SHA512 
 <p class="level1">
 <p class="level0"><a name="-u"></a><span class="nroffip">-u</span> 
 <p class="level1">unlink (remove) certdata.txt after processing 
 <p class="level0"><a name="-v"></a><span class="nroffip">-v</span> 
 <p class="level1">be verbose and print out processed CAs <a name="EXIT"></a><h2 class="nroffsh">EXIT STATUS</h2>
 <p class="level0">Returns 0 on success. Returns 1 if it fails to download data. <a name="CERTDATA"></a><h2 class="nroffsh">CERTDATA FORMAT</h2>
-<p class="level0">The file format used by Mozilla for this trust information seems to be documented here: <pre>
-<p class="level0"><a href="http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html">http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html</a>
- </pre>
+<p class="level0">The file format used by Mozilla for this trust information seems to be documented here: <pre class="level0">
+<a href="http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html">http://p11-glue.freedesktop.org/doc/storing-trust-policy/storing-trust-existing.html</a>
+</pre>
 
 <p class="level0"><a name="SEE"></a><h2 class="nroffsh">SEE ALSO</h2>
 <p class="level0"><span Class="manpage">curl (1)</span> <a name="HISTORY"></a><h2 class="nroffsh">HISTORY</h2>

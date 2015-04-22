@@ -4,15 +4,20 @@
 <title>curl man page</title>
 <meta name="generator" content="roffit">
 <STYLE type="text/css">
-P.level0 {
+pre {
+  overflow: auto;
+  margin: 0;
+}
+
+P.level0, pre.level0 {
  padding-left: 2em;
 }
 
-P.level1 {
+P.level1, pre.level1 {
  padding-left: 4em;
 }
 
-P.level2 {
+P.level2, pre.level2 {
  padding-left: 6em;
 }
 
@@ -48,19 +53,25 @@ p.roffit {
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">curl - transfer a URL <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
 <p class="level0"><span Class="bold">curl [options]</span> <a class="emphasis" href="#URL">[URL...]</a> <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
-<p class="level0"><span Class="bold">curl</span> is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMTP, SMTPS, TELNET and TFTP).  The command is designed to work without user interaction. 
+<p class="level0"><span Class="bold">curl</span> is a tool to transfer data from or to a server, using one of the supported protocols (DICT, FILE, FTP, FTPS, GOPHER, HTTP, HTTPS, IMAP, IMAPS, LDAP, LDAPS, POP3, POP3S, RTMP, RTSP, SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET and TFTP). The command is designed to work without user interaction. 
 <p class="level0">curl offers a busload of useful tricks like proxy support, user authentication, FTP upload, HTTP post, SSL connections, cookies, file transfer resume, Metalink, and more. As you will see below, the number of features will make your head spin! 
 <p class="level0">curl is powered by libcurl for all transfer-related features. See <span Class="manpage">libcurl (3)</span> for details. <a name="URL"></a><h2 class="nroffsh">URL</h2>
 <p class="level0">The URL syntax is protocol-dependent. You'll find a detailed description in <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>. 
 <p class="level0">You can specify multiple URLs or parts of URLs by writing part sets within braces as in: 
-<p class="level0">&nbsp;<a href="http://site">http://site</a>.{one,two,three}.com 
+<p class="level0">&nbsp; <a href="http://site">http://site</a>.{one,two,three}.com 
 <p class="level0">or you can get sequences of alphanumeric series by using [] as in: 
-<p class="level0">&nbsp;<a href="ftp://ftp.numericals.com/file">ftp://ftp.numericals.com/file</a>[1-100].txt &nbsp;<a href="ftp://ftp.numericals.com/file">ftp://ftp.numericals.com/file</a>[001-100].txt    (with leading zeros) &nbsp;<a href="ftp://ftp.letters.com/file">ftp://ftp.letters.com/file</a>[a-z].txt 
+<p class="level0">&nbsp; <a href="ftp://ftp.numericals.com/file">ftp://ftp.numericals.com/file</a>[1-100].txt 
+<p class="level0">&nbsp; <a href="ftp://ftp.numericals.com/file">ftp://ftp.numericals.com/file</a>[001-100].txt    (with leading zeros) 
+<p class="level0">&nbsp; <a href="ftp://ftp.letters.com/file">ftp://ftp.letters.com/file</a>[a-z].txt 
 <p class="level0">Nested sequences are not supported, but you can use several ones next to each other: 
-<p class="level0">&nbsp;<a href="http://any.org/archive">http://any.org/archive</a>[1996-1999]/vol[1-4]/part{a,b,c}.html 
+<p class="level0">&nbsp; <a href="http://any.org/archive">http://any.org/archive</a>[1996-1999]/vol[1-4]/part{a,b,c}.html 
 <p class="level0">You can specify any amount of URLs on the command line. They will be fetched in a sequential manner in the specified order. 
 <p class="level0">You can specify a step counter for the ranges to get every Nth number or letter: 
-<p class="level0">&nbsp;<a href="http://www.numericals.com/file">http://www.numericals.com/file</a>[1-100:10].txt &nbsp;<a href="http://www.letters.com/file">http://www.letters.com/file</a>[a-z:2].txt 
+<p class="level0">&nbsp; <a href="http://www.numericals.com/file">http://www.numericals.com/file</a>[1-100:10].txt 
+<p class="level0">&nbsp; <a href="http://www.letters.com/file">http://www.letters.com/file</a>[a-z:2].txt 
+<p class="level0">When using [] or {} sequences when invoked from a command line prompt, you probably have to put the full URL within double quotes to avoid the shell from interfering with it. This also goes for other characters treated special, like for example '&', '?' and '*'. 
+<p class="level0">Provide the IPv6 zone index in the URL with an escaped percentage sign and the interface name. Like in 
+<p class="level0">&nbsp; http://[fe80::3%25eth0]/ 
 <p class="level0">If you specify URL without protocol:// prefix, curl will attempt to guess what protocol you might want. It will then default to HTTP but try other protocols based on often-used host name prefixes. For example, for host names starting with "ftp." curl will assume you want to speak FTP. 
 <p class="level0">curl will do its best to use what you pass to it as a URL. It is not trying to validate it as a syntactically correct URL by any means but is instead <span Class="bold">very</span> liberal with what it accepts. 
 <p class="level0">curl will attempt to re-use connections for multiple file transfers, so that getting many files from the same server will not do multiple connects / handshakes. This improves speed. Of course this is only done on files specified on a single command line and cannot be used between separate curl invokes. <a name="PROGRESS"></a><h2 class="nroffsh">PROGRESS METER</h2>
@@ -92,15 +103,15 @@ p.roffit {
 <p class="level0"><a name="-1"></a><span class="nroffip">-1, --tlsv1</span> 
 <p class="level1">(SSL) Forces curl to use TLS version 1.x when negotiating with a remote TLS server. You can use options <a class="emphasis" href="#--tlsv10">--tlsv1.0</a>, <a class="emphasis" href="#--tlsv11">--tlsv1.1</a>, and <a class="emphasis" href="#--tlsv12">--tlsv1.2</a> to control the TLS version more precisely (if the SSL backend in use supports such a level of control). 
 <p class="level0"><a name="-2"></a><span class="nroffip">-2, --sslv2</span> 
-<p class="level1">(SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL server. 
+<p class="level1">(SSL) Forces curl to use SSL version 2 when negotiating with a remote SSL server. Sometimes curl is built without SSLv2 support. SSLv2 is widely considered insecure. 
 <p class="level0"><a name="-3"></a><span class="nroffip">-3, --sslv3</span> 
-<p class="level1">(SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL server. 
+<p class="level1">(SSL) Forces curl to use SSL version 3 when negotiating with a remote SSL server. Sometimes curl is built without SSLv3 support. 
 <p class="level0"><a name="-4"></a><span class="nroffip">-4, --ipv4</span> 
-<p class="level1">If curl is capable of resolving an address to multiple IP versions (which it is if it is IPv6-capable), this option tells curl to resolve names to IPv4 addresses only. 
+<p class="level1">This option tells curl to resolve names to IPv4 addresses only, and not for example try IPv6. 
 <p class="level0"><a name="-6"></a><span class="nroffip">-6, --ipv6</span> 
-<p class="level1">If curl is capable of resolving an address to multiple IP versions (which it is if it is IPv6-capable), this option tells curl to resolve names to IPv6 addresses only. 
+<p class="level1">This option tells curl to resolve names to IPv6 addresses only, and not for example try IPv4. 
 <p class="level0"><a name="-a"></a><span class="nroffip">-a, --append</span> 
-<p class="level1">(FTP/SFTP) When used in an upload, this will tell curl to append to the target file instead of overwriting it. If the file doesn't exist, it will be created. Note that this flag is ignored by some SSH servers (including OpenSSH). 
+<p class="level1">(FTP/SFTP) When used in an upload, this makes curl append to the target file instead of overwriting it. If the remote file doesn't exist, it will be created.  Note that this flag is ignored by some SFTP servers (including OpenSSH). 
 <p class="level0"><a name="-A"></a><span class="nroffip">-A, --user-agent &lt;agent string&gt;</span> 
 <p class="level1">(HTTP) Specify the User-Agent string to send to the HTTP server. Some badly done CGIs fail if this field isn't set to "Mozilla/4.0". To encode blanks in the string, surround the string with single quote marks. This can also be set with the <a class="emphasis" href="#-H">-H, --header</a> option of course. 
 <p class="level1">If this option is used several times, the last one will be used. 
@@ -108,16 +119,18 @@ p.roffit {
 <p class="level1">(HTTP) Tells curl to figure out authentication method by itself, and use the most secure one the remote site claims to support. This is done by first doing a request and checking the response-headers, thus possibly inducing an extra network round-trip. This is used instead of setting a specific authentication method, which you can do with <a class="emphasis" href="#--basic">--basic</a>, <a class="emphasis" href="#--digest">--digest</a>, <a class="emphasis" href="#--ntlm">--ntlm</a>, and <a class="emphasis" href="#--negotiate">--negotiate</a>. 
 <p class="level1">Note that using --anyauth is not recommended if you do uploads from stdin, since it may require data to be sent twice and then the client must be able to rewind. If the need should arise when uploading from stdin, the upload operation will fail. 
 <p class="level0"><a name="-b"></a><span class="nroffip">-b, --cookie &lt;name=data&gt;</span> 
-<p class="level1">(HTTP) Pass the data to the HTTP server as a cookie. It is supposedly the data previously received from the server in a "Set-Cookie:" line. The data should be in the format "NAME1=VALUE1; NAME2=VALUE2". 
+<p class="level1">(HTTP) Pass the data to the HTTP server as a cookie. It is supposedly the data previously received from the server in a "Set-Cookie:" line.  The data should be in the format "NAME1=VALUE1; NAME2=VALUE2". 
 <p class="level1">If no '=' symbol is used in the line, it is treated as a filename to use to read previously stored cookie lines from, which should be used in this session if they match. Using this method also activates the "cookie parser" which will make curl record incoming cookies too, which may be handy if you're using this in combination with the <a class="emphasis" href="#-L">-L, --location</a> option. The file format of the file to read cookies from should be plain HTTP headers or the Netscape/Mozilla cookie file format. 
-<p class="level1"><span Class="bold">NOTE</span> that the file specified with <a class="emphasis" href="#-b">-b, --cookie</a> is only used as input. No cookies will be stored in the file. To store cookies, use the <a class="emphasis" href="#-c">-c, --cookie-jar</a> option or you could even save the HTTP headers to a file using <a class="emphasis" href="#-D">-D, --dump-header</a>! 
+<p class="level1">The file specified with <a class="emphasis" href="#-b">-b, --cookie</a> is only used as input. No cookies will be written to the file. To store cookies, use the <a class="emphasis" href="#-c">-c, --cookie-jar</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-B"></a><span class="nroffip">-B, --use-ascii</span> 
 <p class="level1">(FTP/LDAP) Enable ASCII transfer. For FTP, this can also be enforced by using an URL that ends with ";type=A". This option causes data sent to stdout to be in text mode for win32 systems. 
 <p class="level0"><a name="--basic"></a><span class="nroffip">--basic</span> 
-<p class="level1">(HTTP) Tells curl to use HTTP Basic authentication. This is the default and this option is usually pointless, unless you use it to override a previously set option that sets a different authentication method (such as <a class="emphasis" href="#--ntlm">--ntlm</a>, <a class="emphasis" href="#--digest">--digest</a>, or <a class="emphasis" href="#--negotiate">--negotiate</a>). 
+<p class="level1">(HTTP) Tells curl to use HTTP Basic authentication with the remote host. This is the default and this option is usually pointless, unless you use it to override a previously set option that sets a different authentication method (such as <a class="emphasis" href="#--ntlm">--ntlm</a>, <a class="emphasis" href="#--digest">--digest</a>, or <a class="emphasis" href="#--negotiate">--negotiate</a>). 
+<p class="level1">Used together with <a class="emphasis" href="#-u">-u, --user</a> and <a class="emphasis" href="#-x">-x, --proxy</a>. 
+<p class="level1">See also <a class="emphasis" href="#--proxy-basic">--proxy-basic</a>. 
 <p class="level0"><a name="-c"></a><span class="nroffip">-c, --cookie-jar &lt;file name&gt;</span> 
-<p class="level1">(HTTP) Specify to which file you want curl to write all cookies after a completed operation. Curl writes all cookies previously read from a specified file as well as all cookies received from remote server(s). If no cookies are known, no file will be written. The file will be written using the Netscape cookie file format. If you set the file name to a single dash, "-", the cookies will be written to stdout. 
+<p class="level1">(HTTP) Specify to which file you want curl to write all cookies after a completed operation. Curl writes all cookies previously read from a specified file as well as all cookies received from remote server(s). If no cookies are known, no data will be written. The file will be written using the Netscape cookie file format. If you set the file name to a single dash, "-", the cookies will be written to stdout. 
 <p class="level1">This command line option will activate the cookie engine that makes curl record and use cookies. Another way to activate it is to use the <span class="emphasis">-b, --cookie</span> option. 
 <p class="level1">If the cookie jar can't be created or written to, the whole curl operation won't fail or even report an error clearly. Using -v will get a warning displayed, but that is the only visible feedback you get about this possibly lethal situation. 
 <p class="level1">If this option is used several times, the last specified file name will be used. 
@@ -127,18 +140,20 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--ciphers"></a><span class="nroffip">--ciphers &lt;list of ciphers&gt;</span> 
 <p class="level1">(SSL) Specifies which ciphers to use in the connection. The list of ciphers must specify valid ciphers. Read up on SSL cipher list details on this URL: <span Class="emphasis"><a href="http://www.openssl.org/docs/apps/ciphers.html">http://www.openssl.org/docs/apps/ciphers.html</a></span> 
-<p class="level1">NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS ciphers is in the NSSCipherSuite entry at this URL: <span Class="emphasis"><a href="http://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html">http://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html</a>#Directives</span> 
+<p class="level1">NSS ciphers are done differently than OpenSSL and GnuTLS. The full list of NSS ciphers is in the NSSCipherSuite entry at this URL: <span Class="emphasis"><a href="http://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives">http://git.fedorahosted.org/cgit/mod_nss.git/plain/docs/mod_nss.html#Directives</a></span> 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--compressed"></a><span class="nroffip">--compressed</span> 
 <p class="level1">(HTTP) Request a compressed response using one of the algorithms curl supports, and save the uncompressed document.  If this option is used and the server sends an unsupported encoding, curl will report an error. 
 <p class="level0"><a name="--connect-timeout"></a><span class="nroffip">--connect-timeout &lt;seconds&gt;</span> 
-<p class="level1">Maximum time in seconds that you allow the connection to the server to take. This only limits the connection phase, once curl has connected this option is of no more use.  Since 7.32.0, this option accepts decimal values, but the actual timeout will decrease in accuracy as the specified timeout increases in decimal precision. See also the <a class="emphasis" href="#-m">-m, --max-time</a> option. 
+<p class="level1">Maximum time in seconds that you allow curl's connection to take.  This only limits the connection phase, so if curl connects within the given period it will continue - if not it will exit.  Since version 7.32.0, this option accepts decimal values. 
+<p class="level1">See also the <a class="emphasis" href="#-m">-m, --max-time</a> option. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--create-dirs"></a><span class="nroffip">--create-dirs</span> 
 <p class="level1">When used in conjunction with the <a class="emphasis" href="#-o">-o</a> option, curl will create the necessary local directory hierarchy as needed. This option creates the dirs mentioned with the <a class="emphasis" href="#-o">-o</a> option, nothing else. If the <a class="emphasis" href="#-o">-o</a> file name uses no dir or if the dirs it mentions already exist, no dir will be created. 
 <p class="level1">To create remote directories when using FTP or SFTP, try <a class="emphasis" href="#--ftp-create-dirs">--ftp-create-dirs</a>. 
 <p class="level0"><a name="--crlf"></a><span class="nroffip">--crlf</span> 
-<p class="level1">(FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390). 
+<p class="level1">Convert LF to CRLF in upload. Useful for MVS (OS/390). 
+<p class="level1">(SMTP added in 7.40.0) 
 <p class="level0"><a name="--crlfile"></a><span class="nroffip">--crlfile &lt;file&gt;</span> 
 <p class="level1">(HTTPS/FTPS) Provide a file using PEM format with a Certificate Revocation List that may specify peer certificates that are to be considered revoked. 
 <p class="level1">If this option is used several times, the last one will be used. 
@@ -150,10 +165,9 @@ p.roffit {
 <p class="level1">If you start the data with the letter @, the rest should be a file name to read the data from, or - if you want curl to read the data from stdin. Multiple files can also be specified. Posting data from a file named 'foobar' would thus be done with <span Class="emphasis">--data</span> @foobar. When --data is told to read from a file like that, carriage returns and newlines will be stripped out. 
 <p class="level0"><a name="-D"></a><span class="nroffip">-D, --dump-header &lt;file&gt;</span> 
 <p class="level1">Write the protocol headers to the specified file. 
-<p class="level1">This option is handy to use when you want to store the headers that an HTTP site sends to you. Cookies from the headers could then be read in a second curl invocation by using the <a class="emphasis" href="#-b">-b, --cookie</a> option! The <a class="emphasis" href="#-c">-c, --cookie-jar</a> option is however a better way to store cookies. 
+<p class="level1">This option is handy to use when you want to store the headers that an HTTP site sends to you. Cookies from the headers could then be read in a second curl invocation by using the <a class="emphasis" href="#-b">-b, --cookie</a> option! The <a class="emphasis" href="#-c">-c, --cookie-jar</a> option is a better way to store cookies. 
 <p class="level1">When used in FTP, the FTP server response lines are considered being "headers" and thus are saved there. 
 <p class="level1">If this option is used several times, the last one will be used. 
-<p class="level1">
 <p class="level0"><a name="--data-ascii"></a><span class="nroffip">--data-ascii &lt;data&gt;</span> 
 <p class="level1">See <a class="emphasis" href="#-d">-d, --data</a>. 
 <p class="level0"><a name="--data-binary"></a><span class="nroffip">--data-binary &lt;data&gt;</span> 
@@ -234,6 +248,19 @@ p.roffit {
 <p class="level0"><a name="--capath"></a><span class="nroffip">--capath &lt;CA certificate directory&gt;</span> 
 <p class="level1">(SSL) Tells curl to use the specified certificate directory to verify the peer. Multiple paths can be provided by separating them with ":" (e.g. "path1:path2:path3"). The certificates must be in PEM format, and if curl is built against OpenSSL, the directory must have been processed using the c_rehash utility supplied with OpenSSL. Using <a class="emphasis" href="#--capath">--capath</a> can allow OpenSSL-powered curl to make SSL-connections much more efficiently than using <a class="emphasis" href="#--cacert">--cacert</a> if the <a class="emphasis" href="#--cacert">--cacert</a> file contains many CA certificates. 
 <p class="level1">If this option is set, the default capath value will be ignored, and if it is used several times, the last one will be used. 
+<p class="level0"><a name="--pinnedpubkey"></a><span class="nroffip">--pinnedpubkey &lt;pinned public key&gt;</span> 
+<p class="level1">(SSL) Tells curl to use the specified public key file to verify the peer. The file must contain a single public key in PEM or DER format. 
+<p class="level1">When negotiating a TLS or SSL connection, the server sends a certificate indicating its identity. A public key is extracted from this certificate and if it does not exactly match the public key provided to this option, curl will abort the connection before sending or receiving any data. 
+<p class="level1">This is currently only implemented in the OpenSSL, GnuTLS and GSKit backends. 
+<p class="level1">If this option is used several times, the last one will be used. (Added in 7.39.0) 
+<p class="level0"><a name="--cert-status"></a><span class="nroffip">--cert-status</span> 
+<p class="level1">(SSL) Tells curl to verify the status of the server certificate by using the Certificate Status Request (aka. OCSP stapling) TLS extension. 
+<p class="level1">If this option is enabled and the server sends an invalid (e.g. expired) response, if the response suggests that the server certificate has been revoked, or no response at all is received, the verification fails. 
+<p class="level1">This is currently only implemented in the OpenSSL, GnuTLS and NSS backends. (Added in 7.41.0) 
+<p class="level0"><a name="--false-start"></a><span class="nroffip">--false-start</span> 
+<p class="level1">
+<p class="level1">(SSL) Tells curl to use false start during the TLS handshake. False start is a mode where a TLS client will start sending application data before verifying the server's Finished message, thus saving a round trip when performing a full handshake. 
+<p class="level1">This is currently only implemented in the NSS and Secure Transport (on iOS 7.0 or later, or OS X 10.9 or later) backends. (Added in 7.42.0) 
 <p class="level0"><a name="-f"></a><span class="nroffip">-f, --fail</span> 
 <p class="level1">(HTTP) Fail silently (no output at all) on server errors. This is mostly done to better enable scripts etc to better deal with failed attempts. In normal cases when an HTTP server fails to deliver a document, it returns an HTML document stating so (which often also describes why and more). This flag will prevent curl from outputting that and return error 22. 
 <p class="level1">This method is not fail-safe and there are occasions where non-successful response codes will slip through, especially when authentication is involved (response codes 401 and 407). 
@@ -302,6 +329,7 @@ p.roffit {
 <p class="level1">Starting in 7.37.0, you need <a class="emphasis" href="#--proxy-header">--proxy-header</a> to send custom headers intended for a proxy. 
 <p class="level1">Example: 
 <p class="level1"># curl -H "X-First-Name: Joe" <a href="http://192.168.0.1/">http://192.168.0.1/</a> 
+<p class="level1"><span Class="bold">WARNING</span>: headers set with this option will be set in all requests - even after redirects are followed, like when told with <a class="bold" href="#-L">-L, --location</a>. This can lead to the header being sent to other hosts than the original host, so sensitive headers should be used with caution combined with following redirects. 
 <p class="level1">This option can be used multiple times to add/replace/remove multiple headers. 
 <p class="level0"><a name="--hostpubmd5"></a><span class="nroffip">--hostpubmd5 &lt;md5&gt;</span> 
 <p class="level1">(SCP/SFTP) Pass a string containing 32 hexadecimal digits. The string should be the 128 bit MD5 checksum of the remote host's public key, curl will refuse the connection with the host unless the md5sums match. (Added in 7.17.1) 
@@ -331,20 +359,21 @@ p.roffit {
 <p class="level1">Note that to be able to specify a URL in the config file, you need to specify it using the <a class="emphasis" href="#--url">--url</a> option, and not by simply writing the URL on its own line. So, it could look similar to this: 
 <p class="level1">url = "<a href="http://curl.haxx.se/docs/">http://curl.haxx.se/docs/</a>" 
 <p class="level1">When curl is invoked, it always (unless <a class="emphasis" href="#-q">-q</a> is used) checks for a default config file and uses it if found. The default config file is checked for in the following places in this order: 
-<p class="level1">1) curl tries to find the "home dir": It first checks for the CURL_HOME and then the HOME environment variables. Failing that, it uses getpwuid() on UNIX-like systems (which returns the home dir given the current user in your system). On Windows, it then checks for the APPDATA variable, or as a last resort the '%USERPROFILE%\Application Data'. 
-<p class="level1">2) On windows, if there is no _curlrc file in the home dir, it checks for one in the same dir the curl executable is placed. On UNIX-like systems, it will simply try to load .curlrc from the determined home dir. 
-<p class="level1"><pre>
-<p class="level1"># --- Example file ---
- # this is a comment
- url = "curl.haxx.se"
- output = "curlhere.html"
- user-agent = "superagent/1.0"
- <p class="level1"># and fetch another URL too
- url = "curl.haxx.se/docs/manpage.html"
- -O
- referer = "<a href="http://nowhereatall.com/">http://nowhereatall.com/</a>"
- # --- End of example file ---
- </pre>
+<p class="level1">1) curl tries to find the "home dir": It first checks for the CURL_HOME and then the HOME environment variables. Failing that, it uses getpwuid() on Unix-like systems (which returns the home dir given the current user in your system). On Windows, it then checks for the APPDATA variable, or as a last resort the '%USERPROFILE%\Application Data'. 
+<p class="level1">2) On windows, if there is no _curlrc file in the home dir, it checks for one in the same dir the curl executable is placed. On Unix-like systems, it will simply try to load .curlrc from the determined home dir. 
+<p class="level1"><pre class="level1">
+# --- Example file ---
+# this is a comment
+url = "curl.haxx.se"
+output = "curlhere.html"
+user-agent = "superagent/1.0"
+
+# and fetch another URL too
+url = "curl.haxx.se/docs/manpage.html"
+-O
+referer = "<a href="http://nowhereatall.com/">http://nowhereatall.com/</a>"
+# --- End of example file ---
+</pre>
 
 <p class="level1">
 <p class="level1">This option can be used multiple times to load multiple config files. 
@@ -352,7 +381,7 @@ p.roffit {
 <p class="level1">This option sets the time a connection needs to remain idle before sending keepalive probes and the time between individual keepalive probes. It is currently effective on operating systems offering the TCP_KEEPIDLE and TCP_KEEPINTVL socket options (meaning Linux, recent AIX, HP-UX and more). This option has no effect if <a class="emphasis" href="#--no-keepalive">--no-keepalive</a> is used. (Added in 7.18.0) 
 <p class="level1">If this option is used several times, the last one will be used. If unspecified, the option defaults to 60 seconds. 
 <p class="level0"><a name="--key"></a><span class="nroffip">--key &lt;key&gt;</span> 
-<p class="level1">(SSL/SSH) Private key file name. Allows you to provide your private key in this separate file. 
+<p class="level1">(SSL/SSH) Private key file name. Allows you to provide your private key in this separate file. For SSH, if not specified, curl tries the following candidates in order: '~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--key-type"></a><span class="nroffip">--key-type &lt;type&gt;</span> 
 <p class="level1">(SSL) Private key file type. Specify which type your <a class="emphasis" href="#--key">--key</a> provided private key is. DER, PEM, and ENG are supported. If not specified, PEM is assumed. 
@@ -416,7 +445,7 @@ p.roffit {
 <p class="level1">Please note that if FILE protocol is disabled, there is no way to use a local Metalink file at the time of this writing. Also note that if <a class="emphasis" href="#--metalink">--metalink</a> and <span Class="emphasis">--include</span> are used together, <span Class="emphasis">--include</span> will be ignored. This is because including headers in the response will break Metalink parser and if the headers are included in the file described in Metalink file, hash check will fail. 
 <p class="level1">(Added in 7.27.0, if built against the libmetalink library.) 
 <p class="level0"><a name="-n"></a><span class="nroffip">-n, --netrc</span> 
-<p class="level1">Makes curl scan the <span Class="emphasis">.netrc</span> (<span Class="emphasis">_netrc</span> on Windows) file in the user's home directory for login name and password. This is typically used for FTP on UNIX. If used with HTTP, curl will enable user authentication. See <span Class="manpage">netrc(4)</span> or <span Class="manpage">ftp(1)</span> for details on the file format. Curl will not complain if that file doesn't have the right permissions (it should not be either world- or group-readable). The environment variable "HOME" is used to find the home directory. 
+<p class="level1">Makes curl scan the <span Class="emphasis">.netrc</span> (<span Class="emphasis">_netrc</span> on Windows) file in the user's home directory for login name and password. This is typically used for FTP on Unix. If used with HTTP, curl will enable user authentication. See <span Class="manpage">netrc(4)</span> or <span Class="manpage">ftp(1)</span> for details on the file format. Curl will not complain if that file doesn't have the right permissions (it should not be either world- or group-readable). The environment variable "HOME" is used to find the home directory. 
 <p class="level1">A quick and very simple example of how to setup a <span Class="emphasis">.netrc</span> to allow curl to FTP to the machine host.domain.com with user name 'myself' and password 'secret' should look similar to: 
 <p class="level1"><span Class="bold">machine host.domain.com login myself password secret</span> 
 <p class="level0"><a name="-N"></a><span class="nroffip">-N, --no-buffer</span> 
@@ -490,6 +519,9 @@ p.roffit {
 <p class="level0"><a name="--pass"></a><span class="nroffip">--pass &lt;phrase&gt;</span> 
 <p class="level1">(SSL/SSH) Passphrase for the private key 
 <p class="level1">If this option is used several times, the last one will be used. 
+<p class="level0"><a name="--path-as-is"></a><span class="nroffip">--path-as-is</span> 
+<p class="level1">Tell curl to not handle sequences of /../ or /./ in the given URL path. Normally curl will squash or merge them according to standards but with this option set you tell it not to do that. 
+<p class="level1">(Added in 7.42.0) 
 <p class="level0"><a name="--post301"></a><span class="nroffip">--post301</span> 
 <p class="level1">(HTTP) Tells curl to respect <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>/10.3.2 and not convert POST requests into GET requests when following a 301 redirection. The non-RFC behaviour is ubiquitous in web browsers, so curl does the conversion by default to maintain consistency. However, a server may require a POST to remain a POST after such a redirection. This option is meaningful only when using <a class="emphasis" href="#-L">-L, --location</a> (Added in 7.17.1) 
 <p class="level0"><a name="--post302"></a><span class="nroffip">--post302</span> 
@@ -533,6 +565,7 @@ p.roffit {
 <p class="level0"><a name="--pubkey"></a><span class="nroffip">--pubkey &lt;key&gt;</span> 
 <p class="level1">(SSH) Public key file name. Allows you to provide your public key in this separate file. 
 <p class="level1">If this option is used several times, the last one will be used. 
+<p class="level1">(As of 7.39.0, curl attempts to automatically extract the public key from the private key file, so passing this option is generally not required. Note that this public key extraction requires libcurl to be linked against a copy of libssh2 1.2.8 or higher that is itself linked against OpenSSL.) 
 <p class="level0"><a name="-q"></a><span class="nroffip">-q</span> 
 <p class="level1">If used as the first parameter on the command line, the <span Class="emphasis">curlrc</span> config file will not be read and used. See the <a class="emphasis" href="#-K">-K, --config</a> for details on the default config file search path. 
 <p class="level0"><a name="-Q"></a><span class="nroffip">-Q, --quote &lt;command&gt;</span> 
@@ -685,6 +718,8 @@ p.roffit {
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="--trace-time"></a><span class="nroffip">--trace-time</span> 
 <p class="level1">Prepends a time stamp to each trace or verbose line that curl displays. (Added in 7.14.0) 
+<p class="level0"><a name="--unix-socket"></a><span class="nroffip">--unix-socket &lt;path&gt;</span> 
+<p class="level1">(HTTP) Connect through this Unix domain socket, instead of using the network. (Added in 7.40.0) 
 <p class="level0"><a name="-u"></a><span class="nroffip">-u, --user &lt;user:password&gt;</span> 
 <p class="level1">Specify the user name and password to use for server authentication. Overrides <a class="emphasis" href="#-n">-n, --netrc</a> and <a class="emphasis" href="#--netrc-optional">--netrc-optional</a>. 
 <p class="level1">If you simply specify the user name, curl will prompt for a password. 
@@ -692,7 +727,7 @@ p.roffit {
 <p class="level1">When using Kerberos V5 with a Windows based server you should include the Windows domain name in the user name, in order for the server to succesfully obtain a Kerberos Ticket. If you don't then the initial authentication handshake may fail. 
 <p class="level1">When using NTLM, the user name can be specified simply as the user name, without the domain, if there is a single domain and forest in your setup for example. 
 <p class="level1">To specify the domain name use either Down-Level Logon Name or UPN (User Principal Name) formats. For example, EXAMPLE\user and user@example.com respectively. 
-<p class="level1">If you use a Windows SSPI-enabled curl binary and perform Kerberos V5, Negotiate or NTLM authentication then you can tell curl to select the user name and password from your environment by specifying a single colon with this option: "-u :". 
+<p class="level1">If you use a Windows SSPI-enabled curl binary and perform Kerberos V5, Negotiate, NTLM or Digest authentication then you can tell curl to select the user name and password from your environment by specifying a single colon with this option: "-u :". 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-U"></a><span class="nroffip">-U, --proxy-user &lt;user:password&gt;</span> 
 <p class="level1">Specify the user name and password to use for proxy authentication. 
@@ -702,13 +737,13 @@ p.roffit {
 <p class="level1">Specify a URL to fetch. This option is mostly handy when you want to specify URL(s) in a config file. 
 <p class="level1">This option may be used any number of times. To control where this URL is written, use the <a class="emphasis" href="#-o">-o, --output</a> or the <a class="emphasis" href="#-O">-O, --remote-name</a> options. 
 <p class="level0"><a name="-v"></a><span class="nroffip">-v, --verbose</span> 
-<p class="level1">Makes the fetching more verbose/talkative. Mostly useful for debugging. A line starting with '&gt;' means "header data" sent by curl, '&lt;' means "header data" received by curl that is hidden in normal cases, and a line starting with '*' means additional info provided by curl. 
+<p class="level1">Be more verbose/talkative during the operation. Useful for debugging and seeing what's going on "under the hood". A line starting with '&gt;' means "header data" sent by curl, '&lt;' means "header data" received by curl that is hidden in normal cases, and a line starting with '*' means additional info provided by curl. 
 <p class="level1">Note that if you only want HTTP headers in the output, <a class="emphasis" href="#-i">-i, --include</a> might be the option you're looking for. 
 <p class="level1">If you think this option still doesn't give you enough details, consider using <a class="emphasis" href="#--trace">--trace</a> or <a class="emphasis" href="#--trace-ascii">--trace-ascii</a> instead. 
 <p class="level1">This option overrides previous uses of <a class="emphasis" href="#--trace-ascii">--trace-ascii</a> or <a class="emphasis" href="#--trace">--trace</a>. 
 <p class="level1">Use <a class="emphasis" href="#-s">-s, --silent</a> to make curl quiet. 
 <p class="level0"><a name="-w"></a><span class="nroffip">-w, --write-out &lt;format&gt;</span> 
-<p class="level1">Defines what to display on stdout after a completed and successful operation. The format is a string that may contain plain text mixed with any number of variables. The string can be specified as "string", to get read from a particular file you specify it "@filename" and to tell curl to read the format from stdin you write "@-". 
+<p class="level1">Make curl display information on stdout after a completed transfer. The format is a string that may contain plain text mixed with any number of variables. The format can be specified as a literal "string", or you can have curl read the format from a file with "@filename" and to tell curl to read the format from stdin you write "@-". 
 <p class="level1">The variables present in the output format will be substituted by the value or text that curl thinks fit, as described below. All variables are specified as %{variable_name} and to output a normal % you just write them as %%. You can output a newline by using \n, a carriage return with \r and a tab space with \t. 
 <p class="level1"><span Class="bold">NOTE:</span> The %-symbol is a special symbol in the win32-environment, where all occurrences of % must be doubled when using this option. 
 <p class="level1">The variables available are: 
@@ -752,9 +787,10 @@ p.roffit {
 <p class="level1">The proxy host can be specified the exact same way as the proxy environment variables, including the protocol prefix (http://) and the embedded user + password. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-X"></a><span class="nroffip">-X, --request &lt;command&gt;</span> 
-<p class="level1">(HTTP) Specifies a custom request method to use when communicating with the HTTP server.  The specified request will be used instead of the method otherwise used (which defaults to GET). Read the HTTP 1.1 specification for details and explanations. Common additional HTTP requests include PUT and DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and more. 
+<p class="level1">(HTTP) Specifies a custom request method to use when communicating with the HTTP server.  The specified request method will be used instead of the method otherwise used (which defaults to GET). Read the HTTP 1.1 specification for details and explanations. Common additional HTTP requests include PUT and DELETE, but related technologies like WebDAV offers PROPFIND, COPY, MOVE and more. 
 <p class="level1">Normally you don't need this option. All sorts of GET, HEAD, POST and PUT requests are rather invoked by using dedicated command line options. 
 <p class="level1">This option only changes the actual word used in the HTTP request, it does not alter the way curl behaves. So for example if you want to make a proper HEAD request, using -X HEAD will not suffice. You need to use the <a class="emphasis" href="#-I">-I, --head</a> option. 
+<p class="level1">The method string you set with -X will be used for all requests, which if you for example use <a class="bold" href="#-L">-L, --location</a> may cause unintended side-effects when curl doesn't change request method according to the HTTP 30x response codes - and similar. 
 <p class="level1">(FTP) Specifies a custom FTP command to use instead of LIST when doing file lists with FTP. 
 <p class="level1">(POP3) Specifies a custom POP3 command to use instead of LIST or RETR. (Added in 7.26.0) 
 <p class="level1">(IMAP) Specifies a custom IMAP command to use instead of LIST. (Added in 7.30.0) 
@@ -775,7 +811,7 @@ p.roffit {
 <p class="level1">Start the date expression with a dash (-) to make it request for a document that is older than the given date/time, default is a document that is newer than the specified date/time. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-h"></a><span class="nroffip">-h, --help</span> 
-<p class="level1">Usage help. 
+<p class="level1">Usage help. This lists all current command line options with a short description. 
 <p class="level0"><a name="-M"></a><span class="nroffip">-M, --manual</span> 
 <p class="level1">Manual. Display the huge help text. 
 <p class="level0"><a name="-V"></a><span class="nroffip">-V, --version</span> 
@@ -789,7 +825,7 @@ p.roffit {
 <p class="level1"><a name="krb4"></a><span class="nroffip">krb4</span> 
 <p class="level2">Krb4 for FTP is supported. 
 <p class="level1"><a name="SSL"></a><span class="nroffip">SSL</span> 
-<p class="level2">HTTPS and FTPS are supported. 
+<p class="level2">SSL versions of various protocols are supported, such as HTTPS, FTPS, POP3S and so on. 
 <p class="level1"><a name="libz"></a><span class="nroffip">libz</span> 
 <p class="level2">Automatic decompression of compressed files over HTTP is supported. 
 <p class="level1"><a name="NTLM"></a><span class="nroffip">NTLM</span> 
@@ -797,7 +833,7 @@ p.roffit {
 <p class="level1"><a name="Debug"></a><span class="nroffip">Debug</span> 
 <p class="level2">This curl uses a libcurl built with Debug. This enables more error-tracking and memory debugging etc. For curl-developers only! 
 <p class="level1"><a name="AsynchDNS"></a><span class="nroffip">AsynchDNS</span> 
-<p class="level2">This curl uses asynchronous name resolves. 
+<p class="level2">This curl uses asynchronous name resolves. Asynchronous name resolves can be done using either the c-ares or the threaded resolver backends. 
 <p class="level1"><a name="SPNEGO"></a><span class="nroffip">SPNEGO</span> 
 <p class="level2">SPNEGO authentication is supported. 
 <p class="level1"><a name="Largefile"></a><span class="nroffip">Largefile</span> 
@@ -810,6 +846,8 @@ p.roffit {
 <p class="level2">SSPI is supported. 
 <p class="level1"><a name="TLS-SRP"></a><span class="nroffip">TLS-SRP</span> 
 <p class="level2">SRP (Secure Remote Password) authentication is supported for TLS. 
+<p class="level1"><a name="HTTP2"></a><span class="nroffip">HTTP2</span> 
+<p class="level2">HTTP/2 support has been built-in. 
 <p class="level1"><a name="Metalink"></a><span class="nroffip">Metalink</span> 
 <p class="level2">This curl supports Metalink (both version 3 and 4 (<a href="http://www.ietf.org/rfc/rfc5854.txt">RFC 5854</a>)), which describes mirrors and hashes.  curl will use mirrors for failover if there are errors (such as the file or server not being available). 
 <p class="level1"><a name="FILES"></a><h2 class="nroffsh">FILES</h2>
@@ -992,6 +1030,8 @@ p.roffit {
 <p class="level1">FTP chunk callback reported error 
 <p class="level0"><a name="89"></a><span class="nroffip">89</span> 
 <p class="level1">No connection available, the session will be queued 
+<p class="level0"><a name="90"></a><span class="nroffip">90</span> 
+<p class="level1">SSL public key does not matched pinned public key 
 <p class="level0"><a name="XX"></a><span class="nroffip">XX</span> 
 <p class="level1">More error codes will appear here in future releases. The existing ones are meant to never change. <a name="AUTHORS"></a><h2 class="nroffsh">AUTHORS / CONTRIBUTORS</h2>
 <p class="level0">Daniel Stenberg is the main author, but the whole list of contributors is found in the separate THANKS file. <a name="WWW"></a><h2 class="nroffsh">WWW</h2>

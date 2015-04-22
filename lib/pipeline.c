@@ -6,7 +6,7 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2013, Linus Nielsen Feltzing, <linus@haxx.se>
- * Copyright (C) 2013-2014, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2013-2015, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,15 +49,13 @@ static void site_blacklist_llist_dtor(void *user, void *element)
   (void)user;
 
   Curl_safefree(entry->hostname);
-  Curl_safefree(entry);
+  free(entry);
 }
 
 static void server_blacklist_llist_dtor(void *user, void *element)
 {
-  char *server_name = element;
   (void)user;
-
-  Curl_safefree(server_name);
+  free(element);
 }
 
 bool Curl_pipeline_penalized(struct SessionHandle *data,
@@ -99,11 +97,11 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
 {
   struct curl_llist_element *sendhead = conn->send_pipe->head;
   struct curl_llist *pipeline;
-  CURLcode rc;
+  CURLcode result;
 
   pipeline = conn->send_pipe;
 
-  rc = Curl_addHandleToPipeline(handle, pipeline);
+  result = Curl_addHandleToPipeline(handle, pipeline);
 
   if(pipeline == conn->send_pipe && sendhead != conn->send_pipe->head) {
     /* this is a new one as head, expire it */
@@ -115,7 +113,7 @@ CURLcode Curl_add_handle_to_pipeline(struct SessionHandle *handle,
   print_pipeline(conn);
 #endif
 
-  return rc;
+  return result;
 }
 
 /* Move this transfer from the sending list to the receiving list.
@@ -251,7 +249,7 @@ CURLMcode Curl_pipeline_set_site_blacklist(char **sites,
 bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
                                       char *server_name)
 {
-  if(handle->multi) {
+  if(handle->multi && server_name) {
     struct curl_llist *blacklist =
       Curl_multi_pipelining_server_bl(handle->multi);
 
@@ -272,7 +270,7 @@ bool Curl_pipeline_server_blacklisted(struct SessionHandle *handle,
       }
     }
 
-    infof(handle, "Server %s is not blacklisted\n", server_name);
+    DEBUGF(infof(handle, "Server %s is not blacklisted\n", server_name));
   }
   return FALSE;
 }
