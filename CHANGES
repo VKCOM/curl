@@ -6,6 +6,74 @@
 
                                   Changelog
 
+Version 7.42.1 (28 Apr 2015)
+
+Daniel Stenberg (28 Apr 2015)
+- RELEASE-NOTES: 7.42.1 ready
+
+- CURLOPT_HEADEROPT: default to separate
+  
+  Make the HTTP headers separated by default for improved security and
+  reduced risk for information leakage.
+  
+  Bug: http://curl.haxx.se/docs/adv_20150429.html
+  Reported-by: Yehezkel Horowitz, Oren Souroujon
+
+- RELEASE-NOTES: synced with a6e0270e
+
+- sws: init http2 state properly
+  
+  It would otherwise cause problems when running tests after 1801 etc.
+
+- curl_easy_getinfo.3: document 'internals' in CURLINFO_TLS_SESSION
+  
+  ... as it was previouly undocumented what the pointer was.
+
+- openssl: fix serial number output
+  
+  The code extracting the cert serial number was broken and didn't display
+  it properly.
+  
+  Bug: https://github.com/bagder/curl/issues/235
+  Reported-by: dkjjr89
+
+- [Alessandro Ghedini brought this change]
+
+  curl.1: fix typo
+
+- RELEASE-NOTES: toward 7.42.1, synced with 097460a
+
+- [Kamil Dudka brought this change]
+
+  curl -z: do not write empty file on unmet condition
+  
+  This commit fixes a regression introduced in curl-7_41_0-186-g261a0fe.
+  It also introduces a regression test 1424 based on tests 78 and 1423.
+  
+  Reported-by: Viktor Szakats
+  Bug: https://github.com/bagder/curl/issues/237
+
+- [Kamil Dudka brought this change]
+
+  docs: distribute the CURLOPT_PINNEDPUBLICKEY(3) man page, too
+
+- connectionexists: follow-up to fd9d3a1ef1f
+  
+  PROTOPT_CREDSPERREQUEST still needs to be checked even when NTLM is not
+  enabled.
+  
+  Mistake-caught-by: Kamil Dudka
+
+- connectionexists: fix build without NTLM
+  
+  Do not access NTLM-specific struct fields when built without NTLM
+  enabled!
+  
+  bug: http://curl.haxx.se/?i=231
+  Reported-by: Patrick Rapin
+
+- dist: include {src,lib}/checksrc.whitelist
+
 Version 7.42.0 (22 Apr 2015)
 
 Daniel Stenberg (22 Apr 2015)
@@ -5133,79 +5201,3 @@ Patrick Monnerat (14 Oct 2014)
 - OS400: fix bugs in curl_*escape_ccsid() and reduce variables scope
 
 - Implement pinned public key in GSKit backend
-
-Daniel Stenberg (14 Oct 2014)
-- CURLOPT_TLSAUTH_*.3: fix reference typos
-
-- cleanups: reduce variable scope
-  
-  cppcheck pointed these out.
-
-- singleipconnect: remove dead assignment never used
-  
-  cppcheck pointed this out.
-
-- pinning: minor code style policing
-
-Patrick Monnerat (13 Oct 2014)
-- Factorize pinned public key code into generic file handling and backend specific
-
-- vtls: remove QsoSSL
-
-- gskit: supply dummy randomization function
-
-- vtls/*: deprecate have_curlssl_md5sum and set-up default md5sum implementation
-
-Daniel Stenberg (13 Oct 2014)
-- [Peter Wu brought this change]
-
-  tests: move TESTCASES to Makefile.inc, add show for cmake
-  
-  This change allows runtests.pl to be run from the CMake builddir:
-  
-      export srcdir=/tmp/curl/tests;
-      perl -I$srcdir $srcdir/runtests.pl -l
-  
-  In order to make this possible, all test cases have been moved from
-  Makefile.am to Makefile.inc.
-  
-  Signed-off-by: Peter Wu <peter@lekensteyn.nl>
-
-- [Peter Wu brought this change]
-
-  cmake: enable IPv6 by default if available
-  
-  ENABLE_IPV6 depends on HAVE_GETADDRINFO or you will get a
-  Curl_getaddrinfo_ex error. Enable IPv6 by default, disabling it if
-  struct sockaddr_in6 is not found in netinet/in.h.
-  
-  Note that HAVE_GETADDRINFO_THREADSAFE is still not set as it needs more
-  platform checks even though POSIX requires a thread-safe getaddrinfo.
-  
-  Verified on Arch Linux x86_64 with glibc 2.20-2 and Linux 3.16-rc7.
-  
-  Signed-off-by: Peter Wu <peter@lekensteyn.nl>
-
-- [Peter Wu brought this change]
-
-  cmake: build tool_hugehelp (ENABLE_MANUAL)
-  
-  Rather than always outputting an empty manual page for the '-M' option,
-  generate a full manual page as done by autotools. For simplicity in
-  CMake, always generate the gzipped page as it will not be used anyway
-  when zlib is not available.
-  
-  Signed-off-by: Peter Wu <peter@lekensteyn.nl>
-
-- [Peter Wu brought this change]
-
-  tests/http_pipe.py: Python 3 support
-  
-  The 2to3 tool converted socketserver (which I manually fixed up with an
-  import fallback) and the print(e) line. The xrange option was converted
-  to range, but it seems better to use the '*' operator here for
-  simplicity.
-  
-  Signed-off-by: Peter Wu <peter@lekensteyn.nl>
-
-- SECURITY: slightly nicer markdown format

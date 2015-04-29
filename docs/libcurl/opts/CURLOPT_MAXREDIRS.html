@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_MAXREDIRS - maximum number of redirects allowed <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_MAXREDIRS, long amount); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a long. The set number will be the redirection limit <span Class="emphasis">amount</span>. If that many redirections have been followed, the next redirect will cause an error (<span Class="emphasis">CURLE_TOO_MANY_REDIRECTS</span>). This option only makes sense if the <a Class="emphasis" href="./CURLOPT_FOLLOWLOCATION.html">CURLOPT_FOLLOWLOCATION</a> is used at the same time. 
 <p class="level0">Setting the limit to 0 will make libcurl refuse any redirect. 

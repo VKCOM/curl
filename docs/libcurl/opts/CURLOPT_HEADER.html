@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_HEADER - pass headers to the data stream <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HEADER, long onoff); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass in <span Class="emphasis">onoff</span> set to 1 to tell the library to include the header in the body output for requests with this <span Class="emphasis">handle</span>. This option is relevant for protocols that actually have headers or other meta-data (like HTTP and FTP). 
 <p class="level0">When asking to get the header info passed to the same callback as the body, it is not possible to accurately separate them again without detailed knowledge about the protocol in use. 

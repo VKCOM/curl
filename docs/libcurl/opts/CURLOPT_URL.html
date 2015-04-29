@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_URL - provide the URL to use in the request <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_URL, char *URL); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass in a pointer to the <span Class="emphasis">URL</span> to work with. The parameter should be a char * to a zero terminated string which must be URL-encoded in the following format: 
 <p class="level0">scheme://host:port/path 
@@ -140,7 +140,7 @@ p.roffit {
 <p class="level1">For more information about the individual components of a LDAP URL please see <a href="http://www.ietf.org/rfc/rfc4516.txt">RFC 4516</a>. 
 <p class="level0"><a name="RTMP"></a><span class="nroffip">RTMP</span> 
 <p class="level1">There's no official URL spec for RTMP so libcurl uses the URL syntax supported by the underlying librtmp library. It has a syntax where it wants a traditional URL, followed by a space and a series of space-separated name=value pairs. 
-<p class="level1">While space is not typically a "legal" letter, libcurl accepts them. When a user wants to pass in a '#' (hash) character it will be treated as a fragment and get cut off by libcurl if provided literally. You will instead have to escape it by providing it as backslash and its ASCII value in hexadecimal: "\23". <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
+<p class="level1">While space is not typically a "legal" letter, libcurl accepts them. When a user wants to pass in a '&#35;' (hash) character it will be treated as a fragment and get cut off by libcurl if provided literally. You will instead have to escape it by providing it as backslash and its ASCII value in hexadecimal: "\23". <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
 <p class="level0">There is no default URL. If this option isn't set, no transfer can be performed. <a name="SECURITY"></a><h2 class="nroffsh">SECURITY CONCERNS</h2>
 <p class="level0">Applications may at times find it convenient to allow users to specify URLs for various purposes and that string would then end up fed to this option. 
 <p class="level0">Getting a URL from an external untrusted party will bring reasons for several security concerns: 

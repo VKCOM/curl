@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_UPLOAD - enable data upload <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UPLOAD, long upload); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">The long parameter <span Class="emphasis">upload</span> set to 1 tells the library to prepare for and perform an upload. The <a Class="emphasis" href="./CURLOPT_READDATA.html">CURLOPT_READDATA</a> and <a Class="emphasis" href="./CURLOPT_INFILESIZE.html">CURLOPT_INFILESIZE</a> or <a Class="emphasis" href="./CURLOPT_INFILESIZE_LARGE.html">CURLOPT_INFILESIZE_LARGE</a> options are also interesting for uploads. If the protocol is HTTP, uploading means using the PUT request unless you tell libcurl otherwise. 
 <p class="level0">Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header. You can disable this header with <a Class="emphasis" href="./CURLOPT_HTTPHEADER.html">CURLOPT_HTTPHEADER</a> as usual. 
