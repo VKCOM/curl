@@ -1,3 +1,12 @@
+curl (7.42.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    - Don't send sensitive HTTP server headers to proxies as per
+      CVE-2015-3153
+      http://curl.haxx.se/docs/adv_20150429.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 29 Apr 2015 10:41:07 +0200
+
 curl (7.42.0-1) unstable; urgency=medium
 
   * New upstream release
