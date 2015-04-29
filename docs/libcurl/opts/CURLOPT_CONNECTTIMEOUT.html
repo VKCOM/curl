@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_CONNECTTIMEOUT - timeout for the connect phase <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CONNECTTIMEOUT, long timeout); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a long. It should contain the maximum time in seconds that you allow the connection phase to the server to take.  This only limits the connection phase, it has no impact once it has connected. Set to zero to switch to the default built-in connection timeout - 300 seconds. See also the <a Class="emphasis" href="./CURLOPT_TIMEOUT.html">CURLOPT_TIMEOUT</a> option. 
 <p class="level0">In unix-like systems, this might cause signals to be used unless <a Class="emphasis" href="./CURLOPT_NOSIGNAL.html">CURLOPT_NOSIGNAL</a> is set. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>

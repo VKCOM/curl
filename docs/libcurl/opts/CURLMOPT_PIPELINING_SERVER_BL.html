@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLMOPT_PIPELINING_SERVER_BL - pipelining server blacklist <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PIPELINING_SERVER_BL, char **servers); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a <span Class="bold">servers</span> array of char *, ending with a NULL entry. This is a list of server types prefixes (in the Server: HTTP header) that are blacklisted from pipelining, i.e server types that are known to not support HTTP pipelining. The array is copied by libcurl. 
 <p class="level0">Note that the comparison matches if the Server: header begins with the string in the blacklist, i.e "Server: Ninja 1.2.3" and "Server: Ninja 1.4.0" can  both be blacklisted by having "Ninja" in the backlist. 

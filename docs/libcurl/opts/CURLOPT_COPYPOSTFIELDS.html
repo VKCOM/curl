@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_COPYPOSTFIELDS - have libcurl copy data to POST <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_COPYPOSTFIELDS, char *data); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a char * as parameter, which should be the full <span Class="emphasis">data</span> to post in a HTTP POST operation. It behaves as the <a Class="emphasis" href="./CURLOPT_POSTFIELDS.html">CURLOPT_POSTFIELDS</a> option, but the original data is instead copied by the library, allowing the application to overwrite the original data after setting this option. 
 <p class="level0">Because data are copied, care must be taken when using this option in conjunction with <a Class="emphasis" href="./CURLOPT_POSTFIELDSIZE.html">CURLOPT_POSTFIELDSIZE</a> or <a Class="emphasis" href="./CURLOPT_POSTFIELDSIZE_LARGE.html">CURLOPT_POSTFIELDSIZE_LARGE</a>: If the size has not been set prior to <a Class="emphasis" href="./CURLOPT_COPYPOSTFIELDS.html">CURLOPT_COPYPOSTFIELDS</a>, the data is assumed to be a zero terminated string; else the stored size informs the library about the byte count to copy. In any case, the size must not be changed after <a Class="emphasis" href="./CURLOPT_COPYPOSTFIELDS.html">CURLOPT_COPYPOSTFIELDS</a>, unless another <a Class="emphasis" href="./CURLOPT_POSTFIELDS.html">CURLOPT_POSTFIELDS</a> or <a Class="emphasis" href="./CURLOPT_COPYPOSTFIELDS.html">CURLOPT_COPYPOSTFIELDS</a> option is issued. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>

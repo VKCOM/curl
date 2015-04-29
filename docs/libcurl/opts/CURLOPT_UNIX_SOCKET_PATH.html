@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_UNIX_SOCKET_PATH - set Unix domain socket <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNIX_SOCKET_PATH, char *path); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Enables the use of Unix domain sockets as connection endpoint and sets the path to <span Class="emphasis">path</span>. If <span Class="emphasis">path</span> is NULL, then Unix domain sockets are disabled. An empty string will result in an error at some point, it will not disable use of Unix domain sockets. 
 <p class="level0">When enabled, cURL will connect to the Unix domain socket instead of establishing a TCP connection to a host. Since no TCP connection is created, cURL does not need to resolve the DNS hostname in the URL. 

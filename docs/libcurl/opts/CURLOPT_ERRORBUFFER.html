@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_ERRORBUFFER - set error buffer for error messages <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_ERRORBUFFER, char *buf); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a char * to a buffer that the libcurl may store human readable error messages in on failures or problems. This may be more helpful than just the return code from <span Class="emphasis">curl_easy_perform(3)</span> and related functions. The buffer <span Class="bold">must be at least CURL_ERROR_SIZE bytes big</span>. 
 <p class="level0">You must keep the associated buffer available until libcurl no longer needs it. Failing to do so will cause very odd behavior or even crashes. libcurl will need it until you call <span Class="emphasis">curl_easy_cleanup(3)</span> or you set the same option again to use a different pointer. 

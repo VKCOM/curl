@@ -52,12 +52,12 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_CAINFO - path to Certificate Authority (CA) bundle <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CAINFO, char *path); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Pass a char * to a zero terminated string naming a file holding one or more certificates to verify the peer with. 
 <p class="level0">If <a Class="emphasis" href="./CURLOPT_SSL_VERIFYPEER.html">CURLOPT_SSL_VERIFYPEER</a> is zero and you avoid verifying the server's certificate, <a Class="emphasis" href="./CURLOPT_CAINFO.html">CURLOPT_CAINFO</a> need not even indicate an accessible file. 
 <p class="level0">This option is by default set to the system path where libcurl's cacert bundle is assumed to be stored, as established at build time. 
-<p class="level0">If curl is built against the NSS SSL library, the NSS PEM PKCS#11 module (libnsspem.so) needs to be available for this option to work properly. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
+<p class="level0">If curl is built against the NSS SSL library, the NSS PEM PKCS&#35;11 module (libnsspem.so) needs to be available for this option to work properly. <a name="DEFAULT"></a><h2 class="nroffsh">DEFAULT</h2>
 <p class="level0">Built-in system specific <a name="PROTOCOLS"></a><h2 class="nroffsh">PROTOCOLS</h2>
 <p class="level0">All TLS based protocols: HTTPS, FTPS, IMAPS, POP3, SMTPS etc. <a name="EXAMPLE"></a><h2 class="nroffsh">EXAMPLE</h2>
 <p class="level0">TODO <a name="AVAILABILITY"></a><h2 class="nroffsh">AVAILABILITY</h2>

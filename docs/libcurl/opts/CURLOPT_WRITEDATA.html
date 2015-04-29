@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_WRITEDATA - custom pointer passed to the write callback <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_WRITEDATA, void *pointer); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">A data <span Class="emphasis">pointer</span> to pass to the write callback. If you use the <a Class="emphasis" href="./CURLOPT_WRITEFUNCTION.html">CURLOPT_WRITEFUNCTION</a> option, this is the pointer you'll get in that callback's 4th argument. If you don't use a write callback, you must make <span Class="emphasis">pointer</span> a 'FILE *' (cast to 'void *') as libcurl will pass this to <span Class="emphasis">fwrite(3)</span> when writing data. 
 <p class="level0">The internal <a Class="emphasis" href="./CURLOPT_WRITEFUNCTION.html">CURLOPT_WRITEFUNCTION</a> will write the data to the FILE * given with this option, or to stdout if this option hasn't been set. 

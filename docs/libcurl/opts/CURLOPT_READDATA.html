@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_READDATA - custom pointer passed to the read callback <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_READDATA, void *pointer); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">Data <span Class="emphasis">pointer</span> to pass to the file read function. If you use the <a Class="emphasis" href="./CURLOPT_READFUNCTION.html">CURLOPT_READFUNCTION</a> option, this is the pointer you'll get as input in the 4th argument to the callback. 
 <p class="level0">If you don't specify a read callback but instead rely on the default internal read function, this data must be a valid readable FILE * (cast to 'void *'). 

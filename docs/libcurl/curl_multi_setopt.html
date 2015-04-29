@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">curl_multi_setopt - set options for a curl multi handle <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLMcode curl_multi_setopt(CURLM * multi_handle, CURLMoption option, param); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0"><a Class="emphasis" href="./curl_multi_setopt.html">curl_multi_setopt</a> is used to tell a libcurl multi handle how to behave. By using the appropriate options to <a Class="emphasis" href="./curl_multi_setopt.html">curl_multi_setopt</a>, you can change libcurl's behaviour when using that multi handle.  All options are set with the <span Class="emphasis">option</span> followed by the parameter <span Class="emphasis">param</span>. That parameter can be a <span Class="bold">long</span>, a <span Class="bold">function pointer</span>, an <span class="bold">object pointer</span> or a <span Class="bold">curl_off_t</span> type, depending on what the specific option expects. Read this manual carefully as bad input values may cause libcurl to behave badly!  You can only set one option in each function call. 
 <p class="level0"><a name="OPTIONS"></a><h2 class="nroffsh">OPTIONS</h2>

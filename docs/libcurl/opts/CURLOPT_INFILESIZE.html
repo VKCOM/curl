@@ -52,7 +52,7 @@ p.roffit {
 
 <p class="level0"><a name="NAME"></a><h2 class="nroffsh">NAME</h2>
 <p class="level0">CURLOPT_INFILESIZE - set size of the input file to send off <a name="SYNOPSIS"></a><h2 class="nroffsh">SYNOPSIS</h2>
-<p class="level0">#include &lt;curl/curl.h&gt; 
+<p class="level0">&#35;include &lt;curl/curl.h&gt; 
 <p class="level0">CURLcode curl_easy_setopt(CURL *handle, CURLOPT_INFILESIZE, long filesize); <a name="DESCRIPTION"></a><h2 class="nroffsh">DESCRIPTION</h2>
 <p class="level0">When uploading a file to a remote site, <span Class="emphasis">filesize</span> should be used to tell libcurl what the expected size of the input file is. This value must be passed as a long. See also <a Class="emphasis" href="./CURLOPT_INFILESIZE_LARGE.html">CURLOPT_INFILESIZE_LARGE</a> for sending files larger than 2GB. 
 <p class="level0">For uploading using SCP, this option or <a Class="emphasis" href="./CURLOPT_INFILESIZE_LARGE.html">CURLOPT_INFILESIZE_LARGE</a> is mandatory. 
