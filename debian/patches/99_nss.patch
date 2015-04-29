@@ -23,7 +23,7 @@ Last-Update: 2013-04-17
 +++ b/lib/Makefile.am
 @@ -36,7 +36,7 @@
   firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl	\
-  objnames-test08.sh objnames-test10.sh objnames.inc
+  objnames-test08.sh objnames-test10.sh objnames.inc checksrc.whitelist
  
 -lib_LTLIBRARIES = libcurl-gnutls.la
 +lib_LTLIBRARIES = libcurl-nss.la
