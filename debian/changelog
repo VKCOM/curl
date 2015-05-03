@@ -1,3 +1,11 @@
+curl (7.42.1-2) unstable; urgency=medium
+
+  * Switch curl binary to libcurl3-gnutls (Closes: #342719)
+    This is the first step of a possible migration to a GnuTLS-only
+    libcurl for Debian. Let's see how it goes.
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 03 May 2015 13:13:15 +0200
+
 curl (7.42.1-1) unstable; urgency=high
 
   * New upstream release
