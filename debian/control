@@ -68,7 +68,9 @@ Description: easy-to-use client-side URL transfer library (OpenSSL flavour)
 Package: libcurl3-gnutls
 Architecture: any
 Section: libs
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends},
+# temporary fix for #787960
+ libgnutls-deb0-28 (>= 3.3.15-5)
 Recommends: ca-certificates
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
