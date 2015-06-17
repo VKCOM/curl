@@ -148,7 +148,7 @@ Description: development files and documentation for libcurl (OpenSSL flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl.
+ manual pages) that allow one to build software which uses libcurl.
  .
  SSL support is provided by OpenSSL.
 
@@ -186,7 +186,7 @@ Description: development files and documentation for libcurl (GnuTLS flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl.
+ manual pages) that allow one to build software which uses libcurl.
  .
  SSL support is provided by GnuTLS.
 
@@ -224,7 +224,7 @@ Description: development files and documentation for libcurl (NSS flavour)
  successful companies and numerous applications.
  .
  This package provides the development files (ie. includes, static library,
- manual pages) that allow to build software which uses libcurl.
+ manual pages) that allow one to build software which uses libcurl.
  .
  SSL support is provided by NSS.
 
