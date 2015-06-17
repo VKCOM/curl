@@ -1,3 +1,13 @@
+curl (7.43.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    - Fix lingering HTTP credentials in connection re-use as per CVE-2015-3236
+      http://curl.haxx.se/docs/adv_20150617A.html
+    - Fix SMB send off unrelated memory contents as per CVE-2015-3237
+      http://curl.haxx.se/docs/adv_20150617B.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 17 Jun 2015 09:38:31 +0200
+
 curl (7.42.1-3) unstable; urgency=medium
 
   * Update copyright
