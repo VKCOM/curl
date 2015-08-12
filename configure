@@ -1105,6 +1105,7 @@ enable_curldebug
 enable_symbol_hiding
 enable_hidden_symbols
 enable_ares
+enable_rt
 enable_dependency_tracking
 enable_silent_rules
 enable_largefile
@@ -1816,6 +1817,7 @@ Optional Features:
                           To be deprecated, use --disable-symbol-hiding
   --enable-ares[=PATH]    Enable c-ares for DNS lookups
   --disable-ares          Disable c-ares for DNS lookups
+  --disable-rt            disable dependency on -lrt
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -3257,6 +3259,38 @@ fi
   esac
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $want_ares" >&5
 $as_echo "$want_ares" >&6; }
+
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to disable dependency on -lrt" >&5
+$as_echo_n "checking whether to disable dependency on -lrt... " >&6; }
+  OPT_RT="default"
+  # Check whether --enable-rt was given.
+if test "${enable_rt+set}" = set; then :
+  enableval=$enable_rt; OPT_RT=$enableval
+fi
+
+  case "$OPT_RT" in
+    no)
+            dontwant_rt="yes"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      ;;
+    default)
+            dontwant_rt="no"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: (assumed no)
+      ;;
+    *" >&5
+$as_echo "(assumed no)
+      ;;
+    *" >&6; }
+            dontwant_rt="no"
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      ;;
+  esac
+    if test "$dontwant_rt" = "yes" && test "$want_thres" = "yes" ; then
+    as_fn_error $? "options --disable-rt and --enable-thread-resolver are mutually exclusive, at most one can be selected." "$LINENO" 5
+  fi
 
 
 #
@@ -4858,7 +4892,7 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
-am__api_version='1.14'
+am__api_version='1.15'
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether build environment is sane" >&5
 $as_echo_n "checking whether build environment is sane... " >&6; }
@@ -4954,7 +4988,7 @@ else
 $as_echo "$as_me: WARNING: 'missing' script is too old or missing" >&2;}
 fi
 
-if test x"${install_sh}" != xset; then
+if test x"${install_sh+set}" != xset; then
   case $am_aux_dir in
   *\ * | *\	*)
     install_sh="\${SHELL} '$am_aux_dir/install-sh'" ;;
@@ -5349,8 +5383,8 @@ MAKEINFO=${MAKEINFO-"${am_missing_run}makeinfo"}
 # <http://lists.gnu.org/archive/html/automake/2012-07/msg00014.html>
 mkdir_p='$(MKDIR_P)'
 
-# We need awk for the "check" target.  The system "awk" is bad on
-# some platforms.
+# We need awk for the "check" target (and possibly the TAP driver).  The
+# system "awk" is bad on some platforms.
 # Always define AMTAR for backward compatibility.  Yes, it's still used
 # in the wild :-(  We should find a proper way to deprecate it ...
 AMTAR='$${TAR-tar}'
@@ -19936,7 +19970,9 @@ done
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for monotonic clock_gettime" >&5
 $as_echo_n "checking for monotonic clock_gettime... " >&6; }
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+  #
+  if test "x$dontwant_rt" == "xno" ; then
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 
@@ -19957,8 +19993,8 @@ $as_echo_n "checking for monotonic clock_gettime... " >&6; }
 int main (void)
 {
 
-      struct timespec ts;
-      (void)clock_gettime(CLOCK_MONOTONIC, &ts);
+        struct timespec ts;
+        (void)clock_gettime(CLOCK_MONOTONIC, &ts);
 
  ;
  return 0;
@@ -19967,18 +20003,19 @@ int main (void)
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-    ac_cv_func_clock_gettime="yes"
+      ac_cv_func_clock_gettime="yes"
 
 else
 
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-    ac_cv_func_clock_gettime="no"
+      ac_cv_func_clock_gettime="no"
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
 
 
     #
@@ -21727,6 +21764,76 @@ fi
 fi
 
 
+
+  if test X"$HAVECRYPTO" = X"yes"; then
+     { $as_echo "$as_me:${as_lineno-$LINENO}: checking OpenSSL linking without -ldl" >&5
+$as_echo_n "checking OpenSSL linking without -ldl... " >&6; }
+     saved_libs=$LIBS
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+          #include <openssl/evp.h>
+
+int main (void)
+{
+
+          SSLeay_add_all_algorithms();
+
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+          LIBS="$saved_libs"
+
+else
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+          { $as_echo "$as_me:${as_lineno-$LINENO}: checking OpenSSL linking with -ldl" >&5
+$as_echo_n "checking OpenSSL linking with -ldl... " >&6; }
+          LIBS="-ldl $LIBS"
+          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+            #include <openssl/evp.h>
+
+int main (void)
+{
+
+            SSLeay_add_all_algorithms();
+
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+            LIBS="$saved_libs -ldl"
+
+else
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+            LIBS="$saved_libs"
+
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+  fi
 
   if test X"$HAVECRYPTO" = X"yes"; then
 
@@ -39065,7 +39172,7 @@ if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
   as_fn_error $? "Options --enable-threaded-resolver and --enable-ares are mutually exclusive" "$LINENO" 5
 fi
 
-if test "$want_thres" = "yes"; then
+if test "$want_thres" = "yes" && test "$dontwant_rt" = "no"; then
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
 if test "x$ac_cv_header_pthread_h" = xyes; then :
 
