@@ -6,5 +6,6 @@
 07_do-not-disable-debug-symbols.patch
 
 # do not add patches below
+08_spelling.patch
 90_gnutls.patch
 99_nss.patch
