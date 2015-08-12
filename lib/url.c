@@ -142,7 +142,6 @@ find_oldest_idle_connection_in_bundle(struct SessionHandle *data,
                                       struct connectbundle *bundle);
 static void conn_free(struct connectdata *conn);
 static void signalPipeClose(struct curl_llist *pipeline, bool pipe_broke);
-static CURLcode do_init(struct connectdata *conn);
 static CURLcode parse_url_login(struct SessionHandle *data,
                                 struct connectdata *conn,
                                 char **userptr, char **passwdptr,
@@ -2235,7 +2234,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option,
 
   case CURLOPT_SSL_OPTIONS:
     arg = va_arg(param, long);
-    data->set.ssl_enable_beast = arg&CURLSSLOPT_ALLOW_BEAST?TRUE:FALSE;
+    data->set.ssl_enable_beast = !!(arg & CURLSSLOPT_ALLOW_BEAST);
+    data->set.ssl_no_revoke = !!(arg & CURLSSLOPT_NO_REVOKE);
     break;
 
 #endif
@@ -5651,7 +5651,7 @@ static CURLcode create_conn(struct SessionHandle *data,
     }
 
     /* since we skip do_init() */
-    do_init(conn);
+    Curl_init_do(data, conn);
 
     goto out;
   }
@@ -5830,7 +5830,7 @@ static CURLcode create_conn(struct SessionHandle *data,
   conn->inuse = TRUE;
 
   /* Setup and init stuff before DO starts, in preparing for the transfer. */
-  do_init(conn);
+  Curl_init_do(data, conn);
 
   /*
    * Setup whatever necessary for a resumed transfer
@@ -6112,20 +6112,24 @@ CURLcode Curl_done(struct connectdata **connp,
 }
 
 /*
- * do_init() inits the readwrite session. This is inited each time (in the DO
- * function before the protocol-specific DO functions are invoked) for a
- * transfer, sometimes multiple times on the same SessionHandle. Make sure
+ * Curl_init_do() inits the readwrite session. This is inited each time (in
+ * the DO function before the protocol-specific DO functions are invoked) for
+ * a transfer, sometimes multiple times on the same SessionHandle. Make sure
  * nothing in here depends on stuff that are setup dynamically for the
  * transfer.
+ *
+ * Allow this function to get called with 'conn' set to NULL.
  */
 
-static CURLcode do_init(struct connectdata *conn)
+CURLcode Curl_init_do(struct SessionHandle *data, struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
   struct SingleRequest *k = &data->req;
 
+  if(conn)
+    conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
+                                 * use */
+
   data->state.done = FALSE; /* Curl_done() is not called yet */
-  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
   data->state.expect100header = FALSE;
 
   if(data->set.opt_no_body)
