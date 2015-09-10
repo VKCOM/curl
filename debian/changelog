@@ -1,3 +1,9 @@
+curl (7.44.0-2) unstable; urgency=medium
+
+  * Enable HTTP/2 support (Closes: #796302)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 10 Sep 2015 11:25:14 +0200
+
 curl (7.44.0-1) unstable; urgency=medium
 
   * New upstream release
