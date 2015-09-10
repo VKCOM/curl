@@ -11,7 +11,8 @@ export DEB_BUILD_MAINT_OPTIONS:=hardening=+all
 
 CONFIGURE_ARGS = -- --disable-dependency-tracking		\
 	--disable-symbol-hiding --enable-versioned-symbols	\
-	--enable-threaded-resolver --with-lber-lib=lber --with-gssapi=/usr
+	--enable-threaded-resolver --with-lber-lib=lber		\
+	--with-gssapi=/usr --with-nghttp2
 
 %:
 	dh $@
