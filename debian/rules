@@ -7,7 +7,7 @@ export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,-z,defs
 
 # enable all hardening options (see #763372)
-export DEB_BUILD_MAINT_OPTIONS:=hardening=+all
+export DEB_BUILD_MAINT_OPTIONS := hardening=+all
 
 CONFIGURE_ARGS = -- --disable-dependency-tracking		\
 	--disable-symbol-hiding --enable-versioned-symbols	\
