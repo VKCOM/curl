@@ -55,8 +55,8 @@ p.roffit {
 <p class="level0"><pre class="level0">
 &#35;include &lt;curl/curl.h&gt;
 &nbsp;
-char *curl_pushheader_bynum(push_headers, int num);
-char *curl_pushheader_byname(push_headers, const char *name);
+char *curl_pushheader_bynum(struct curl_pushheaders *h, size_t num);
+char *curl_pushheader_byname(struct curl_pushheaders *h, const char *name);
 &nbsp;
 int curl_push_callback(CURL *parent,
 &nbsp;                      CURL *easy,
@@ -77,7 +77,7 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
 <p class="level0"><span Class="emphasis">headers</span> is a handle used to access push headers using the accessor functions described below. This only accesses and provides the PUSH_PROMISE headers, the normal response headers will be provided in the header callback as usual. 
 <p class="level0"><span Class="emphasis">userp</span> is the pointer set with <a Class="emphasis" href="./CURLMOPT_PUSHDATA.html">CURLMOPT_PUSHDATA</a> 
 <p class="level0">If the callback returns CURL_PUSH_OK, the 'easy' handle will be added to the multi handle, the callback must not do that by itself. 
-<p class="level0">The callback can access PUSH_PROMISE headers with two accessor functions. These functions can only be used from within this callback and they can only access the PUSH_PROMISE headers. The normal response headers will be pased to the header callback for pushed streams just as for normal streams. 
+<p class="level0">The callback can access PUSH_PROMISE headers with two accessor functions. These functions can only be used from within this callback and they can only access the PUSH_PROMISE headers. The normal response headers will be passed to the header callback for pushed streams just as for normal streams. 
 <p class="level0"><a name="curlpushheaderbynum"></a><span class="nroffip">curl_pushheader_bynum</span> 
 <p class="level1">Returns the header at index 'num' (or NULL). The returned pointer points to a "name:value" string that will be freed when this callback returns. 
 <p class="level0"><a name="curlpushheaderbyname"></a><span class="nroffip">curl_pushheader_byname</span> 
@@ -104,7 +104,7 @@ int push_callback(CURL *parent,
 &nbsp; FILE *out;
 &nbsp; headp = curl_pushheader_byname(headers, ":path");
 &nbsp; if(headp && !strncmp(headp, "/push-", 6)) {
-&nbsp;   fprintf(stderr, "The PATH is %sn", headp);
+&nbsp;   fprintf(stderr, "The PATH is %s\n", headp);
 &nbsp;
 &nbsp;   /* save the push here */
 &nbsp;   out = fopen("pushed-stream", "wb");
@@ -126,6 +126,6 @@ curl_multi_setopt(multi, CURLMOPT_PUSHDATA, &counter);
 <p class="level0"><a name="AVAILABILITY"></a><h2 class="nroffsh">AVAILABILITY</h2>
 <p class="level0">Added in 7.44.0 <a name="RETURN"></a><h2 class="nroffsh">RETURN VALUE</h2>
 <p class="level0">Returns CURLM_OK if the option is supported, and CURLM_UNKNOWN_OPTION if not. <a name="SEE"></a><h2 class="nroffsh">SEE ALSO</h2>
-<p class="level0"><a Class="manpage" href="./CURLMOPT_PUSHDATA.html">CURLMOPT_PUSHDATA</a>, <a Class="manpage" href="./CURLMOPT_PIPELINING.html">CURLMOPT_PIPELINING</a>, <a Class="manpage" href="./CURLOPT_PIPEWAIT.html">CURLOPT_PIPEWAIT</a>, <a class="manpage" href="#"> </a> <span Class="manpage"><a href="http://www.ietf.org/rfc/rfc7540.txt">RFC 7540</a></span> <p class="roffit">
+<p class="level0"><a Class="manpage" href="./CURLMOPT_PUSHDATA.html">CURLMOPT_PUSHDATA</a>, <a Class="manpage" href="./CURLMOPT_PIPELINING.html">CURLMOPT_PIPELINING</a>, <a Class="manpage" href="./CURLOPT_PIPEWAIT.html">CURLOPT_PIPEWAIT</a>, <span Class="manpage"><a href="http://www.ietf.org/rfc/rfc7540.txt">RFC 7540</a></span><p class="roffit">
  This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
 </body></html>
