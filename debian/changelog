@@ -1,3 +1,9 @@
+curl (7.45.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 07 Oct 2015 11:05:36 +0200
+
 curl (7.44.0-2) unstable; urgency=medium
 
   * Enable HTTP/2 support (Closes: #796302)
