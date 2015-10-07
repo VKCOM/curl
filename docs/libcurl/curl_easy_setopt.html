@@ -156,6 +156,8 @@ p.roffit {
 <p class="level1">Allowed protocols. See <span Class="emphasis">CURLOPT_PROTOCOLS(3)</span> 
 <p class="level0"><a name="CURLOPTREDIRPROTOCOLS"></a><span class="nroffip">CURLOPT_REDIR_PROTOCOLS</span> 
 <p class="level1">Protocols to allow redirects to. See <span Class="emphasis">CURLOPT_REDIR_PROTOCOLS(3)</span> 
+<p class="level0"><a name="CURLOPTDEFAULTPROTOCOL"></a><span class="nroffip">CURLOPT_DEFAULT_PROTOCOL</span> 
+<p class="level1">Default protocol. See <span Class="emphasis">CURLOPT_DEFAULT_PROTOCOL(3)</span> 
 <p class="level0"><a name="CURLOPTPROXY"></a><span class="nroffip">CURLOPT_PROXY</span> 
 <p class="level1">Proxy to use. See <span Class="emphasis">CURLOPT_PROXY(3)</span> 
 <p class="level0"><a name="CURLOPTPROXYPORT"></a><span class="nroffip">CURLOPT_PROXYPORT</span> 
@@ -521,10 +523,10 @@ if(curl) {
 &nbsp; curl_easy_setopt(curl, CURLOPT_URL, "<a href="http://example.com">http://example.com</a>");
 &nbsp; res = curl_easy_perform(curl);
 &nbsp; curl_easy_cleanup(curl);
-}}
+}
 </pre>
 
 <p class="level0"><a name="SEE"></a><h2 class="nroffsh">SEE ALSO</h2>
-<p class="level0"><a Class="manpage" href="./curl_easy_init.html">curl_easy_init</a>, <a Class="manpage" href="./curl_easy_cleanup.html">curl_easy_cleanup</a>, <a Class="manpage" href="./curl_easy_reset.html">curl_easy_reset</a>, <span Class="manpage"> </span> <a Class="manpage" href="./curl_multi_setopt.html">curl_multi_setopt</a>, <span Class="manpage"> </span> <p class="roffit">
+<p class="level0"><a Class="manpage" href="./curl_easy_init.html">curl_easy_init</a>, <a Class="manpage" href="./curl_easy_cleanup.html">curl_easy_cleanup</a>, <a Class="manpage" href="./curl_easy_reset.html">curl_easy_reset</a>, <a Class="manpage" href="./curl_easy_getinfo.html">curl_easy_getinfo</a>, <a Class="manpage" href="./curl_multi_setopt.html">curl_multi_setopt</a><p class="roffit">
  This HTML page was made with <a href="http://daniel.haxx.se/projects/roffit/">roffit</a>.
 </body></html>
