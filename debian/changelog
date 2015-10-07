@@ -1,8 +1,9 @@
-curl (7.45.0-1) UNRELEASED; urgency=medium
+curl (7.45.0-1) unstable; urgency=medium
 
   * New upstream release
+  * Drop 08_spelling.patch (merged upstream)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 07 Oct 2015 11:05:36 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 07 Oct 2015 12:59:03 +0200
 
 curl (7.44.0-2) unstable; urgency=medium
 
