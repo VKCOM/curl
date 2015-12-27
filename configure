@@ -903,6 +903,7 @@ MANOPT
 NROFF
 PERL
 IPV6_ENABLED
+ZSH_FUNCTIONS_DIR
 USE_NGHTTP2
 IDN_ENABLED
 CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS_FALSE
@@ -913,12 +914,15 @@ USE_LIBSSH2
 LIBMETALINK_CPPFLAGS
 LIBMETALINK_LDFLAGS
 LIBMETALINK_LIBS
+USE_LIBPSL_FALSE
+USE_LIBPSL_TRUE
 CURL_CA_BUNDLE
 SSL_ENABLED
 USE_AXTLS
 NSS_LIBS
 USE_NSS
 USE_CYASSL
+USE_MBEDTLS
 USE_POLARSSL
 HAVE_GNUTLS_SRP
 USE_GNUTLS_NETTLE
@@ -1000,10 +1004,6 @@ PKGADD_NAME
 PKGADD_PKG
 VERSIONNUM
 CURLVERSION
-AM_BACKSLASH
-AM_DEFAULT_VERBOSITY
-AM_DEFAULT_V
-AM_V
 am__fastdepCC_FALSE
 am__fastdepCC_TRUE
 CCDEPMODE
@@ -1052,6 +1052,10 @@ GREP
 SED
 CURL_CFLAG_EXTRAS
 CONFIGURE_OPTIONS
+AM_BACKSLASH
+AM_DEFAULT_VERBOSITY
+AM_DEFAULT_V
+AM_V
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
@@ -1098,6 +1102,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
+enable_silent_rules
 enable_debug
 enable_optimize
 enable_warnings
@@ -1108,7 +1113,6 @@ enable_hidden_symbols
 enable_ares
 enable_rt
 enable_dependency_tracking
-enable_silent_rules
 enable_largefile
 enable_shared
 enable_static
@@ -1149,11 +1153,13 @@ with_egd_socket
 with_random
 with_gnutls
 with_polarssl
+with_mbedtls
 with_cyassl
 with_nss
 with_axtls
 with_ca_bundle
 with_ca_path
+with_libpsl
 with_libmetalink
 with_libssh2
 with_librtmp
@@ -1161,6 +1167,7 @@ enable_versioned_symbols
 with_winidn
 with_libidn
 with_nghttp2
+with_zsh_functions_dir
 enable_threaded_resolver
 enable_verbose
 enable_sspi
@@ -1812,6 +1819,8 @@ Optional Features:
   --enable-maintainer-mode
                           enable make rules and dependencies not useful (and
                           sometimes confusing) to the casual installer
+  --enable-silent-rules   less verbose build output (undo: "make V=1")
+  --disable-silent-rules  verbose build output (undo: "make V=0")
   --enable-debug          Enable debug build options
   --disable-debug         Disable debug build options
   --enable-optimize       Enable compiler optimizations
@@ -1834,8 +1843,6 @@ Optional Features:
                           do not reject slow dependency extractors
   --disable-dependency-tracking
                           speeds up one-time build
-  --enable-silent-rules   less verbose build output (undo: "make V=1")
-  --disable-silent-rules  verbose build output (undo: "make V=0")
   --disable-largefile     omit support for large files
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -1941,6 +1948,9 @@ Optional Packages:
   --with-polarssl=PATH    where to look for PolarSSL, PATH points to the
                           installation root
   --without-polarssl      disable PolarSSL detection
+  --with-mbedtls=PATH     where to look for mbedTLS, PATH points to the
+                          installation root
+  --without-mbedtls       disable mbedTLS detection
   --with-cyassl=PATH      where to look for CyaSSL, PATH points to the
                           installation root (default: system lib default)
   --without-cyassl        disable CyaSSL detection
@@ -1956,6 +1966,7 @@ Optional Packages:
   --with-ca-path=DIRECTORY
                           Directory to use as CA path
   --without-ca-path       Don't use a default CA path
+  --without-libpsl        disable support for libpsl cookie checking
   --with-libmetalink=PATH where to look for libmetalink, PATH points to the
                           installation root
   --without-libmetalink   disable libmetalink detection
@@ -1975,6 +1986,10 @@ Optional Packages:
   --without-libidn        Disable libidn usage
   --with-nghttp2=PATH     Enable nghttp2 usage
   --without-nghttp2       Disable nghttp2 usage
+  --with-zsh-functions-dir=PATH
+                          Install zsh completions to PATH
+  --without-zsh-functions-dir
+                          Do not install zsh completions
 
 Some influential environment variables:
   CC          C compiler command
@@ -3077,6 +3092,45 @@ fi
 
   MAINT=$MAINTAINER_MODE_TRUE
 
+
+# Check whether --enable-silent-rules was given.
+if test "${enable_silent_rules+set}" = set; then :
+  enableval=$enable_silent_rules;
+fi
+
+case $enable_silent_rules in # (((
+  yes) AM_DEFAULT_VERBOSITY=0;;
+   no) AM_DEFAULT_VERBOSITY=1;;
+    *) AM_DEFAULT_VERBOSITY=0;;
+esac
+am_make=${MAKE-make}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $am_make supports nested variables" >&5
+$as_echo_n "checking whether $am_make supports nested variables... " >&6; }
+if ${am_cv_make_support_nested_variables+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if $as_echo 'TRUE=$(BAR$(V))
+BAR0=false
+BAR1=true
+V=1
+am__doit:
+	@$(TRUE)
+.PHONY: am__doit' | $am_make -f - >/dev/null 2>&1; then
+  am_cv_make_support_nested_variables=yes
+else
+  am_cv_make_support_nested_variables=no
+fi
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_make_support_nested_variables" >&5
+$as_echo "$am_cv_make_support_nested_variables" >&6; }
+if test $am_cv_make_support_nested_variables = yes; then
+    AM_V='$(V)'
+  AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
+else
+  AM_V=$AM_DEFAULT_VERBOSITY
+  AM_DEFAULT_V=$AM_DEFAULT_VERBOSITY
+fi
+AM_BACKSLASH='\'
 
 
 
@@ -5294,45 +5348,6 @@ else
 fi
 
 
-# Check whether --enable-silent-rules was given.
-if test "${enable_silent_rules+set}" = set; then :
-  enableval=$enable_silent_rules;
-fi
-
-case $enable_silent_rules in # (((
-  yes) AM_DEFAULT_VERBOSITY=0;;
-   no) AM_DEFAULT_VERBOSITY=1;;
-    *) AM_DEFAULT_VERBOSITY=1;;
-esac
-am_make=${MAKE-make}
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $am_make supports nested variables" >&5
-$as_echo_n "checking whether $am_make supports nested variables... " >&6; }
-if ${am_cv_make_support_nested_variables+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if $as_echo 'TRUE=$(BAR$(V))
-BAR0=false
-BAR1=true
-V=1
-am__doit:
-	@$(TRUE)
-.PHONY: am__doit' | $am_make -f - >/dev/null 2>&1; then
-  am_cv_make_support_nested_variables=yes
-else
-  am_cv_make_support_nested_variables=no
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_make_support_nested_variables" >&5
-$as_echo "$am_cv_make_support_nested_variables" >&6; }
-if test $am_cv_make_support_nested_variables = yes; then
-    AM_V='$(V)'
-  AM_DEFAULT_V='$(AM_DEFAULT_VERBOSITY)'
-else
-  AM_V=$AM_DEFAULT_VERBOSITY
-  AM_DEFAULT_V=$AM_DEFAULT_VERBOSITY
-fi
-AM_BACKSLASH='\'
-
 ## --------------------------------------- ##
 ##  Start of automake initialization code  ##
 ## --------------------------------------- ##
@@ -5602,7 +5617,7 @@ PKGADD_VENDOR="curl.haxx.se"
 
 
 
-    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,cyassl,axtls,winssl,darwinssl} )"
+    curl_ssl_msg="no      (--with-{ssl,gnutls,nss,polarssl,mbedtls,cyassl,axtls,winssl,darwinssl} )"
     curl_ssh_msg="no      (--with-libssh2)"
    curl_zlib_msg="no      (--with-zlib)"
     curl_gss_msg="no      (--with-gssapi)"
@@ -5620,6 +5635,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
   curl_mtlnk_msg="no      (--with-libmetalink)"
+    curl_psl_msg="no      (--with-libpsl)"
 
     init_ssl_msg=${curl_ssl_msg}
 
@@ -6083,7 +6099,6 @@ _ACEOF
   #
   x_LP64_long=""
   x_LP32_long=""
-  x_LP16_long=""
   #
   if test "$ac_cv_sizeof_long" -eq "8" &&
      test "$ac_cv_sizeof_voidp" -ge "8"; then
@@ -6091,9 +6106,6 @@ _ACEOF
   elif test "$ac_cv_sizeof_long" -eq "4" &&
        test "$ac_cv_sizeof_voidp" -ge "4"; then
     x_LP32_long="long"
-  elif test "$ac_cv_sizeof_long" -eq "2" &&
-       test "$ac_cv_sizeof_voidp" -ge "2"; then
-    x_LP16_long="long"
   fi
   #
     #
@@ -6321,120 +6333,6 @@ rm -f conftest.err conftest.i conftest.$ac_ext
           curl_format_curl_off_t=`eval 'as_val=${'$as_tmp_FmtDef'};$as_echo "$as_val"'`
           curl_typeof_curl_off_t="$t4"
           curl_sizeof_curl_off_t="4"
-        fi
-                      fi
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-
-    done
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $curl_typeof_curl_off_t" >&5
-$as_echo "$curl_typeof_curl_off_t" >&6; }
-  fi
-  if test "$curl_typeof_curl_off_t" = "unknown"; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for 16-bit curl_off_t data type" >&5
-$as_echo_n "checking for 16-bit curl_off_t data type... " >&6; }
-    for t2 in          \
-      "$x_LP16_long"   \
-      'int16_t'        \
-      '__int16'        \
-      'int'            ; do
-
-    if test "$curl_typeof_curl_off_t" = "unknown" && test ! -z "$t2"; then
-    tmp_includes=""
-    tmp_source=""
-    tmp_fmt=""
-    case `echo "$t2" | sed 's/[^a-zA-Z0-9_]/_/g'` in
-      int64_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f[] = PRId64;"
-        tmp_fmt="PRId64"
-        ;;
-      int32_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f[] = PRId32;"
-        tmp_fmt="PRId32"
-        ;;
-      int16_t)
-        tmp_includes="$curl_includes_inttypes"
-        tmp_source="char f[] = PRId16;"
-        tmp_fmt="PRId16"
-        ;;
-    esac
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-
-        $tmp_includes
-        typedef $t2 curl_off_t;
-        typedef char dummy_arr[sizeof(curl_off_t) == 2 ? 1 : -1];
-
-int main (void)
-{
-
-        $tmp_source
-        curl_off_t dummy;
-
- ;
- return 0;
-}
-
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-
-      if test -z "$tmp_fmt"; then
-        curl_typeof_curl_off_t="$t2"
-        curl_sizeof_curl_off_t="2"
-      else
-
-  as_ac_HaveDef=`$as_echo "curl_cv_have_def_$tmp_fmt" | $as_tr_sh`
-  as_ac_Def=`$as_echo "curl_cv_def_$tmp_fmt" | $as_tr_sh`
-  if test -z "$SED"; then
-    as_fn_error $? "SED not set. Cannot continue without SED being set." "$LINENO" 5
-  fi
-  if test -z "$GREP"; then
-    as_fn_error $? "GREP not set. Cannot continue without GREP being set." "$LINENO" 5
-  fi
-
-  tmp_exp=""
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-    $curl_includes_inttypes
-#ifdef $tmp_fmt
-CURL_DEF_TOKEN $tmp_fmt
-#endif
-
-
-_ACEOF
-if ac_fn_c_try_cpp "$LINENO"; then :
-
-    tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
-      "$GREP" CURL_DEF_TOKEN 2>/dev/null | \
-      "$SED" 's/.*CURL_DEF_TOKEN[ ][ ]*//' 2>/dev/null | \
-      "$SED" 's/["][ ]*["]//g' 2>/dev/null`
-    if test -z "$tmp_exp" || test "$tmp_exp" = "$tmp_fmt"; then
-      tmp_exp=""
-    fi
-
-fi
-rm -f conftest.err conftest.i conftest.$ac_ext
-  if test -z "$tmp_exp"; then
-    eval "$as_ac_HaveDef=no"
-
-  else
-    eval "$as_ac_HaveDef=yes"
-    eval "$as_ac_Def=\$tmp_exp"
-
-  fi
-
-        as_tmp_HaveFmtDef=`$as_echo "curl_cv_have_def_$tmp_fmt" | $as_tr_sh`
-        as_tmp_FmtDef=`$as_echo "curl_cv_def_$tmp_fmt" | $as_tr_sh`
-        if test `eval 'as_val=${'$as_tmp_HaveFmtDef'};$as_echo "$as_val"'` = "yes"; then
-          curl_format_curl_off_t=`eval 'as_val=${'$as_tmp_FmtDef'};$as_echo "$as_val"'`
-          curl_typeof_curl_off_t="$t2"
-          curl_sizeof_curl_off_t="2"
         fi
                       fi
 
@@ -21451,6 +21349,37 @@ if test "$curl_ssl_msg" = "$init_ssl_msg" && test X"$OPT_SSL" != Xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
+    case $host in
+    *-*-msys* | *-*-mingw*)
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdi32" >&5
+$as_echo_n "checking for gdi32... " >&6; }
+      my_ac_save_LIBS=$LIBS
+      LIBS="-lgdi32 $LIBS"
+      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <windef.h>
+                   #include <wingdi.h>
+int main (void)
+{
+GdiFlush();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+                      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+                      LIBS=$my_ac_save_LIBS
+                   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+      ;;
+  esac
+
   case "$OPT_SSL" in
   yes)
         if test x$cross_compiling != xyes; then
@@ -21488,10 +21417,10 @@ $as_echo "$as_me: PKG_CONFIG_LIBDIR will be set to \"$OPENSSL_PCDIR\"" >&6;}
   if test "$PKGTEST" = "yes"; then
 
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -21591,8 +21520,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for openssl options with pkg-config" >&5
 $as_echo_n "checking for openssl options with pkg-config... " >&6; }
             itexists=`
@@ -21651,37 +21581,6 @@ $as_echo "$as_me: pkg-config: SSL_CPPFLAGS: \"$SSL_CPPFLAGS\"" >&6;}
 
     CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
   LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
-
-    case $host in
-    *-*-msys* | *-*-mingw*)
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdi32" >&5
-$as_echo_n "checking for gdi32... " >&6; }
-      my_ac_save_LIBS=$LIBS
-      LIBS="-lgdi32 $LIBS"
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <windef.h>
-                   #include <wingdi.h>
-int main (void)
-{
-GdiFlush();
- ;
- return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-                      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-                      LIBS=$my_ac_save_LIBS
-                   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-      ;;
-  esac
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for HMAC_Update in -lcrypto" >&5
 $as_echo_n "checking for HMAC_Update in -lcrypto... " >&6; }
@@ -22904,10 +22803,10 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
 
     if test "x$OPT_GNUTLS" = "xyes"; then
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -23007,8 +22906,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gnutls options with pkg-config" >&5
 $as_echo_n "checking for gnutls options with pkg-config... " >&6; }
             itexists=`
@@ -23537,6 +23437,163 @@ $as_echo "$as_me: Added $polarssllib to LD_LIBRARY_PATH" >&6;}
 fi
 
 
+OPT_MBEDTLS=no
+
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+
+# Check whether --with-mbedtls was given.
+if test "${with_mbedtls+set}" = set; then :
+  withval=$with_mbedtls; OPT_MBEDTLS=$withval
+fi
+
+
+if test "$curl_ssl_msg" = "$init_ssl_msg"; then
+
+  if test X"$OPT_MBEDTLS" != Xno; then
+
+    if test "$OPT_MBEDTLS" = "yes"; then
+      OPT_MBEDTLS=""
+    fi
+
+    if test -z "$OPT_MBEDTLS" ; then
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mbedtls_havege_init in -lmbedtls" >&5
+$as_echo_n "checking for mbedtls_havege_init in -lmbedtls... " >&6; }
+if ${ac_cv_lib_mbedtls_mbedtls_havege_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char mbedtls_havege_init ();
+int main (void)
+{
+return mbedtls_havege_init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_mbedtls_mbedtls_havege_init=yes
+else
+  ac_cv_lib_mbedtls_mbedtls_havege_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mbedtls_mbedtls_havege_init" >&5
+$as_echo "$ac_cv_lib_mbedtls_mbedtls_havege_init" >&6; }
+if test "x$ac_cv_lib_mbedtls_mbedtls_havege_init" = xyes; then :
+
+
+$as_echo "#define USE_MBEDTLS 1" >>confdefs.h
+
+         USE_MBEDTLS=1
+
+         MBEDTLS_ENABLED=1
+         USE_MBEDTLS="yes"
+         curl_ssl_msg="enabled (mbedTLS)"
+
+fi
+
+    fi
+
+    addld=""
+    addlib=""
+    addcflags=""
+    mbedtlslib=""
+
+    if test "x$USE_MBEDTLS" != "xyes"; then
+            addld=-L$OPT_MBEDTLS/lib$libsuff
+      addcflags=-I$OPT_MBEDTLS/include
+      mbedtlslib=$OPT_MBEDTLS/lib$libsuff
+
+      LDFLAGS="$LDFLAGS $addld"
+      if test "$addcflags" != "-I/usr/include"; then
+         CPPFLAGS="$CPPFLAGS $addcflags"
+      fi
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for mbedtls_ssl_init in -lmbedtls" >&5
+$as_echo_n "checking for mbedtls_ssl_init in -lmbedtls... " >&6; }
+if ${ac_cv_lib_mbedtls_mbedtls_ssl_init+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char mbedtls_ssl_init ();
+int main (void)
+{
+return mbedtls_ssl_init ();
+ ;
+ return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_mbedtls_mbedtls_ssl_init=yes
+else
+  ac_cv_lib_mbedtls_mbedtls_ssl_init=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mbedtls_mbedtls_ssl_init" >&5
+$as_echo "$ac_cv_lib_mbedtls_mbedtls_ssl_init" >&6; }
+if test "x$ac_cv_lib_mbedtls_mbedtls_ssl_init" = xyes; then :
+
+
+$as_echo "#define USE_MBEDTLS 1" >>confdefs.h
+
+       USE_MBEDTLS=1
+
+       MBEDTLS_ENABLED=1
+       USE_MBEDTLS="yes"
+       curl_ssl_msg="enabled (mbedTLS)"
+
+else
+
+         CPPFLAGS=$_cppflags
+         LDFLAGS=$_ldflags
+
+fi
+
+    fi
+
+    if test "x$USE_MBEDTLS" = "xyes"; then
+      { $as_echo "$as_me:${as_lineno-$LINENO}: detected mbedTLS" >&5
+$as_echo "$as_me: detected mbedTLS" >&6;}
+
+      LIBS="-lmbedtls -lmbedx509 -lmbedcrypto $LIBS"
+
+      if test -n "$mbedtlslib"; then
+                                        if test "x$cross_compiling" != "xyes"; then
+          LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$mbedtlslib"
+          export LD_LIBRARY_PATH
+          { $as_echo "$as_me:${as_lineno-$LINENO}: Added $mbedtlslib to LD_LIBRARY_PATH" >&5
+$as_echo "$as_me: Added $mbedtlslib to LD_LIBRARY_PATH" >&6;}
+        fi
+      fi
+    fi
+
+  fi
+fi
+
+
 OPT_CYASSL=no
 
 _cppflags=$CPPFLAGS
@@ -23848,10 +23905,10 @@ if test "$curl_ssl_msg" = "$init_ssl_msg"; then
     if test "x$OPT_NSS" = "xyes"; then
 
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -23951,8 +24008,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nss options with pkg-config" >&5
 $as_echo_n "checking for nss options with pkg-config... " >&6; }
             itexists=`
@@ -23996,10 +24054,10 @@ $as_echo "found" >&6; }
       NSS_PCDIR="$OPT_NSS/lib/pkgconfig"
       if test -f "$NSS_PCDIR/nss.pc"; then
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -24099,8 +24157,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nss options with pkg-config" >&5
 $as_echo_n "checking for nss options with pkg-config... " >&6; }
             itexists=`
@@ -24342,7 +24401,7 @@ fi
   fi
 fi
 
-if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
+if test "x$OPENSSL_ENABLED$GNUTLS_ENABLED$NSS_ENABLED$POLARSSL_ENABLED$MBEDTLS_ENABLED$AXTLS_ENABLED$CYASSL_ENABLED$WINSSL_ENABLED$DARWINSSL_ENABLED" = "x"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&5
 $as_echo "$as_me: WARNING: SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more." >&2;}
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Use --with-ssl, --with-gnutls, --with-polarssl, --with-cyassl, --with-nss, --with-axtls, --with-winssl, or --with-darwinssl to address this." >&5
@@ -24465,6 +24524,89 @@ $as_echo "no" >&6; }
 
 
 
+
+# Check whether --with-libpsl was given.
+if test "${with_libpsl+set}" = set; then :
+  withval=$with_libpsl; with_libpsl=$withval
+else
+  with_libpsl=yes
+fi
+
+if test $with_libpsl != "no"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing psl_builtin" >&5
+$as_echo_n "checking for library containing psl_builtin... " >&6; }
+if ${ac_cv_search_psl_builtin+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+#ifdef __cplusplus
+extern "C"
+#endif
+char psl_builtin ();
+int main (void)
+{
+return psl_builtin ();
+ ;
+ return 0;
+}
+_ACEOF
+for ac_lib in '' psl; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_psl_builtin=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_psl_builtin+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_psl_builtin+:} false; then :
+
+else
+  ac_cv_search_psl_builtin=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_psl_builtin" >&5
+$as_echo "$ac_cv_search_psl_builtin" >&6; }
+ac_res=$ac_cv_search_psl_builtin
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  curl_psl_msg="yes";
+
+$as_echo "#define USE_LIBPSL 1" >>confdefs.h
+
+
+else
+  curl_psl_msg="no      (libpsl not found)";
+     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: libpsl was not found" >&5
+$as_echo "$as_me: WARNING: libpsl was not found" >&2;}
+
+
+fi
+
+fi
+ if test "$curl_psl_msg" = "yes"; then
+  USE_LIBPSL_TRUE=
+  USE_LIBPSL_FALSE='#'
+else
+  USE_LIBPSL_TRUE='#'
+  USE_LIBPSL_FALSE=
+fi
+
+
+
 OPT_LIBMETALINK=no
 
 
@@ -24486,10 +24628,10 @@ if test X"$OPT_LIBMETALINK" != Xno; then
   if test "x$OPT_LIBMETALINK" = "xyes"; then
         PKGTEST="yes"
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -24589,8 +24731,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libmetalink options with pkg-config" >&5
 $as_echo_n "checking for libmetalink options with pkg-config... " >&6; }
             itexists=`
@@ -24619,10 +24762,10 @@ $as_echo "$as_me: PKG_CONFIG_LIBDIR will be set to \"$LIBMETALINK_PCDIR\"" >&6;}
     fi
     if test "$PKGTEST" = "yes"; then
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -24722,8 +24865,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libmetalink options with pkg-config" >&5
 $as_echo_n "checking for libmetalink options with pkg-config... " >&6; }
             itexists=`
@@ -24852,10 +24996,10 @@ if test X"$OPT_LIBSSH2" != Xno; then
   case "$OPT_LIBSSH2" in
   yes)
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -24955,8 +25099,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libssh2 options with pkg-config" >&5
 $as_echo_n "checking for libssh2 options with pkg-config... " >&6; }
             itexists=`
@@ -25106,10 +25251,10 @@ if test X"$OPT_LIBRTMP" != Xno; then
   case "$OPT_LIBRTMP" in
   yes)
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -25209,8 +25354,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for librtmp options with pkg-config" >&5
 $as_echo_n "checking for librtmp options with pkg-config... " >&6; }
             itexists=`
@@ -25553,10 +25699,10 @@ if test "$want_idn" = "yes"; then
   if test "$want_idn_path" != "default"; then
         IDN_PCDIR="$want_idn_path/lib$libsuff/pkgconfig"
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -25656,8 +25802,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libidn options with pkg-config" >&5
 $as_echo_n "checking for libidn options with pkg-config... " >&6; }
             itexists=`
@@ -25705,10 +25852,10 @@ $as_echo "found" >&6; }
     fi
   else
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -25808,8 +25955,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libidn options with pkg-config" >&5
 $as_echo_n "checking for libidn options with pkg-config... " >&6; }
             itexists=`
@@ -26041,10 +26189,10 @@ if test X"$want_h2" != Xno; then
   CLEANLIBS="$LIBS"
 
 
-
-    PKGCONFIG="no"
-
-    if test -n "$ac_tool_prefix"; then
+    if test -n "$PKG_CONFIG"; then
+      PKGCONFIG="$PKG_CONFIG"
+    else
+      if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}pkg-config", so it can be a program name with args.
 set dummy ${ac_tool_prefix}pkg-config; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -26144,8 +26292,9 @@ else
   PKGCONFIG="$ac_cv_path_PKGCONFIG"
 fi
 
+    fi
 
-    if test x$PKGCONFIG != xno; then
+    if test "x$PKGCONFIG" != "xno"; then
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libnghttp2 options with pkg-config" >&5
 $as_echo_n "checking for libnghttp2 options with pkg-config... " >&6; }
             itexists=`
@@ -26272,6 +26421,27 @@ fi
   fi
 
 fi
+
+
+OPT_ZSH_FPATH=default
+
+# Check whether --with-zsh-functions-dir was given.
+if test "${with_zsh_functions_dir+set}" = set; then :
+  withval=$with_zsh_functions_dir; OPT_ZSH_FPATH=$withval
+fi
+
+case "$OPT_ZSH_FPATH" in
+  no)
+        ;;
+  default|yes)
+        ZSH_FUNCTIONS_DIR="$datarootdir/zsh/site-functions"
+
+    ;;
+  *)
+        ZSH_FUNCTIONS_DIR="$withval"
+
+    ;;
+esac
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
@@ -39650,6 +39820,10 @@ if test "x$HAVE_GSSAPI" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES GSS-API"
 fi
 
+if test "x$curl_psl_msg" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES PSL"
+fi
+
 if test "x$CURL_DISABLE_CRYPTO_AUTH" != "x1" -a \
     \( "x$HAVE_GSSAPI" = "x1" -o "x$USE_WINDOWS_SSPI" = "x1" \); then
   SUPPORT_FEATURES="$SUPPORT_FEATURES SPNEGO"
@@ -39949,7 +40123,7 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
-ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile docs/libcurl/opts/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile lib/libcurl.vers tests/Makefile tests/certs/Makefile tests/certs/scripts/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
+ac_config_files="$ac_config_files Makefile docs/Makefile docs/examples/Makefile docs/libcurl/Makefile docs/libcurl/opts/Makefile include/Makefile include/curl/Makefile src/Makefile lib/Makefile scripts/Makefile lib/libcurl.vers tests/Makefile tests/certs/Makefile tests/certs/scripts/Makefile tests/data/Makefile tests/server/Makefile tests/libtest/Makefile tests/unit/Makefile packages/Makefile packages/Win32/Makefile packages/Win32/cygwin/Makefile packages/Linux/Makefile packages/Linux/RPM/Makefile packages/Linux/RPM/curl.spec packages/Linux/RPM/curl-ssl.spec packages/Solaris/Makefile packages/EPM/curl.list packages/EPM/Makefile packages/vms/Makefile packages/AIX/Makefile packages/AIX/RPM/Makefile packages/AIX/RPM/curl.spec curl-config libcurl.pc"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -40122,6 +40296,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LIBZ_TRUE}" && test -z "${HAVE_LIBZ_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_LIBZ\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_LIBPSL_TRUE}" && test -z "${USE_LIBPSL_FALSE}"; then
+  as_fn_error $? "conditional \"USE_LIBPSL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS_TRUE}" && test -z "${CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS_FALSE}"; then
@@ -41028,6 +41206,7 @@ do
     "include/curl/Makefile") CONFIG_FILES="$CONFIG_FILES include/curl/Makefile" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
     "lib/libcurl.vers") CONFIG_FILES="$CONFIG_FILES lib/libcurl.vers" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
     "tests/certs/Makefile") CONFIG_FILES="$CONFIG_FILES tests/certs/Makefile" ;;
@@ -42721,6 +42900,7 @@ done
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  PSL support:      ${curl_psl_msg}
   HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&5
@@ -42751,6 +42931,7 @@ $as_echo "$as_me: Configured to build curl/libcurl:
   RTSP support:     ${curl_rtsp_msg}
   RTMP support:     ${curl_rtmp_msg}
   metalink support: ${curl_mtlnk_msg}
+  PSL support:      ${curl_psl_msg}
   HTTP2 support:    ${curl_h2_msg}
   Protocols:        ${SUPPORT_PROTOCOLS}
 " >&6;}

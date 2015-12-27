@@ -425,6 +425,7 @@ USE_GNUTLS = @USE_GNUTLS@
 USE_GNUTLS_NETTLE = @USE_GNUTLS_NETTLE@
 USE_LIBRTMP = @USE_LIBRTMP@
 USE_LIBSSH2 = @USE_LIBSSH2@
+USE_MBEDTLS = @USE_MBEDTLS@
 USE_NGHTTP2 = @USE_NGHTTP2@
 USE_NSS = @USE_NSS@
 USE_OPENLDAP = @USE_OPENLDAP@
@@ -435,6 +436,7 @@ USE_WINDOWS_SSPI = @USE_WINDOWS_SSPI@
 VERSION = @VERSION@
 VERSIONNUM = @VERSIONNUM@
 ZLIB_LIBS = @ZLIB_LIBS@
+ZSH_FUNCTIONS_DIR = @ZSH_FUNCTIONS_DIR@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -598,17 +600,19 @@ CLEANFILES = $(VC6_LIBDSP) $(VC6_SRCDSP) $(VC7_LIBVCPROJ) $(VC7_SRCVCPROJ)	\
  $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ)
 
 bin_SCRIPTS = curl-config
-SUBDIRS = lib src include
+SUBDIRS = lib src include scripts
 DIST_SUBDIRS = $(SUBDIRS) tests packages docs
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
 LIB_VTLS_CFILES = vtls/openssl.c vtls/gtls.c vtls/vtls.c vtls/nss.c     \
   vtls/polarssl.c vtls/polarssl_threadlock.c vtls/axtls.c               \
-  vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c
+  vtls/cyassl.c vtls/schannel.c vtls/darwinssl.c vtls/gskit.c           \
+  vtls/mbedtls.c
 
 LIB_VTLS_HFILES = vtls/openssl.h vtls/vtls.h vtls/gtls.h                \
   vtls/nssg.h vtls/polarssl.h vtls/polarssl_threadlock.h vtls/axtls.h   \
-  vtls/cyassl.h vtls/schannel.h vtls/darwinssl.h vtls/gskit.h
+  vtls/cyassl.h vtls/schannel.h vtls/darwinssl.h vtls/gskit.h           \
+  vtls/mbedtls.h
 
 LIB_CFILES = file.c timeval.c base64.c hostip.c progress.c formdata.c   \
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c       \
@@ -669,6 +673,7 @@ CURLX_HFILES = \
 	../lib/warnless.h
 
 CURL_CFILES = \
+	slist_wc.c \
 	tool_binmode.c \
 	tool_bname.c \
 	tool_cb_dbg.c \
@@ -710,6 +715,7 @@ CURL_CFILES = \
 	tool_xattr.c
 
 CURL_HFILES = \
+	slist_wc.h \
 	tool_binmode.h \
 	tool_bname.h \
 	tool_cb_dbg.h \
@@ -1303,10 +1309,10 @@ dist-hook:
 	done)
 
 html:
-	cd docs; make html
+	cd docs && make html
 
 pdf:
-	cd docs; make pdf
+	cd docs && make pdf
 
 check: test examples check-docs
 

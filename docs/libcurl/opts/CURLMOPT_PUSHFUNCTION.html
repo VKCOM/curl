@@ -81,7 +81,7 @@ CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_PUSHFUNCTION,
 <p class="level0"><a name="curlpushheaderbynum"></a><span class="nroffip">curl_pushheader_bynum</span> 
 <p class="level1">Returns the header at index 'num' (or NULL). The returned pointer points to a "name:value" string that will be freed when this callback returns. 
 <p class="level0"><a name="curlpushheaderbyname"></a><span class="nroffip">curl_pushheader_byname</span> 
-<p class="level1">Returns the value for the given header name (or NULL). This is a shortcut so that the application doesn't have to loop through all headers to find the one it is interested in. The data pointed will be freed when this callback returns. <a name="CALLBACK"></a><h2 class="nroffsh">CALLBACK RETURN VALUE</h2>
+<p class="level1">Returns the value for the given header name (or NULL). This is a shortcut so that the application doesn't have to loop through all headers to find the one it is interested in. The data pointed will be freed when this callback returns. If more than one header field use the same name, this returns only the first one. <a name="CALLBACK"></a><h2 class="nroffsh">CALLBACK RETURN VALUE</h2>
 <p class="level0">
 <p class="level0"><a name="CURLPUSHOK"></a><span class="nroffip">CURL_PUSH_OK (0)</span> 
 <p class="level1">The application has accepted the stream and it can now start receiving data, the ownership of the CURL handle has been taken over by the application. 

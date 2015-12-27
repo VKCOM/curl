@@ -69,7 +69,7 @@ static size_t header_callback(char *buffer, size_t size,
 &nbsp;                             size_t nitems, void *userdata)
 {
 &nbsp; /* received header is nitems * size long in 'buffer' NOT ZERO TERMINATED */
-&nbsp; /* 'userdata' is set with CURLOPT_WRITEDATA */
+&nbsp; /* 'userdata' is set with CURLOPT_HEADERDATA */
 &nbsp; return nitems * size;
 }
 &nbsp;
