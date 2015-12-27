@@ -928,6 +928,9 @@
 /* if GnuTLS uses nettle as crypto backend */
 #undef USE_GNUTLS_NETTLE
 
+/* PSL support enabled */
+#undef USE_LIBPSL
+
 /* if librtmp is in use */
 #undef USE_LIBRTMP
 
@@ -936,6 +939,9 @@
 
 /* If you want to build curl with the built-in manual */
 #undef USE_MANUAL
+
+/* if mbedTLS is enabled */
+#undef USE_MBEDTLS
 
 /* Define to enable metalink support */
 #undef USE_METALINK

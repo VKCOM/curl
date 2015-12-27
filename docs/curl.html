@@ -230,7 +230,7 @@ p.roffit {
 <p class="level1">(HTTP) Sends the "Referrer Page" information to the HTTP server. This can also be set with the <a class="emphasis" href="#-H">-H, --header</a> flag of course.  When used with <a class="emphasis" href="#-L">-L, --location</a> you can append ";auto" to the --referer URL to make curl automatically set the previous URL when it follows a Location: header. The ";auto" string can be used alone, even if you don't set an initial --referer. 
 <p class="level1">If this option is used several times, the last one will be used. 
 <p class="level0"><a name="-E"></a><span class="nroffip">-E, --cert &lt;certificate[:password]&gt;</span> 
-<p class="level1">(SSL) Tells curl to use the specified client certificate file when getting a file with HTTPS, FTPS or another SSL-based protocol. The certificate must be in PKCS&#35;12 format if using Secure Transport, or PEM format if using any other engine.  If the optional password isn't specified, it will be queried for on the terminal. Note that this option assumes a "certificate" file that is the private key and the private certificate concatenated! See <span Class="emphasis">--cert</span> and <a class="emphasis" href="#--key">--key</a> to specify them independently. 
+<p class="level1">(SSL) Tells curl to use the specified client certificate file when getting a file with HTTPS, FTPS or another SSL-based protocol. The certificate must be in PKCS&#35;12 format if using Secure Transport, or PEM format if using any other engine.  If the optional password isn't specified, it will be queried for on the terminal. Note that this option assumes a "certificate" file that is the private key and the client certificate concatenated! See <span Class="emphasis">--cert</span> and <a class="emphasis" href="#--key">--key</a> to specify them independently. 
 <p class="level1">If curl is built against the NSS SSL library then this option can tell curl the nickname of the certificate to use within the NSS database defined by the environment variable SSL_DIR (or by default /etc/pki/nssdb). If the NSS PEM PKCS&#35;11 module (libnsspem.so) is available then PEM files may be loaded. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname.  If the nickname contains ":", it needs to be preceded by "\" so that it is not recognized as password delimiter.  If the nickname contains "\", it needs to be escaped as "\\" so that it is not recognized as an escape character. 
 <p class="level1">(iOS and Mac OS X only) If curl is built against Secure Transport, then the certificate string can either be the name of a certificate/private key in the system or user keychain, or the path to a PKCS&#35;12-encoded certificate and private key. If you want to use a file from the current directory, please precede it with "./" prefix, in order to avoid confusion with a nickname. 
 <p class="level1">If this option is used several times, the last one will be used. 
@@ -340,7 +340,8 @@ p.roffit {
 <p class="level0"><a name="--hostpubmd5"></a><span class="nroffip">--hostpubmd5 &lt;md5&gt;</span> 
 <p class="level1">(SCP/SFTP) Pass a string containing 32 hexadecimal digits. The string should be the 128 bit MD5 checksum of the remote host's public key, curl will refuse the connection with the host unless the md5sums match. (Added in 7.17.1) 
 <p class="level0"><a name="--ignore-content-length"></a><span class="nroffip">--ignore-content-length</span> 
-<p class="level1">(HTTP) Ignore the Content-Length header. This is particularly useful for servers running Apache 1.x, which will report incorrect Content-Length for files larger than 2 gigabytes. 
+<p class="level1">For HTTP, Ignore the Content-Length header. This is particularly useful for servers running Apache 1.x, which will report incorrect Content-Length for files larger than 2 gigabytes. 
+<p class="level1">For FTP (since 7.46.0), skip the RETR command to figure out the size before downloading a file. 
 <p class="level0"><a name="-i"></a><span class="nroffip">-i, --include</span> 
 <p class="level1">(HTTP) Include the HTTP-header in the output. The HTTP-header includes things like server-name, date of the document, HTTP-version and more... 
 <p class="level0"><a name="-I"></a><span class="nroffip">-I, --head</span> 
@@ -629,9 +630,8 @@ referer = "<a href="http://nowhereatall.com/">http://nowhereatall.com/</a>"
 <p class="level2"><span Class="bold">500-999</span> specifies the second 500 bytes 
 <p class="level2"><span Class="bold">-500</span> specifies the last 500 bytes 
 <p class="level2"><span Class="bold">9500-</span> specifies the bytes from offset 9500 and forward 
-<p class="level2"><span Class="bold">0-0,-1</span> specifies the first and last byte only(*)(H) 
-<p class="level2"><span Class="bold">500-700,600-799</span> specifies 300 bytes from offset 500(H) 
-<p class="level2"><span Class="bold">100-199,500-599</span> specifies two separate 100-byte ranges(*)(H) 
+<p class="level2"><span Class="bold">0-0,-1</span> specifies the first and last byte only(*)(HTTP) 
+<p class="level2"><span Class="bold">100-199,500-599</span> specifies two separate 100-byte ranges(*) (HTTP) 
 <p class="level1">
 <p class="level0"><a name=""></a><span class="nroffip"></span> 
 <p class="level1">(*) = NOTE that this will cause the server to reply with a multipart response! 

@@ -851,8 +851,8 @@ static CURLcode operate_do(struct GlobalConfig *global,
         else if(!config->use_metalink)
           my_setopt(curl, CURLOPT_HEADER, config->include_headers?1L:0L);
 
-        if(config->xoauth2_bearer)
-          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->xoauth2_bearer);
+        if(config->oauth_bearer)
+          my_setopt_str(curl, CURLOPT_XOAUTH2_BEARER, config->oauth_bearer);
 
 #if !defined(CURL_DISABLE_PROXY)
         {
@@ -892,7 +892,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                               (long)CURLAUTH_BASIC);
 
           /* new in libcurl 7.19.4 */
-          my_setopt(curl, CURLOPT_NOPROXY, config->noproxy);
+          my_setopt_str(curl, CURLOPT_NOPROXY, config->noproxy);
         }
 #endif
 
@@ -909,7 +909,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_IGNORED);
 
         if(config->netrc_file)
-          my_setopt(curl, CURLOPT_NETRC_FILE, config->netrc_file);
+          my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
 
         my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii?1L:0L);
         if(config->login_options)

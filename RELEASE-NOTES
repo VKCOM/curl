@@ -1,92 +1,92 @@
-Curl and libcurl 7.45.0
+Curl and libcurl 7.46.0
 
- Public curl releases:         149
+ Public curl releases:         150
  Command line options:         177
- curl_easy_setopt() options:   219
+ curl_easy_setopt() options:   221
  Public functions in libcurl:  61
- Contributors:                 1303
+ Contributors:                 1340
 
 This release includes the following changes:
 
- o added CURLOPT_DEFAULT_PROTOCOL [6]
- o added new tool option --proto-default [6]
- o getinfo: added CURLINFO_ACTIVESOCKET
- o turned CURLINFO_* option docs as stand-alone man pages
- o curl: point out unnecessary uses of -X in verbose mode [17]
+ o configure: build silently by default
+ o cookies: Add support for Publix Suffix List with libpsl
+ o vtls: added support for mbedTLS [7]
+ o Added CURLOPT_STREAM_DEPENDS [8]
+ o Added CURLOPT_STREAM_DEPENDS_E [9]
+ o Added CURLOPT_STREAM_WEIGHT [10]
+ o Added CURLFORM_CONTENTLEN [14]
+ o oauth2: Added support for OAUTHBEARER SASL mechanism to IMAP, POP3 and SNMP
 
 This release includes the following bugfixes:
 
- o curl_global_init_mem.3: Stronger thread safety warning [1]
- o buildconf.bat: Fixed issues when ran in directories with special chars [2]
- o cmake: Fix CurlTests check for gethostbyname_r with 5 arguments
- o generate.bat: Fixed issues when ran in directories with special chars
- o generate.bat: Only call buildconf.bat if it exists
- o generate.bat: Added support for generating only the prerequisite files
- o curl.1: Document weaknesses in SSLv2 and SSLv3
- o CURLOPT_HTTP_VERSION.3: connection re-use goes before version
- o docs: Update the redirect protocols disabled by default
- o inet_pton.c: Fix MSVC run-time check failure
- o CURLMOPT_PUSHFUNCTION.3: fix argument types
- o rtsp: support basic/digest authentication
- o rtsp: stop reading empty DESCRIBE responses
- o travis: Upgrading to container based build [3]
- o travis.yml: Add OS X testbot
- o FTP: make state machine not get stuck in state
- o openssl: handle lack of server cert when strict checking disabled [4]
- o configure: change functions to detect openssl (clones) [5]
- o configure: detect latest boringssl [5]
- o runtests: Allow for spaces in server-verify curl custom path
- o http2: on_frame_recv: get a proper 'conn' for the debug logging
- o ntlm: mark deliberate switch case fall-through
- o http2: remove dead code
- o curl_easy_{escape,unescape}.3: "char *" vs. "const char *" [7]
- o curl: point out the conflicting HTTP methods if used
- o cmake: added Windows SSL support [8]
- o curl_easy_{escape,setopt}.3: fix example
- o curl_easy_escape.3: escape '\n' [9]
- o libcurl.m4: Put braces around empty if body [10]
- o buildconf.bat: Fixed double blank line in 'curl manual' warning output
- o sasl: Only define Curl_sasl_digest_get_pair() when CRYPTO_AUTH enabled
- o inet_pton.c: Fix MSVC run-time check failure
- o CURLOPT_FOLLOWLOCATION.3: mention methods for redirects
- o http2: don't pass on Connection: headers [11]
- o nss: do not directly access SSL_ImplementedCiphers [12]
- o docs: numerous cleanups and spelling fixes
- o FTP: do_more: add check for wait_data_conn in upload case [13]
- o parse_proxy: reject illegal port numbers [14]
- o cmake: IPv6 : disable Unix header check on Windows platform [15]
- o winbuild: run buildconf.bat if necessary
- o buildconf.bat: fix syntax error
- o curl_sspi: fix possibly undefined CRYPT_E_REVOKED [16]
- o nss: prevent NSS from incorrectly re-using a session [18]
- o libcurl-errors.3: add two missing error codes
- o openssl: fix build with < 0.9.8
- o openssl: refactor certificate parsing to use OpenSSL memory BIO [19]
- o openldap: only part of LDAP query results received [20]
- o ssl: add server cert's "sha256//" hash to verbose [21]
- o NTLM: Reset auth-done when using a fresh connection [22]
- o curl: generate easysrc only on --libcurl [23]
- o tests: disable 1801 until fixed [24]
- o CURLINFO_TLS_SESSION: always return backend info
- o gnutls: Support CURLOPT_KEYPASSWD
- o gnutls: Report actual GnuTLS error message for certificate errors
- o tests: disable 1510 due to CI-problems on github
- o cmake: Put "winsock2.h" before "windows.h" during configure checks
- o cmake: Ensure discovered include dirs are considered
- o configure: Add missing ')' for CURL_CHECK_OPTION_RT [25]
- o build: fix failures with -Wcast-align and -Werror [26]
- o FTP: fix uploading ASCII with unknown size
- o readwrite_data: set a max number of loops
- o http2: avoid superfluous Curl_expire() calls
- o http2: set TCP_NODELAY unconditionally [27]
- o docs: fix unescaped '\n' in man pages
- o openssl: Fix algorithm init to make (gost) engines work [28]
- o win32: make recent Borland compilers use long long
- o runtests: Fix pid check in checkdied
- o gopher: don't send NUL byte [29]
- o tool_setopt: fix c_escape truncated octal [30]
- o hiperfifo: fix the pointer passed to WRITEDATA [31]
- o getinfo: Fix return code for unknown CURLINFO options [32]
+ o des: Fix header conditional for Curl_des_set_odd_parity
+ o ntlm: get rid of unconditional use of long long [1]
+ o CURLOPT_CERTINFO.3: fix reference to CURLINFO_CERTINFO
+ o docs: CURLINFO_LASTSOCKET => CURLINFO_ACTIVESOCKET [2]
+ o http2: Fix http2_recv to return -1 if recv returned -1
+ o curl_global_init_mem: set function pointers before doing init
+ o ntlm: error out without 64bit support as the code needs it [1]
+ o openssl: Fix set up of pkcs12 certificate verification chain
+ o acinclude: remove PKGCONFIG override [3]
+ o test1531: case the size to fix the test on non-largefile builds
+ o fread_func: move callback pointer from set to state struct [4]
+ o test1601: fix compilation with --enable-debug and --disable-crypto-auth
+ o http2: Don't pass unitialized name+len pairs to nghttp2_submit_request [5]
+ o curlbuild.h: Fix non-configure compiling to mips and sh4 targets
+ o tool: Generate easysrc with last cache linked-list [6]
+ o cmake: Fix for add_subdirectory(curl) use-case
+ o vtls: fix compiler warning for TLS backends without sha256
+ o build: fix for MSDOS/djgpp
+ o checksrc: add crude // detection
+ o http2: on_frame_recv: trust the conn/data input
+ o ftp: allow CURLOPT_IGNORE_CONTENT_LENGTH to ignore size [11]
+ o polarssl/mbedtls: fix name space pollution
+ o build: Fix mingw ssl gdi32 order [12]
+ o build: Fix support for PKG_CONFIG
+ o MacOSX-Framework: sdk regex fix for sdk 10.10 and later
+ o socks: Fix incorrect port numbers in failed connect messages
+ o curl.1: -E: s/private certificate/client certificate
+ o curl.h: s/HTTPPOST_/CURL_HTTPOST_ [13]
+ o curl_formadd: support >2GB files on windows [14]
+ o http redirects: %-encode bytes outside of ascii range [15]
+ o rawstr: Speed up Curl_raw_toupper by 40%
+ o curl_ntlm_core: fix 2 curl_off_t constant overflows.
+ o getinfo: CURLINFO_ACTIVESOCKET: fix bad socket value
+ o tftp tests: verify sent options too
+ o imap: Don't call imap_atom() when no mailbox specified in LIST command
+ o imap: Fixed double quote in LIST command when mailbox contains spaces
+ o imap: Don't check for continuation when executing a CUSTOMREQUEST [16]
+ o acinclude: Remove check for 16-bit curl_off_t
+ o BoringSSL: Work with stricter BIO_get_mem_data() [17]
+ o cmake: Add missing feature macros in config header [18]
+ o sasl_sspi: fixed unicode build for digest authentication [19]
+ o sasl_sspi: fix identity memory leak in digest authentication
+ o unit1602: Fixed failure in torture test
+ o unit1603: Added unit tests for hash functions
+ o vtls/openssl: remove unused traces of yassl ifdefs
+ o openssl: remove #ifdefs for < 0.9.7 support
+ o typecheck-gcc.h: add some missing options
+ o curl: mark two more options strings for --libcurl output
+ o openssl: Free modules on cleanup [20]
+ o CURLMOPT_PUSHFUNCTION.3: *_byname() returns only the first header
+ o getconnectinfo: Don't call recv(2) if socket == -1
+ o http2: http_done: don't free already-freed push headers
+ o zsh completion: Preserve single quotes in output [21]
+ o os400: Provide options for libssh2 use in compile scripts.
+ o build: Fix theoretical infinite loops [22]
+ o pop3: Differentiate between success and continuation responses
+ o examples: Fixed compilation warnings
+ o schannel: Use GetVersionEx() when VerifyVersionInfo() isn't available
+ o CURLOPT_HEADERFUNCTION.3: fix typo
+ o curl: expanded the -XHEAD warning text
+ o done: make sure the final progress update is made [23]
+ o build: Install zsh completion [24]
+ o RTSP: do not add if-modified-since without timecondition [25]
+ o curl: Fixed display of URL index in password prompt for --next
+ o nonblock: fix setting non-blocking mode for Amiga [26]
+ o http2 push: add missing inits of new stream [27]
+ o http2: convert some verbose output into debug-only output
+ o Curl_read_plain: clean up ifdefs that break statements [28]
 
 This release includes the following known bugs:
 
@@ -95,52 +95,45 @@ This release includes the following known bugs:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alessandro Ghedini, Benjamin Kircher, Bertrand Simonnet, Brad King,
-  Dan Fandrich, Daniel Hwang, Daniel Kahn Gillmor, Daniel Lee Hwang,
-  Daniel Seither, Daniel Stenberg, Denis Feklushkin, Eric Ridge, Erik Janssen,
-  Isaac Boukris, Jactry Zeng, Jakub Zakrzewski, Jim Hollinger, Kamil Dudka,
-  Maksim Stsepanenka, Marcel Raad, Michael Kalinin, Mike Crowe,
-  Nathaniel Waisbrot, Nikolai Kondrashov, Orange Tsai, Patricia Muscalu,
-  Patrick Monnerat, Rajkumar Mandal, Ray Satiro, Razvan Cojocaru, Rémy Léone,
-  Richard van den Berg, Sam Roth, Sergei Nikulov, Steve Holme,
-  Svyatoslav Mishyn, Tatsuhiro Tsujikawa, Thorsten Schöning, Viktor Szakáts,
-  W. Mark Kubacki,
-  (40 contributors)
+  Anders Bakken, Dan Fandrich, Daniel Hwang, Daniel Shahaf, Daniel Stenberg,
+  Davey Shafik, Dmitry S. Baikov, Douglas Creager, Erik Johansson,
+  Flavio Medeiros, Gisle Vanem, Javier G. Sogo, John Levon, Jonas Minnberg,
+  Justin Ehlert, Kamil Dudka, Kang Lin, Kurt Fankhauser, Lauri Kasanen,
+  Lukas Ruzicka, Marcel Raad, Michał Piechowski, Mohammad AlSaleh, Norbert Kett,
+  Patrick Monnerat, Rainer Jung, Ray Satiro, Richard Hosking,
+  Sebastian Pohlschmidt, Stefan Bühler, Steve Holme, Svyatoslav Mishyn,
+  Tatsuhiro Tsujikawa, Tim Rühsen, Xiangbin Li,
+  (35 contributors)
 
         Thanks! (and sorry if I forgot to mention someone)
 
 References to bug reports and discussions on issues:
 
- [1] = http://curl.haxx.se/mail/lib-2015-08/0016.html
- [2] = https://github.com/bagder/curl/pull/379
- [3] = http://curl.haxx.se/bug/?i=388
- [4] = http://curl.haxx.se/bug/?i=392
- [5] = https://android.googlesource.com/platform/external/curl/+/f551028d5caab
-29d4b4a4ae8c159c76c3cfd4887%5E!/
- [6] = http://curl.haxx.se/bug/?i=351
- [7] = http://curl.haxx.se/bug/?i=395
- [8] = http://curl.haxx.se/bug/?i=399
- [9] = http://curl.haxx.se/bug/?i=398
- [10] = http://curl.haxx.se/bug/?i=402
- [11] = http://curl.haxx.se/bug/?i=401
- [12] = https://lists.fedoraproject.org/pipermail/devel/2015-September/214117.html
- [13] = http://curl.haxx.se/bug/?i=405
- [14] = http://curl.haxx.se/bug/?i=415
- [15] = http://curl.haxx.se/bug/?i=409
- [16] = http://curl.haxx.se/bug/?i=411
- [17] = http://daniel.haxx.se/blog/2015/09/11/unnecessary-use-of-curl-x/
- [18] = https://bugzilla.mozilla.org/1202264
- [19] = http://curl.haxx.se/bug/?i=427
- [20] = http://curl.haxx.se/bug/?i=440
- [21] = http://curl.haxx.se/bug/?i=410
- [22] = http://curl.haxx.se/bug/?i=435
- [23] = http://curl.haxx.se/bug/?i=429
- [24] = http://curl.haxx.se/bug/?i=380
- [25] = http://curl.haxx.se/bug/?i=456
- [26] = http://curl.haxx.se/bug/?i=457
- [27] = http://curl.haxx.se/mail/lib-2015-09/0097.html
- [28] = http://curl.haxx.se/bug/?i=447
- [29] = http://curl.haxx.se/bug/?i=466
- [30] = http://curl.haxx.se/bug/?i=469
- [31] = http://curl.haxx.se/bug/?i=471
- [32] = http://curl.haxx.se/bug/?i=468
+ [1] = http://curl.haxx.se/bug/?i=478
+ [2] = http://curl.haxx.se/bug/?i=479
+ [3] = http://curl.haxx.se/mail/lib-2015-10/0035.html
+ [4] = http://curl.haxx.se/bug/?i=346
+ [5] = http://curl.haxx.se/bug/?i=493
+ [6] = http://curl.haxx.se/bug/?i=452
+ [7] = http://curl.haxx.se/bug/?i=496
+ [8] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_DEPENDS.html
+ [9] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_DEPENDS_E.html
+ [10] = http://curl.haxx.se/libcurl/c/CURLOPT_STREAM_WEIGHT.html
+ [11] = http://curl.haxx.se/bug/?i=480
+ [12] = https://github.com/bagder/curl/pull/501
+ [13] = http://curl.haxx.se/bug/?i=506
+ [14] = http://curl.haxx.se/bug/?i=425
+ [15] = http://curl.haxx.se/bug/?i=473
+ [16] = http://curl.haxx.se/bug/?i=486
+ [17] = http://curl.haxx.se/bug/?i=524
+ [18] = http://curl.haxx.se/bug/?i=523
+ [19] = http://curl.haxx.se/bug/?i=525
+ [20] = http://curl.haxx.se/bug/?i=526
+ [21] = http://curl.haxx.se/bug/?i=532
+ [22] = http://curl.haxx.se/bug/?i=535
+ [23] = http://curl.haxx.se/bug/?i=538
+ [24] = http://curl.haxx.se/bug/?i=534
+ [25] = http://stackoverflow.com/questions/33903982/curl-timecond-none-doesnt-work-how-to-remove-if-modified-since-header
+ [26] = http://curl.haxx.se/mail/lib-2015-11/0088.html
+ [27] = http://curl.haxx.se/bug/?i=530
+ [28] = http://curl.haxx.se/bug/?i=546
