@@ -1,8 +1,15 @@
-curl (7.47.0-1) UNRELEASED; urgency=medium
+curl (7.47.0-1) unstable; urgency=high
 
   * New upstream release
+    - Fix NTLM credentials not-checked for proxy connection re-use
+      as per CVE-2016-0755
+      http://curl.haxx.se/docs/adv_20160127A.html
+    - Set uyrgency=high accordingly
+  * Remove hard-coded dependency on libgnutls (Closes: #812542)
+  * Drop 08_fix-zsh-completion.patch (merged upstream)
+  * Refresh patches
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 27 Jan 2016 11:42:04 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 27 Jan 2016 11:45:59 +0000
 
 curl (7.46.0-1) unstable; urgency=medium
 
