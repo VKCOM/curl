@@ -15,6 +15,7 @@
 16_CVE-2015-3148.patch
 17_CVE-2015-3153.patch
 18_CVE-2016-0755.patch
+19_CVE-2016-5419.patch
 
 # do not add patches below
 90_gnutls.patch
