@@ -1,3 +1,14 @@
+curl (7.38.0-4+deb8u4) jessie-security; urgency=high
+
+  * Fix TLS session resumption client cert bypass as per CVE-2016-5419
+    https://curl.haxx.se/docs/adv_20160803A.html
+  * Fix re-using connection with wrong client cert as per CVE-2016-5420
+    https://curl.haxx.se/docs/adv_20160803B.html
+  * Fix use of connection struct after free as per CVE-2016-5421
+    https://curl.haxx.se/docs/adv_20160803C.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 01 Aug 2016 12:19:28 +0100
+
 curl (7.38.0-4+deb8u3) jessie-security; urgency=medium
 
   * Fix NTLM credentials not-checked for proxy connection re-use
