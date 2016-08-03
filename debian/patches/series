@@ -7,5 +7,6 @@
 
 # do not add patches below
 08_enable-zsh.patch
+09_fix-typo.patch
 90_gnutls.patch
 99_nss.patch
