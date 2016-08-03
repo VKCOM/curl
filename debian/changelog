@@ -1,4 +1,4 @@
-curl (7.50.1-1) UNRELEASED; urgency=medium
+curl (7.50.1-1) unstable; urgency=medium
 
   * New upstream release (Closes: #827900)
     - Fix TLS session resumption client cert bypass as per CVE-2016-5419
@@ -8,8 +8,20 @@ curl (7.50.1-1) UNRELEASED; urgency=medium
     - Fix use of connection struct after free as per CVE-2016-5421
       https://curl.haxx.se/docs/adv_20160803C.html
     - Support OpenSSL 1.1 (Closes: #828127)
+  * Fix 04_workaround_as_needed_bug.patch.
+    Thanks to Yuriy M. Kaminskiy for the patch (Closes: #818131)
+  * Bump Standards-Version to 3.9.8 (no changes needed)
+  * Update Vcs-* URLs
+  * Refresh patches
+  * Add 08_enable-zsh.patch to re-enable zsh completion generation
+  * Remove 08_fix-zsh-completion.patch (was already disabled)
+  * Add 09_fix-typo.patch to fix spelling-error-in-manpage
+  * Add 10_disable-network-tests.patch to disable networked tests
+    (Closes: #830273)
+  * Improve cross Build-Depends satisfiability.
+    Thanks to Helmut Grohne for the patch (Closes: #818092)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 03 Aug 2016 08:44:42 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 03 Aug 2016 12:46:05 +0100
 
 curl (7.47.0-1) unstable; urgency=high
 
