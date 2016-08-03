@@ -25,8 +25,8 @@ Build-Depends: debhelper (>= 9),
  zlib1g-dev
 Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.8
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/curl.git
-Vcs-Git: git://anonscm.debian.org/collab-maint/curl.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/curl.git
+Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/curl.git
 Homepage: http://curl.haxx.se
 
 Package: curl
