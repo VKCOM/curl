@@ -1,3 +1,16 @@
+curl (7.50.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release (Closes: #827900)
+    - Fix TLS session resumption client cert bypass as per CVE-2016-5419
+      https://curl.haxx.se/docs/adv_20160803A.html
+    - Fix re-using connection with wrong client cert as per CVE-2016-5420
+      https://curl.haxx.se/docs/adv_20160803B.html
+    - Fix use of connection struct after free as per CVE-2016-5421
+      https://curl.haxx.se/docs/adv_20160803C.html
+    - Support OpenSSL 1.1 (Closes: #828127)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 03 Aug 2016 08:44:42 +0100
+
 curl (7.47.0-1) unstable; urgency=high
 
   * New upstream release
