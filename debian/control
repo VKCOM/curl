@@ -3,10 +3,11 @@ Section: web
 Priority: optional
 Maintainer: Alessandro Ghedini <ghedo@debian.org>
 Uploaders: Ian Jackson <ijackson@chiark.greenend.org.uk>
-Build-Depends: debhelper (>= 9),
+Build-Depends: debhelper (>= 9.20141010~),
  autoconf,
  automake,
  ca-certificates,
+ dpkg-dev (>= 1.17.14~),
  groff-base,
  libgnutls28-dev,
  libidn11-dev,
@@ -18,10 +19,10 @@ Build-Depends: debhelper (>= 9),
  libssh2-1-dev,
  libssl-dev,
  libtool,
- openssh-server,
- python,
+ openssh-server <!nocheck>,
+ python:native,
  quilt,
- stunnel4,
+ stunnel4 <!nocheck>,
  zlib1g-dev
 Build-Conflicts: autoconf2.13, automake1.4
 Standards-Version: 3.9.8
