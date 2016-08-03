@@ -5,11 +5,11 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2015, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2016, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
+ * are also available at https://curl.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -98,7 +98,7 @@ CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #define CURL_CA_CERT_ERRORMSG1                                              \
-  "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n"           \
+  "More details here: https://curl.haxx.se/docs/sslcerts.html\n\n"           \
   "curl performs SSL certificate verification by default, "                 \
   "using a \"bundle\"\n"                                                    \
   " of Certificate Authority (CA) public keys (CA certs). If the default\n" \
@@ -151,6 +151,7 @@ static curl_off_t vms_realfilesize(const char * name,
   int ret_stat;
   FILE * file;
 
+  /* !checksrc! disable FOPENMODE 1 */
   file = fopen(name, "r"); /* VMS */
   if(file == NULL) {
     return 0;
@@ -204,6 +205,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
   CURLcode result = CURLE_OK;
   unsigned long li;
+  bool capath_from_env;
 
   /* Save the values of noprogress and isatty to restore them later on */
   bool orig_noprogress = global->noprogress;
@@ -239,6 +241,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
    * We support the environment variable thing for non-Windows platforms
    * too. Just for the sake of it.
    */
+  capath_from_env = false;
   if(!config->cacert &&
      !config->capath &&
      !config->insecure_ok) {
@@ -263,6 +266,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           result = CURLE_OUT_OF_MEMORY;
           goto quit_curl;
         }
+        capath_from_env = true;
       }
       else {
         env = curlx_getenv("SSL_CERT_FILE");
@@ -543,15 +547,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
             result = get_url_file_name(&outfile, this_url);
             if(result)
               goto show_error;
-
-#if defined(MSDOS) || defined(WIN32)
-            result = sanitize_file_name(&outfile);
-            if(result) {
-              Curl_safefree(outfile);
-              goto show_error;
-            }
-#endif /* MSDOS || WIN32 */
-
             if(!*outfile && !config->content_disposition) {
               helpf(global->errors, "Remote file name has no length!\n");
               result = CURLE_WRITE_ERROR;
@@ -563,17 +558,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
             char *storefile = outfile;
             result = glob_match_url(&outfile, storefile, urls);
             Curl_safefree(storefile);
-
-#if defined(MSDOS) || defined(WIN32)
-            if(!result) {
-              result = sanitize_file_name(&outfile);
-              if(result) {
-                Curl_safefree(outfile);
-                goto show_error;
-              }
-            }
-#endif /* MSDOS || WIN32 */
-
             if(result) {
               /* bad globbing */
               warnf(config->global, "bad output glob!\n");
@@ -811,6 +795,9 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->tcp_nodelay)
           my_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
 
+        if(config->tcp_fastopen)
+          my_setopt(curl, CURLOPT_TCP_FASTOPEN, 1L);
+
         /* where to store */
         my_setopt(curl, CURLOPT_WRITEDATA, &outs);
         if(metalink || !config->use_metalink)
@@ -1029,8 +1016,16 @@ static CURLcode operate_do(struct GlobalConfig *global,
 
         if(config->cacert)
           my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
-        if(config->capath)
-          my_setopt_str(curl, CURLOPT_CAPATH, config->capath);
+        if(config->capath) {
+          result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
+          if(result == CURLE_NOT_BUILT_IN) {
+            warnf(config->global, "ignoring %s, not supported by libcurl\n",
+                  capath_from_env?
+                  "SSL_CERT_DIR environment variable":"--capath");
+          }
+          else if(result)
+            goto show_error;
+        }
         if(config->crlfile)
           my_setopt_str(curl, CURLOPT_CRLFILE, config->crlfile);
 
@@ -1185,9 +1180,12 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1L);
         }
 
-        /* new in curl 7.10.7, extended in 7.19.4 but this only sets 0 or 1 */
+        /* new in curl 7.10.7, extended in 7.19.4. Modified to use
+           CREATE_DIR_RETRY in 7.49.0 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                  config->ftp_create_dirs?1L:0L);
+                  (long)(config->ftp_create_dirs?
+                         CURLFTP_CREATE_DIR_RETRY:
+                         CURLFTP_CREATE_DIR_NONE));
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)
@@ -1217,11 +1215,6 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->ftp_ssl_ccc)
           my_setopt_enum(curl, CURLOPT_FTP_SSL_CCC,
                          (long)config->ftp_ssl_ccc_mode);
-
-        /* new in curl 7.19.4 */
-        if(config->socks5_gssapi_service)
-          my_setopt_str(curl, CURLOPT_SOCKS5_GSSAPI_SERVICE,
-                        config->socks5_gssapi_service);
 
         /* new in curl 7.19.4 */
         if(config->socks5_gssapi_nec)
@@ -1302,9 +1295,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
           my_setopt_flags(curl, CURLOPT_REDIR_PROTOCOLS, config->proto_redir);
 
         if(config->content_disposition
-           && (urlnode->flags & GETOUT_USEREMOTE)
-           && (checkprefix("http://", this_url) ||
-               checkprefix("https://", this_url)))
+           && (urlnode->flags & GETOUT_USEREMOTE))
           hdrcbdata.honor_cd_filename = TRUE;
         else
           hdrcbdata.honor_cd_filename = FALSE;
@@ -1318,6 +1309,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->resolve)
           /* new in 7.21.3 */
           my_setopt_slist(curl, CURLOPT_RESOLVE, config->resolve);
+
+        if(config->connect_to)
+          /* new in 7.49.0 */
+          my_setopt_slist(curl, CURLOPT_CONNECT_TO, config->connect_to);
 
         /* new in 7.21.4 */
         if(curlinfo->features & CURL_VERSION_TLSAUTH_SRP) {
@@ -1373,6 +1368,10 @@ static CURLcode operate_do(struct GlobalConfig *global,
         if(config->expect100timeout > 0)
           my_setopt_str(curl, CURLOPT_EXPECT_100_TIMEOUT_MS,
                         (long)(config->expect100timeout*1000));
+
+        /* new in 7.48.0 */
+        if(config->tftp_no_options)
+          my_setopt(curl, CURLOPT_TFTP_NO_OPTIONS, 1L);
 
         /* initialize retry vars for loop below */
         retry_sleep_default = (config->retry_delay) ?
@@ -1525,7 +1524,7 @@ static CURLcode operate_do(struct GlobalConfig *global,
                 fflush(outs.stream);
                 /* truncate file at the position where we started appending */
 #ifdef HAVE_FTRUNCATE
-                if(ftruncate( fileno(outs.stream), outs.init)) {
+                if(ftruncate(fileno(outs.stream), outs.init)) {
                   /* when truncate fails, we can't just append as then we'll
                      create something strange, bail out */
                   if(!global->mute)
@@ -1842,7 +1841,9 @@ CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[])
 #endif
 
   /* Parse .curlrc if necessary */
-  if((argc == 1) || (!curlx_strequal(argv[1], "-q"))) {
+  if((argc == 1) ||
+     (!curlx_strequal(argv[1], "-q") &&
+      !curlx_strequal(argv[1], "--disable"))) {
     parseconfig(NULL, config); /* ignore possible failure */
 
     /* If we had no arguments then make sure a url was specified in .curlrc */
