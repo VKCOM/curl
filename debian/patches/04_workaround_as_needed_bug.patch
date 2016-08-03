@@ -4,7 +4,7 @@ Bug-Debian: http://bugs.debian.org/347650
 Forwarded: not-needed
 Author: Alessandro Ghedini <ghedo@debian.org>
 Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
-Last-Update: 2013-03-22
+Last-Update: 2016-08-03
 
 --- a/ltmain.sh
 +++ b/ltmain.sh
@@ -13,7 +13,7 @@ Last-Update: 2013-03-22
  	;;
  
 +      -Wl,--as-needed|-Wl,--no-as-needed)
-+	deplibs="$deplibs $arg"
++	deplibs="$arg $deplibs"
 +	continue
 +	;;
 +
