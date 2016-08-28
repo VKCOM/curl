@@ -1,3 +1,9 @@
+curl (7.50.1-2) unstable; urgency=medium
+
+  * Disable more network tests (Closes: #830273)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 28 Aug 2016 14:48:05 +0100
+
 curl (7.50.1-1) unstable; urgency=medium
 
   * New upstream release (Closes: #827900)
