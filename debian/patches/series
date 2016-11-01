@@ -18,6 +18,16 @@
 19_CVE-2016-5419.patch
 20_CVE-2016-5420.patch
 21_CVE-2016-5421.patch
+22_CVE-2016-8615.patch
+23_CVE-2016-8616.patch
+24_CVE-2016-8617.patch
+25_CVE-2016-8618.patch
+26_CVE-2016-8619.patch
+27_CVE-2016-8620.patch
+28_CVE-2016-8621.patch
+29_CVE-2016-8622.patch
+30_CVE-2016-8623.patch
+31_CVE-2016-8624.patch
 
 # do not add patches below
 90_gnutls.patch
