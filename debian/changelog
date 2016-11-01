@@ -1,3 +1,28 @@
+curl (7.38.0-4+deb8u5) jessie-security; urgency=high
+
+  * Fix cookie injection for other servers as per CVE-2016-8615
+    https://curl.haxx.se/docs/adv_20161102A.html
+  * Fix case insensitive password comparison as per CVE-2016-8616
+    https://curl.haxx.se/docs/adv_20161102B.html
+  * Fix OOB write via unchecked multiplication as per CVE-2016-8617
+    https://curl.haxx.se/docs/adv_20161102C.html
+  * Fix double-free in curl_maprintf as per CVE-2016-8618
+    https://curl.haxx.se/docs/adv_20161102D.html
+  * Fix double-free in krb5 code as per CVE-2016-8619
+    https://curl.haxx.se/docs/adv_20161102E.html
+  * Fix glob parser write/read out of bounds as per CVE-2016-8620
+    https://curl.haxx.se/docs/adv_20161102F.html
+  * Fix curl_getdate read out of bounds as per CVE-2016-8621
+    https://curl.haxx.se/docs/adv_20161102G.html
+  * Fix URL unescape heap overflow via integer truncation as per CVE-2016-8622
+    https://curl.haxx.se/docs/adv_20161102H.html
+  * Fix use-after-free via shared cookies as per CVE-2016-8623
+    https://curl.haxx.se/docs/adv_20161102I.html
+  * Fix invalid URL parsing with '#' as per CVE-2016-8624
+    https://curl.haxx.se/docs/adv_20161102J.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 01 Nov 2016 21:38:10 +0000
+
 curl (7.38.0-4+deb8u4) jessie-security; urgency=high
 
   * Fix TLS session resumption client cert bypass as per CVE-2016-5419
