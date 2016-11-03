@@ -1,3 +1,37 @@
+curl (7.51.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    - Fix cookie injection for other servers as per CVE-2016-8615
+      https://curl.haxx.se/docs/adv_20161102A.html
+    - Fix case insensitive password comparison as per CVE-2016-8616
+      https://curl.haxx.se/docs/adv_20161102B.html
+    - Fix OOB write via unchecked multiplication as per CVE-2016-8617
+      https://curl.haxx.se/docs/adv_20161102C.html
+    - Fix double-free in curl_maprintf as per CVE-2016-8618
+      https://curl.haxx.se/docs/adv_20161102D.html
+    - Fix double-free in krb5 code as per CVE-2016-8619
+      https://curl.haxx.se/docs/adv_20161102E.html
+    - Fix glob parser write/read out of bounds as per CVE-2016-8620
+      https://curl.haxx.se/docs/adv_20161102F.html
+    - Fix curl_getdate read out of bounds as per CVE-2016-8621
+      https://curl.haxx.se/docs/adv_20161102G.html
+    - Fix URL unescape heap overflow via integer truncation as per CVE-2016-8622
+      https://curl.haxx.se/docs/adv_20161102H.html
+    - Fix use-after-free via shared cookies as per CVE-2016-8623
+      https://curl.haxx.se/docs/adv_20161102I.html
+    - Fix invalid URL parsing with '#' as per CVE-2016-8624
+      https://curl.haxx.se/docs/adv_20161102J.html
+    - Fix IDNA 2003 makes curl use wrong host
+      https://curl.haxx.se/docs/adv_20161102K.html
+    - Fix escape and unescape integer overflows as
+      per CVE-2016-7167 (Closes: #837945)
+      https://curl.haxx.se/docs/adv_20160914.html
+    - Fix incorrect reuse of client certificates (NSS backend)
+      as per CVE-2016-7141 (Closes: #836918)
+      https://curl.haxx.se/docs/adv_20160907.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 03 Nov 2016 01:13:24 +0000
+
 curl (7.50.1-2) unstable; urgency=medium
 
   * Disable more network tests (Closes: #830273)
