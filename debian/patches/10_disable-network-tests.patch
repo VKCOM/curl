@@ -37,13 +37,3 @@ Last-Update: 2016-08-03
  </keywords>
  </info>
  
---- a/tests/data/test237
-+++ b/tests/data/test237
-@@ -2,6 +2,7 @@
- <info>
- <keywords>
- FTP
-+non-existing host
- </keywords>
- </info>
- 
