@@ -1,4 +1,4 @@
-curl (7.51.0-1) UNRELEASED; urgency=medium
+curl (7.51.0-1) unstable; urgency=medium
 
   * New upstream release
     - Fix cookie injection for other servers as per CVE-2016-8615
@@ -29,8 +29,13 @@ curl (7.51.0-1) UNRELEASED; urgency=medium
     - Fix incorrect reuse of client certificates (NSS backend)
       as per CVE-2016-7141 (Closes: #836918)
       https://curl.haxx.se/docs/adv_20160907.html
+  * Drop 02_art_http_scripting.patch (file not shipped anymore)
+  * Refresh patches
+  * Temporarily disable IDN support
+  * Don't install pdf and html docs (they are not shipped in the tarball anymore)
+  * Install markdown docs
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 03 Nov 2016 01:13:24 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 03 Nov 2016 22:46:14 +0000
 
 curl (7.50.1-2) unstable; urgency=medium
 
