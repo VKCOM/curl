@@ -1,3 +1,11 @@
+curl (7.52.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    - Fix printf floating point buffer overflow as per CVE-2016-9586
+      (Closes: #848958)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 30 Dec 2016 11:28:43 +0000
+
 curl (7.51.0-1) unstable; urgency=medium
 
   * New upstream release
