@@ -3,10 +3,11 @@
 04_workaround_as_needed_bug.patch
 06_always-disable-valgrind.patch
 07_do-not-disable-debug-symbols.patch
-
-# do not add patches below
 08_enable-zsh.patch
 09_fix-typo.patch
 10_disable-network-tests.patch
+11_omit-directories-from-config.patch
+
+# do not add patches below
 90_gnutls.patch
 99_nss.patch
