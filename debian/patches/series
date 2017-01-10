@@ -5,7 +5,6 @@
 07_do-not-disable-debug-symbols.patch
 08_enable-zsh.patch
 09_fix-typo.patch
-10_disable-network-tests.patch
 11_omit-directories-from-config.patch
 
 # do not add patches below
