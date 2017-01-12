@@ -1,10 +1,20 @@
-curl (7.52.1-1) UNRELEASED; urgency=medium
+curl (7.52.1-1) unstable; urgency=medium
 
   * New upstream release
     - Fix printf floating point buffer overflow as per CVE-2016-9586
       (Closes: #848958)
+  * B-D on "libssl1.0-dev | libssl-dev (<< 1.1)" (Closes: #850880, #844018)
+  * Another attempt at making -dev packages multi-arch.
+    Thanks to Benjamin Moody for the patches. (Closes: #731998, #846360)
+  * Enable support for PSL (Closes: #847958)
+  * Re-enable support for IDN (Closes: #849539)
+  * Drop 10_disable-network-tests.patch.
+    It didn't really work, and the issue is not urgent.
+  * Switch curl binary back to libcurl3/OpenSSL.
+    While the GnuTLS flavour mostly worked fine, there are a bunch of features
+    that are not implemented.
 
- -- Alessandro Ghedini <ghedo@debian.org>  Fri, 30 Dec 2016 11:28:43 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 12 Jan 2017 22:02:44 +0000
 
 curl (7.51.0-1) unstable; urgency=medium
 
