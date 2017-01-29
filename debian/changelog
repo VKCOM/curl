@@ -1,3 +1,9 @@
+curl (7.52.1-2) unstable; urgency=medium
+
+  * Fix HTTPS connection timeout with OpenSSL (Closes: #852317)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 29 Jan 2017 21:34:10 +0000
+
 curl (7.52.1-1) unstable; urgency=medium
 
   * New upstream release
