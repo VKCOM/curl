@@ -6,6 +6,7 @@
 08_enable-zsh.patch
 09_fix-typo.patch
 11_omit-directories-from-config.patch
+12_fix-openssl-connection-timeout.patch
 
 # do not add patches below
 90_gnutls.patch
