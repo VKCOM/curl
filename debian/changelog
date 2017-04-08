@@ -1,3 +1,11 @@
+curl (7.52.1-4) unstable; urgency=medium
+
+  * Fix regression in CONNECT response handling (Closes: #857613)
+  * Fix buffer read overrun on --write-out as per CVE-2017-7407
+    https://curl.haxx.se/docs/adv_20170403.html (Closes: #859500)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 08 Apr 2017 21:55:27 +0100
+
 curl (7.52.1-3) unstable; urgency=high
 
   * Make SSL_VERIFYSTATUS work again as per CVE-2017-2629
