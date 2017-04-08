@@ -9,6 +9,7 @@
 12_fix-openssl-connection-timeout.patch
 13_CVE-2017-2629.patch
 14_fix-connect-regression.patch
+15_CVE-2017-7407.patch
 
 # do not add patches below
 90_gnutls.patch
