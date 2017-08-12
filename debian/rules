@@ -108,11 +108,6 @@ override_dh_installchangelogs:
 override_dh_compress:
 	dh_compress -X.pdf
 
-override_dh_strip:
-	dh_strip -plibcurl3 -plibcurl3-gnutls -plibcurl3-nss	\
-		--dbg-package=libcurl3-dbg
-	dh_strip --remaining-packages
-
 override_dh_auto_clean:
 	$(RM) -r debian/build* debian/tmp*
 	dh_auto_clean
