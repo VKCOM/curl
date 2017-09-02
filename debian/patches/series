@@ -5,6 +5,7 @@
 07_do-not-disable-debug-symbols.patch
 08_enable-zsh.patch
 11_omit-directories-from-config.patch
+12_dont-wait-on-CONNECT.patch
 
 # do not add patches below
 90_gnutls.patch
