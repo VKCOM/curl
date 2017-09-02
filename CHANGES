@@ -6,6 +6,270 @@
 
                                   Changelog
 
+Version 7.55.1 (13 Aug 2017)
+
+Daniel Stenberg (13 Aug 2017)
+- RELEASE-NOTES/THANKS: curl 7.55.1 release time
+
+- gitignore: ignore .xz now instead of .lzma
+
+- [Sergei Nikulov brought this change]
+
+  cmake: Threads detection update. ref: #1702
+  
+  Closes #1719
+
+- ipv6_scope: support unique local addresses
+  
+  Fixes #1764
+  Closes #1773
+  Reported-by: James Slaughter
+
+- [Alex Potapenko brought this change]
+
+  curl/system.h: GCC doesn't define __ppc__ on PowerPC, uses __powerpc__
+  
+  Closes #1774
+
+- test1448: verify redirect to IDN using URL
+  
+  Closes #1772
+
+- [Salah-Eddin Shaban brought this change]
+
+  redirect: skip URL encoding for host names
+  
+  This fixes redirects to IDN URLs
+  
+  Fixes #1441
+  Closes #1762
+  Reported by: David Lord
+
+- test2032: mark as flaky (again)
+
+- travis: test cmake build on tarball too
+  
+  Could've prevented #1755
+
+- [Simon Warta brought this change]
+
+  cmake: allow user to override CMAKE_DEBUG_POSTFIX
+  
+  Closes #1763
+
+- connect-to.d: better language
+
+- connect-to.d: clarified
+
+- bagder/Curl_tvdiff_us: fix the math
+  
+  Regression since adef394ac5 (released in 7.55.0)
+  
+  Reported-by: Han Qiao
+  Fixes #1769
+  Closes #1771
+
+- curl/system.h: add Oracle Solaris Studio
+  
+  Fixes #1752
+
+- [Alessandro Ghedini brought this change]
+
+  docs: fix typo funtion -> function
+  
+  Closes #1770
+
+Alessandro Ghedini (12 Aug 2017)
+- docs: fix grammar in CURL_SSLVERSION_MAX_DEFAULT description
+
+- docs: fix typo stuct -> struct
+
+Dan Fandrich (12 Aug 2017)
+- test1447: require a curl with http support
+
+Daniel Stenberg (11 Aug 2017)
+- [Thomas Petazzoni brought this change]
+
+  curl/system.h: support more architectures
+  
+  The long list of architectures in include/curl/system.h is annoying to
+  maintain, and needs to be extended for each and every architecture to
+  support.
+  
+  Instead, let's rely on the __SIZEOF_LONG__ define of the gcc compiler
+  (we are in the GNUC condition anyway), which tells us if long is 4
+  bytes or 8 bytes.
+  
+  This fixes the build of libcurl 7.55.0 on architectures such as
+  OpenRISC or ARC.
+  
+  Closes #1766
+  
+  Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
+
+- test2033: this went flaky again
+  
+  Suspicion: when we enabled the threaded resolver by default.
+
+- test1447: verifies the parse proxy fix in 6e0e152ce5c
+
+- [Even Rouault brought this change]
+
+  parse_proxy(): fix memory leak in case of invalid proxy server name
+  
+  Fixes the below leak:
+  
+  $ valgrind --leak-check=full ~/install-curl-git/bin/curl --proxy "http://a:b@/x" http://127.0.0.1
+  curl: (5) Couldn't resolve proxy name
+  ==5048==
+  ==5048== HEAP SUMMARY:
+  ==5048==     in use at exit: 532 bytes in 12 blocks
+  ==5048==   total heap usage: 5,288 allocs, 5,276 frees, 445,271 bytes allocated
+  ==5048==
+  ==5048== 2 bytes in 1 blocks are definitely lost in loss record 1 of 12
+  ==5048==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+  ==5048==    by 0x4E6CB79: parse_login_details (url.c:5614)
+  ==5048==    by 0x4E6BA82: parse_proxy (url.c:5091)
+  ==5048==    by 0x4E6C46D: create_conn_helper_init_proxy (url.c:5346)
+  ==5048==    by 0x4E6EA18: create_conn (url.c:6498)
+  ==5048==    by 0x4E6F9B4: Curl_connect (url.c:6967)
+  ==5048==    by 0x4E86D05: multi_runsingle (multi.c:1436)
+  ==5048==    by 0x4E88432: curl_multi_perform (multi.c:2160)
+  ==5048==    by 0x4E7C515: easy_transfer (easy.c:708)
+  ==5048==    by 0x4E7C74A: easy_perform (easy.c:794)
+  ==5048==    by 0x4E7C7B1: curl_easy_perform (easy.c:813)
+  ==5048==    by 0x414025: operate_do (tool_operate.c:1563)
+  ==5048==
+  ==5048== 2 bytes in 1 blocks are definitely lost in loss record 2 of 12
+  ==5048==    at 0x4C2DB8F: malloc (in /usr/lib/valgrind/vgpreload_memcheck-amd64-linux.so)
+  ==5048==    by 0x4E6CBB6: parse_login_details (url.c:5621)
+  ==5048==    by 0x4E6BA82: parse_proxy (url.c:5091)
+  ==5048==    by 0x4E6C46D: create_conn_helper_init_proxy (url.c:5346)
+  ==5048==    by 0x4E6EA18: create_conn (url.c:6498)
+  ==5048==    by 0x4E6F9B4: Curl_connect (url.c:6967)
+  ==5048==    by 0x4E86D05: multi_runsingle (multi.c:1436)
+  ==5048==    by 0x4E88432: curl_multi_perform (multi.c:2160)
+  ==5048==    by 0x4E7C515: easy_transfer (easy.c:708)
+  ==5048==    by 0x4E7C74A: easy_perform (easy.c:794)
+  ==5048==    by 0x4E7C7B1: curl_easy_perform (easy.c:813)
+  ==5048==    by 0x414025: operate_do (tool_operate.c:1563)
+  
+  Fixes https://bugs.chromium.org/p/oss-fuzz/issues/detail?id=2984
+  Credit to OSS Fuzz for discovery
+  
+  Closes #1761
+
+- RELEASE-NOTES: synced with 37f2195a9
+
+- curlver: bump to 7.55.1
+
+- openssl: fix "error: this statement may fall through"
+  
+  A gcc7 warning.
+
+- [David Benjamin brought this change]
+
+  openssl: remove CONST_ASN1_BIT_STRING.
+  
+  Just making the pointer as const works for the pre-1.1.0 path too.
+  
+  Closes #1759
+
+- maketgz: remove old *.dist files before making the tarball
+  
+  To avoid "old crap" unintentionally getting shipped.
+  
+  Bug: https://curl.haxx.se/mail/lib-2017-08/0050.html
+  Reported-by: Christian Weisgerber
+
+Jay Satiro (10 Aug 2017)
+- mkhelp.pl: allow executing this script directly
+  
+  - Enable execute permission (chmod +x)
+  
+  - Change interpreter to /usr/bin/env perl
+  
+  Ref: https://github.com/curl/curl/issues/1743
+
+Daniel Stenberg (10 Aug 2017)
+- configure: use the threaded resolver backend by default if possible
+  
+  Closes #1647
+
+- cmake: move cmake_uninstall.cmake to CMake/
+  
+  Closes #1756
+
+- metalink: fix error: ‘*’ in boolean context, suggest ‘&&’ instead
+
+- dist: fix the cmake build by shipping cmake_uninstall.cmake.in too
+  
+  Fixes #1755
+
+- travis: verify "make install"
+  
+  Help-by: Jay Satiro
+  Closes #1753
+
+Marcel Raad (10 Aug 2017)
+- build: check out *.sln files with Windows line endings
+  
+  Visual Studio doesn't like LF line endings in solution files and always
+  converts them to CRLF when doing changes to the solution. Notably, this
+  affects the solutions in the release archive.
+  
+  Closes https://github.com/curl/curl/pull/1746
+
+- gitignore: ignore top-level .vs folder
+  
+  This folder is generated when using the CMake build system from within
+  Visual Studio.
+  
+  Closes https://github.com/curl/curl/pull/1746
+
+Jay Satiro (10 Aug 2017)
+- digest_sspi: Don't reuse context if the user/passwd has changed
+  
+  Bug: https://github.com/curl/curl/issues/1685
+  Reported-by: paulharris@users.noreply.github.com
+  
+  Assisted-by: Isaac Boukris
+  
+  Closes https://github.com/curl/curl/pull/1742
+
+Daniel Stenberg (9 Aug 2017)
+- [Adam Sampson brought this change]
+
+  dist: Add dictserver.py/negtelnetserver.py to EXTRA_DIST
+  
+  These weren't included in the 7.55.0 release, but are required in order
+  to run the full test suite.
+  
+  Closes #1744
+
+- [Adam Sampson brought this change]
+
+  curl: do bounds check using a double comparison
+  
+  The fix for this in 8661a0aacc01492e0436275ff36a21734f2541bb wasn't
+  complete: if the parsed number in num is larger than will fit in a long,
+  the conversion is undefined behaviour (causing test1427 to fail for me
+  on IA32 with GCC 7.1, although it passes on AMD64 and ARMv7).  Getting
+  rid of the cast means the comparison will be done using doubles.
+  
+  It might make more sense for the max argument to also be a double...
+  
+  Fixes #1750
+  Closes #1749
+
+- make install: add 8 missing man pages to the installation
+
+- build: fix 'make install' with configure, install docs/libcurl/* too
+  
+  Broken since d24838d4da9faa
+  
+  Reported-by: Bernard Spil
+
 Version 7.55.0 (9 Aug 2017)
 
 Daniel Stenberg (9 Aug 2017)
@@ -6121,244 +6385,3 @@ Jay Satiro (16 Nov 2016)
   
   http2.c:2057:3: runtime error: null pointer passed as argument 2, which
   is declared to never be null
-
-- tool_help: Clarify --dump-header only writes received headers
-
-- curl.1: Clarify --dump-header only writes received headers
-
-Daniel Stenberg (15 Nov 2016)
-- [Alex Chan brought this change]
-
-  docs: Spelling fixes
-
-Kamil Dudka (15 Nov 2016)
-- docs: the next release will be 7.52.0
-
-Daniel Stenberg (15 Nov 2016)
-- cmdline-opts: support generating the --help output
-
-- [David Schweikert brought this change]
-
-  darwinssl: fix SSL client certificate not found on MacOS Sierra
-  
-  Reviewed-by: Nick Zitzmann
-  
-  Closes #1105
-
-- curl: add --fail-early to help output
-  
-  Fixes test 1139 failures
-  
-  Follow-up to f82bbe01c8835
-
-- glob: fix [a-c] globbing regression
-  
-  Brought in ee4f76606cf
-  
-  Added test case 1280 to verify
-  
-  Reported-by: Dave Reisner
-  
-  Bug: https://github.com/curl/curl/commit/ee4f76606cfa4ee068bf28edd37c8dae7e8db317#commitcomment-19823146
-
-- curl: add --fail-early
-  
-  Exit with an error on the first transfer error instead of continuing to
-  do the rest of the URLs.
-  
-  Discussion: https://curl.haxx.se/mail/archive-2016-11/0038.html
-
-- Curl_rand: fixed and moved to rand.c
-  
-  Now Curl_rand() is made to fail if it cannot get the necessary random
-  level.
-  
-  Changed the proto of Curl_rand() slightly to provide a number of ints at
-  once.
-  
-  Moved out from vtls, since it isn't a TLS function and vtls provides
-  Curl_ssl_random() for this to use.
-  
-  Discussion: https://curl.haxx.se/mail/lib-2016-11/0119.html
-
-- cmdline-opts: first test version of a new man page generator kit
-  
-  See MANPAGE.md for the description of how this works. Each command line
-  option is now described in a separate .d file.
-
-- time_t fix: follow-up to de4de4e3c7c
-  
-  Blah, I accidentally wrote size_t instead of time_t for two variables.
-  
-  Reported-by: Dave Reisner
-
-- timeval: prefer time_t to hold seconds instead of long
-  
-  ... as long is still 32bit on modern 64bit windows machines, while
-  time_t is generally 64bit.
-
-Dan Fandrich (12 Nov 2016)
-- tests: fixed variable might be clobbered warning
-  
-  This stops the compiler from potentially making invalid assumptions
-  about the immutability of sdp and sap across the longjmp boundary.
-
-Daniel Stenberg (12 Nov 2016)
-- RELEASE-NOTES: synced with 346340808c
-
-- URL-parser: for file://[host]/ URLs, the [host] must be localhost
-  
-  Previously, the [host] part was just ignored which made libcurl accept
-  strange URLs misleading users. like "file://etc/passwd" which might've
-  looked like it refers to "/etc/passwd" but is just "/passwd" since the
-  "etc" is an ignored host name.
-  
-  Reported-by: Mike Crowe
-  Assisted-by: Kamil Dudka
-
-- test558: adapt to 0649433da
-
-- openssl: make sure to fail in the unlikely event that PRNG seeding fails
-
-- openssl: avoid unnecessary seeding if already done
-  
-  1.1.0+ does more of this by itself so we can avoid extra processing this
-  way.
-
-- openssl: RAND_status always exists in OpenSSL >= 0.9.7
-  
-  and remove RAND_screen from configure since nothing is using that
-  function
-
-- Curl_pgrsUpdate: use dedicated function for time passed
-
-- realloc: use Curl_saferealloc to avoid common mistakes
-  
-  Discussed: https://curl.haxx.se/mail/lib-2016-11/0087.html
-
-- [Daniel Hwang brought this change]
-
-  curl: Add --retry-connrefused
-  
-  to consider ECONNREFUSED as a transient error.
-  
-  Closes #1064
-
-- openssl: raise the max_version to 1.3 if asked for
-  
-  Now I've managed to negotiate TLS 1.3 with https://enabled.tls13.com/ when
-  using boringssl.
-
-Jay Satiro (9 Nov 2016)
-- vtls: Fail on unrecognized param for CURLOPT_SSLVERSION
-  
-  - Fix GnuTLS code for CURL_SSLVERSION_TLSv1_2 that broke when the
-  TLS 1.3 support was added in 6ad3add.
-  
-  - Homogenize across code for all backends the error message when TLS 1.3
-  is not available to "<backend>: TLS 1.3 is not yet supported".
-  
-  - Return an error when a user-specified ssl version is unrecognized.
-  
-  ---
-  
-  Prior to this change our code for some of the backends used the
-  'default' label in the switch statement (ie ver unrecognized) for
-  ssl.version and treated it the same as CURL_SSLVERSION_DEFAULT.
-  
-  Bug: https://curl.haxx.se/mail/lib-2016-11/0048.html
-  Reported-by: Kamil Dudka
-
-Daniel Stenberg (9 Nov 2016)
-- [Isaac Boukris brought this change]
-
-  SPNEGO: Fix memory leak when authentication fails
-  
-  If SPNEGO fails, cleanup the negotiate handle right away.
-  
-  Fixes #1115
-  
-  Signed-off-by: Isaac Boukris <iboukris@gmail.com>
-  Reported-by: ashman-p
-
-- CODE_STYLE.md: link to INTERNALS.md correctly
-
-- bump: next version will be 7.52.0
-
-- RELEASE-NOTES: synced with dfcdaaba371e9a3
-
-- examples/fileupload.c: fclose the file as well
-
-- printf: fix ".*f" handling
-  
-  It would always use precision 1 instead of reading it from the argument
-  list as intended.
-  
-  Reported-by: Ray Satiro
-  
-  Bug: #1113
-
-- curl_formadd.3: *_FILECONTENT and *_FILE need the file to be kept
-  
-  Reported-by: Frank Gevaerts
-
-Kamil Dudka (7 Nov 2016)
-- nss: silence warning 'SSL_NEXT_PROTO_EARLY_VALUE not handled in switch'
-  
-  ... with nss-3.26.0 and newer
-  
-  Reported-by: Daniel Stenberg
-
-Daniel Stenberg (7 Nov 2016)
-- openssl: initial TLS 1.3 adaptions
-  
-  BoringSSL supports TLSv1.3 already, but these changes don't seem to be anough
-  to get it working.
-
-- ssh: check md5 fingerprints case insensitively (regression)
-  
-  Revert the change from ce8d09483eea but use the new function
-  
-  Reported-by: Kamil Dudka
-  Bug: https://github.com/curl/curl/commit/ce8d09483eea2fcb1b50e323e1a8ed1f3613b2e3#commitcomment-19666146
-
-Kamil Dudka (7 Nov 2016)
-- curl: introduce the --tlsv1.3 option to force TLS 1.3
-  
-  Fully implemented with the NSS backend only for now.
-  
-  Reviewed-by: Ray Satiro
-
-- vtls: support TLS 1.3 via CURL_SSLVERSION_TLSv1_3
-  
-  Fully implemented with the NSS backend only for now.
-  
-  Reviewed-by: Ray Satiro
-
-- nss: map CURL_SSLVERSION_DEFAULT to NSS default
-  
-  ... but make sure we use at least TLSv1.0 according to libcurl API
-  
-  Reported-by: Cure53
-  Reviewed-by: Ray Satiro
-
-Daniel Stenberg (7 Nov 2016)
-- s/cURL/curl
-  
-  We're mostly saying just "curl" in lower case these days so here's a big
-  cleanup to adapt to this reality. A few instances are left as the
-  project could still formally be considered called cURL.
-
-Jay Satiro (7 Nov 2016)
-- [Tatsuhiro Tsujikawa brought this change]
-
-  http2: Don't send header fields prohibited by HTTP/2 spec
-  
-  Previously, we just ignored "Connection" header field.  But HTTP/2
-  specification actually prohibits few more header fields.  This commit
-  ignores all of them so that we don't send these bad header fields.
-  
-  Bug: https://curl.haxx.se/mail/archive-2016-10/0033.html
-  Reported-by: Ricki Hirner
-  
-  Closes https://github.com/curl/curl/pull/1092
