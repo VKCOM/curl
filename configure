@@ -40649,6 +40649,7 @@ else
 fi
 
 
+if test "x$want_ares" != xyes; then
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable the threaded resolver" >&5
 $as_echo_n "checking whether to enable the threaded resolver... " >&6; }
@@ -40659,19 +40660,16 @@ if test "${enable_threaded_resolver+set}" = set; then :
 fi
 
   case "$OPT_THRES" in
-    yes)
+    *)
             want_thres="yes"
       ;;
-    *)
+    no)
             want_thres="no"
       ;;
   esac
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $want_thres" >&5
 $as_echo "$want_thres" >&6; }
 
-
-if test "x$want_thres" = xyes && test "x$want_ares" = xyes; then
-  as_fn_error $? "Options --enable-threaded-resolver and --enable-ares are mutually exclusive" "$LINENO" 5
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to use POSIX threads for threaded resolver" >&5
