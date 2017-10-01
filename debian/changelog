@@ -1,3 +1,14 @@
+curl (7.38.0-4+deb8u6) jessie-security; urgency=medium
+
+  * Fix TFTP sends more than buffer size as per CVE-2017-1000100
+    https://curl.haxx.se/docs/adv_20170809B.html
+  * Fix URL globbing out of bounds read as per CVE-2017-1000101
+    https://curl.haxx.se/docs/adv_20170809A.html
+  * Fix FTP PWD response parser out of bounds read as per CVE-2017-1000254
+    https://curl.haxx.se/docs/adv_20171004.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 01 Oct 2017 12:05:13 +0100
+
 curl (7.38.0-4+deb8u5) jessie-security; urgency=high
 
   * Fix cookie injection for other servers as per CVE-2016-8615
