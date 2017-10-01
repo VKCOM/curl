@@ -12,6 +12,7 @@
 15_CVE-2017-7407.patch
 16_CVE-2017-7468.patch
 17_CVE-2017-1000100.patch
+18_CVE-2017-1000101.patch
 
 # do not add patches below
 90_gnutls.patch
