@@ -1,3 +1,14 @@
+curl (7.52.1-5+deb9u1) stretch-security; urgency=medium
+
+  * Fix TFTP sends more than buffer size as per CVE-2017-1000100
+    https://curl.haxx.se/docs/adv_20170809B.html
+  * Fix URL globbing out of bounds read as per CVE-2017-1000101
+    https://curl.haxx.se/docs/adv_20170809A.html
+  * Fix FTP PWD response parser out of bounds read as per CVE-2017-1000254
+    https://curl.haxx.se/docs/adv_20171004.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 01 Oct 2017 12:07:01 +0100
+
 curl (7.52.1-5) unstable; urgency=high
 
   * Fix TLS session resumption client cert bypass as per CVE-2017-7468
