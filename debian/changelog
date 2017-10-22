@@ -1,3 +1,10 @@
+curl (7.52.1-5+deb9u2) stretch-security; urgency=medium
+
+  * Fix IMAP FETCH response out of bounds read as per CVE-2017-1000257
+    https://curl.haxx.se/docs/adv_20171023.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 22 Oct 2017 21:23:30 +0100
+
 curl (7.52.1-5+deb9u1) stretch-security; urgency=medium
 
   * Fix TFTP sends more than buffer size as per CVE-2017-1000100
