@@ -1,4 +1,3 @@
-01_runtests_gdb.patch
 03_keep_symbols_compat.patch
 04_workaround_as_needed_bug.patch
 06_always-disable-valgrind.patch
