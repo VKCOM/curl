@@ -1,10 +1,16 @@
-curl (7.56.1-1) UNRELEASED; urgency=medium
+curl (7.56.1-1) unstable; urgency=medium
 
   * New upstream release
     - Fix IMAP FETCH response out of bounds read as per CVE-2017-1000257
       https://curl.haxx.se/docs/adv_20171023.html
+  * Bump Standards-Version to 4.1.1 (no changes needed)
+  * Drop 01_runtests_gdb.patch
+  * Drop 12_dont-wait-on-CONNECT.patch
+  * Refresh patches
+  * Update *.symbols files
+  * Use https:// URL in watch file
 
- -- Alessandro Ghedini <ghedo@debian.org>  Mon, 23 Oct 2017 20:48:25 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 24 Oct 2017 11:05:48 +0100
 
 curl (7.55.1-1) unstable; urgency=medium
 
