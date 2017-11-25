@@ -33,6 +33,7 @@
 34_CVE-2017-1000254.patch
 35_CVE-2017-1000257.patch
 36_CVE-2017-8816.patch
+37_CVE-2017-8817.patch
 
 # do not add patches below
 90_gnutls.patch
