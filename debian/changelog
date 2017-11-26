@@ -1,3 +1,10 @@
+curl (7.52.1-5+deb9u2) UNRELEASED; urgency=high
+
+  * Non-maintainer upload by the Security Team.
+  * 
+
+ -- Yves-Alexis Perez <corsac@debian.org>  Sun, 26 Nov 2017 12:48:45 +0100
+
 curl (7.52.1-5+deb9u2) stretch-security; urgency=medium
 
   * Fix IMAP FETCH response out of bounds read as per CVE-2017-1000257
