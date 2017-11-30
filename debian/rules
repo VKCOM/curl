@@ -97,9 +97,12 @@ override_dh_install:
 #    package.
 # 3. Likewise, replace the architecture name used for --build (and
 #    build_alias) with a literal backquoted call to dpkg-architecture.
+# 4. In --configure output, remove
+#    -fdebug-prefix-map=/buildd/specific/random/path=.
 	sed -e "/-lcurl /s|`krb5-config --libs gssapi`|\`krb5-config --libs gssapi\`|" \
 	    -e "/--prefix/s|/$(DEB_HOST_MULTIARCH)'|/'\\\\\`dpkg-architecture -qDEB_HOST_MULTIARCH\\\\\`|g" \
 	    -e "/--prefix/s|=$(DEB_BUILD_GNU_TYPE)'|='\\\\\`dpkg-architecture -qDEB_BUILD_GNU_TYPE\\\\\`|g" \
+	    -e "/-fdebug-prefix-map=/s|\(-fdebug-prefix-map=\)/[^ ]*=.||" \
 	    -i `find . -name curl-config`
 
 override_dh_installchangelogs:
