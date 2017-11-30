@@ -1,4 +1,4 @@
-curl (7.57.0-1) UNRELEASED; urgency=medium
+curl (7.57.0-1) unstable; urgency=medium
 
   * New upstream release
     - Fix NTLM buffer overflow via integer overflow as per CVE-2017-8816
@@ -7,8 +7,12 @@ curl (7.57.0-1) UNRELEASED; urgency=medium
       https://curl.haxx.se/docs/adv_2017-ae72.html
     - Fix SSL out of buffer access as per CVE-2017-8818
       https://curl.haxx.se/docs/adv_2017-af0a.html
+  * Remove -fdebug-prefix-map from curl-config.
+    Thanks to Timo Weingärtner for the patch (Closes: #861974, #874223, #874238)
+  * Don't install zsh completion when cross compiling.
+    Thanks to Wookey for the patch (Closes: #812965)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Thu, 30 Nov 2017 09:44:02 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 30 Nov 2017 10:16:03 +0000
 
 curl (7.56.1-1) unstable; urgency=medium
 
