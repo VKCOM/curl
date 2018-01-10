@@ -19,7 +19,7 @@ Build-Depends: debhelper (>= 11),
  libpsl-dev,
  librtmp-dev (>= 2.4+20131018.git79459a2-3~),
  libssh2-1-dev,
- libssl1.0-dev | libssl-dev (<< 1.1),
+ libssl-dev | libssl1.0-dev,
  libtool,
  openssh-server <!nocheck>,
  python:native,
@@ -34,7 +34,7 @@ Homepage: http://curl.haxx.se
 
 Package: curl
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl3 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl4 (= ${binary:Version})
 Multi-Arch: foreign
 Description: command line tool for transferring data with URL syntax
  curl is a command line tool for transferring data with URL syntax, supporting
@@ -46,9 +46,11 @@ Description: command line tool for transferring data with URL syntax
  NTLM, Negotiate, kerberos...), file transfer resume, proxy tunneling and a
  busload of other useful tricks.
 
-Package: libcurl3
+Package: libcurl4
 Architecture: any
 Section: libs
+Conflicts: libcurl3
+Replaces: libcurl3
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
 Pre-Depends: ${misc:Pre-Depends}
@@ -69,9 +71,11 @@ Description: easy-to-use client-side URL transfer library (OpenSSL flavour)
  .
  SSL support is provided by OpenSSL.
 
-Package: libcurl3-gnutls
+Package: libcurl4-gnutls
 Architecture: any
 Section: libs
+Conflicts: libcurl3-gnutls
+Replaces: libcurl3-gnutls
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
 Pre-Depends: ${misc:Pre-Depends}
@@ -92,9 +96,11 @@ Description: easy-to-use client-side URL transfer library (GnuTLS flavour)
  .
  SSL support is provided by GnuTLS.
 
-Package: libcurl3-nss
+Package: libcurl4-nss
 Architecture: any
 Section: libs
+Conflicts: libcurl3-nss
+Replaces: libcurl3-nss
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
 Pre-Depends: ${misc:Pre-Depends}
@@ -124,14 +130,14 @@ Provides: libcurl-dev,
  libcurl4-dev,
  libcurl3-dev
 Conflicts: libcurl4-gnutls-dev, libcurl4-nss-dev
-Depends: ${misc:Depends}, libcurl3 (= ${binary:Version})
+Depends: ${misc:Depends}, libcurl4 (= ${binary:Version})
 Suggests: libcurl4-doc,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
  libssh2-1-dev,
- libssl1.0-dev | libssl-dev (<< 1.1),
+ libssl-dev | libssl1.0-dev,
  pkg-config,
  zlib1g-dev
 Multi-Arch: same
@@ -162,7 +168,7 @@ Provides: libcurl-dev,
  libcurl3-gnutls-dev,
  libcurl4-dev
 Conflicts: libcurl4-openssl-dev, libcurl4-nss-dev
-Depends: ${misc:Depends}, libcurl3-gnutls (= ${binary:Version})
+Depends: ${misc:Depends}, libcurl4-gnutls (= ${binary:Version})
 Suggests: libcurl4-doc,
  libgnutls28-dev,
  libidn11-dev,
@@ -200,7 +206,7 @@ Provides: libcurl-dev,
  libcurl3-nss-dev,
  libcurl4-dev
 Conflicts: libcurl4-openssl-dev, libcurl4-gnutls-dev
-Depends: ${misc:Depends}, libcurl3-nss (= ${binary:Version})
+Depends: ${misc:Depends}, libcurl4-nss (= ${binary:Version})
 Suggests: libcurl4-doc,
  libidn11-dev,
  libkrb5-dev,
