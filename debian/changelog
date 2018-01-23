@@ -1,3 +1,12 @@
+curl (7.52.1-5+deb9u4) stretch-security; urgency=high
+
+  * Fix HTTP/2 trailer out-of-bounds read as per CVE-2018-1000005
+    https://curl.haxx.se/docs/adv_2018-824a.html
+  * Fix HTTP authentication leak in redirects as per CVE-2018-1000007
+    https://curl.haxx.se/docs/adv_2018-b3bf.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 23 Jan 2018 21:56:56 +0000
+
 curl (7.52.1-5+deb9u3) stretch-security; urgency=high
 
   * Non-maintainer upload by the Security Team.
