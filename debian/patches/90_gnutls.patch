@@ -30,7 +30,7 @@ Last-Update: 2015-08-12
  
  if BUILD_UNITTESTS
  noinst_LTLIBRARIES = libcurlu.la
-@@ -84,42 +84,42 @@
+@@ -84,44 +84,44 @@
  AM_LDFLAGS =
  AM_CFLAGS =
  
@@ -65,6 +65,9 @@ Last-Update: 2015-08-12
  if CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS
 -libcurl_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 +libcurl_gnutls_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
+ else
+-libcurl_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
++libcurl_gnutls_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
  endif
  
  if USE_CPPFLAG_CURL_STATICLIB
@@ -88,7 +91,7 @@ Last-Update: 2015-08-12
  
  libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
  libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
-@@ -128,7 +128,7 @@
+@@ -130,7 +130,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
