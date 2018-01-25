@@ -1,3 +1,10 @@
+curl (7.38.0-4+deb8u9) jessie-security; urgency=high
+
+  * Fix HTTP authentication leak in redirects as per CVE-2018-1000007
+    https://curl.haxx.se/docs/adv_2018-b3bf.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 25 Jan 2018 22:34:49 +0000
+
 curl (7.38.0-4+deb8u8) jessie-security; urgency=high
 
   * Non-maintainer upload by the Security Team.
