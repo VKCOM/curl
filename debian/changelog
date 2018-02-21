@@ -1,3 +1,16 @@
+curl (7.58.0-2.1) UNRELEASED; urgency=medium
+
+  * Build-depend on libssl-dev instead of libssl1.0-dev.
+  * Rename libcurl3 to libcurl4, because libcurl exposes an SSL_CTX via
+    CURLOPT_SSL_CTX_FUNCTION, and this object changes incompatibly between
+    openssl 1.0 and openssl 1.1.
+  * debian/patches/03_keep_symbols_compat.patch: drop, since we are no longer
+    claiming compatibility.
+  * debian/patches/90_gnutls.patch: Retain symbol versioning compatibility for
+    non-OpenSSL builds.  Closes: #858398.
+
+ -- Steve Langasek <vorlon@debian.org>  Wed, 21 Feb 2018 08:21:31 -0800
+
 curl (7.58.0-2) unstable; urgency=medium
 
   * Explicitly enable libssh2 support which got silently disabled in the
