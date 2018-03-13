@@ -1,3 +1,15 @@
+curl (7.38.0-4+deb8u10) jessie-security; urgency=high
+
+  * Fix NIL byte out of bounds write due to FTP path trickery
+    as per CVE-2018-1000120
+    https://curl.haxx.se/docs/adv_2018-9cd6.html
+  * Fix LDAP NULL pointer dereference as per CVE-2018-1000121
+    https://curl.haxx.se/docs/adv_2018-97a2.html
+  * Fix RTSP RTP buffer over-read as per CVE-2018-1000122
+    https://curl.haxx.se/docs/adv_2018-b047.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 13 Mar 2018 20:47:46 +0000
+
 curl (7.38.0-4+deb8u9) jessie-security; urgency=high
 
   * Fix HTTP authentication leak in redirects as per CVE-2018-1000007
