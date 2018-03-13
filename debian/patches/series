@@ -36,6 +36,7 @@
 37_CVE-2017-8817.patch
 38_CVE-2018-1000007.patch
 39_CVE-2018-1000120.patch
+40_CVE-2018-1000121.patch
 
 # do not add patches below
 90_gnutls.patch
