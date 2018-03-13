@@ -1,3 +1,15 @@
+curl (7.52.1-5+deb9u5) stretch-security; urgency=high
+
+  * Fix NIL byte out of bounds write due to FTP path trickery
+    as per CVE-2018-1000120
+    https://curl.haxx.se/docs/adv_2018-9cd6.html
+  * Fix LDAP NULL pointer dereference as per CVE-2018-1000121
+    https://curl.haxx.se/docs/adv_2018-97a2.html
+  * Fix RTSP RTP buffer over-read as per CVE-2018-1000122
+    https://curl.haxx.se/docs/adv_2018-b047.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 13 Mar 2018 00:46:06 +0000
+
 curl (7.52.1-5+deb9u4) stretch-security; urgency=high
 
   * Fix HTTP/2 trailer out-of-bounds read as per CVE-2018-1000005
