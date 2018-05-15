@@ -1,3 +1,11 @@
+curl (7.52.1-5+deb9u6) stretch-security; urgency=high
+
+  * Fix heap buffer over-read when parsing bad RTSP headers
+    as per CVE-2018-1000301
+    https://curl.haxx.se/docs/adv_2018-b138.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 15 May 2018 23:00:28 +0100
+
 curl (7.52.1-5+deb9u5) stretch-security; urgency=high
 
   * Fix NIL byte out of bounds write due to FTP path trickery
