@@ -22,6 +22,7 @@
 25_CVE-2018-1000120.patch
 26_CVE-2018-1000121.patch
 27_CVE-2018-1000122.patch
+28_CVE-2018-1000301.patch
 
 # do not add patches below
 90_gnutls.patch
