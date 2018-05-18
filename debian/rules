@@ -77,7 +77,7 @@ override_dh_install:
 		--sourcedir=debian/tmp-gnutls
 	dh_install -plibcurl3-nss -plibcurl4-nss-dev		\
 		--sourcedir=debian/tmp-nss
-	dh_install -pcurl -plibcurl4 -plibcurl4-openssl-dev -plibcurl4-doc \
+	dh_install -pcurl -plibcurl3 -plibcurl4-openssl-dev -plibcurl4-doc \
 		--sourcedir=debian/tmp
 	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 # Modify curl-config to make it architecture-independent:
