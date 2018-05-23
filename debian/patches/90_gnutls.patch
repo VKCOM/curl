@@ -3,7 +3,7 @@ Origin: vendor
 Forwarded: not-needed
 Author: Ramakrishnan Muthukrishnan <vu3rdd@gmail.com>
 Reviewed-by: Alessandro Ghedini <ghedo@debian.org>
-Last-Update: 2015-08-12
+Last-Update: 2018-05-23
 
 --- a/docs/examples/Makefile.am
 +++ b/docs/examples/Makefile.am
@@ -132,3 +132,14 @@ Last-Update: 2015-08-12
  endif
  
  # Dependencies (may need to be overridden)
+--- a/lib/libcurl.vers.in
++++ b/lib/libcurl.vers.in
+@@ -6,7 +6,7 @@
+     _save*;
+ };
+ 
+-CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@4
++CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@3
+ {
+   global: curl_*;
+   local: *;

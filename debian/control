@@ -19,7 +19,7 @@ Build-Depends: debhelper (>= 11),
  libpsl-dev,
  librtmp-dev (>= 2.4+20131018.git79459a2-3~),
  libssh2-1-dev,
- libssl1.0-dev | libssl-dev (<< 1.1),
+ libssl-dev (>= 1.1),
  libtool,
  openssh-server <!nocheck>,
  python:native,
@@ -34,7 +34,7 @@ Homepage: http://curl.haxx.se
 
 Package: curl
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl3 (= ${binary:Version})
+Depends: ${shlibs:Depends}, ${misc:Depends}, libcurl4 (= ${binary:Version})
 Multi-Arch: foreign
 Description: command line tool for transferring data with URL syntax
  curl is a command line tool for transferring data with URL syntax, supporting
@@ -46,12 +46,14 @@ Description: command line tool for transferring data with URL syntax
  NTLM, Negotiate, kerberos...), file transfer resume, proxy tunneling and a
  busload of other useful tricks.
 
-Package: libcurl3
+Package: libcurl4
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates
 Pre-Depends: ${misc:Pre-Depends}
+Conflicts: libcurl3
+Replaces: libcurl3
 Multi-Arch: same
 Description: easy-to-use client-side URL transfer library (OpenSSL flavour)
  libcurl is an easy-to-use client-side URL transfer library, supporting DICT,
@@ -123,15 +125,15 @@ Provides: libcurl-dev,
  libcurl3-openssl-dev,
  libcurl4-dev,
  libcurl3-dev
-Conflicts: libcurl4-gnutls-dev, libcurl4-nss-dev
-Depends: ${misc:Depends}, libcurl3 (= ${binary:Version})
+Conflicts: libcurl4-gnutls-dev, libcurl4-nss-dev, libssl-dev (<< 1.1), libssl1.0-dev
+Depends: ${misc:Depends}, libcurl4 (= ${binary:Version})
 Suggests: libcurl4-doc,
  libidn11-dev,
  libkrb5-dev,
  libldap2-dev,
  librtmp-dev,
  libssh2-1-dev,
- libssl1.0-dev | libssl-dev (<< 1.1),
+ libssl-dev (>= 1.1),
  pkg-config,
  zlib1g-dev
 Multi-Arch: same
