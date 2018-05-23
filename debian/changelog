@@ -1,3 +1,18 @@
+curl (7.60.0-2) unstable; urgency=medium
+
+  [ Steve Langasek ]
+  * Build-depend on libssl-dev instead of libssl1.0-dev.
+  * Rename libcurl3 to libcurl4, because libcurl exposes an SSL_CTX via
+    CURLOPT_SSL_CTX_FUNCTION, and this object changes incompatibly between
+    openssl 1.0 and openssl 1.1.
+  * debian/patches/03_keep_symbols_compat.patch: drop, since we are no longer
+    claiming compatibility.
+  * debian/patches/90_gnutls.patch: Retain symbol versioning compatibility for
+    non-OpenSSL builds.  Closes: #858398.
+  * Adjust libssl1.1 vs libssl1.0 Suggests/Conflicts; thanks, Adrian Bunk
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 23 May 2018 20:25:39 +0100
+
 curl (7.60.0-1) unstable; urgency=medium
 
   * New upstream release (Closes: #891997, #893546, #898856)
