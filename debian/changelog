@@ -1,3 +1,12 @@
+curl (7.61.0-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    + Fix SMTP send heap buffer overflow as per CVE-2018-0500 (Closes: #903546)
+      https://curl.haxx.se/docs/adv_2018-70a2.html
+    + Fix some crashes related to HTTP/2 (Closes: #902628)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 11 Jul 2018 22:37:43 +0100
+
 curl (7.60.0-2) unstable; urgency=medium
 
   [ Steve Langasek ]
