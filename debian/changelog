@@ -1,11 +1,15 @@
-curl (7.61.0-1) UNRELEASED; urgency=medium
+curl (7.61.0-1) unstable; urgency=medium
 
   * New upstream release
     + Fix SMTP send heap buffer overflow as per CVE-2018-0500 (Closes: #903546)
       https://curl.haxx.se/docs/adv_2018-70a2.html
     + Fix some crashes related to HTTP/2 (Closes: #902628)
+  * Disable libssh2 on Ubuntu.
+    Thanks to Gianfranco Costamagna for the patch (Closes: #888449)
+  * Bump Standards-Version to 4.2.0 (no changes needed)
+  * Don't configure default CA bundle with OpenSSL and GnuTLS (Closes: #883174)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 11 Jul 2018 22:37:43 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 11 Aug 2018 13:32:28 +0100
 
 curl (7.60.0-2) unstable; urgency=medium
 
