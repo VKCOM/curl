@@ -30,7 +30,7 @@ Last-Update: 2015-08-12
  
  if BUILD_UNITTESTS
  noinst_LTLIBRARIES = libcurlu.la
-@@ -84,44 +84,44 @@
+@@ -84,47 +84,47 @@
  AM_LDFLAGS =
  AM_CFLAGS =
  
@@ -66,8 +66,11 @@ Last-Update: 2015-08-12
 -libcurl_gnutls_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
 +libcurl_nss_la_LDFLAGS_EXTRA += -Wl,--version-script=libcurl.vers
  else
+ # if symbol-hiding is enabled, hide them!
+ if DOING_CURL_SYMBOL_HIDING
 -libcurl_gnutls_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
 +libcurl_nss_la_LDFLAGS_EXTRA += -export-symbols-regex '^curl_.*'
+ endif
  endif
  
  if USE_CPPFLAG_CURL_STATICLIB
@@ -91,7 +94,7 @@ Last-Update: 2015-08-12
  
  libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
  libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
-@@ -130,7 +130,7 @@
+@@ -133,7 +133,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
@@ -116,7 +119,7 @@ Last-Update: 2015-08-12
  curl_LDFLAGS = @LIBMETALINK_LDFLAGS@
 --- a/tests/libtest/Makefile.am
 +++ b/tests/libtest/Makefile.am
-@@ -55,11 +55,11 @@
+@@ -57,11 +57,11 @@
  LIBS = $(BLANK_AT_MAKETIME)
  
  if USE_EXPLICIT_LIB_DEPS
