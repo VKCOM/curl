@@ -1,3 +1,11 @@
+curl (7.61.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    + Fix NTLM password overflow via integer overflow as per CVE-2018-14618
+      https://curl.haxx.se/docs/CVE-2018-14618.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 05 Sep 2018 21:00:42 +0100
+
 curl (7.61.0-1) unstable; urgency=medium
 
   * New upstream release
