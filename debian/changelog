@@ -1,3 +1,12 @@
+curl (7.52.1-5+deb9u8) stretch-security; urgency=high
+
+  * Fix SASL password overflow via integer overflow as per CVE-2018-16839
+    https://curl.haxx.se/docs/CVE-2018-16839.html
+  * Fix warning message out-of-buffer read as per CVE-2018-16842
+    https://curl.haxx.se/docs/CVE-2018-16842.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 30 Oct 2018 21:39:11 +0000
+
 curl (7.52.1-5+deb9u7) stretch-security; urgency=high
 
   * Fix NTLM password overflow via integer overflow as per CVE-2018-14618
