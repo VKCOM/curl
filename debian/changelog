@@ -1,10 +1,17 @@
-curl (7.61.1-1) UNRELEASED; urgency=medium
+curl (7.62.0-1) UNRELEASED; urgency=medium
 
   * New upstream release
     + Fix NTLM password overflow via integer overflow as per CVE-2018-14618
-      https://curl.haxx.se/docs/CVE-2018-14618.html
+      (Closes: #908327) https://curl.haxx.se/docs/CVE-2018-14618.html
+    + Fix SASL password overflow via integer overflow as per CVE-2018-16839
+      https://curl.haxx.se/docs/CVE-2018-16839.html
+    + Fix use-after-free in handle close as per CVE-2018-16840
+      https://curl.haxx.se/docs/CVE-2018-16840.html
+    + Fix warning message out-of-buffer read as per CVE-2018-16842
+      https://curl.haxx.se/docs/CVE-2018-16842.html
+    + Fix broken terminal output (closes: #911333)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 05 Sep 2018 21:00:42 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 31 Oct 2018 09:31:45 +0000
 
 curl (7.61.0-1) unstable; urgency=medium
 
