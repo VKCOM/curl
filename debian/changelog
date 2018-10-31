@@ -1,4 +1,4 @@
-curl (7.62.0-1) UNRELEASED; urgency=medium
+curl (7.62.0-1) unstable; urgency=medium
 
   * New upstream release
     + Fix NTLM password overflow via integer overflow as per CVE-2018-14618
@@ -10,8 +10,10 @@ curl (7.62.0-1) UNRELEASED; urgency=medium
     + Fix warning message out-of-buffer read as per CVE-2018-16842
       https://curl.haxx.se/docs/CVE-2018-16842.html
     + Fix broken terminal output (closes: #911333)
+  * Refresh patches
+  * Add 12_fix-runtests-curl.patch to fix running curl in tests
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 31 Oct 2018 09:31:45 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 31 Oct 2018 22:42:44 +0000
 
 curl (7.61.0-1) unstable; urgency=medium
 
