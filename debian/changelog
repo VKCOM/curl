@@ -1,11 +1,16 @@
-curl (7.63.0-1) UNRELEASED; urgency=medium
+curl (7.63.0-1) unstable; urgency=medium
 
   * New upstream release
     + Fix IPv6 numeral address parser (Closes: #915520)
     + Fix timeout handling (Closes: #914793)
     + Fix HTTP auth to include query in URI (Closes: #913214)
+  * Drop 12_fix-runtests-curl.patch (merged upstream)
+  * Update symbols
+  * Update copyright for removed files
+  * Bump debhlper compat level to 12
+  * Bump Standards-Version to 4.3.0 (no changes needed)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Sat, 15 Dec 2018 10:39:30 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Tue, 15 Jan 2019 20:47:40 +0000
 
 curl (7.62.0-1) unstable; urgency=medium
 
