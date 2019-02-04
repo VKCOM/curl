@@ -28,6 +28,7 @@
 31_CVE-2018-16842.patch
 32_CVE-2018-16890.patch
 33_CVE-2019-3822.patch
+34_CVE-2019-3823.patch
 
 # do not add patches below
 90_gnutls.patch
