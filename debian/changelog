@@ -1,4 +1,4 @@
-curl (7.64.0-1) UNRELEASED; urgency=medium
+curl (7.64.0-1) unstable; urgency=medium
 
   * New upstream release
     + Fix NTLM type-2 out-of-bounds buffer read as per CVE-2018-16890
@@ -9,7 +9,7 @@ curl (7.64.0-1) UNRELEASED; urgency=medium
       https://curl.haxx.se/docs/CVE-2019-3823.html
     + Fix HTTP negotiation with POST requests (Closes: #920267)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Wed, 06 Feb 2019 20:29:36 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Wed, 06 Feb 2019 22:33:05 +0000
 
 curl (7.63.0-1) unstable; urgency=medium
 
