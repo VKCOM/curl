@@ -8,6 +8,8 @@ curl (7.64.0-1) unstable; urgency=medium
     + Fix SMTP end-of-response out-of-bounds read as per CVE-2019-3823
       https://curl.haxx.se/docs/CVE-2019-3823.html
     + Fix HTTP negotiation with POST requests (Closes: #920267)
+  * Refresh patches
+  * Import fixes for zsh completion script generator (Closes: #92145)
 
  -- Alessandro Ghedini <ghedo@debian.org>  Wed, 06 Feb 2019 22:33:05 +0000
 
