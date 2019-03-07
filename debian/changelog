@@ -1,3 +1,9 @@
+curl (7.64.0-2) unstable; urgency=medium
+
+  * Fix infinite loop when fetching URLs with unreachable IPv6 (Closes: #922554)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Thu, 07 Mar 2019 20:02:35 +0000
+
 curl (7.64.0-1) unstable; urgency=medium
 
   * New upstream release
