@@ -5,6 +5,8 @@
 11_omit-directories-from-config.patch
 12_zsh.patch
 13_singlesocket-fix-the-sincebefore-placement.patch
+14_connection_check-set-data-to-the-transfer-doing-the-.patch
+15_connection_check-restore-original-conn-data-after-th.patch
 
 # do not add patches below
 90_gnutls.patch
