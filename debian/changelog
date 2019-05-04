@@ -1,3 +1,10 @@
+curl (7.64.0-3) unstable; urgency=medium
+
+  * Fix potential crash in HTTP/2 code and busy loop at the end of connections
+    (Closes: #927471)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 04 May 2019 12:51:06 +0100
+
 curl (7.64.0-2) unstable; urgency=medium
 
   * Fix infinite loop when fetching URLs with unreachable IPv6 (Closes: #922554)
