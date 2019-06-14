@@ -7,6 +7,7 @@
 13_singlesocket-fix-the-sincebefore-placement.patch
 14_connection_check-set-data-to-the-transfer-doing-the-.patch
 15_connection_check-restore-original-conn-data-after-th.patch
+16_tftp-use-the-current-blksize-for-recvfrom.patch
 
 # do not add patches below
 90_gnutls.patch
