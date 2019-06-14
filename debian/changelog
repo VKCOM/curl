@@ -1,3 +1,12 @@
+curl (7.64.0-4) unstable; urgency=medium
+
+  * Fix TFTP receive buffer overflow as per CVE-2019-5436 (Closes: #929351)
+    https://curl.haxx.se/docs/CVE-2019-5436.html
+  * Fix integer overflow in curl_url_set() as per CVE-2019-5435 (Closes: #929352)
+    https://curl.haxx.se/docs/CVE-2019-5435.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 14 Jun 2019 19:23:32 +0100
+
 curl (7.64.0-3) unstable; urgency=medium
 
   * Fix potential crash in HTTP/2 code and busy loop at the end of connections
