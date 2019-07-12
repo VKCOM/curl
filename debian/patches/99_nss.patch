@@ -96,7 +96,7 @@ Last-Update: 2015-08-12
 +libcurl_nss_la_SOURCES = $(CSOURCES) $(HHEADERS)
  libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
  
- checksrc:
+ CHECKSRC = $(CS_$(V))
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
 @@ -61,9 +61,9 @@
