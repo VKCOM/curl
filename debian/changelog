@@ -1,3 +1,11 @@
+curl (7.65.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    + Reduce verbose output (Closes: #926148)
+    + Fix parsing URLs with link local addresses (Closes: #926812)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 12 Jul 2019 20:16:56 +0100
+
 curl (7.64.0-4) unstable; urgency=medium
 
   * Fix TFTP receive buffer overflow as per CVE-2019-5436 (Closes: #929351)
