@@ -1,10 +1,17 @@
-curl (7.65.1-1) UNRELEASED; urgency=medium
+curl (7.65.1-1) unstable; urgency=medium
 
   * New upstream release
     + Reduce verbose output (Closes: #926148)
     + Fix parsing URLs with link local addresses (Closes: #926812)
+  * Drop patches merged upstream
+  * Refresh patches
+  * Bump STandards-Version to 4.4.0 (no changes needed)
+  * Update entry in copyright for renamed files
+  * Fix some man errors.
+    Thanks to Bjarni Ingi Gislason for the patch (Closes: #926352)
+  * Add Build-Depends-Package field to symbols files
 
- -- Alessandro Ghedini <ghedo@debian.org>  Fri, 12 Jul 2019 20:16:56 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 13 Jul 2019 12:37:09 +0100
 
 curl (7.64.0-4) unstable; urgency=medium
 
