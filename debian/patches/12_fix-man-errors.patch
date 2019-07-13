@@ -1,0 +1,80 @@
+From 655add8444a7e4ddf5bca8b66f5ab7a55252e8ea Mon Sep 17 00:00:00 2001
+From: Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+Date: Tue, 2 Apr 2019 21:55:11 +0000
+Subject: [PATCH] curl.1: Missing lines caused by undefined macros
+
+  Some lines begin with a "'" (apostrophe, single quote), which is then
+interpreted as a control character in *roff.
+
+  Such lines are interpreted as being a call to a macro, and if
+undefined, the lines are removed from the output.
+
+Signed-off-by: Bjarni Ingi Gislason <bjarniig@rhi.hi.is>
+---
+ docs/cmdline-opts/data.d  | 2 +-
+ docs/cmdline-opts/key.d   | 2 +-
+ docs/cmdline-opts/proto.d | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+--- a/docs/cmdline-opts/data.d
++++ b/docs/cmdline-opts/data.d
+@@ -24,7 +24,7 @@
+ If you start the data with the letter @, the rest should be a file name to
+ read the data from, or - if you want curl to read the data from
+ stdin. Multiple files can also be specified. Posting data from a file named
+-'foobar' would thus be done with --data @foobar. When --data is told to read
++\&'foobar' would thus be done with --data @foobar. When --data is told to read
+ from a file like that, carriage returns and newlines will be stripped out. If
+ you don't want the @ character to have a special interpretation use --data-raw
+ instead.
+--- a/docs/cmdline-opts/key.d
++++ b/docs/cmdline-opts/key.d
+@@ -5,7 +5,7 @@
+ ---
+ Private key file name. Allows you to provide your private key in this separate
+ file. For SSH, if not specified, curl tries the following candidates in order:
+-'~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
++\&'~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
+ 
+ If curl is built against OpenSSL library, and the engine pkcs11 is available,
+ then a PKCS#11 URI (RFC 7512) can be used to specify a private key located in a
+--- a/docs/cmdline-opts/proto.d
++++ b/docs/cmdline-opts/proto.d
+@@ -6,7 +6,7 @@
+ ---
+ Tells curl to limit what protocols it may use in the transfer. Protocols are
+ evaluated left to right, are comma separated, and are each a protocol name or
+-'all', optionally prefixed by zero or more modifiers. Available modifiers are:
++\&'all', optionally prefixed by zero or more modifiers. Available modifiers are:
+ .RS
+ .TP 3
+ .B +
+--- a/docs/curl.1
++++ b/docs/curl.1
+@@ -542,7 +542,7 @@
+ If you start the data with the letter @, the rest should be a file name to
+ read the data from, or - if you want curl to read the data from
+ stdin. Multiple files can also be specified. Posting data from a file named
+-'foobar' would thus be done with \fI-d, --data\fP @foobar. When --data is told to read
++\&'foobar' would thus be done with \fI-d, --data\fP @foobar. When --data is told to read
+ from a file like that, carriage returns and newlines will be stripped out. If
+ you don't want the @ character to have a special interpretation use \fI--data-raw\fP
+ instead.
+@@ -1160,7 +1160,7 @@
+ .IP "--key <key>"
+ (TLS SSH) Private key file name. Allows you to provide your private key in this separate
+ file. For SSH, if not specified, curl tries the following candidates in order:
+-'~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
++\&'~/.ssh/id_rsa', '~/.ssh/id_dsa', './id_rsa', './id_dsa'.
+ 
+ If curl is built against OpenSSL library, and the engine pkcs11 is available,
+ then a PKCS#11 URI (RFC 7512) can be used to specify a private key located in a
+@@ -1628,7 +1628,7 @@
+ .IP "--proto <protocols>"
+ Tells curl to limit what protocols it may use in the transfer. Protocols are
+ evaluated left to right, are comma separated, and are each a protocol name or
+-'all', optionally prefixed by zero or more modifiers. Available modifiers are:
++\&'all', optionally prefixed by zero or more modifiers. Available modifiers are:
+ .RS
+ .TP 3
+ .B +
