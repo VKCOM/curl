@@ -1,4 +1,5 @@
 libcurl-gnutls.so.4 libcurl3-gnutls #MINVER#
+* Build-Depends-Package: libcurl4-gnutls-dev
  CURL_GNUTLS_3@CURL_GNUTLS_3 7.16.2
  HIDDEN@HIDDEN 7.16.2
  curl_easy_cleanup@CURL_GNUTLS_3 7.16.2

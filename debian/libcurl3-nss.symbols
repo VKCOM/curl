@@ -1,4 +1,5 @@
 libcurl-nss.so.4 libcurl3-nss #MINVER#
+* Build-Depends-Package: libcurl4-nss-dev
  CURL_NSS_3@CURL_NSS_3 7.23.1
  HIDDEN@HIDDEN 7.23.1
  curl_easy_cleanup@CURL_NSS_3 7.23.1

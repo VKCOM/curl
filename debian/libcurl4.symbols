@@ -1,4 +1,5 @@
 libcurl.so.4 libcurl4 #MINVER#
+* Build-Depends-Package: libcurl4-openssl-dev
  CURL_OPENSSL_4@CURL_OPENSSL_4 7.16.2
  HIDDEN@HIDDEN 7.16.2
  curl_easy_cleanup@CURL_OPENSSL_4 7.16.2
