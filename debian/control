@@ -2,7 +2,6 @@ Source: curl
 Section: web
 Priority: optional
 Maintainer: Alessandro Ghedini <ghedo@debian.org>
-Uploaders: Ian Jackson <ijackson@chiark.greenend.org.uk>
 Build-Depends: debhelper (>= 12),
  autoconf,
  automake,
