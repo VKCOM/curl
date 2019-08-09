@@ -1,8 +1,10 @@
-curl (7.65.3-1) UNRELEASED; urgency=medium
+curl (7.65.3-1) unstable; urgency=medium
 
   * New upstream release
+  * Drop 12_fix-man-errors.patch (merged upstream)
+  * Remove Ian Jackson from Uploaders as he has never done an upload
 
- -- Alessandro Ghedini <ghedo@debian.org>  Fri, 09 Aug 2019 19:40:45 +0100
+ -- Alessandro Ghedini <ghedo@debian.org>  Fri, 09 Aug 2019 19:45:02 +0100
 
 curl (7.65.1-1) unstable; urgency=medium
 
