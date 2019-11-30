@@ -1,8 +1,10 @@
-curl (7.67.0-1) UNRELEASED; urgency=medium
+curl (7.67.0-1) unstable; urgency=medium
 
   * New upstream release
+  * Replace python with python3 in Build-Depends (Closes: #942984)
+  * Bump Standards-Version to 4.4.1 (no changes needed)
 
- -- Alessandro Ghedini <ghedo@debian.org>  Sun, 24 Nov 2019 17:14:34 +0000
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 30 Nov 2019 12:45:07 +0000
 
 curl (7.66.0-1) unstable; urgency=medium
 
