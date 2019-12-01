@@ -1,3 +1,10 @@
+curl (7.67.0-2) unstable; urgency=medium
+
+  * Restore :native annotation for python3 Build-Depends.
+    Thanks to Helmut Grohne for the patch (Closes: #945928)
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sun, 01 Dec 2019 13:29:28 +0000
+
 curl (7.67.0-1) unstable; urgency=medium
 
   * New upstream release
