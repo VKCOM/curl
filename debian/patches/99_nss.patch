@@ -21,16 +21,16 @@ Last-Update: 2015-08-12
  # This might hold -Werror
 --- a/lib/Makefile.am
 +++ b/lib/Makefile.am
-@@ -31,7 +31,7 @@
-  config-tpf.h mk-ca-bundle.pl mk-ca-bundle.vbs $(CMAKE_DIST)        \
-  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl
+@@ -32,7 +32,7 @@
+  firefox-db2pem.sh config-vxworks.h Makefile.vxworks checksrc.pl    \
+  setup-win32.h
  
 -lib_LTLIBRARIES = libcurl-gnutls.la
 +lib_LTLIBRARIES = libcurl-nss.la
  
  if BUILD_UNITTESTS
  noinst_LTLIBRARIES = libcurlu.la
-@@ -83,43 +83,43 @@
+@@ -84,43 +84,43 @@
  AM_LDFLAGS =
  AM_CFLAGS =
  
@@ -88,7 +88,7 @@ Last-Update: 2015-08-12
  
  libcurlu_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
  libcurlu_la_LDFLAGS = $(AM_LDFLAGS) -static $(LIBCURL_LIBS)
-@@ -128,7 +128,7 @@
+@@ -129,7 +129,7 @@
  # Makefile.inc provides the CSOURCES and HHEADERS defines
  include Makefile.inc
  
