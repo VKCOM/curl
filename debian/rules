@@ -76,13 +76,13 @@ override_dh_install:
 		DESTDIR=$(shell pwd)/debian/tmp-gnutls install
 	${MAKE} -C debian/build-nss				\
 		DESTDIR=$(shell pwd)/debian/tmp-nss install
+	find debian/tmp* -name '*.la' -delete
 	dh_install -plibcurl3-gnutls -plibcurl4-gnutls-dev	\
 		--sourcedir=debian/tmp-gnutls
 	dh_install -plibcurl3-nss -plibcurl4-nss-dev		\
 		--sourcedir=debian/tmp-nss
 	dh_install -pcurl -plibcurl4 -plibcurl4-openssl-dev -plibcurl4-doc \
 		--sourcedir=debian/tmp
-	sed -i "/dependency_libs/ s/'.*'/''/" `find . -name '*.la'`
 # Modify curl-config to make it architecture-independent:
 # 1. In --static-libs output, replace the output of krb5-config (which
 #    currently includes architecture-specific paths) with a call at
