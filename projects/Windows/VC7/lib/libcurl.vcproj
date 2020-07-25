@@ -35,7 +35,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib libssh2.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib libssh2.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -87,7 +87,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -592,7 +592,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -849,7 +849,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386 /FIXED:NO"
-				AdditionalDependencies="wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib libssh2d.lib"
+				AdditionalDependencies="crypt32.lib wldap32.lib ws2_32.lib libeay32.lib ssleay32.lib libssh2d.lib"
 				OutputFile="$(OutDir)\$(ProjectName)d.dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -1200,6 +1200,9 @@
 				RelativePath="..\..\..\..\lib\dotdot.c">
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\dynbuf.c">
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\easy.c">
 			</File>
 			<File
@@ -1314,6 +1317,9 @@
 				RelativePath="..\..\..\..\lib\mprintf.c">
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\mqtt.c">
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\multi.c">
 			</File>
 			<File
@@ -1345,6 +1351,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\rand.c">
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\rename.c">
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\rtsp.c">
@@ -1573,6 +1582,9 @@
 				RelativePath="..\..\..\..\lib\dotdot.h">
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\dynbuf.h">
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\easyif.h">
 			</File>
 			<File
@@ -1651,6 +1663,9 @@
 				RelativePath="..\..\..\..\lib\mime.h">
 			</File>
 			<File
+				RelativePath="..\..\..\..\lib\mqtt.h">
+			</File>
+			<File
 				RelativePath="..\..\..\..\lib\multihandle.h">
 			</File>
 			<File
@@ -1685,6 +1700,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\rand.h">
+			</File>
+			<File
+				RelativePath="..\..\..\..\lib\rename.h">
 			</File>
 			<File
 				RelativePath="..\..\..\..\lib\rtsp.h">
@@ -1856,6 +1874,9 @@
 				<File
 					RelativePath="..\..\..\..\lib\vquic\quiche.c">
 				</File>
+				<File
+					RelativePath="..\..\..\..\lib\vquic\vquic.c">
+				</File>
 			</Filter>
 			<Filter
 				Name="Header Files"
@@ -1865,6 +1886,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vquic\quiche.h">
+				</File>
+				<File
+					RelativePath="..\..\..\..\lib\vquic\vquic.h">
 				</File>
 			</Filter>
 		</Filter>
@@ -1879,6 +1903,9 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vssh\libssh.c">
+				</File>
+				<File
+					RelativePath="..\..\..\..\lib\vssh\wolfssh.c">
 				</File>
 			</Filter>
 			<Filter
@@ -1905,7 +1932,13 @@
 					RelativePath="..\..\..\..\lib\vtls\gtls.c">
 				</File>
 				<File
+					RelativePath="..\..\..\..\lib\vtls\keylog.c">
+				</File>
+				<File
 					RelativePath="..\..\..\..\lib\vtls\mbedtls.c">
+				</File>
+				<File
+					RelativePath="..\..\..\..\lib\vtls\mbedtls_threadlock.c">
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\mesalink.c">
@@ -1915,12 +1948,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\openssl.c">
-				</File>
-				<File
-					RelativePath="..\..\..\..\lib\vtls\polarssl.c">
-				</File>
-				<File
-					RelativePath="..\..\..\..\lib\vtls\polarssl_threadlock.c">
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\schannel.c">
@@ -1951,7 +1978,13 @@
 					RelativePath="..\..\..\..\lib\vtls\gtls.h">
 				</File>
 				<File
+					RelativePath="..\..\..\..\lib\vtls\keylog.h">
+				</File>
+				<File
 					RelativePath="..\..\..\..\lib\vtls\mbedtls.h">
+				</File>
+				<File
+					RelativePath="..\..\..\..\lib\vtls\mbedtls_threadlock.h">
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\mesalink.h">
@@ -1961,12 +1994,6 @@
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\openssl.h">
-				</File>
-				<File
-					RelativePath="..\..\..\..\lib\vtls\polarssl.h">
-				</File>
-				<File
-					RelativePath="..\..\..\..\lib\vtls\polarssl_threadlock.h">
 				</File>
 				<File
 					RelativePath="..\..\..\..\lib\vtls\schannel.h">
