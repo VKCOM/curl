@@ -1,3 +1,15 @@
+curl (7.71.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+    + Fix partial password leak over DNS on HTTP redirect as per CVE-2020-8169
+      (Closes: #965280)
+      https://curl.haxx.se/docs/CVE-2020-8169.html
+    + Fix local file overwrite with -J option as per CVE-2020-8177
+      (Closes: #965281)
+      https://curl.haxx.se/docs/CVE-2020-8177.html
+
+ -- Alessandro Ghedini <ghedo@debian.org>  Sat, 25 Jul 2020 17:44:17 +0100
+
 curl (7.68.0-1) unstable; urgency=medium
 
   * New upstream release
