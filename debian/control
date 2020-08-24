@@ -2,7 +2,7 @@ Source: curl
 Section: web
 Priority: optional
 Maintainer: Alessandro Ghedini <ghedo@debian.org>
-Build-Depends: debhelper-compat (= 13),
+Build-Depends: debhelper (>= 12),
  autoconf,
  automake,
  ca-certificates,
