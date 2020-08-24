@@ -23,6 +23,7 @@ Build-Depends: debhelper (>= 12),
  libtool,
  openssh-server <!nocheck>,
  python3:native,
+ python3-impacket,
  quilt,
  stunnel4 <!nocheck>,
  zlib1g-dev
