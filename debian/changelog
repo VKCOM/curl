@@ -1,4 +1,4 @@
-curl (7.72.0-1) UNRELEASED; urgency=medium
+curl (7.72.0-1) unstable; urgency=medium
 
   * New upstream release
     + Fix partial password leak over DNS on HTTP redirect as per CVE-2020-8169
@@ -9,8 +9,14 @@ curl (7.72.0-1) UNRELEASED; urgency=medium
       https://curl.haxx.se/docs/CVE-2020-8177.html
     + Fix wrong connect-only connection as per CVE-2020-8231 (Closes: #968831)
       https://curl.haxx.se/docs/CVE-2020-8231.html
+  * Refresh patches
+  * Do not install *.la files.
+    Thanks to Pino Toscano for the patch. (Closes: #955785)
+  * Update list of doc files
+  * Update copyright for polarssl -> mbedtls rename
+  * Use python3 executable in tests
 
- -- Alessandro Ghedini <ghedo@debian.org>  Mon, 24 Aug 2020 08:48:13 +0200
+ -- Alessandro Ghedini <ghedo@debian.org>  Mon, 24 Aug 2020 10:26:12 +0200
 
 curl (7.68.0-1) unstable; urgency=medium
 
