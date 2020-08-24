@@ -41,9 +41,9 @@ Copyright: 2011-2015, Daniel Stenberg <daniel@haxx.se>
  2010, Howard Chu <hyc@openldap.org>
 License: curl
 
-Files: lib/vtls/polarssl.*
+Files: lib/vtls/mbedtls.*
 Copyright: 2010-2011, Hoi-Ho Chan <hoiho.chan@gmail.com>
- 2012-2015, Daniel Stenberg <daniel@haxx.se>
+ 2012-2020, Daniel Stenberg <daniel@haxx.se>
 License: curl
 
 Files: lib/socks_gssapi.c
