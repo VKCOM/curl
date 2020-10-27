@@ -1,0 +1,30 @@
+#!/usr/bin/make -f
+# See debhelper(7) (uncomment to enable)
+# output every command that modifies files on the build system.
+DH_VERBOSE = 1
+
+override_dh_auto_build:
+	./configure --prefix=/opt/curl7600 --without-librtmp --without-libssh2 --disable-ldap --disable-ldaps --disable-threaded-resolver --with-nghttp2 --enable-versioned-symbols
+	${MAKE} -j16
+
+override_dh_install:
+	dh_install
+
+override_dh_makeshlibs:
+
+override_dh_shlibdeps:
+
+override_dh_installdocs:
+
+override_dh_clean:
+
+override_dh_auto_clean:
+
+override_dh_strip:
+
+override_dh_usrlocal:
+
+override_dh_auto_test:
+
+%:
+	dh $@

@@ -1,0 +1,13 @@
+Source: curl-kphp-vk
+Section: misc
+Priority: optional
+Maintainer: George Belousov <g.belousov@corp.vk.com>
+Build-Depends: debhelper (>= 9), libssl-dev
+Standards-Version: 3.9.5
+Homepage: https://bitbucket.mvk.com/projects/ENGINE/repos/tiff/browse
+
+Package: curl-kphp-vk
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Curl for KPHP VK
+ Curl for KPHP VK
